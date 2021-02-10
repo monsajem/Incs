@@ -207,8 +207,6 @@
     <Compile Include="BasicFrameWorks\Tester\Tester.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="BasicFrameWorks\Datawork\DatabaseInterface\KeyValueDatabase\CDN\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

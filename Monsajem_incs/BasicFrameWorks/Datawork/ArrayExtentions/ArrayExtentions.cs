@@ -61,6 +61,7 @@ namespace Monsajem_Incs.ArrayExtentions
             System.Array.Copy(ar, Position + 1, ar, Position, (ar.Length - Position) - 1);
             System.Array.Resize(ref ar, ar.Length - 1);
         }
+
         public static void DeleteFrom<t>(ref t[] ar, int from)
         {
             System.Array.Resize(ref ar, from);
@@ -215,6 +216,39 @@ namespace Monsajem_Incs.ArrayExtentions
             }
         }
 
+        public static (int OldPlace, int NewPlace) BinaryUpdate<t>(t[] ar, t OldValue, t NewValue)=>
+            BinaryUpdate(ar, OldValue, NewValue,
+                System.Array.BinarySearch(ar, OldValue),
+                System.Array.BinarySearch(ar, NewValue));
+
+        public static (int OldPlace, int NewPlace) BinaryUpdate<t>(
+            t[] ar, t OldValue, t NewValue, IComparer<t> Comparer) =>
+            BinaryUpdate(ar, OldValue, NewValue,
+                System.Array.BinarySearch(ar, OldValue, Comparer),
+                System.Array.BinarySearch(ar, NewValue, Comparer));
+
+        private static (int OldPlace, int NewPlace) 
+            BinaryUpdate<t>(t[] ar, t OldValue, t NewValue, int OldPlace, int NewPlace)
+        {
+            if (NewPlace < 0)
+                NewPlace = (NewPlace * -1) - 1;
+
+            if (OldPlace == NewPlace)
+                ar[OldPlace] = NewValue;
+            else if (OldPlace < NewPlace)
+            {
+                NewPlace -= 1;
+                shiftBegin(ar, OldPlace, NewPlace, 1);
+                ar[NewPlace] = NewValue;
+            }
+            else
+            {
+                shiftEnd(ar, NewPlace, OldPlace, 1);
+                ar[NewPlace] = NewValue;
+            }
+            return (OldPlace, NewPlace);
+        }
+
         public static void Insert<t>(ref t[] ar, t Value)
         {
             System.Array.Resize(ref ar, ar.Length + 1);
@@ -309,28 +343,58 @@ namespace Monsajem_Incs.ArrayExtentions
             ar[To] = Value;
         }
 
-        public static void shiftEnd<t>(t[] ar, int Len)
+        public static void shiftEnd<t>(t[] ar, int Len) =>
+            shiftEnd(ar, 0, ar.Length - 1, Len);
+        public static void shiftBegin<t>(t[] ar, int Len) =>
+            shiftBegin(ar, 0, ar.Length - 1, Len);
+
+        public static void shiftRollEnd<t>(t[] ar, int Len) =>
+            shiftRollEnd(ar, 0, ar.Length - 1, Len);
+        public static void shiftRollBegin<t>(t[] ar, int Len) =>
+            shiftRollBegin(ar, 0, ar.Length - 1, Len);
+
+        public static void shiftExtraEnd<t>(t[] ar, int Len) =>
+            shiftExtraEnd(ar, 0, ar.Length - 1, Len);
+        public static void shiftExtraBegin<t>(t[] ar, int Len) =>
+            shiftExtraBegin(ar, 0, ar.Length - 1, Len);
+
+        public static void shiftEnd<t>(t[] ar, int From, int To, int Len)
         {
-            System.Array.Copy(ar,0,ar,Len,ar.Length-Len);
+            System.Array.Copy(ar, From, ar, From + Len, ((To - From) + 1) - Len);
         }
-        public static void shiftBegin<t>(t[] ar, int Len)
+        public static void shiftBegin<t>(t[] ar, int From, int To, int Len)
         {
-            System.Array.Copy(ar, Len, ar, 0, ar.Length - Len);
+            System.Array.Copy(ar, From + Len, ar, From, ((To - From) + 1) - Len);
         }
 
-        public static void shiftRollEnd<t>(t[] ar, int Len)
+        public static void shiftRollEnd<t>(t[] ar, int From, int To, int Len)
         {
-            var Roll = new t[Len];
-            System.Array.Copy(ar, ar.Length - Len, Roll,0,Len);
-            System.Array.Copy(ar, 0, ar, Len, ar.Length - Len);
-            System.Array.Copy(Roll, 0, ar, 0, Len);
+            var Roll = shiftExtraEnd(ar, From, To, Len);
+            To = To + 1 - Len;
+            System.Array.Copy(Roll, 0, ar, From, Len);
         }
-        public static void shiftRollBegin<t>(t[] ar, int Len)
+        public static void shiftRollBegin<t>(t[] ar, int From, int To, int Len)
+        {
+            var Roll = shiftExtraBegin(ar, From, To, Len);
+            To = To + 1 - Len;
+            System.Array.Copy(Roll, 0, ar, To, Len);
+        }
+
+        public static t[] shiftExtraEnd<t>(t[] ar, int From, int To, int Len)
         {
             var Roll = new t[Len];
-            System.Array.Copy(ar, 0, Roll, 0, Len);
-            System.Array.Copy(ar, Len, ar, 0, ar.Length - Len);
-            System.Array.Copy(Roll, 0, ar, ar.Length - Len, Len);
+            To = To + 1 - Len;
+            System.Array.Copy(ar, To, Roll, 0, Len);
+            System.Array.Copy(ar, From, ar, From + Len, To - From);
+            return Roll;
+        }
+        public static t[] shiftExtraBegin<t>(t[] ar, int From, int To, int Len)
+        {
+            var Roll = new t[Len];
+            To = To + 1 - Len;
+            System.Array.Copy(ar, From, Roll, 0, Len);
+            System.Array.Copy(ar, From + Len, ar, From, To);
+            return Roll;
         }
     }
 }
