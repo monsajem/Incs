@@ -15,26 +15,26 @@ namespace Monsajem_Incs.Database.Base
         public static Task SendUpdate<DataType, KeyType>
           (this IAsyncOprations Client, Table<DataType, KeyType> Table)
           where KeyType : IComparable<KeyType>
-          => Client.I_SendUpdate(Table);
+          => Client.I_SendUpdate(Table,false);
 
         public static Task<bool> GetUpdate<DataType, KeyType>(
             this IAsyncOprations Client,
             Table<DataType, KeyType> Table,
             Action<DataType> MakeingUpdate = null)
             where KeyType : IComparable<KeyType>
-            => Client.I_GetUpdate(Table, MakeingUpdate);
+            => Client.I_GetUpdate(Table, MakeingUpdate,false);
 
         public static Task SendUpdate<DataType, KeyType>
             (this IAsyncOprations Client,
             PartOfTable<DataType, KeyType> Table)
             where KeyType : IComparable<KeyType>
-            => Client.I_SendUpdate(Table);
+            => Client.I_SendUpdate(Table,true);
 
         public static Task<bool> GetUpdate<DataType, KeyType>(
             this IAsyncOprations Client,
             PartOfTable<DataType, KeyType> RelationTable,
             Action<DataType> MakeingUpdate = null)
             where KeyType : IComparable<KeyType>
-            => Client.I_GetUpdate(RelationTable, MakeingUpdate);
+            => Client.I_GetUpdate(RelationTable, MakeingUpdate,true);
     }
 }

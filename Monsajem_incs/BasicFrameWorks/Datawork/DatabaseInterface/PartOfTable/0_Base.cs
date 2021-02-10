@@ -87,39 +87,14 @@ namespace Monsajem_Incs.Database.Base
             {
                 if (_UpdateAble != null)
                 {
-                    //Extras.Accepted += (info) =>
-                    //{
-                    //    _UpdateAble.Insert(info.Pos);
-                    //};
-
-                    //Extras.Ignored += (info) =>
-                    //{
-                    //    _UpdateAble.Delete(info.Pos);
-                    //};
-
-                    //Events.Updated += (info) =>
-                    //{
-                    //    var OldPos = info.Info[KeyPos].OldPos;
-                    //    var NewPos = info.Info[KeyPos].Pos;
-                    //    if (OldPos < NewPos)
-                    //    {
-                    //        NewPos -= 1;
-                    //    }
-                    //    _UpdateAble.ChangePosition(OldPos, NewPos);
-                    //};
-                    Extras.Accepted += (info) =>
+                    Extras.Accepted += (TableExtras.KeyInfo info) =>
                     {
-                        _UpdateAble.Update();
+                        _UpdateAble.Insert(info.Key);
                     };
 
-                    Extras.Ignored += (info) =>
+                    Extras.Ignored += (TableExtras.KeyInfo info) =>
                     {
-                        _UpdateAble.Update();
-                    };
-
-                    Events.Updated += (info) =>
-                    {
-                        _UpdateAble.Update();
+                        _UpdateAble.Delete(info.Key);
                     };
                 }
             };

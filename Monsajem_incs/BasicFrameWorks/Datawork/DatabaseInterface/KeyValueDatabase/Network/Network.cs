@@ -12,232 +12,299 @@ namespace Monsajem_Incs.Database.Base
 {
     public static partial class Extentions
     {
+        public static void XChange<t>(ref t A, ref t B)
+        {
+            var X = A;
+            A = B;
+            B = X;
+        }
 
-        private static async Task I_SendUpdate<DataType, KeyType>
-                   (this IAsyncOprations Client, Table<DataType, KeyType> Table)
+        private static (IEnumerable<UpdateAble<KeyType>> UpdateCodes, IEnumerable<ValueType> Values, ulong FirstCode)
+            Base_GetNexts<KeyType, ValueType>(
+            Table<ValueType, KeyType> Table,
+            ulong UpdateCode)
+            where KeyType : IComparable<KeyType>
+        {
+            var UpdateCodes = Table.UpdateAble.UpdateCodes;
+            var Place = System.Array.BinarySearch(UpdateCodes,
+                        new UpdateAble<KeyType>() { UpdateCode = UpdateCode },
+                        UpdateAble<KeyType>.CompareCode);
+            if (Place < 0)
+                Place = (Place * -1) - 1;
+            else
+                Place += 1;
+
+            ulong FirstCode;
+            if (Place == 0)
+                FirstCode = UpdateCodes[0].UpdateCode;
+            else
+                FirstCode = UpdateCodes[Place - 1].UpdateCode;
+
+            var ResultCodes = UpdateCodes.Skip(Place);
+            var Values = ResultCodes.Select((c) =>
+            {
+                var Data = Table[c.Key];
+                Table.ClearRelations?.Invoke(Data);
+                return Data.Value;
+            });
+            return (ResultCodes, Values, FirstCode);
+        }
+        private static (ulong[] UpdateCodes, IEnumerable<ValueType> Values, ulong FirstCode)
+            GetNexts<KeyType, ValueType>(
+            Table<ValueType, KeyType> Table,
+            ulong UpdateCode)
+            where KeyType : IComparable<KeyType>
+        {
+            var UpdateCodes = Base_GetNexts(Table, UpdateCode);
+
+            var Updates = UpdateCodes.UpdateCodes.Select((c) => c.UpdateCode).ToArray();
+            return (Updates, UpdateCodes.Values, UpdateCodes.FirstCode);
+        }
+        private static (ulong[] ParentCodes, ulong[] PartCodes, IEnumerable<ValueType> Values, ulong FirstCode)
+            GetNexts<KeyType, ValueType>(
+            PartOfTable<ValueType, KeyType> Table,
+            ulong UpdateCode)
+            where KeyType : IComparable<KeyType>
+        {
+            var UpdateCodes = Base_GetNexts(Table, UpdateCode);
+            var ParentUpdateAble = Table.Parent.UpdateAble;
+            var ParentCodes = UpdateCodes.UpdateCodes.Select((c) => ParentUpdateAble[c.Key].UpdateCode).ToArray();
+            var PartCodes = UpdateCodes.UpdateCodes.Select((c) => c.UpdateCode).ToArray();
+
+            return (ParentCodes, PartCodes, UpdateCodes.Values, UpdateCodes.FirstCode);
+        }
+
+        private static async Task I_SendUpdate<ValueType, KeyType>
+                   (this IAsyncOprations Client, Table<ValueType, KeyType> Table, bool IsPartOfTable)
                    where KeyType : IComparable<KeyType>
         {
-            await Client.SendData(Table.UpdateAble.UpdateCode);
-            if (await Client.GetCondition())
+            var LastUpdateCode = await Client.GetData<ulong>();//1
+            await Client.SendData(Table.UpdateAble.UpdateCode);//2
+            if (Table.UpdateAble.UpdateCode != LastUpdateCode)
             {
-                var Len = Table.KeysInfo.Keys.Length;
-                var UpdateAble = Table.UpdateAble;
-                var Keys = Table.KeysInfo.Keys;
-                await Client.SendData((Table.KeysInfo.Keys, UpdateAble.UpdateCodes));
-                var IsOk = await Client.GetData<bool[]>();
+                IEnumerator<ValueType> IE_Values;
+                if (IsPartOfTable)
+                {
+                    var NextUpdates = GetNexts((PartOfTable<ValueType, KeyType>)Table, LastUpdateCode);
+                    await Client.SendData(NextUpdates.FirstCode);//3
+                    await Client.SendData(NextUpdates.ParentCodes);//4
+                    await Client.SendData(NextUpdates.PartCodes);//5
+                    IE_Values = NextUpdates.Values.GetEnumerator();
+                }
+                else
+                {
+                    var NextUpdates = GetNexts(Table, LastUpdateCode);
+                    await Client.SendData(NextUpdates.FirstCode);//3
+                    await Client.SendData(NextUpdates.UpdateCodes);//4
+                    IE_Values = NextUpdates.Values.GetEnumerator();
+                }
+                var SendToClient = await Client.GetData<bool[]>();//5
+
+                IE_Values.MoveNext();
+                var Len = SendToClient.Length;
                 for (int i = 0; i < Len; i++)
                 {
-                    if (IsOk[i])
-                    {
-                        var Data = Table.GetItem(i);
-                        Table.ClearRelations?.Invoke(Data);
-                        await Client.SendData(Data.Value);
-                    };
+                    if (SendToClient[i] == true)
+                        await Client.SendData(IE_Values.Current);//6
+                    IE_Values.MoveNext();
                 }
+                IE_Values.Dispose();
+            }
+
+            var UpdateAble = Table.UpdateAble.UpdateCodes;
+            await Client.SendData(UpdateAble.Length);
+            var Pos = await Client.GetData<int>();
+            while (Pos != -1)
+            {
+                await Client.SendData(UpdateAble[Pos].UpdateCode);
+                Pos = await Client.GetData<int>();
             }
         }
 
+
+        private static async Task CompareToOther<KeyType, ValueType>(
+            Func<int, Task<ulong>> Ar_SV,
+            Table<ValueType, KeyType> Table,
+            int TrueLen)
+            where KeyType : IComparable<KeyType>
+        {
+            while (Table.UpdateAble.UpdateCodes.Length != TrueLen)
+            {
+                var UpdateCodes = Table.UpdateAble.UpdateCodes;
+                int EndPos = TrueLen - 1;
+                int BeginPos = 0;
+                int MidPos = (EndPos + BeginPos + 1) / 2;
+                while (EndPos != BeginPos &&
+                      EndPos != MidPos &&
+                      BeginPos != MidPos)
+                {
+                    var E = await Ar_SV(EndPos) == UpdateCodes[EndPos].UpdateCode;
+                    var B = await Ar_SV(BeginPos) == UpdateCodes[BeginPos].UpdateCode;
+                    var M = await Ar_SV(MidPos) == UpdateCodes[MidPos].UpdateCode;
+                    if (E == false && M == false && B == true)
+                    {
+                        EndPos = BeginPos - 1;
+                        MidPos = (EndPos + BeginPos + 1) / 2;
+                    }
+                    else if (E == false && M == true && B == true)
+                    {
+                        BeginPos = MidPos + 1;
+                        MidPos = (EndPos + BeginPos + 1) / 2;
+                    }
+                    else if (E == true && M == true && B == true)
+                    {
+                        EndPos = EndPos + 1;
+                        MidPos = EndPos;
+                        BeginPos = EndPos;
+                    }
+                    else if (E == false && M == false && B == false)
+                    {
+                        EndPos = BeginPos;
+                        MidPos = BeginPos;
+                    }
+                }
+                var Key = UpdateCodes[EndPos].Key;
+                Table.Delete(Key);
+                Table.UpdateAble.Delete(Key);
+            }
+        }
+
+        private static void DeleteFrom<KeyType, ValueType>(
+            Table<ValueType, KeyType> Table,
+            ulong UpdateCode)
+            where KeyType : IComparable<KeyType>
+        {
+            var UpdateCodes = Table.UpdateAble.UpdateCodes;
+            var Place = System.Array.BinarySearch(UpdateCodes,
+                        new UpdateAble<KeyType>() { UpdateCode = UpdateCode },
+                        UpdateAble<KeyType>.CompareCode);
+            if (Place < 0)
+                Place = (Place * -1) - 1;
+            else
+                Place += 1;
+            var UpdateAble = Table.UpdateAble;
+            foreach (var Update in UpdateCodes.Skip(Place))
+            {
+                UpdateAble.Delete(Update.Key, 0);
+                Table.Delete(Update.Key);
+            }
+        }
         private static async Task<bool> I_GetUpdate<DataType, KeyType>(
             this IAsyncOprations Client,
             Table<DataType, KeyType> Table,
-            Action<DataType> MakeingUpdate = null)
+            Action<DataType> MakeingUpdate,
+            bool IsPartOfTable)
             where KeyType : IComparable<KeyType>
         {
-            var Result = false;
-            if (Table.UpdateAble == null)
-                Table.UpdateAble = new UpdateAble<DataType, KeyType>()
-                { UpdateCode = 0, UpdateCodes = new ulong[Table.KeysInfo.Keys.Length] };
-            var TableUpdateCode = await Client.GetData<ulong>();
-            if (await Client.SendCondition(TableUpdateCode != Table.UpdateAble.UpdateCode))
+            Table<DataType, KeyType> ParentTable = Table;
+            PartOfTable<DataType, KeyType> PartTable = null;
+            if (IsPartOfTable)
             {
-                var UpdateList = await Client.GetData((
-                    Keys: Table.KeysInfo.Keys,
-                    UpdateCodes: Table.UpdateAble.UpdateCodes));
-                Table.GetElseItems(UpdateList.Keys).Delete((info) =>
-                    DeleteByPosition(ref Table.UpdateAble.UpdateCodes, info.Pos));
-                var Conditions = (
-                    NeedUpdate: new bool[UpdateList.Keys.Length],
-                    Pos: new int[UpdateList.Keys.Length]);
-                for (int i = 0; i < UpdateList.Keys.Length; i++)
+                PartTable = (PartOfTable<DataType, KeyType>)Table;
+                ParentTable = PartTable.Parent;
+            }
+
+            var Result = false;
+            if (Table._UpdateAble == null)
+                Table._UpdateAble = new UpdateAbles<KeyType>(0);
+
+            await Client.SendData(Table.UpdateAble.UpdateCode);//1
+            var LastUpdateCode = await Client.GetData<ulong>();//2
+            if (Table.UpdateAble.UpdateCode != LastUpdateCode)
+            {
+                DeleteFrom(Table, await Client.GetData<ulong>());//3
+
+                bool[] NeedUpdate;
+                var UpdateCodes = await Client.GetData<ulong[]>();//4
+                ulong[] PartUpdateCodes = null;
+                if (IsPartOfTable)
+                    PartUpdateCodes = await Client.GetData<ulong[]>();//5
+
+                NeedUpdate = new bool[UpdateCodes.Length];
+
+                if (IsPartOfTable)
+                    for (int i = 0; i < UpdateCodes.Length; i++)
+                        NeedUpdate[i] = ParentTable.UpdateAble.IsExist(UpdateCodes[i]) == false;
+                else
+                    for (int i = 0; i < UpdateCodes.Length; i++)
+                        NeedUpdate[i] = Table.UpdateAble.IsExist(UpdateCodes[i]) == false;
+
+                await Client.SendData(NeedUpdate);//5
+
+                for (int i = 0; i < NeedUpdate.Length; i++)
                 {
-                    var Pos = Table.PositionOf(UpdateList.Keys[i]);
-                    if (Pos > -1)
+                    if (NeedUpdate[i] == true)
                     {
-                        Conditions.NeedUpdate[i] = Table.UpdateAble.UpdateCodes[Pos] < UpdateList.UpdateCodes[i];
-                    }
-                    else
-                    {
-                        Conditions.NeedUpdate[i] = true;
-                    }
-                    Conditions.Pos[i] = Pos;
-                }
-                await Client.SendData(Conditions.NeedUpdate);
-                for (int i = 0; i < UpdateList.Keys.Length; i++)
-                {
-                    if (Conditions.NeedUpdate[i] == true)
-                    {
-                        var Data = await Client.GetData<DataType>();
+                        var Data = await Client.GetData<DataType>();//6
                         MakeingUpdate?.Invoke(Data);
-                        if (Conditions.Pos[i] > -1)
+                        var Key = Table.GetKey(Data);
+                        if (ParentTable.PositionOf(Key) > -1)
                         {
-                            Table.Update(UpdateList.Keys[i], (c) =>
+                            ParentTable.Update(Key, (c) =>
                             {
-                                Table.MoveRelations(c, Data);
+                                ParentTable.MoveRelations(c, Data);
                                 return Data;
                             });
-                            Table.UpdateAble.UpdateCodes[Conditions.Pos[i]] = UpdateList.UpdateCodes[i];
+                            ParentTable.UpdateAble.Changed(Key, Key, UpdateCodes[i]);
                         }
                         else
                         {
-                            var Pos = Table.Insert(Data);
-                            ArrayExtentions.ArrayExtentions.Insert(
-                                ref Table.UpdateAble.UpdateCodes, UpdateList.UpdateCodes[i], Pos);
+                            ParentTable.Insert(Data);
+                            ParentTable.UpdateAble.Insert(Key, UpdateCodes[i]);
                         }
-                        Result = true;
-                    }
-                }
-                Table.UpdateAble.UpdateCode = TableUpdateCode;
-                if (Table.Length > 0)
-                    Table.Update(Table.KeysInfo.Keys[0], (c) => { });
-            }
-            return Result;
-        }
-
-        private static async Task I_SendUpdate<DataType, KeyType>
-            (this IAsyncOprations Client,
-            PartOfTable<DataType, KeyType> Table)
-            where KeyType : IComparable<KeyType>
-        {
-            Func<Task> SendUpdate = async () =>
-            {
-                var Len = Table.KeysInfo.Keys.Length;
-                var UpdateAble = Table.Parent.UpdateAble;
-                var Keys = Table.KeysInfo.Keys;
-                var UpdateCodes = new ulong[Keys.Length];
-                for (int i = 0; i < Len; i++)
-                {
-                    UpdateCodes[i] = Table.Parent.UpdateAble.UpdateCodes[Table.Parent.PositionOf(Keys[i])];
-                }
-                await Client.SendData((Table.KeysInfo.Keys, UpdateCodes));
-                var IsOk = await Client.GetData<bool[]>();
-                for (int i = 0; i < Len; i++)
-                {
-                    if (IsOk[i])
-                    {
-                        var Data = Table.GetItem(i);
-                        Table.Parent.ClearRelations?.Invoke(Data);
-                        await Client.SendData(Data.Value);
-                    };
-                }
-            };
-
-            if (await Client.SendCondition(Table.UpdateAble != null))
-            {
-                await Client.SendData(Table.UpdateAble.UpdateCode);
-                if (await Client.GetCondition())
-                {
-                    await SendUpdate();
-                }
-            }
-            else
-            {
-                await SendUpdate();
-            }
-        }
-
-        private static async Task<bool> I_GetUpdate<DataType, KeyType>(
-            this IAsyncOprations Client,
-            PartOfTable<DataType, KeyType> RelationTable,
-            Action<DataType> MakeingUpdate = null)
-            where KeyType : IComparable<KeyType>
-        {
-            var Result = false;
-            Func<Task> Update = async () =>
-            {
-                var UpdateList = await Client.GetData((
-                    Keys: RelationTable.KeysInfo.Keys,
-                    UpdateCodes: RelationTable.UpdateAble.UpdateCodes));
-                var Igonres = RelationTable.GetElseItems(UpdateList.Keys);
-
-                RelationTable.Ignore(RelationTable.GetElseItems(UpdateList.Keys).KeysInfo.Keys.ToArray());
-
-                var Conditions = (
-                    NeedUpdate: new bool[UpdateList.Keys.Length],
-                    Pos: new int[UpdateList.Keys.Length]);
-                for (int i = 0; i < UpdateList.Keys.Length; i++)
-                {
-                    var Pos = RelationTable.Parent.PositionOf(UpdateList.Keys[i]);
-                    if (Pos > -1)
-                    {
-                        Conditions.NeedUpdate[i] = RelationTable.Parent.UpdateAble.UpdateCodes[Pos] < UpdateList.UpdateCodes[i];
-                    }
-                    else
-                    {
-                        Conditions.NeedUpdate[i] = true;
-                    }
-                    Conditions.Pos[i] = Pos;
-                }
-                await Client.SendData(Conditions.NeedUpdate);
-                for (int i = 0; i < UpdateList.Keys.Length; i++)
-                {
-                    int Pos;
-                    if (Conditions.NeedUpdate[i] == true)
-                    {
-                        var Data = await Client.GetData<DataType>();
-                        MakeingUpdate?.Invoke(Data);
-                        if (Conditions.Pos[i] > -1)
+                        if (IsPartOfTable)
                         {
-                            RelationTable.Parent.Update(UpdateList.Keys[i], (c) =>
+                            if (PartTable.PositionOf(Key) > -1)
                             {
-                                RelationTable.Parent.MoveRelations(c, Data);
-                                return Data;
-                            });
-                            RelationTable.Parent.UpdateAble.UpdateCodes[Conditions.Pos[i]] = UpdateList.UpdateCodes[i];
+                                ParentTable.UpdateAble.Changed(Key, Key, PartUpdateCodes[i]);
+                                PartTable.Update(Key,(c)=>{ });
+                            }
+                            else
+                            {
+                                PartTable.UpdateAble.Insert(Key, PartUpdateCodes[i]);
+                                PartTable.Accept(Key);
+                            }
                         }
+                    }
+                    else if (IsPartOfTable)
+                    {
+                        var Data = ParentTable[ParentTable.UpdateAble[UpdateCodes[i]].Key];//6
+                        MakeingUpdate?.Invoke(Data);
+                        var Key = Table.GetKey(Data);
+                        if (PartTable.PositionOf(Key) > -1)
+                            PartTable.UpdateAble.Changed(Key, Key, PartUpdateCodes[i]);
                         else
                         {
-                            Pos = RelationTable.Insert(Data);
-                            ArrayExtentions.ArrayExtentions.Insert(
-                                    ref RelationTable.Parent.UpdateAble.UpdateCodes, UpdateList.UpdateCodes[i], Pos);
+                            PartTable.UpdateAble.Insert(Key, PartUpdateCodes[i]);
+                            PartTable.Accept(Key);
                         }
-                        Result = true;
                     }
-                    Pos = RelationTable.PositionOf(UpdateList.Keys[i]);
-                    if (Pos < 0)
+                    Table.UpdateAble.UpdateCode = UpdateCodes[i];
+                    Result = true;
+                }
+            }
+
+            var TrueLen = await Client.GetData<int>();//6
+            if (Table.UpdateAble.UpdateCodes.Length != TrueLen)
+            {
+                var ServerValues = new ulong?[TrueLen];
+                await CompareToOther(async (pos) =>
+                {
+                    var Value = ServerValues[pos];
+                    if (Value == null)
                     {
-                        Result = true;
-                        RelationTable.Accept(UpdateList.Keys[i]);
+                        await Client.SendData(pos);//7
+                        Value = await Client.GetData<ulong>();//8
+                        ServerValues[pos] = Value;
                     }
-                }
-            };
-
-
-            var Table = RelationTable.Parent;
-            if (Table.UpdateAble == null)
-                Table.UpdateAble = new UpdateAble<DataType, KeyType>()
-                {
-                    UpdateCode = 0,
-                    UpdateCodes = new ulong[Table.KeysInfo.Keys.Length]
-                };
-
-            if (RelationTable.UpdateAble == null)
-                RelationTable.UpdateAble = new UpdateAble<DataType, KeyType>();
-
-            if (await Client.GetCondition())
-            {
-                var TableUpdateCode = await Client.GetData<ulong>();
-                if (await Client.SendCondition(TableUpdateCode != RelationTable.UpdateAble.UpdateCode))
-                {
-                    await Update();
-                    RelationTable.UpdateAble.UpdateCode = TableUpdateCode;
-                }
+                    return Value.Value;
+                }, Table, TrueLen);
             }
-            else
-            {
-                await Update();
-            }
+            await Client.SendData(-1);//7+
+
+
+            Table.UpdateAble.UpdateCode = LastUpdateCode;
             return Result;
         }
-
     }
 }

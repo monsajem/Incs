@@ -16,26 +16,26 @@ namespace Monsajem_Incs.Database.Base
         public static void SendUpdate<DataType, KeyType>
             (this ISyncOprations Client, Table<DataType, KeyType> Table)
             where KeyType : IComparable<KeyType>
-            => Client.I_SendUpdate(Table).Wait();
+            => Client.I_SendUpdate(Table,false).Wait();
 
         public static bool GetUpdate<DataType, KeyType>(
             this ISyncOprations Client,
             Table<DataType, KeyType> Table,
             Action<DataType> MakeingUpdate = null)
             where KeyType : IComparable<KeyType>
-            => Client.I_GetUpdate(Table, MakeingUpdate).GetAwaiter().GetResult();
+            => Client.I_GetUpdate(Table, MakeingUpdate,false).GetAwaiter().GetResult();
 
         public static void SendUpdate<DataType, KeyType>
             (this ISyncOprations Client,
             PartOfTable<DataType, KeyType> Table)
             where KeyType : IComparable<KeyType>
-            => Client.I_SendUpdate(Table).Wait();
+            => Client.I_SendUpdate(Table,true).Wait();
 
         public static bool GetUpdate<DataType, KeyType>(
             this ISyncOprations Client,
             PartOfTable<DataType, KeyType> RelationTable,
             Action<DataType> MakeingUpdate = null)
             where KeyType : IComparable<KeyType>
-            => Client.I_GetUpdate(RelationTable, MakeingUpdate).GetAwaiter().GetResult();
+            => Client.I_GetUpdate(RelationTable, MakeingUpdate,true).GetAwaiter().GetResult();
     }
 }

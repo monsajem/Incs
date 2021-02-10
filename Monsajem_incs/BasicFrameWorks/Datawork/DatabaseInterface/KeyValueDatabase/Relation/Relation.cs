@@ -227,12 +227,10 @@ namespace Monsajem_Incs.Database.Base
 
                    if (Relation.IsUpdateAble)
                        if (ThisRelation.UpdateAble == null)
-                           ThisRelation.UpdateAble = new UpdateAble<To, ToKeyType>();
+                           ThisRelation.UpdateAble = new UpdateAbles<ToKeyType>();
                    return ThisRelation;
                });
-               
             };
-
         }
 
         public void _AddRelationForLoading<To, ToKeyType>(

@@ -19,7 +19,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE_NET</DefineConstants>
+    <DefineConstants>DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -52,6 +52,7 @@
     <Compile Include="BasicFrameWorks\Datawork\ArrayExtentions\Hyper\SortedArray.cs" />
     <Compile Include="BasicFrameWorks\Datawork\DatabaseInterface\KeyValueDatabase\0_Base.cs" />
     <Compile Include="BasicFrameWorks\Datawork\DatabaseInterface\KeyValueDatabase\Atributes.cs" />
+    <Compile Include="BasicFrameWorks\Datawork\DatabaseInterface\KeyValueDatabase\CDN\Network.cs" />
     <Compile Include="BasicFrameWorks\Datawork\DatabaseInterface\KeyValueDatabase\Delete.cs" />
     <Compile Include="BasicFrameWorks\Datawork\DatabaseInterface\KeyValueDatabase\Enumerator.cs" />
     <Compile Include="BasicFrameWorks\Datawork\DatabaseInterface\KeyValueDatabase\Extentions.cs" />
@@ -61,6 +62,7 @@
     <Compile Include="BasicFrameWorks\Datawork\DatabaseInterface\KeyValueDatabase\KeyInfo.cs" />
     <Compile Include="BasicFrameWorks\Datawork\DatabaseInterface\KeyValueDatabase\Keys.cs" />
     <Compile Include="BasicFrameWorks\Datawork\DatabaseInterface\KeyValueDatabase\Network\Async.cs" />
+    <Compile Include="BasicFrameWorks\Datawork\DatabaseInterface\KeyValueDatabase\Network\Network - Copy.cs" />
     <Compile Include="BasicFrameWorks\Datawork\DatabaseInterface\KeyValueDatabase\Network\Network.cs" />
     <Compile Include="BasicFrameWorks\Datawork\DatabaseInterface\KeyValueDatabase\Network\Sync.cs" />
     <Compile Include="BasicFrameWorks\Datawork\DatabaseInterface\KeyValueDatabase\PositionOf.cs" />

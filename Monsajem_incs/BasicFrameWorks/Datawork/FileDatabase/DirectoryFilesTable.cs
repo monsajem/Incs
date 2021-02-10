@@ -38,7 +38,7 @@ namespace Monsajem_Incs.Database.DirectoryTable
                 if (IsUpdateAble)
                 {
                     ReadyForUpdateAble();
-                    this.UpdateAble = new UpdateAble<ValueType, KeyType>();
+                    this.UpdateAble = new UpdateAbles<KeyType>();
                 }
             }
 

@@ -73,6 +73,7 @@ namespace Monsajem_Incs.Database.KeyValue.WebStorageBased
         Base.Table<ValueType, KeyType>
         where KeyType : IComparable<KeyType>
     {
+        public string TableName { get; }
         public Table(string TableName,
             Func<ValueType, KeyType> GetKey, bool IsUpdatAble) :
             base(
@@ -89,6 +90,8 @@ namespace Monsajem_Incs.Database.KeyValue.WebStorageBased
                      return null;
                  },
                  new StorageDictionary<KeyType, ValueType>("V" + TableName), GetKey, IsUpdatAble)
-        { }
+        {
+            this.TableName = TableName;
+        }
     }
 }

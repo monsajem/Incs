@@ -364,7 +364,7 @@ namespace Monsajem_Incs.ArrayExtentions
         }
         public static void shiftBegin<t>(t[] ar, int From, int To, int Len)
         {
-            System.Array.Copy(ar, From + Len, ar, From, ((To - From) + 1) - Len);
+            System.Array.Copy(ar, From + Len, ar, From, ((To-From)+1) - Len);
         }
 
         public static void shiftRollEnd<t>(t[] ar, int From, int To, int Len)

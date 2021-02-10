@@ -93,6 +93,10 @@ namespace Monsajem_Incs.Database.Base
         {
             I_Update(GetKey(OldValue), (c) => NewValue);
         }
+        public ValueType Update(ValueType OldValue, Func<ValueType, ValueType> NewValueCreator)
+        {
+            return I_Update(GetKey(OldValue), NewValueCreator);
+        }
         public ValueType Update(KeyType OldKey, Func<ValueType, ValueType> NewValueCreator)
         {
             return I_Update(OldKey, NewValueCreator);

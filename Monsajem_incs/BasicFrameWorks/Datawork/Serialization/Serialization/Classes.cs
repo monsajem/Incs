@@ -426,7 +426,8 @@ namespace Monsajem_Incs.Serialization
             Traced = Traced.Substring(0, Traced.Length - (On.Length + "\n >> ".Length));
         }
 
-        private string Traced;
+        [ThreadStaticAttribute]
+        private static string Traced;
 
         private int[] SerializersHashCodes = new int[0];
         private int[] SerializersNameCodes = new int[0];

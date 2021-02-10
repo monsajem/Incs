@@ -12,7 +12,6 @@ namespace Monsajem_Incs.Database.Base
 {
     public partial class Table<ValueType, KeyType>
     {
-
         public void AddRelation<To, ToKeyType>(
             RelationItemInfo<To, ToKeyType> ThisRelation,
             Table<To, ToKeyType>.RelationTableInfo<ValueType, KeyType> ThatRelation)
@@ -241,7 +240,9 @@ namespace Monsajem_Incs.Database.Base
 
                                     ThisRelation.LinkArray.Update(ThatValue, (c) =>
                                     {
-                                        ThatRelation.Field.Value(c).UpdateAble.Update();
+                                        var MyInfo = info.Info[KeyPos];
+                                        ThatRelation.Field.Value(c).UpdateAble.Changed(
+                                            (KeyType)MyInfo.OldKey, (KeyType)MyInfo.OldKey);
                                     });
                                 }
                             }

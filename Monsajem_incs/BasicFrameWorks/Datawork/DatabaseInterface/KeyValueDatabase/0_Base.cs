@@ -307,10 +307,10 @@ namespace Monsajem_Incs.Database.Base
             if (IsUpdateAble)
             {
                 ReadyForUpdateAble();
-                this.UpdateAble = new UpdateAble<ValueType, KeyType>();
+                this.UpdateAble = new UpdateAbles<KeyType>();
             }
-            IgnoreUpdateAble_pos = UpdateAble<ValueType, KeyType>.IgnoreUpdateAble_Len;
-            UpdateAble<ValueType, KeyType>.IgnoreUpdateAble_Len++;
+            IgnoreUpdateAble_pos = UpdateAbles<KeyType>.IgnoreUpdateAble_Len;
+            UpdateAbles<KeyType>.IgnoreUpdateAble_Len++;
 
         }
 

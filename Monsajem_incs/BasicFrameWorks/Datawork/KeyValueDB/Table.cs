@@ -29,12 +29,29 @@ namespace Monsajem_Incs.Database.KeyValue.Base
             Action<byte[]> SaveKeys,
             Func<byte[]> LoadKeys,
             IDictionary<KeyType, ValueType> Data, 
-            Func<ValueType, KeyType> GetKey, bool IsUpdatAble) :
-            base(new DynamicArray<ValueType>(), GetKey, IsUpdatAble)
+            Func<ValueType, KeyType> GetKey, bool IsUpdateAble) :
+            base(new DynamicArray<ValueType>(), GetKey, false)
         {
             var OldData = LoadKeys();
-            if (OldData!=null)
-                this.KeysInfo.Keys = OldData.Deserialize(this.KeysInfo.Keys);
+
+            if (OldData != null)
+            {
+                var OldTable = OldData.Deserialize(this);
+                this.KeysInfo.Keys = OldTable.KeysInfo.Keys;
+                if (IsUpdateAble)
+                {
+                    ReadyForUpdateAble();
+                }
+                this.UpdateAble = OldTable.UpdateAble;
+            }
+            else
+            {
+                if (IsUpdateAble)
+                {
+                    ReadyForUpdateAble();
+                    this.UpdateAble = new UpdateAbles<KeyType>();
+                }
+            }
 
             var Ar = (DynamicArray<ValueType>)this.BasicActions.Items;
             
@@ -56,7 +73,7 @@ namespace Monsajem_Incs.Database.KeyValue.Base
 
             Action Save = () =>
             {
-                SaveKeys(this.KeysInfo.Keys.Serialize());
+                SaveKeys(this.Serialize());
             };
 
             if (true == true) //is fast Save
