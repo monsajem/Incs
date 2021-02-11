@@ -94,6 +94,17 @@ namespace Monsajem_Incs.Database.Base
         public void Insert(KeyType Key, ulong UpdateCode)
         {
             var Update = new UpdateAble<KeyType>() { Key = Key, UpdateCode = UpdateCode };
+            var Place = System.Array.BinarySearch(UpdateKeys, Update, UpdateAble<KeyType>.CompareKey);
+            if (Place >= 0)
+            {
+                _Changed(Key, Key, UpdateCode, Place);
+                return;
+            }
+            _Insert(Key, UpdateCode);
+        }
+        private void _Insert(KeyType Key, ulong UpdateCode)
+        {
+            var Update = new UpdateAble<KeyType>() { Key = Key, UpdateCode = UpdateCode };
             ArrayExtentions.ArrayExtentions.BinaryInsert(
                 ref UpdateCodes, Update, UpdateAble<KeyType>.CompareCode);
             ArrayExtentions.ArrayExtentions.BinaryInsert(
@@ -110,6 +121,8 @@ namespace Monsajem_Incs.Database.Base
             var Place = System.Array.BinarySearch(UpdateKeys,
                 new UpdateAble<KeyType>() { Key = Key },
                 UpdateAble<KeyType>.CompareKey);
+            if (Place < 0)
+                return;
             var Update = UpdateKeys[Place];
             ArrayExtentions.ArrayExtentions.BinaryDelete(
                 ref UpdateCodes, Update, UpdateAble<KeyType>.CompareCode);
@@ -130,10 +143,14 @@ namespace Monsajem_Incs.Database.Base
                         UpdateAble<KeyType>.CompareKey);
             if(OldPlace<0)
             {
-                Insert(New, UpdateCode);
+                _Insert(New, UpdateCode);
                 return;
             }
-            var OldUpdate = UpdateKeys[OldPlace];
+            _Changed(Old, New, UpdateCode, OldPlace);
+        }
+        private void _Changed(KeyType Old, KeyType New, ulong UpdateCode,int OldPlace_key)
+        {
+            var OldUpdate = UpdateKeys[OldPlace_key];
             var NewUpdate = new UpdateAble<KeyType>() { Key = New, UpdateCode = UpdateCode };
 
             ArrayExtentions.ArrayExtentions.BinaryUpdate(

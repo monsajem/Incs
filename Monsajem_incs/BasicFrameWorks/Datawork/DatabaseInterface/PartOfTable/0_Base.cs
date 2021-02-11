@@ -9,9 +9,9 @@ using Monsajem_Incs.Serialization;
 
 namespace Monsajem_Incs.Database.Base
 {
-    public partial class PartOfTable<ValueType,KeyType>:
-        Table<ValueType,KeyType>
-        where KeyType:IComparable<KeyType>
+    public partial class PartOfTable<ValueType, KeyType> :
+        Table<ValueType, KeyType>
+        where KeyType : IComparable<KeyType>
     {
 
         [Serialization.NonSerialized]
@@ -21,7 +21,7 @@ namespace Monsajem_Incs.Database.Base
         internal Table<ValueType, KeyType> Parent;
 
         [Serialization.NonSerialized]
-        internal Action SaveToParent; 
+        internal Action SaveToParent;
 
         public PartOfTable(KeyType[] NewKEys, Table<ValueType, KeyType> Parent)
         {
@@ -31,7 +31,7 @@ namespace Monsajem_Incs.Database.Base
             base.Events = new Events<ValueType>();
             base.SecurityEvents = new SecurityEvents<ValueType>();
 
-            base.BasicActions.Items=new Array.Base.DynamicArray<ValueType>()
+            base.BasicActions.Items = new Array.Base.DynamicArray<ValueType>()
             {
                 _GetItem = (pos) => Parent.GetItem(KeysInfo.Keys[pos]).Value
             };
@@ -65,7 +65,7 @@ namespace Monsajem_Incs.Database.Base
 
             base.GetKey = Parent.GetKey;
 
-            
+
             base.KeysInfo.Keys = new SortedArray<KeyType>(NewKEys);
 
             base.Events.Inserted += (inf) =>
@@ -89,17 +89,20 @@ namespace Monsajem_Incs.Database.Base
             UpdateAbleChanged += (_UpdateAble) =>
             {
                 if (_UpdateAble != null)
-                {
-                    Extras.Accepting += (TableExtras.KeyInfo info) =>
-                    {
-                        _UpdateAble.Insert(info.Key);
-                    };
+                    ReadyForUpdateAble();
+            };
+        }
 
-                    Extras.Ignoring += (TableExtras.KeyInfo info) =>
-                    {
-                        _UpdateAble.Delete(info.Key);
-                    };
-                }
+        internal new void ReadyForUpdateAble()
+        {
+            Extras.Accepting += (TableExtras.KeyInfo info) =>
+            {
+                     _UpdateAble.Insert(info.Key);
+            };
+
+            Extras.Ignoring += (TableExtras.KeyInfo info) =>
+            {
+                _UpdateAble.Delete(info.Key);
             };
         }
 

@@ -78,6 +78,15 @@ namespace Monsajem_Incs.Database.Base
                    (this IAsyncOprations Client, Table<ValueType, KeyType> Table, bool IsPartOfTable)
                    where KeyType : IComparable<KeyType>
         {
+            Table<ValueType, KeyType> ParentTable = Table;
+            PartOfTable<ValueType, KeyType> PartTable = null;
+            Func<KeyType, Task> Delete;
+            if (IsPartOfTable)
+            {
+                PartTable = (PartOfTable<ValueType, KeyType>)Table;
+                ParentTable = PartTable.Parent;
+            }
+
             var LastUpdateCode = await Client.GetData<ulong>();//1
             await Client.SendData(Table.UpdateAble.UpdateCode);//2
             if (Table.UpdateAble.UpdateCode != LastUpdateCode)
@@ -87,6 +96,11 @@ namespace Monsajem_Incs.Database.Base
                 {
                     var NextUpdates = GetNexts((PartOfTable<ValueType, KeyType>)Table, LastUpdateCode);
                     await Client.SendData(NextUpdates.FirstCode);//3
+                    while (await Client.GetData<int>() != -1)
+                    {
+                        var Key = await Client.GetData<KeyType>();
+                        await Client.SendCondition(ParentTable.PositionOf(Key) >= 0);
+                    }
                     await Client.SendData(NextUpdates.ParentCodes);//4
                     await Client.SendData(NextUpdates.PartCodes);//5
                     IE_Values = NextUpdates.Values.GetEnumerator();
@@ -114,10 +128,29 @@ namespace Monsajem_Incs.Database.Base
             var UpdateAble = Table.UpdateAble.UpdateCodes;
             await Client.SendData(UpdateAble.Length);
             var Pos = await Client.GetData<int>();
-            while (Pos != -1)
+            if (IsPartOfTable)
             {
-                await Client.SendData(UpdateAble[Pos].UpdateCode);
-                Pos = await Client.GetData<int>();
+                while (Pos != -1)
+                {
+                    if (Pos == -2)
+                    {
+                        var Key = await Client.GetData<KeyType>();
+                        await Client.SendCondition(ParentTable.PositionOf(Key) >= 0);
+                    }
+                    else
+                    {
+                        await Client.SendData(UpdateAble[Pos].UpdateCode);
+                    }
+                    Pos = await Client.GetData<int>();
+                }
+            }
+            else
+            {
+                while (Pos != -1)
+                {
+                    await Client.SendData(UpdateAble[Pos].UpdateCode);
+                    Pos = await Client.GetData<int>();
+                }
             }
         }
 
@@ -125,6 +158,7 @@ namespace Monsajem_Incs.Database.Base
         private static async Task CompareToOther<KeyType, ValueType>(
             Func<int, Task<ulong>> Ar_SV,
             Table<ValueType, KeyType> Table,
+            Func<KeyType, Task> Delete,
             int TrueLen)
             where KeyType : IComparable<KeyType>
         {
@@ -164,13 +198,14 @@ namespace Monsajem_Incs.Database.Base
                     }
                 }
                 var Key = UpdateCodes[EndPos].Key;
-                Table.Delete(Key);
-                Table.UpdateAble.Delete(Key);
+                await Delete(Key);
+                Table.UpdateAble.Delete(Key, 0);
             }
         }
 
-        private static void DeleteFrom<KeyType, ValueType>(
+        private static async Task DeleteFrom<KeyType, ValueType>(
             Table<ValueType, KeyType> Table,
+            Func<KeyType, Task> Delete,
             ulong UpdateCode)
             where KeyType : IComparable<KeyType>
         {
@@ -186,7 +221,7 @@ namespace Monsajem_Incs.Database.Base
             foreach (var Update in UpdateCodes.Skip(Place))
             {
                 UpdateAble.Delete(Update.Key, 0);
-                Table.Delete(Update.Key);
+                await Delete(Update.Key);
             }
         }
         private static async Task<bool> I_GetUpdate<DataType, KeyType>(
@@ -198,11 +233,23 @@ namespace Monsajem_Incs.Database.Base
         {
             Table<DataType, KeyType> ParentTable = Table;
             PartOfTable<DataType, KeyType> PartTable = null;
+            Func<KeyType, Task> Delete;
             if (IsPartOfTable)
             {
                 PartTable = (PartOfTable<DataType, KeyType>)Table;
                 ParentTable = PartTable.Parent;
+                Delete = async (key) =>
+                {
+                    await Client.SendData(-2);
+                    await Client.SendData(key);
+                    if (await Client.GetCondition())
+                        PartTable.Ignore(key);
+                    else
+                        PartTable.Delete(key);
+                };
             }
+            else
+                Delete = async (key) => Table.Delete(key);
 
             var Result = false;
             if (Table._UpdateAble == null)
@@ -212,7 +259,9 @@ namespace Monsajem_Incs.Database.Base
             var LastUpdateCode = await Client.GetData<ulong>();//2
             if (Table.UpdateAble.UpdateCode != LastUpdateCode)
             {
-                DeleteFrom(Table, await Client.GetData<ulong>());//3
+                await DeleteFrom(Table, Delete, await Client.GetData<ulong>());//3
+                if (IsPartOfTable)
+                   await Client.SendData(-1);
 
                 bool[] NeedUpdate;
                 var UpdateCodes = await Client.GetData<ulong[]>();//4
@@ -257,8 +306,6 @@ namespace Monsajem_Incs.Database.Base
                             if (PartTable.PositionOf(Key) > -1)
                             {
                                 PartTable.UpdateAble.Changed(Key, Key, PartUpdateCodes[i]);
-                                PartTable.Ignore(Key);
-                                PartTable.Accept(Key);
                             }
                             else
                             {
@@ -299,12 +346,14 @@ namespace Monsajem_Incs.Database.Base
                         ServerValues[pos] = Value;
                     }
                     return Value.Value;
-                }, Table, TrueLen);
+                }, Table, Delete, TrueLen);
             }
             await Client.SendData(-1);//7+
 
 
             Table.UpdateAble.UpdateCode = LastUpdateCode;
+            if (IsPartOfTable)
+                PartTable.SaveToParent();
             return Result;
         }
     }

@@ -199,16 +199,21 @@ namespace Monsajem_Incs.Database.Base
                    {
                        ThisRelation = new PartOfTable<To, ToKeyType>(ThisRelation.KeysInfo.Keys, Relation.LinkArray)
                        {
-                           UpdateAble = ThisRelation.UpdateAble,
+                           _UpdateAble = ThisRelation._UpdateAble,
                            AutoFillRelations = (c) =>
                            {
                                Relation.LinkArray.AutoFillRelations?.Invoke(c);
                                MakeNew?.Invoke((Value, c));
                            }
                        };
+                       if (Relation.IsUpdateAble)
+                           ThisRelation.ReadyForUpdateAble();
                    }
                    else
                        return ThisRelation;
+
+                   ThisRelation.SaveToParent = () =>
+                        this.Update(Key, (c) => Relation.Field.Value(c, (f) => ThisRelation));
 
                    ThisRelation.Extras.Accepted += (PartOfTable<To, ToKeyType>.TableExtras.KeyInfo Info) =>
                    {

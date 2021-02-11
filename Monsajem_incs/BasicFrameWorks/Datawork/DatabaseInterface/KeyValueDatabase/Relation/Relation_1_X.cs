@@ -34,8 +34,7 @@ namespace Monsajem_Incs.Database.Base
 #endif
                     using (ThisRelation.LinkArray.IgnoreUpdateAble.Block())
                     {
-                        ThisRelation.LinkArray.Update(Key,
-                            (c) => ThatRelation.Field.Value(c,(f)=> PartTable));
+                        PartTable.SaveToParent();
                     }
 
                     using (this.IgnoreUpdateAble.Block())
@@ -51,8 +50,7 @@ namespace Monsajem_Incs.Database.Base
 #endif
                     using (ThisRelation.LinkArray.IgnoreUpdateAble.Block())
                     {
-                        ThisRelation.LinkArray.Update(Key,
-                            (c) => ThatRelation.Field.Value(c,(f)=>PartTable));
+                        PartTable.SaveToParent();
                     }
 
 

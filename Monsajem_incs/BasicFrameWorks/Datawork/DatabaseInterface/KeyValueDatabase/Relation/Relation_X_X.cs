@@ -63,8 +63,7 @@ namespace Monsajem_Incs.Database.Base
 #endif
                     using (this.IgnoreUpdateAble.Block())
                     {
-                        this.Update(Key,
-                            (c) => ThisRelation.Field.Value(c,(f)=> PartTable));
+                        PartTable.SaveToParent();
                     }
 
 
@@ -82,8 +81,7 @@ namespace Monsajem_Incs.Database.Base
 #endif
                     using (this.IgnoreUpdateAble.Block())
                     {
-                        this.Update(Key,
-                            (c) => ThisRelation.Field.Value(c,(f)=>PartTable));
+                        PartTable.SaveToParent();
                     }
 
 
