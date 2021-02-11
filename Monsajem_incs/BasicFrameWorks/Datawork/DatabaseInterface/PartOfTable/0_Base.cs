@@ -20,6 +20,9 @@ namespace Monsajem_Incs.Database.Base
         [Serialization.NonSerialized]
         internal Table<ValueType, KeyType> Parent;
 
+        [Serialization.NonSerialized]
+        internal Action SaveToParent; 
+
         public PartOfTable(KeyType[] NewKEys, Table<ValueType, KeyType> Parent)
         {
             this.Parent = Parent;
@@ -87,12 +90,12 @@ namespace Monsajem_Incs.Database.Base
             {
                 if (_UpdateAble != null)
                 {
-                    Extras.Accepted += (TableExtras.KeyInfo info) =>
+                    Extras.Accepting += (TableExtras.KeyInfo info) =>
                     {
                         _UpdateAble.Insert(info.Key);
                     };
 
-                    Extras.Ignored += (TableExtras.KeyInfo info) =>
+                    Extras.Ignoring += (TableExtras.KeyInfo info) =>
                     {
                         _UpdateAble.Delete(info.Key);
                     };

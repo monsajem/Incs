@@ -256,8 +256,9 @@ namespace Monsajem_Incs.Database.Base
                         {
                             if (PartTable.PositionOf(Key) > -1)
                             {
-                                ParentTable.UpdateAble.Changed(Key, Key, PartUpdateCodes[i]);
-                                PartTable.Update(Key,(c)=>{ });
+                                PartTable.UpdateAble.Changed(Key, Key, PartUpdateCodes[i]);
+                                PartTable.Ignore(Key);
+                                PartTable.Accept(Key);
                             }
                             else
                             {

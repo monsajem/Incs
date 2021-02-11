@@ -125,10 +125,15 @@ namespace Monsajem_Incs.Database.Base
 
         public void Changed(KeyType Old, KeyType New,ulong UpdateCode)
         {
-            var OldUpdate = UpdateKeys[
-                    System.Array.BinarySearch(UpdateKeys,
+            var OldPlace = System.Array.BinarySearch(UpdateKeys,
                         new UpdateAble<KeyType>() { Key = Old },
-                        UpdateAble<KeyType>.CompareKey)];
+                        UpdateAble<KeyType>.CompareKey);
+            if(OldPlace<0)
+            {
+                Insert(New, UpdateCode);
+                return;
+            }
+            var OldUpdate = UpdateKeys[OldPlace];
             var NewUpdate = new UpdateAble<KeyType>() { Key = New, UpdateCode = UpdateCode };
 
             ArrayExtentions.ArrayExtentions.BinaryUpdate(

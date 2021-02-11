@@ -56,7 +56,7 @@ namespace Monsajem_Incs.Database.Base
 
             _AddRelationForLoading(RelationName,
                 ThisRelation,
-                Accepted: (Key, AcceptedKey) =>
+                Accepted: (Key, AcceptedKey, PartTable) =>
                 {
 #if TRACE
                     Console.WriteLine("@ " + this.GetType().Namespace + this.GetType().Name + " _AddRelation_X_X >> Accepted");
@@ -64,7 +64,7 @@ namespace Monsajem_Incs.Database.Base
                     using (this.IgnoreUpdateAble.Block())
                     {
                         this.Update(Key,
-                            (c) => ThisRelation.Field.Value(c).Accept(AcceptedKey));
+                            (c) => ThisRelation.Field.Value(c,(f)=> PartTable));
                     }
 
 
@@ -75,7 +75,7 @@ namespace Monsajem_Incs.Database.Base
                     }
 
                 },
-                Ignored: (Key, IgnoredKey) =>
+                Ignored: (Key, IgnoredKey, PartTable) =>
                 {
 #if TRACE
                     Console.WriteLine("@ " + this.GetType().Namespace + this.GetType().Name + " _AddRelation_X_X >> Ignored");
@@ -83,7 +83,7 @@ namespace Monsajem_Incs.Database.Base
                     using (this.IgnoreUpdateAble.Block())
                     {
                         this.Update(Key,
-                            (c) => ThisRelation.Field.Value(c).Ignore(IgnoredKey));
+                            (c) => ThisRelation.Field.Value(c,(f)=>PartTable));
                     }
 
 

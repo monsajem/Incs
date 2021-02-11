@@ -171,8 +171,8 @@ namespace Monsajem_Incs.Database.Base
         private void _AddRelationForLoading<To, ToKeyType>(
             string RelationName,
             RelationTableInfo<To, ToKeyType> Relation,
-            Action<KeyType, ToKeyType> Accepted,
-            Action<KeyType, ToKeyType> Ignored,
+            Action<KeyType, ToKeyType, PartOfTable<To,ToKeyType>> Accepted,
+            Action<KeyType, ToKeyType, PartOfTable<To, ToKeyType>> Ignored,
             Action<(
                 ValueType LoadedValue,
                 To NewValue)> MakeNew=null)
@@ -185,6 +185,7 @@ namespace Monsajem_Incs.Database.Base
                Fild.Value(Value,(ThisRelation)=>
                {
                    var Key = this.GetKey(Value);
+
                    if (ThisRelation == null)
                        ThisRelation = new PartOfTable<To, ToKeyType>(new ToKeyType[0], Relation.LinkArray)
                        {
@@ -213,7 +214,7 @@ namespace Monsajem_Incs.Database.Base
                    {
                        if (Run.Use(RelationName))
                        {
-                           Accepted(Key, Info.Key);
+                           Accepted(Key, Info.Key,ThisRelation);
                        }
                    };
 
@@ -221,7 +222,7 @@ namespace Monsajem_Incs.Database.Base
                    {
                        if (Run.Use(RelationName))
                        {
-                           Ignored(Key, Info.Key);
+                           Ignored(Key, Info.Key, ThisRelation);
                        }
                    };
 
