@@ -62,7 +62,6 @@
     <Compile Include="BasicFrameWorks\Datawork\DatabaseInterface\KeyValueDatabase\KeyInfo.cs" />
     <Compile Include="BasicFrameWorks\Datawork\DatabaseInterface\KeyValueDatabase\Keys.cs" />
     <Compile Include="BasicFrameWorks\Datawork\DatabaseInterface\KeyValueDatabase\Network\Async.cs" />
-    <Compile Include="BasicFrameWorks\Datawork\DatabaseInterface\KeyValueDatabase\Network\Network - Copy.cs" />
     <Compile Include="BasicFrameWorks\Datawork\DatabaseInterface\KeyValueDatabase\Network\Network.cs" />
     <Compile Include="BasicFrameWorks\Datawork\DatabaseInterface\KeyValueDatabase\Network\Sync.cs" />
     <Compile Include="BasicFrameWorks\Datawork\DatabaseInterface\KeyValueDatabase\PositionOf.cs" />
@@ -125,6 +124,7 @@
     <Compile Include="BasicFrameWorks\Network\TcpService\RequestClient.cs" />
     <Compile Include="BasicFrameWorks\Network\TcpService\ResposerServer.cs" />
     <Compile Include="BasicFrameWorks\Network\TcpService\ServerSocket.cs" />
+    <Compile Include="BasicFrameWorks\Network\Virtual\Oprations.cs" />
     <Compile Include="BasicFrameWorks\Network\WebService\WebService.cs" />
     <Compile Include="BasicFrameWorks\Network\websocket-sharp\ByteOrder.cs" />
     <Compile Include="BasicFrameWorks\Network\websocket-sharp\CloseEventArgs.cs" />
