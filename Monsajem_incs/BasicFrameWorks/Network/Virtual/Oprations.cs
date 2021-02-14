@@ -7,20 +7,30 @@ using Monsajem_Incs.Net.Base.Service;
 using Monsajem_Incs.DynamicAssembly;
 using System.Collections.Generic;
 
-namespace Monsajem_Incs.Net.Base.Virtual
+namespace Monsajem_Incs.Net.Virtual
 {
 
     public class Socket
     {
+        public readonly Socket OtherSide;
         private Action Getting;
         private Array.DynamicSize.Array<object> Data = new Array.DynamicSize.Array<object>(10);
+
+        public Socket()
+        {
+            this.OtherSide = new Socket(this);
+        }
+        private Socket(Socket OtherSide)
+        {
+            this.OtherSide = OtherSide;
+        }
 
         public void Send(object Data)
         {
             lock (Data)
             {
-                this.Data.Insert(Data, 0);
-                Getting();
+                OtherSide.Data.Insert(Data, 0);
+                OtherSide.Getting?.Invoke();
             }
         }
         public void Send<t>(t Data) => Send((object)Data);

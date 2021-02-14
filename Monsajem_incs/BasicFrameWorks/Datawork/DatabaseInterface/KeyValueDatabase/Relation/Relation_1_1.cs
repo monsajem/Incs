@@ -135,7 +135,6 @@ namespace Monsajem_Incs.Database.Base
                 ThisRelationLink.OwnerArray._ClearRelation(ThisRelationLink.Link);
             if (ThatRelationLink.ClearRelationOnSendUpdate)
                 ThatRelationLink.OwnerArray._ClearRelation(ThatRelationLink.Link);
-
         }
     }
 }

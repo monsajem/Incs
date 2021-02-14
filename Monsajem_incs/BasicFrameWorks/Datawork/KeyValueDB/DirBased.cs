@@ -49,6 +49,8 @@ namespace Monsajem_Incs.Database.KeyValue.DirBased
             base((b)=>File.WriteAllBytes(Dir+"\\K",b),
                  ()=>File.Exists(Dir + "\\K") ? File.ReadAllBytes(Dir + "\\K"):null,
                  new FileDictionary<KeyType,ValueType>(Dir+"\\V"), GetKey, IsUpdatAble)
-        {}
+        {
+            this.TableName = new DirectoryInfo(Dir).Name;
+        }
     }
 }

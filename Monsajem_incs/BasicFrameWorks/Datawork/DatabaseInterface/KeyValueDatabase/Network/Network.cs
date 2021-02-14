@@ -12,20 +12,14 @@ namespace Monsajem_Incs.Database.Base
 {
     public static partial class Extentions
     {
-        public static void XChange<t>(ref t A, ref t B)
-        {
-            var X = A;
-            A = B;
-            B = X;
-        }
-
-        private static (IEnumerable<UpdateAble<KeyType>> UpdateCodes, IEnumerable<ValueType> Values, ulong FirstCode)
+        private static (IEnumerable<UpdateAble<KeyType>> UpdateCodes, IEnumerable<Task<ValueType>> Values, ulong FirstCode)
             Base_GetNexts<KeyType, ValueType>(
-            Table<ValueType, KeyType> Table,
+            Action<Table<ValueType, KeyType>.ValueInfo> ClearRelations,
+            UpdateAble<KeyType>[] UpdateCodes,
+            Func<KeyType, Task<ValueType>> GetItem,
             ulong UpdateCode)
             where KeyType : IComparable<KeyType>
         {
-            var UpdateCodes = Table.UpdateAble.UpdateCodes;
             var Place = System.Array.BinarySearch(UpdateCodes,
                         new UpdateAble<KeyType>() { UpdateCode = UpdateCode },
                         UpdateAble<KeyType>.CompareCode);
@@ -41,46 +35,52 @@ namespace Monsajem_Incs.Database.Base
                 FirstCode = UpdateCodes[Place - 1].UpdateCode;
 
             var ResultCodes = UpdateCodes.Skip(Place);
-            var Values = ResultCodes.Select((c) =>
+            var Values = ResultCodes.Select(async (c) =>
             {
-                var Data = Table[c.Key];
-                Table.ClearRelations?.Invoke(Data);
+                var Data = new Table<ValueType, KeyType>.ValueInfo() { Value = await GetItem(c.Key) };
+                ClearRelations?.Invoke(Data);
                 return Data.Value;
             });
             return (ResultCodes, Values, FirstCode);
         }
-        private static (ulong[] UpdateCodes, IEnumerable<ValueType> Values, ulong FirstCode)
+        private static (ulong[] UpdateCodes, IEnumerable<Task<ValueType>> Values, ulong FirstCode)
             GetNexts<KeyType, ValueType>(
-            Table<ValueType, KeyType> Table,
+            Action<Table<ValueType, KeyType>.ValueInfo> ClearRelations,
+            UpdateAble<KeyType>[] UpdateCodes,
+            Func<KeyType, Task<ValueType>> GetItem,
             ulong UpdateCode)
             where KeyType : IComparable<KeyType>
         {
-            var UpdateCodes = Base_GetNexts(Table, UpdateCode);
+            var Nexts = Base_GetNexts(ClearRelations, UpdateCodes, GetItem, UpdateCode);
 
-            var Updates = UpdateCodes.UpdateCodes.Select((c) => c.UpdateCode).ToArray();
-            return (Updates, UpdateCodes.Values, UpdateCodes.FirstCode);
+            var Updates = Nexts.UpdateCodes.Select((c) => c.UpdateCode).ToArray();
+            return (Updates, Nexts.Values, Nexts.FirstCode);
         }
-        private static (ulong[] ParentCodes, ulong[] PartCodes, IEnumerable<ValueType> Values, ulong FirstCode)
+        private static (ulong[] ParentCodes, ulong[] PartCodes, IEnumerable<Task<ValueType>> Values, ulong FirstCode)
             GetNexts<KeyType, ValueType>(
             PartOfTable<ValueType, KeyType> Table,
+            Func<KeyType, Task<ValueType>> GetItem,
             ulong UpdateCode)
             where KeyType : IComparable<KeyType>
         {
-            var UpdateCodes = Base_GetNexts(Table, UpdateCode);
+            var Nexts = Base_GetNexts(Table.Parent.ClearRelations, Table.UpdateAble.UpdateCodes, GetItem, UpdateCode);
             var ParentUpdateAble = Table.Parent.UpdateAble;
-            var ParentCodes = UpdateCodes.UpdateCodes.Select((c) => ParentUpdateAble[c.Key].UpdateCode).ToArray();
-            var PartCodes = UpdateCodes.UpdateCodes.Select((c) => c.UpdateCode).ToArray();
+            var ParentCodes = Nexts.UpdateCodes.Select((c) => ParentUpdateAble[c.Key].UpdateCode).ToArray();
+            var PartCodes = Nexts.UpdateCodes.Select((c) => c.UpdateCode).ToArray();
 
-            return (ParentCodes, PartCodes, UpdateCodes.Values, UpdateCodes.FirstCode);
+            return (ParentCodes, PartCodes, Nexts.Values, Nexts.FirstCode);
         }
 
         private static async Task I_SendUpdate<ValueType, KeyType>
-                   (this IAsyncOprations Client, Table<ValueType, KeyType> Table, bool IsPartOfTable)
+                   (this IAsyncOprations Client,
+                    Table<ValueType, KeyType> Table,
+                    UpdateAble<KeyType>[] UpdateCodes,
+                    Func<KeyType, Task<ValueType>> GetItem,
+                    bool IsPartOfTable)
                    where KeyType : IComparable<KeyType>
         {
             Table<ValueType, KeyType> ParentTable = Table;
             PartOfTable<ValueType, KeyType> PartTable = null;
-            Func<KeyType, Task> Delete;
             if (IsPartOfTable)
             {
                 PartTable = (PartOfTable<ValueType, KeyType>)Table;
@@ -91,10 +91,10 @@ namespace Monsajem_Incs.Database.Base
             await Client.SendData(Table.UpdateAble.UpdateCode);//2
             if (Table.UpdateAble.UpdateCode != LastUpdateCode)
             {
-                IEnumerator<ValueType> IE_Values;
+                IEnumerator<Task<ValueType>> IE_Values;
                 if (IsPartOfTable)
                 {
-                    var NextUpdates = GetNexts((PartOfTable<ValueType, KeyType>)Table, LastUpdateCode);
+                    var NextUpdates = GetNexts(PartTable, GetItem, LastUpdateCode);
                     await Client.SendData(NextUpdates.FirstCode);//3
                     while (await Client.GetData<int>() != -1)
                     {
@@ -107,7 +107,7 @@ namespace Monsajem_Incs.Database.Base
                 }
                 else
                 {
-                    var NextUpdates = GetNexts(Table, LastUpdateCode);
+                    var NextUpdates = GetNexts(Table.ClearRelations, UpdateCodes, GetItem, LastUpdateCode);
                     await Client.SendData(NextUpdates.FirstCode);//3
                     await Client.SendData(NextUpdates.UpdateCodes);//4
                     IE_Values = NextUpdates.Values.GetEnumerator();
@@ -119,14 +119,15 @@ namespace Monsajem_Incs.Database.Base
                 for (int i = 0; i < Len; i++)
                 {
                     if (SendToClient[i] == true)
-                        await Client.SendData(IE_Values.Current);//6
+                        await Client.SendData(await IE_Values.Current);//6
                     IE_Values.MoveNext();
                 }
                 IE_Values.Dispose();
             }
 
-            var UpdateAble = Table.UpdateAble.UpdateCodes;
-            await Client.SendData(UpdateAble.Length);
+            if (IsPartOfTable)
+                UpdateCodes = PartTable.UpdateAble.UpdateCodes;
+            await Client.SendData(UpdateCodes.Length);
             var Pos = await Client.GetData<int>();
             if (IsPartOfTable)
             {
@@ -139,7 +140,7 @@ namespace Monsajem_Incs.Database.Base
                     }
                     else
                     {
-                        await Client.SendData(UpdateAble[Pos].UpdateCode);
+                        await Client.SendData(UpdateCodes[Pos].UpdateCode);
                     }
                     Pos = await Client.GetData<int>();
                 }
@@ -148,12 +149,11 @@ namespace Monsajem_Incs.Database.Base
             {
                 while (Pos != -1)
                 {
-                    await Client.SendData(UpdateAble[Pos].UpdateCode);
+                    await Client.SendData(UpdateCodes[Pos].UpdateCode);
                     Pos = await Client.GetData<int>();
                 }
             }
         }
-
 
         private static async Task CompareToOther<KeyType, ValueType>(
             Func<int, Task<ulong>> Ar_SV,
@@ -261,7 +261,7 @@ namespace Monsajem_Incs.Database.Base
             {
                 await DeleteFrom(Table, Delete, await Client.GetData<ulong>());//3
                 if (IsPartOfTable)
-                   await Client.SendData(-1);
+                    await Client.SendData(-1);
 
                 bool[] NeedUpdate;
                 var UpdateCodes = await Client.GetData<ulong[]>();//4

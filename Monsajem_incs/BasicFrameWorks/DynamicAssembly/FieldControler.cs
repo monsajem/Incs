@@ -11,11 +11,20 @@ namespace Monsajem_Incs.DynamicAssembly
 {
     public class FieldControler
     {
-        public FieldControler(FieldInfo Field)
+        public FieldControler(FieldInfo Field):this(
+            Field,
+            TypeController.SetValue(Field),
+             TypeController.GetValue(Field))
+        {}
+
+        public FieldControler(
+            FieldInfo Field,
+            Action<object, object> SetValue, 
+            Func<object, object> GetValue)
         {
             this.Info = Field;
-            this.SetValue = TypeController.SetValue(Field);
-            this.GetValue = TypeController.GetValue(Field);
+            this.SetValue = SetValue;
+            this.GetValue = GetValue;
         }
 
         public readonly FieldInfo Info;
@@ -167,4 +176,5 @@ namespace Monsajem_Incs.DynamicAssembly
             return Str;
         }
     }
+
 }

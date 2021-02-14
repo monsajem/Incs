@@ -21,6 +21,7 @@ namespace Monsajem_Incs.Database.DirectoryTable
             bool FastSave):
             base(new StreamCollection.StreamCollection<ValueType>(),GetKey,false)
         {
+            this.TableName = new DirectoryInfo(DirectoryAddress).Name;
             Directory.CreateDirectory(DirectoryAddress);
             Directory.CreateDirectory(DirectoryAddress+"\\Keys");
             if (File.Exists(DirectoryAddress + "\\Keys\\PK"))

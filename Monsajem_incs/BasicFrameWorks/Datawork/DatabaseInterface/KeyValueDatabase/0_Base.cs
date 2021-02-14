@@ -55,6 +55,8 @@ namespace Monsajem_Incs.Database.Base
         public Action<ValueType> AutoFillRelations;
         [Serialization.NonSerialized]
         public SecurityEvents<ValueType> SecurityEvents;
+        [Serialization.NonSerialized]
+        internal string TableName;
 
         protected int KeyPos;
 

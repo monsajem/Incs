@@ -33,6 +33,7 @@ namespace Monsajem_Incs.Database.DirectoryTable
             bool FastSave):
             base(new StreamCollection.StreamCollection<ValueType>(),GetKey,false)
         {
+            this.TableName = new DirectoryInfo(DirectoryAddress).Name;
             _StreamCollection =(StreamCollection<ValueType>) this.BasicActions.Items;
             Directory.CreateDirectory(DirectoryAddress);
             if (File.Exists(DirectoryAddress + "\\PK"))
