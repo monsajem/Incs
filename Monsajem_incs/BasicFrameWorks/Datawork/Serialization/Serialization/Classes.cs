@@ -379,7 +379,7 @@ namespace Monsajem_Incs.Serialization
                    (object obj) =>
                    {
                        var Name = Write(((Type)obj).MidName());
-                       S_Data.Write(Name,0,Name.Length);
+                       S_Data.Write(Name, 0, Name.Length);
                    },
                    () =>
                    {
@@ -478,21 +478,25 @@ namespace Monsajem_Incs.Serialization
 
         private byte[] _Serialize<t>(t obj)
         {
-            var Type = typeof(t);
-            byte[] Result;
-
-            if (Serialization.S_Data == null)
+            lock (this)
             {
-                Serialization.S_Data = new MemoryStream();
-                Serialization.Visitor = new SortedArray<ObjectContainer>(20);
-                Serialization.Visitor_info = new SortedArray<ObjectContainer>(20);
+                var Type = typeof(t);
+                byte[] Result;
+
+                if (Serialization.S_Data == null)
+                {
+                    Serialization.S_Data = new MemoryStream();
+                    Serialization.Visitor = new SortedArray<ObjectContainer>(20);
+                    Serialization.Visitor_info = new SortedArray<ObjectContainer>(20);
+                }
+                var SR = FindSerializer(Type);
+                VisitedSerialize(obj, SR);
+                Result = S_Data.ToArray();
+                Serialization.S_Data.SetLength(0);
+                Serialization.Visitor.Clear();
+                Serialization.Visitor_info.Clear();
+                return Result;
             }
-            VisitedSerialize(obj, FindSerializer(Type));
-            Result = S_Data.ToArray();
-            Serialization.S_Data.SetLength(0);
-            Serialization.Visitor.Clear();
-            Serialization.Visitor_info.Clear();
-            return Result;
         }
 
         public t Deserialize<t>(byte[] Data)
@@ -516,25 +520,27 @@ namespace Monsajem_Incs.Serialization
 
         public object Deserialize(byte[] Data, Type Type, ref int From)
         {
+            lock (this)
+            {
 #if TRACE_SR
             try
             {
 #endif
-            if (Serialization.Visitor_info == null)
-            {
-                Serialization.Visitor = new SortedArray<ObjectContainer>(20);
-                Serialization.Visitor_info = new SortedArray<ObjectContainer>(20);
-            }
-            Serialization.D_Data = Data;
-            Serialization.From = From;
-            object Result = null;
-            VisitedDeserialize((c) => Result = c, FindSerializer(Type));
-            AtLast?.Invoke();
-            Serialization.Visitor.Clear();
-            Serialization.Visitor_info.Clear();
-            Serialization.D_Data = null;
-            AtLast = null;
-            return Result;
+                if (Serialization.Visitor_info == null)
+                {
+                    Serialization.Visitor = new SortedArray<ObjectContainer>(20);
+                    Serialization.Visitor_info = new SortedArray<ObjectContainer>(20);
+                }
+                Serialization.D_Data = Data;
+                Serialization.From = From;
+                object Result = null;
+                VisitedDeserialize((c) => Result = c, FindSerializer(Type));
+                AtLast?.Invoke();
+                Serialization.Visitor.Clear();
+                Serialization.Visitor_info.Clear();
+                Serialization.D_Data = null;
+                AtLast = null;
+                return Result;
 #if TRACE_SR
             }
             catch (Exception ex)
@@ -545,6 +551,7 @@ namespace Monsajem_Incs.Serialization
             }
 #endif
 
+            }
         }
     }
 }
