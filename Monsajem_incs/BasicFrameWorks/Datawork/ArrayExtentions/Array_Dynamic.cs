@@ -17,9 +17,35 @@ namespace Monsajem_Incs.Array.Base
         public Action<int> _DeleteFrom;
         public Action<int> _AddLength;
         public Action<((int From, int To, System.Array Ar)[] Ar, int MaxLen),int> _AddFromTo;
-        public Func<int, int,( (int From, int To, System.Array Ar)[], int)> _GetFromTo;
+        public Func<int, int, ((int From, int To, System.Array Ar)[], int MaxLen)> _GetFromTo;
         public Action<((int From, int To, System.Array Ar)[] Ar, int MaxLen), int> _SetFromTo;
         public Action<int> _DeleteByPosition;
+
+        public DynamicArray()
+        {
+            _GetFromTo =
+            (From, To) =>
+            {
+                var Result = new ArrayType[To - From];
+                var Len = Result.Length;
+                for (int i = 0; i < Len; i++)
+                    Result[i] = this[i + From];
+                return (new (int, int, System.Array)[] { (0,Len,Result) },Len);
+            };
+
+            _SetFromTo = (Ar, From) =>
+            {
+                for (int ArPos = 0;ArPos<Ar.Ar.Length; ArPos++)
+                {
+                    var Current_Ar_Info = Ar.Ar[ArPos];
+                    var Current_Ar =(ArrayType[]) Current_Ar_Info.Ar;
+                    var I_From = Current_Ar_Info.From;
+                    var I_To = Current_Ar_Info.To;
+                    for (int i = I_From; i < I_To; i++)
+                        this[From++] = Current_Ar[i];
+                }
+            };
+        }
 
         public override ArrayType this[int Pos] { get => _GetItem(Pos); set => _SetItem(Pos, value); }
 

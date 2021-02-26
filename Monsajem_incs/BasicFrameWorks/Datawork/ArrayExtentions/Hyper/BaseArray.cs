@@ -315,7 +315,7 @@ namespace Monsajem_Incs.Array.Hyper
                 var MyAr = ar[arPos+i];
                 To -= MyAr.ar.Length;
                 if(To > 0)
-                    Result[i] = (From, MyAr.ar.Length-1, MyAr.ar);
+                    Result[i] = (From, MyAr.ar.Length, MyAr.ar);
                 else
                 {
                     Result[i] = (From, MyAr.ar.Length + To, MyAr.ar);

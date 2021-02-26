@@ -632,7 +632,7 @@ namespace Monsajem_Incs.Serialization
                 {
                     var Array = Arrays[i];
                     S_Data.Write(BitConverter.GetBytes(Array.From), 0, 4);
-                    S_Data.Write(BitConverter.GetBytes(Array.To + 1), 0, 4);
+                    S_Data.Write(BitConverter.GetBytes(Array.To), 0, 4);
                     ItemsSerializer.Serializer(Array.Ar);
                 }
             };
@@ -652,7 +652,7 @@ namespace Monsajem_Incs.Serialization
                     From += 4;
                     var Array = ItemsSerializer.Deserializer();
                     AllLen += ArLen;
-                    AllArrays.Ar[i] = (ArFrom, ArLen - 1, (System.Array)Array);
+                    AllArrays.Ar[i] = (ArFrom, ArLen, (System.Array)Array);
                 }
                 ar.SetAllArrays(AllArrays);
                 ar.SetLen(AllLen);

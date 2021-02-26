@@ -7,7 +7,7 @@ using System.Linq;
 using Monsajem_Incs.Array.Hyper;
 using System.Linq.Expressions;
 using Monsajem_Incs.Serialization;
-using System.Net;
+using System.Net.Http;
 
 namespace Monsajem_Incs.Database.Base
 {
@@ -19,21 +19,27 @@ namespace Monsajem_Incs.Database.Base
             Action<ValueType> MakeingUpdate = null)
             where KeyType : IComparable<KeyType>
         {
+
+            if (typeof(PartOfTable<ValueType, KeyType>).IsAssignableFrom(Table.GetType()))
+                throw new Exception("Get Update must use in part of table mode.");
+            if (Table.TableName == null)
+                throw new Exception("Table Name not found!");
+
             CDN = new Uri($"{CDN.ToString()}/{Table.TableName}");
             var Socket = new Net.Virtual.Socket();
             var Server = new Net.Virtual.AsyncOprations(Socket);
             var Client = new Net.Virtual.AsyncOprations(Socket.OtherSide);
 
-            var WebClient = new WebClient();
-            var ServerTable =(await WebClient.DownloadDataTaskAsync(CDN.ToString()+"/K")).Deserialize(Table);
+            var WebClient = new HttpClient();
+            var ServerTable = (await WebClient.GetByteArrayAsync(CDN.ToString() + "/K")).Deserialize(Table);
             ServerTable.ClearRelations = Table.ClearRelations;
 
             Server.I_SendUpdate(ServerTable, ServerTable.UpdateAble.UpdateCodes,
-                async(key) =>
+                async (key) =>
                 {
-                    return (await WebClient.DownloadDataTaskAsync(CDN.ToString() + "/V/" +
+                    return (await WebClient.GetByteArrayAsync(CDN.ToString() + "/V/" +
                         Convert.ToBase64String(key.Serialize()))).Deserialize<ValueType>();
-                },false);
+                }, false);
 
             return await Client.I_GetUpdate(Table, MakeingUpdate, false);
         }
@@ -48,15 +54,15 @@ namespace Monsajem_Incs.Database.Base
             where KeyType_RLN : IComparable<KeyType_RLN>
         {
             var PartTable = GetRelation(RLNTable[RLNKey]);
-            var RootCDN = new Uri( $"{CDN.ToString()}/{PartTable.Parent.TableName}");
+            var RootCDN = new Uri($"{CDN.ToString()}/{PartTable.Parent.TableName}");
             var RelationCDN = new Uri($"{CDN.ToString()}/{RLNTable.TableName}");
             return GetUpdate(RootCDN, RelationCDN, RLNTable, RLNKey, GetRelation, MakeingUpdate);
         }
 
-        public static async Task<bool> GetUpdate<ValueType_RLN,KeyType_RLN,ValueType, KeyType>(
+        public static async Task<bool> GetUpdate<ValueType_RLN, KeyType_RLN, ValueType, KeyType>(
             this Uri RootCDN,
             Uri RelationCDN,
-            Table<ValueType_RLN,KeyType_RLN> RLNTable,
+            Table<ValueType_RLN, KeyType_RLN> RLNTable,
             KeyType_RLN RLNKey,
             Func<ValueType_RLN, PartOfTable<ValueType, KeyType>> GetRelation,
             Action<ValueType> MakeingUpdate = null)
@@ -67,18 +73,17 @@ namespace Monsajem_Incs.Database.Base
             var Server = new Net.Virtual.AsyncOprations(Socket);
             var Client = new Net.Virtual.AsyncOprations(Socket.OtherSide);
 
-            var WebClient = new WebClient();
-
-            var ServerTable = (await WebClient.DownloadDataTaskAsync(
-                                RootCDN.ToString() + "/K")).Deserialize<Table<ValueType,KeyType>>();
+            var WebClient = new HttpClient();
+            var ServerTable = (await WebClient.GetByteArrayAsync(
+                                RootCDN.ToString() + "/K")).Deserialize<Table<ValueType, KeyType>>();
             var ServerPartTable =
-                GetRelation((await WebClient.DownloadDataTaskAsync(
-                    RelationCDN.ToString() + "/V/"+Convert.ToBase64String(RLNKey.Serialize()))).Deserialize<ValueType_RLN>());
+                GetRelation((await WebClient.GetByteArrayAsync(
+                    RelationCDN.ToString() + "/V/" + Convert.ToBase64String(RLNKey.Serialize()))).Deserialize<ValueType_RLN>());
 
             Server.I_SendUpdate(ServerPartTable, ServerTable.UpdateAble.UpdateCodes,
                 async (key) =>
                 {
-                    return (await WebClient.DownloadDataTaskAsync(RootCDN.ToString() + "/V/" +
+                    return (await WebClient.GetByteArrayAsync(RootCDN.ToString() + "/V/" +
                         Convert.ToBase64String(key.Serialize()))).Deserialize<ValueType>();
                 }, true);
 

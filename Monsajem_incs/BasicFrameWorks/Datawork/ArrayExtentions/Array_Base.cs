@@ -28,6 +28,8 @@ namespace Monsajem_Incs.Array.Base
         {
             if (this.ToArray().Length != Length)
                 throw new Exception();
+            //if (this.AsEnumerable().ToArray().Length != Length)
+            //    throw new Exception();
         }
 #endif
 
@@ -110,7 +112,7 @@ namespace Monsajem_Incs.Array.Base
                     _ar = value;
                     var AR = _ar[0];
                     CurrnetAr = (ArrayType[])AR.Ar;
-                    CurrnetLen = AR.To+1;
+                    CurrnetLen = AR.To;
                     CurrentPos = AR.From - 1;
                     ArLastPos = _ar.Length - 1;
                 }
@@ -140,7 +142,7 @@ namespace Monsajem_Incs.Array.Base
                         return false;
                     var AR = _ar[ArPos];
                     CurrnetAr = (ArrayType[])AR.Ar;
-                    CurrnetLen = AR.To+1;
+                    CurrnetLen = AR.To;
                     CurrentPos = AR.From;
                     Result = CurrentPos < CurrnetLen;
                 }
@@ -174,7 +176,7 @@ namespace Monsajem_Incs.Array.Base
 #if DEBUG
             Debug();
 #endif
-            var Result = GetFromTo(0,Length-1);
+            var Result = GetFromTo(0,Length);
 #if DEBUG
             Debug();
 #endif
