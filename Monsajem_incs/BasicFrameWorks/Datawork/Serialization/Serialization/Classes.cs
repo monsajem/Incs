@@ -452,10 +452,6 @@ namespace Monsajem_Incs.Serialization
 
         public byte[] Serialize<t>(t obj)
         {
-#if TRACE_SR
-            try
-            {
-#endif
 #if DEBUG
             var Result = _Serialize(obj);
             var DS = Deserialize<t>(Result);
@@ -464,24 +460,14 @@ namespace Monsajem_Incs.Serialization
 #else
             return _Serialize(obj);
 #endif
-#if TRACE_SR
-            }
-            catch (Exception ex)
-            {
-                var Traced = this.Traced;
-                this.Traced = null;
-                throw new Exception($"Serialize Of Type >> {obj.GetType().FullName} Is Failed On " + Traced, ex);
-            }
-
-#endif
         }
 
         private byte[] _Serialize<t>(t obj)
         {
             lock (this)
             {
-                var Type = typeof(t);
                 byte[] Result;
+                var Type = typeof(t);
 
                 if (Serialization.S_Data == null)
                 {
@@ -490,11 +476,25 @@ namespace Monsajem_Incs.Serialization
                     Serialization.Visitor_info = new SortedArray<ObjectContainer>(20);
                 }
                 var SR = FindSerializer(Type);
-                VisitedSerialize(obj, SR);
-                Result = S_Data.ToArray();
-                Serialization.S_Data.SetLength(0);
-                Serialization.Visitor.Clear();
-                Serialization.Visitor_info.Clear();
+                try
+                {
+                    VisitedSerialize(obj, SR);
+                    Result = S_Data.ToArray();
+                }
+                catch (Exception ex)
+                {
+                    var Traced = Serialization.Traced;
+                    if (Traced != null)
+                        Traced = "On " + Traced;
+                    throw new Exception($"Serialize Of Type >> {obj.GetType().FullName} Is Failed " + Traced, ex);
+                }
+                finally
+                {
+                    Serialization.Traced = null;
+                    Serialization.S_Data.SetLength(0);
+                    Serialization.Visitor.Clear();
+                    Serialization.Visitor_info.Clear();
+                }
                 return Result;
             }
         }
@@ -522,10 +522,7 @@ namespace Monsajem_Incs.Serialization
         {
             lock (this)
             {
-#if TRACE_SR
-            try
-            {
-#endif
+                object Result = null;
                 if (Serialization.Visitor_info == null)
                 {
                     Serialization.Visitor = new SortedArray<ObjectContainer>(20);
@@ -533,24 +530,27 @@ namespace Monsajem_Incs.Serialization
                 }
                 Serialization.D_Data = Data;
                 Serialization.From = From;
-                object Result = null;
-                VisitedDeserialize((c) => Result = c, FindSerializer(Type));
-                AtLast?.Invoke();
-                Serialization.Visitor.Clear();
-                Serialization.Visitor_info.Clear();
-                Serialization.D_Data = null;
-                AtLast = null;
+                try
+                {
+                    VisitedDeserialize((c) => Result = c, FindSerializer(Type));
+                    AtLast?.Invoke();
+                }
+                catch (Exception ex)
+                {
+                    var Traced = Serialization.Traced;
+                    if (Traced != null)
+                        Traced = "On " + Traced;
+                    throw new Exception($"Deserialize From Point {From} Of Type >> {Type.FullName} Is Failed {Traced}\nDatas As B64:\n" + System.Convert.ToBase64String(Data), ex);
+                }
+                finally
+                {
+                    Serialization.Traced = null;
+                    Serialization.Visitor.Clear();
+                    Serialization.Visitor_info.Clear();
+                    Serialization.D_Data = null;
+                    AtLast = null;
+                }
                 return Result;
-#if TRACE_SR
-            }
-            catch (Exception ex)
-            {
-                var Traced = this.Traced;
-                this.Traced = null;
-                throw new Exception($"Deserialize From Point {From} Of Type >> {Type.FullName} Is Failed on {Traced}\nDatas As B64:\n" + System.Convert.ToBase64String(Data), ex);
-            }
-#endif
-
             }
         }
     }

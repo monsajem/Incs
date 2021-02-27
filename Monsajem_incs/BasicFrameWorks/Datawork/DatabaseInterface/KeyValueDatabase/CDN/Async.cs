@@ -75,7 +75,7 @@ namespace Monsajem_Incs.Database.Base
 
             var WebClient = new HttpClient();
             var ServerTable = (await WebClient.GetByteArrayAsync(
-                                RootCDN.ToString() + "/K")).Deserialize<Table<ValueType, KeyType>>();
+                                RootCDN.ToString() + "/K")).Deserialize<KeyValue.DirBased.Table<ValueType, KeyType>>();
             var ServerPartTable =
                 GetRelation((await WebClient.GetByteArrayAsync(
                     RelationCDN.ToString() + "/V/" + Convert.ToBase64String(RLNKey.Serialize()))).Deserialize<ValueType_RLN>());

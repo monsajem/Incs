@@ -245,7 +245,7 @@ namespace Monsajem_Incs.Array.Hyper
                     FromPos = From
                 };
                 NewArs[i] = NewAr;
-                From += ThisAr.To+1;
+                From += ThisAr.To;
             }
             ar = new DynamicSize.SortedArray<ArrayInstance>(NewArs);
         }
