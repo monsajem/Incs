@@ -41,7 +41,6 @@ namespace Monsajem_Incs.Array.Base
         public Type ElementType => typeof(ArrayType);
         
         public abstract ((int From, int To, System.Array Ar)[] Ar, int MaxLen) GetFromTo(int From, int To);
-        protected abstract void AddFromTo(((int From, int To, System.Array Ar)[] Ar, int MaxLen) Ar, int From);
         protected abstract void AddLength(int Count);
 
         public abstract ArrayType this[int Pos] { get; set; }
@@ -66,6 +65,19 @@ namespace Monsajem_Incs.Array.Base
 #if DEBUG
             Debug();
 #endif
+        }
+
+        protected virtual void AddFromTo(((int From, int To, System.Array Ar)[] Ar, int MaxLen) Ar, int From)
+        {
+            var SumLen = 0;
+            for (int i = 0; i < Ar.Ar.Length; i++)
+            {
+                var CurrentAr = Ar.Ar[i];
+                SumLen += CurrentAr.To - CurrentAr.From;
+            }
+            this.AddLength(SumLen);
+            shiftEnd(From, (From + SumLen - 1), SumLen);
+            SetFromTo(Ar, From);
         }
         protected void AddFromTo((int From, int To, ArrayType[] Ar) Ar, int MaxLen, int From)
         {
