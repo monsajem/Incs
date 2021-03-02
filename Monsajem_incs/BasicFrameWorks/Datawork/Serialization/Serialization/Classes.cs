@@ -417,6 +417,8 @@ namespace Monsajem_Incs.Serialization
                 });
         }
 
+#if DEBUG
+
         private void Tracer(string On)
         {
             Traced += "\n >> " + On;
@@ -428,6 +430,8 @@ namespace Monsajem_Incs.Serialization
 
         [ThreadStaticAttribute]
         private static string Traced;
+
+#endif
 
         private int[] SerializersHashCodes = new int[0];
         private int[] SerializersNameCodes = new int[0];
