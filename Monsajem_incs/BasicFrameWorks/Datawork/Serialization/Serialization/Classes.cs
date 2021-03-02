@@ -481,16 +481,18 @@ namespace Monsajem_Incs.Serialization
                     VisitedSerialize(obj, SR);
                     Result = S_Data.ToArray();
                 }
+#if DEBUG
                 catch (Exception ex)
                 {
                     var Traced = Serialization.Traced;
                     if (Traced != null)
                         Traced = "On " + Traced;
+                    Serialization.Traced = null;
                     throw new Exception($"Serialize Of Type >> {obj.GetType().FullName} Is Failed " + Traced, ex);
                 }
+#endif
                 finally
                 {
-                    Serialization.Traced = null;
                     Serialization.S_Data.SetLength(0);
                     Serialization.Visitor.Clear();
                     Serialization.Visitor_info.Clear();
@@ -535,16 +537,18 @@ namespace Monsajem_Incs.Serialization
                     VisitedDeserialize((c) => Result = c, FindSerializer(Type));
                     AtLast?.Invoke();
                 }
+#if DEBUG
                 catch (Exception ex)
                 {
                     var Traced = Serialization.Traced;
                     if (Traced != null)
                         Traced = "On " + Traced;
+                    Serialization.Traced = null;
                     throw new Exception($"Deserialize From Point {From} Of Type >> {Type.FullName} Is Failed {Traced}\nDatas As B64:\n" + System.Convert.ToBase64String(Data), ex);
                 }
+#endif
                 finally
                 {
-                    Serialization.Traced = null;
                     Serialization.Visitor.Clear();
                     Serialization.Visitor_info.Clear();
                     Serialization.D_Data = null;
