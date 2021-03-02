@@ -506,7 +506,6 @@ namespace Monsajem_Incs.Array.Base
             return Count;
         }
 
-
         public void shiftEnd(int Count) =>
             shiftEnd(0, Length - 1, Count);
         public void shiftBegin(int Count) =>
