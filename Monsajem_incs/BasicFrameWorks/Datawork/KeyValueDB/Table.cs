@@ -61,6 +61,8 @@ namespace Monsajem_Incs.Database.KeyValue.Base
             };
 
             Ar._SetItem = (Pos, Value) => Data.SetItem(this.KeysInfo.Keys[Pos],Value);
+            Ar._GetFromTo = (c1, c2) => default;
+            Ar._SetFromTo = (c1, c2) => { };
             Ar._DeleteByPosition = (c) =>
             {
                 Data.DeleteItem(this.KeysInfo.Keys[c]);

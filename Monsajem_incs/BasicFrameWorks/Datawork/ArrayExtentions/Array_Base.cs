@@ -23,15 +23,6 @@ namespace Monsajem_Incs.Array.Base
     public abstract partial class IArray<ArrayType> :
         IArray,IEnumerable<ArrayType>
     {
-#if DEBUG
-        public void Debug()
-        {
-            if (this.ToArray().Length != Length)
-                throw new Exception();
-            //if (this.AsEnumerable().ToArray().Length != Length)
-            //    throw new Exception();
-        }
-#endif
 
         void IArray.SetLen(int Len) => Length = Len;
         public int Length;
@@ -47,24 +38,12 @@ namespace Monsajem_Incs.Array.Base
 
         public virtual void Clear()
         {
-#if DEBUG
-            Debug();
-#endif
             DeleteFromTo(0, Length - 1);
-#if DEBUG
-            Debug();
-#endif
         }
 
         protected void SetFromTo((int From, int To, ArrayType[] Ar) Ar, int MaxLen, int From)
         {
-#if DEBUG
-            Debug();
-#endif
             SetFromTo((new (int, int, System.Array)[] { Ar }, MaxLen), From);
-#if DEBUG
-            Debug();
-#endif
         }
 
         protected virtual void AddFromTo(((int From, int To, System.Array Ar)[] Ar, int MaxLen) Ar, int From)
@@ -81,13 +60,7 @@ namespace Monsajem_Incs.Array.Base
         }
         protected void AddFromTo((int From, int To, ArrayType[] Ar) Ar, int MaxLen, int From)
         {
-#if DEBUG
-            Debug();
-#endif
             AddFromTo((new (int, int, System.Array)[] { Ar }, MaxLen), From);
-#if DEBUG
-            Debug();
-#endif
         }
 
         protected static void Copy(
@@ -208,33 +181,18 @@ namespace Monsajem_Incs.Array.Base
 
         public virtual void SetAllArrays(((int From, int To, System.Array Ar)[] Ar, int MaxLen) Ar)
         {
-#if DEBUG
-            Debug();
-#endif
             Clear();
             AddFromTo(Ar, 0);
-#if DEBUG
-            Debug();
-#endif
         }
 
         public virtual ((int From, int To, System.Array Ar)[] Ar, int MaxLen)
             GetAllArrays()
         {
-#if DEBUG
-            Debug();
-#endif
             var Result = GetFromTo(0,Length);
-#if DEBUG
-            Debug();
-#endif
             return Result;
         }
         public virtual void SetFromTo(((int From, int To, System.Array Ar)[] Ar, int MaxLen) Ar, int From)
         {
-#if DEBUG
-            Debug();
-#endif
             for (int i=0; i <Ar.Ar.Length;i++)
             {
                 var _ThisAr = Ar.Ar[i];
@@ -245,9 +203,6 @@ namespace Monsajem_Incs.Array.Base
                     this[From] = ThisAr[j];
                 }
             }
-#if DEBUG
-            Debug();
-#endif
         }
 
         public ArrayType[] ToArray()
@@ -264,9 +219,6 @@ namespace Monsajem_Incs.Array.Base
 
         public virtual void DeleteByPosition(int Position)
         {
-#if DEBUG
-            Debug();
-#endif
             if (Position == Length - 1)
             {
                 DeleteFrom(Position);
@@ -275,85 +227,43 @@ namespace Monsajem_Incs.Array.Base
             //System.Array.Copy(ar, 0, ar, 0, Position);
             CopyTo(Position + 1, this, Position, (Length - Position) - 1);
             DeleteFrom(Length - 1);
-#if DEBUG
-            Debug();
-#endif
         }
         public abstract void DeleteFrom(int from);
         public void DeleteFromTo(int from, int To)
         {
-#if DEBUG
-            Debug();
-#endif
             CopyTo(To + 1, this, from, Length - (To + 1));
             DeleteFrom(Length - (To - from + 1));
-#if DEBUG
-            Debug();
-#endif
         }
         public void DeleteTo(int To)
         {
-#if DEBUG
-            Debug();
-#endif
             CopyTo(To + 1, this, 0, Length - (To + 1));
             DeleteFrom(Length - (To + 1));
-#if DEBUG
-            Debug();
-#endif
         }
 
         public ArrayType Pop()
         {
-#if DEBUG
-            Debug();
-#endif
             var Item = this[Length - 1];
             DeleteFrom(Length - 1);
-#if DEBUG
-            Debug();
-#endif
             return Item;
         }
 
         public virtual void Insert(ArrayType Value)
         {
-#if DEBUG
-            Debug();
-#endif
             Insert(Value, Length);
-#if DEBUG
-            Debug();
-#endif
         }
 
         public void Insert(IArray<ArrayType> Values)
         {
-#if DEBUG
-            Debug();
-#endif
             var From = Length;
             AddFromTo(Values.GetFromTo(0, Values.Length), From);
-#if DEBUG
-            Debug();
-#endif
         }
         public void Insert(params ArrayType[] Values)
         {
-#if DEBUG
-            Debug();
-#endif
             var From = Length;
             AddFromTo((0, Values.Length, Values), Values.Length, From);
-#if DEBUG
-            Debug();
-#endif
         }
         public void Insert(IEnumerable<ArrayType> Values)
         {
-#if DEBUG
-            Debug();
-#endif
             var From = Length;
             var Count = Values.Count();
             AddLength(Count);
@@ -368,26 +278,14 @@ namespace Monsajem_Incs.Array.Base
                 i++;
             }
             Reader.Dispose();
-#if DEBUG
-            Debug();
-#endif
         }
         public void Insert(ArrayType[] Values, int From)
         {
-#if DEBUG
-            Debug();
-#endif
             var ArLen = Length;
             AddFromTo((0, Values.Length, Values), Values.Length, From);
-#if DEBUG
-            Debug();
-#endif
         }
         public void Insert(IEnumerable<ArrayType> Values, int From)
         {
-#if DEBUG
-            Debug();
-#endif
             var ArLen = Length;
             var Count = Values.Count();
             AddLength(Count);
@@ -403,15 +301,9 @@ namespace Monsajem_Incs.Array.Base
                 i++;
             }
             Reader.Dispose();
-#if DEBUG
-            Debug();
-#endif
         }
         public virtual void Insert(ArrayType Value, int Position)
         {
-#if DEBUG
-            Debug();
-#endif
             AddLength(1);
             if (Position == Length)
                 this[Position] = Value;
@@ -421,16 +313,10 @@ namespace Monsajem_Incs.Array.Base
                 //CopyTo(Position, this, Position + 1, Length - Position - 1);
                 this[Position] = Value;
             }
-#if DEBUG
-            Debug();
-#endif
         }
 
         public void DropFromInsertTo(int From, int To, ArrayType Value)
         {
-#if DEBUG
-            Debug();
-#endif
             if (From < To)
             {
                 CopyTo(From + 1, this, From, (To - From));
@@ -440,15 +326,9 @@ namespace Monsajem_Incs.Array.Base
                 CopyTo(To, this, To + 1, (From - To));
             }
             this[To] = Value;
-#if DEBUG
-            Debug();
-#endif
         }
         public void DropFromInsertTo(int From, int To)
         {
-#if DEBUG
-            Debug();
-#endif
             var Value = this[From];
             if (From < To)
             {
@@ -459,9 +339,6 @@ namespace Monsajem_Incs.Array.Base
                 CopyTo(To, this, To + 1, (From - To));
             }
             this[To] = Value;
-#if DEBUG
-            Debug();
-#endif
         }
 
         System.Array IArray.ToArray()
@@ -471,13 +348,7 @@ namespace Monsajem_Incs.Array.Base
 
         void IArray.Insert(System.Array Array)
         {
-#if DEBUG
-            Debug();
-#endif
             Insert((ArrayType[])Array);
-#if DEBUG
-            Debug();
-#endif
         }
 
 
@@ -651,39 +522,23 @@ namespace Monsajem_Incs.Array.Base
         public OwnerType PopFrom(int From)
         {
 #if DEBUG
-            Debug();
             if (From > this.Length)
                 throw new Exception("From Bigger Than Len");
 #endif
             var Result = this.From(From);
             DeleteFrom(From);
-#if DEBUG
-            Debug();
-#endif
             return Result;
         }
         public OwnerType PopTo(int to)
         {
-#if DEBUG
-            Debug();
-#endif
             var Result = this.To(to);
             DeleteTo(to);
-#if DEBUG
-            Debug();
-#endif
             return Result;
         }
         public OwnerType PopFromTo(int From, int To)
         {
-#if DEBUG
-            Debug();
-#endif
             var Result = this.From(From).To(To);
             DeleteFromTo(From, To);
-#if DEBUG
-            Debug();
-#endif
             return Result;
         }
 
