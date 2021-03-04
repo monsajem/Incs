@@ -59,16 +59,19 @@ namespace Monsajem_Incs.Database.Base
             return GetUpdate(RootCDN, RelationCDN, RLNTable, RLNKey, GetRelation, MakeingUpdate);
         }
 
-        public static async Task<bool> GetUpdate<ValueType_RLN, KeyType_RLN, ValueType, KeyType>(
+        private static async Task<bool> GetUpdate<ValueType_RLN, KeyType_RLN, ValueType, KeyType>(
             this Uri RootCDN,
             Uri RelationCDN,
             Table<ValueType_RLN, KeyType_RLN> RLNTable,
             KeyType_RLN RLNKey,
             Func<ValueType_RLN, PartOfTable<ValueType, KeyType>> GetRelation,
-            Action<ValueType> MakeingUpdate = null)
+            Action<ValueType> MakeingUpdate)
             where KeyType : IComparable<KeyType>
             where KeyType_RLN : IComparable<KeyType_RLN>
         {
+            if (GetRelation==null)
+                throw new Exception("Get Update in part of table need to known relation.");
+
             var Socket = new Net.Virtual.Socket();
             var Server = new Net.Virtual.AsyncOprations(Socket);
             var Client = new Net.Virtual.AsyncOprations(Socket.OtherSide);
@@ -80,6 +83,9 @@ namespace Monsajem_Incs.Database.Base
                 GetRelation((await WebClient.GetByteArrayAsync(
                     RelationCDN.ToString() + "/V/" + Convert.ToBase64String(RLNKey.Serialize()))).Deserialize<ValueType_RLN>());
 
+            if (ServerPartTable == null)
+                return false;
+
             Server.I_SendUpdate(ServerPartTable, ServerTable.UpdateAble.UpdateCodes,
                 async (key) =>
                 {
@@ -87,7 +93,16 @@ namespace Monsajem_Incs.Database.Base
                         Convert.ToBase64String(key.Serialize()))).Deserialize<ValueType>();
                 }, true);
 
-            var ClientTable = GetRelation(RLNTable[RLNKey]);
+            ValueType_RLN RLNValue;
+            try
+            {
+                RLNValue = RLNTable[RLNKey].Value;
+            }
+            catch(Exception ex)
+            {
+                throw new Exception("Get Value of the key have exception when update.",ex);
+            }
+            var ClientTable = GetRelation(RLNValue);
             ServerTable.ClearRelations = ClientTable.Parent.ClearRelations;
             ServerPartTable.Parent = ServerTable;
 

@@ -844,7 +844,8 @@ namespace Monsajem_Incs.Serialization
             var Filds = new DynamicAssembly.TypeFields(Type).Fields;
             Filds = Filds.Where((c) => FieldCondition(c.Info)).ToArray();
 
-            Filds = Filds.OrderBy((c) => c.Info.Name + c.Info.DeclaringType.FullName).ToArray();
+            Filds = Filds.OrderBy((c) => c.Info.Name + c.Info.DeclaringType.FullName,
+                                  StringComparer.Ordinal).ToArray();
 
             var FildSerializer = new (SerializeInfo Sr,
                                       DynamicAssembly.FieldControler Controller)[Filds.Length];

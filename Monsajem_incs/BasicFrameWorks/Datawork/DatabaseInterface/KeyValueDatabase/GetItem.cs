@@ -5,34 +5,7 @@ using System.IO;
 using System.Collections;
 using Monsajem_Incs.Array.Hyper;
 using static Monsajem_Incs.Database.Base.Runer;
-
-namespace Monsajem_Incs.Database.Base
-{
-    public static partial class Extentions
-    {
-        public static Table<ValueType, KeyType>.ValueInfo GetItem<ValueType, KeyType>
-                (this Table<ValueType, KeyType> Table,
-                Action<ValueType> ValueAction)
-                where ValueType : new()
-                where KeyType : IComparable<KeyType>
-        {
-            var Value = new ValueType();
-            ValueAction(Value);
-            return Table.GetItem(Value);
-        }
-
-        public static ValueType GetOrInserItem<ValueType, KeyType>
-            (this Table<ValueType, KeyType> Table,
-            Action<ValueType> ValueAction)
-            where ValueType : new()
-            where KeyType : IComparable<KeyType>
-        {
-            var Value = new ValueType();
-            ValueAction(Value);
-            return Table.GetOrInserItem(Value);
-        }
-    }
-}
+using static System.Runtime.Serialization.FormatterServices;
 
 namespace Monsajem_Incs.Database.Base
 {
@@ -209,6 +182,20 @@ namespace Monsajem_Incs.Database.Base
                 return Result;
             }
 
+        }
+
+        public ValueInfo GetItem(Action<ValueType> ValueAction)
+        {
+            var Value = (ValueType)GetUninitializedObject(typeof(ValueType));
+            ValueAction(Value);
+            return GetItem(Value);
+        }
+
+        public ValueType GetOrInserItem(Action<ValueType> ValueAction)
+        {
+            var Value = (ValueType)GetUninitializedObject(typeof(ValueType));
+            ValueAction(Value);
+            return GetOrInserItem(Value);
         }
     }
 }
