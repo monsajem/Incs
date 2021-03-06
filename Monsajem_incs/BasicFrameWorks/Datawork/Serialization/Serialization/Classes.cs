@@ -112,12 +112,11 @@ namespace Monsajem_Incs.Serialization
         private static byte[] Byte_1 = new byte[] { 1 };
         private static byte[] Byte_PosN_1 = BitConverter.GetBytes(-1);
         private static byte[] Byte_PosN_2 = BitConverter.GetBytes(-2);
-        public static FieldInfo Deletage_Target =
-            typeof(Delegate).GetField("_target",
-                BindingFlags.Instance |
-                BindingFlags.NonPublic |
-                BindingFlags.Public |
-                BindingFlags.FlattenHierarchy);
+        internal static FieldInfo Deletage_Target = ((Func<FieldInfo>)(() =>
+        {
+            return DynamicAssembly.FieldControler.GetFields(typeof(Delegate)).
+                        Where((c) => c.Name.ToLower().Contains("target")).FirstOrDefault();
+        }))();
 
         public Serialization(Func<FieldInfo, bool> FieldCondition) :
             this()
@@ -459,7 +458,6 @@ namespace Monsajem_Incs.Serialization
 #if DEBUG
             var Result = _Serialize(obj);
             var DS = Deserialize<t>(Result);
-            DS.GetType();
             return Result;
 #else
             return _Serialize(obj);
@@ -482,6 +480,18 @@ namespace Monsajem_Incs.Serialization
                 var SR = FindSerializer(Type);
                 try
                 {
+#if DEBUG
+                    if (Deletage_Target == null)
+                    {
+                        var Fields = DynamicAssembly.FieldControler.GetFields(typeof(Delegate));
+                        var Fields_str = "";
+                        for (int i = 0; i < Fields.Length; i++)
+                        {
+                            Fields_str += "\n" + Fields[i].Name;
+                        }
+                        throw new Exception("Cant Access to Deletage Target field at serializer, Fields >>" + Fields_str);
+                    }
+#endif
                     VisitedSerialize(obj, SR);
                     Result = S_Data.ToArray();
                 }
@@ -538,6 +548,18 @@ namespace Monsajem_Incs.Serialization
                 Serialization.From = From;
                 try
                 {
+#if DEBUG
+                    if (Deletage_Target == null)
+                    {
+                        var Fields = DynamicAssembly.FieldControler.GetFields(typeof(Delegate));
+                        var Fields_str = "";
+                        for (int i = 0; i < Fields.Length; i++)
+                        {
+                            Fields_str += "\n" + Fields[i].Name;
+                        }
+                        throw new Exception("Cant Access to Deletage Target field at serializer, Fields >>" + Fields_str);
+                    }
+#endif
                     VisitedDeserialize((c) => Result = c, FindSerializer(Type));
                     AtLast?.Invoke();
                 }
@@ -548,7 +570,7 @@ namespace Monsajem_Incs.Serialization
                     if (Traced != null)
                         Traced = "On " + Traced;
                     Serialization.Traced = null;
-                    throw new Exception($"Deserialize From Point {From} Of Type >> {Type.FullName} Is Failed {Traced}\nDatas As B64:\n" + System.Convert.ToBase64String(Data), ex);
+                    throw new Exception($"Deserialize From Point {Serialization.From} Of Type >> {Type.FullName} Is Failed {Traced}\nDatas As B64:\n" + System.Convert.ToBase64String(Data), ex);
                 }
 #endif
                 finally

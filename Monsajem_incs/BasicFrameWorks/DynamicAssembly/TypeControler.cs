@@ -13,12 +13,17 @@ namespace Monsajem_Incs.DynamicAssembly
         public static Func<T> CreateInstance()
         {
             var t = typeof(T);
+            var Rt = Type.GetType("System.RuntimeType");
+            var nativeGetUninitializedObject = typeof(System.Runtime.Serialization.FormatterServices).
+                GetMethod("nativeGetUninitializedObject", BindingFlags.Static | BindingFlags.NonPublic);
             return DynamicMethodBuilder.Delegate<Func<T>>("CreateInstance_",
             (il) =>
             {
-                il.Emit(OpCodes.Newobj, t.GetConstructor(Type.EmptyTypes));
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Call, nativeGetUninitializedObject);
+                il.Emit(OpCodes.Castclass, t);
                 il.Emit(OpCodes.Ret);
-            });
+            }, Rt, t);
         }
     }
 
@@ -112,7 +117,7 @@ namespace Monsajem_Incs.DynamicAssembly
         public static Action<object, object, int[]> SetArray(Type Type)
         {
             var Rank = Type.GetArrayRank();
-            return DynamicMethodBuilder.Delegate<Action<object, object, int[]>>("SetValue_", 
+            return DynamicMethodBuilder.Delegate<Action<object, object, int[]>>("SetValue_",
             (il) =>
             {
                 il.Emit(OpCodes.Ldarg_0);
@@ -213,7 +218,7 @@ namespace Monsajem_Incs.DynamicAssembly
         //            il.Emit(OpCodes.Unbox_Any, Result);
         //        il.Emit(OpCodes.Ret);
         //    });
-            
+
         //    if (HaveResult)
         //        return dynMethod.CreateDelegate(DelegateType, Func);
         //    else
@@ -258,7 +263,7 @@ namespace Monsajem_Incs.DynamicAssembly
                     var x = i - 1;
                     il.Emit(OpCodes.Ldc_I4_S, x);
                     il.Emit(OpCodes.Ldarg_S, i);
-                    il.Emit(OpCodes.Box, Params[i-1]);
+                    il.Emit(OpCodes.Box, Params[i - 1]);
                     il.Emit(OpCodes.Stelem_Ref);
                 }
                 il.Emit(OpCodes.Stloc_0);
@@ -267,7 +272,7 @@ namespace Monsajem_Incs.DynamicAssembly
                 il.Emit(OpCodes.Ldloc_0);
 
                 if (HaveResult)
-                    il.Emit(OpCodes.Call,typeof(Func<object[], object>).GetMethod("Invoke"));
+                    il.Emit(OpCodes.Call, typeof(Func<object[], object>).GetMethod("Invoke"));
                 else
                     il.Emit(OpCodes.Call, typeof(Action<object[]>).GetMethod("Invoke"));
 
@@ -283,7 +288,7 @@ namespace Monsajem_Incs.DynamicAssembly
             else
                 ResultObj.GetType().GetField("DG").SetValue(ResultObj, Action);
 
-            return ResultObj.GetType().GetMethod("Warp_Method").CreateDelegate(DelegateType,ResultObj);
+            return ResultObj.GetType().GetMethod("Warp_Method").CreateDelegate(DelegateType, ResultObj);
         }
 
         public static Delegate CreateDelagate(
@@ -332,13 +337,16 @@ namespace Monsajem_Incs.DynamicAssembly
 
         public static Func<object> CreateInstance(Type Type)
         {
-
-            var methodName = "CreateInstance_";
-            var dynMethod = new DynamicMethod(methodName, Type, null, true);
-            ILGenerator il = dynMethod.GetILGenerator();
-            il.Emit(OpCodes.Newobj, Type.GetConstructor(Type.EmptyTypes));
-            il.Emit(OpCodes.Ret);
-            return (Func<object>)dynMethod.CreateDelegate(typeof(Func<object>));
+            var Rt = Type.GetType("System.RuntimeType");
+            var nativeGetUninitializedObject = typeof(System.Runtime.Serialization.FormatterServices).
+                GetMethod("nativeGetUninitializedObject", BindingFlags.Static | BindingFlags.NonPublic);
+            return DynamicMethodBuilder.Delegate<Func<object>>("CreateInstance_",
+            (il) =>
+            {
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Call, nativeGetUninitializedObject);
+                il.Emit(OpCodes.Ret);
+            }, Rt, Type);
         }
 
         public static Func<object> CreateInstance_Struct(Type Type)

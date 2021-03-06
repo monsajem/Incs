@@ -34,6 +34,9 @@ namespace Monsajem_Incs.Database.Base
             var ServerTable = (await WebClient.GetByteArrayAsync(CDN.ToString() + "/K")).Deserialize<KeyValue.Base.Table<ValueType, KeyType>>();
             ServerTable.ClearRelations = Table.ClearRelations;
 
+            if (ServerTable.UpdateAble == null)
+                throw new Exception("UpdateAble at Server Not Found!");
+
             Server.I_SendUpdate(ServerTable, ServerTable.UpdateAble.UpdateCodes,
                 async (key) =>
                 {

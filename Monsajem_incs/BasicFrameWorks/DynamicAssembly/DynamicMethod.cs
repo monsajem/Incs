@@ -31,6 +31,15 @@ namespace Monsajem_Incs.DynamicAssembly
                 LikeMethod.ReturnType,
                 ILGenerator);
 
+        public static DynamicMethod Method<TargetType>(
+            string Name,
+            MethodInfo LikeMethod,
+            Action<ILGenerator> ILGenerator) =>
+            Method(Name,
+                LikeMethod.GetParameters().Select((c) => c.ParameterType).ToArray(),
+                LikeMethod.ReturnType,
+                ILGenerator);
+
         public static DynamicMethod Method<t>(
             string Name,
             Action<ILGenerator> ILGenerator)
@@ -48,5 +57,32 @@ namespace Monsajem_Incs.DynamicAssembly
             Action<ILGenerator> ILGenerator)
             where t : MulticastDelegate =>
                (t)Method<t>(Name,ILGenerator).CreateDelegate(typeof(t));
+
+        public static Delegate Delegate(
+            string Name,
+            Type DelegateType,
+            Action<ILGenerator> ILGenerator,
+            object Target) =>
+                Method(Name, DelegateType.GetMethod("Invoke"), ILGenerator).CreateDelegate(DelegateType,Target);
+
+        public static t Delegate<t>(
+            string Name,
+            t Sample,
+            Action<ILGenerator> ILGenerator,
+            object Target=null)
+            where t : MulticastDelegate =>
+              (t)Method(Name,Sample.Method, ILGenerator).CreateDelegate(typeof(t), Target);
+
+        public static Type Delegate<Type>(
+            string Name,
+            Action<ILGenerator> ILGenerator,
+            System.Type TargetType,
+            object Target)
+            where Type : MulticastDelegate =>
+                (Type)Method(
+                        Name, 
+                        new System.Type[] {TargetType}.Concat(
+                            typeof(Type).GetMethod("Invoke").GetParameters().Select((c) => c.ParameterType)).ToArray(),
+                        typeof(Type).GetMethod("Invoke").ReturnType,ILGenerator).CreateDelegate(typeof(Type), Target);
     }
 }
