@@ -89,6 +89,8 @@ namespace Monsajem_Incs.Database.Base
 
             var LastUpdateCode = await Client.GetData<ulong>();//1
             await Client.SendData(Table.UpdateAble.UpdateCode);//2
+            if (Table.UpdateAble.UpdateCode < LastUpdateCode)
+                LastUpdateCode = 0;
             if (Table.UpdateAble.UpdateCode != LastUpdateCode)
             {
                 IEnumerator<Task<ValueType>> IE_Values;
@@ -257,6 +259,18 @@ namespace Monsajem_Incs.Database.Base
 
             await Client.SendData(Table.UpdateAble.UpdateCode);//1
             var LastUpdateCode = await Client.GetData<ulong>();//2
+            if (Table.UpdateAble.UpdateCode > LastUpdateCode)
+            {
+                Table.UpdateAble.UpdateCode = 0;
+                Table.UpdateAble.UpdateCodes = new UpdateAble<KeyType>[0];
+                Table.UpdateAble.UpdateKeys = new UpdateAble<KeyType>[0];
+                if (IsPartOfTable)
+                {
+                    ParentTable.UpdateAble.UpdateCode = 0;
+                    ParentTable.UpdateAble.UpdateCodes = new UpdateAble<KeyType>[0];
+                    ParentTable.UpdateAble.UpdateKeys = new UpdateAble<KeyType>[0];
+                }
+            }
             if (Table.UpdateAble.UpdateCode != LastUpdateCode)
             {
                 await DeleteFrom(Table, Delete, await Client.GetData<ulong>());//3
