@@ -236,10 +236,15 @@ namespace Monsajem_Incs.Database.Base
             Table<DataType, KeyType> ParentTable = Table;
             PartOfTable<DataType, KeyType> PartTable = null;
             Func<KeyType, Task> Delete;
+            if (Table._UpdateAble == null)
+                Table._UpdateAble = new UpdateAbles<KeyType>(0);
+
             if (IsPartOfTable)
             {
                 PartTable = (PartOfTable<DataType, KeyType>)Table;
                 ParentTable = PartTable.Parent;
+                if (ParentTable._UpdateAble == null)
+                    ParentTable._UpdateAble = new UpdateAbles<KeyType>(0);
                 Delete = async (key) =>
                 {
                     await Client.SendData(-2);
@@ -254,8 +259,6 @@ namespace Monsajem_Incs.Database.Base
                 Delete = async (key) => Table.Delete(key);
 
             var Result = false;
-            if (Table._UpdateAble == null)
-                Table._UpdateAble = new UpdateAbles<KeyType>(0);
 
             await Client.SendData(Table.UpdateAble.UpdateCode);//1
             var LastUpdateCode = await Client.GetData<ulong>();//2
