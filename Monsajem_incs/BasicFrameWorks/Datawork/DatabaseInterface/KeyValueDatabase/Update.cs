@@ -78,6 +78,14 @@ namespace Monsajem_Incs.Database.Base
         {
             I_Update(KeysInfo.Keys[Position], (c) => NewValue);
         }
+        public void Update(int Position, Func<ValueType, ValueType> NewValueCreator)
+        {
+            I_Update(KeysInfo.Keys[Position], NewValueCreator);
+        }
+        public void Update(int Position, Action<ValueType> NewValueCreator)
+        {
+            I_Update(KeysInfo.Keys[Position],(c)=> { NewValueCreator(c); return c; });
+        }
 
         public void Update(ValueType OldValue)
         {
