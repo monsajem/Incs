@@ -30,16 +30,71 @@ namespace Monsajem_Incs.DynamicAssembly
     public class TypeController
     {
 
-        public static FieldInfo[] GetAllFields(Type typeToReflect, BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy, Func<FieldInfo, bool> filter = null)
+        public static FieldInfo[] GetAllFields(
+            Type typeToReflect, 
+            BindingFlags? bindingFlags = null, 
+            Func<FieldInfo, bool> filter = null)
         {
-            var fiels = typeToReflect.GetFields(bindingFlags);
+            return GetAll(
+                    typeToReflect,
+                    (c) => c.Type.GetFields(c.BindingFlags),
+                    bindingFlags,
+                    filter);
+        }
+
+        public static MethodInfo[] GetAllMethods(
+            Type typeToReflect,
+            BindingFlags? bindingFlags = null,
+            Func<MethodInfo, bool> filter = null)
+        {
+            return GetAll(
+                    typeToReflect,
+                    (c) => c.Type.GetMethods(c.BindingFlags),
+                    bindingFlags,
+                    filter);
+        }
+
+        public static MemberInfo[] GetAllMembers(
+            Type typeToReflect,
+            BindingFlags? bindingFlags = null,
+            Func<MemberInfo, bool> filter = null)
+        {
+            return GetAll(
+                    typeToReflect,
+                    (c) => c.Type.GetMembers(c.BindingFlags),
+                    bindingFlags,
+                    filter);
+        }
+
+        public static T[] GetAll<T>(
+            Type typeToReflect,
+            Func<(Type Type, BindingFlags BindingFlags), T[]> GetMembers,
+            BindingFlags? bindingFlags,
+            Func<T, bool> filter = null)
+            where T:MemberInfo
+        {
+#if DEBUG
+            if (typeToReflect == null)
+                throw new NullReferenceException("typeToReflect is null!");
+#endif
+            if (bindingFlags==null)
+                bindingFlags = BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy;
+            var Memebrs = GetMembers((typeToReflect,bindingFlags.Value));
             if (filter != null)
-                fiels = fiels.Where((c) => filter(c)).ToArray();
+                Memebrs = Memebrs.Where(filter).ToArray();
             if (typeToReflect.BaseType != null)
             {
-                Insert(ref fiels, GetAllFields(typeToReflect.BaseType, BindingFlags.Instance | BindingFlags.NonPublic, info => info.IsPrivate));
+                var OldFilter = filter;
+                if (filter == null)
+                    filter = info => Memebrs.All((c) => c.MetadataToken!= info.MetadataToken);
+                else
+                    filter = info => OldFilter(info) && Memebrs.All((c) => c.MetadataToken != info.MetadataToken);
+                Insert(ref Memebrs, 
+                       GetAll(typeToReflect.BaseType,GetMembers,
+                              bindingFlags, 
+                              filter));
             }
-            return fiels;
+            return Memebrs;
         }
 
         public static Func<object, object> GetValue(Type Type, string FieldName)
@@ -425,7 +480,7 @@ namespace Monsajem_Incs.DynamicAssembly
         public TypeFields(Type Type)
         {
             this.Type = Type;
-            var Fields = TypeController.GetAllFields(Type);
+            var Fields = TypeController.GetAllFields(Type,filter:(c)=>c.IsStatic==false);
             this.Fields = new FieldControler[Fields.Length];
             for (int i = 0; i < Fields.Length; i++)
                 this.Fields[i] = new FieldControler(Fields[i]);
