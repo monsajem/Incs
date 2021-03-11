@@ -82,7 +82,6 @@ namespace Monsajem_Incs.Serialization
             return HoleSerializere.Deserialize(Data, Type);
         }
     }
-
     public partial class Serialization
     {
         private class SerializeInfo
@@ -110,8 +109,8 @@ namespace Monsajem_Incs.Serialization
         private static Type ISerializableType = typeof(ISerializable<object>).GetGenericTypeDefinition();
         private static byte[] Byte_0 = new byte[] { 0 };
         private static byte[] Byte_1 = new byte[] { 1 };
-        private static byte[] Byte_PosN_1 = BitConverter.GetBytes(-1);
-        private static byte[] Byte_PosN_2 = BitConverter.GetBytes(-2);
+        private static byte[] Byte_Int_N_1 = BitConverter.GetBytes(-1);
+        private static byte[] Byte_Int_N_2 = BitConverter.GetBytes(-2);
         internal static FieldInfo Deletage_Target = ((Func<FieldInfo>)(() =>
         {
             return DynamicAssembly.FieldControler.GetFields(typeof(Delegate)).
@@ -199,7 +198,7 @@ namespace Monsajem_Incs.Serialization
             InsertSerializer<byte>(
             (object Obj) =>
             {
-                S_Data.Write(new byte[] { (byte)Obj }, 0, 1);
+                S_Data.WriteByte((byte)Obj);
             },
             () =>
             {
@@ -210,7 +209,7 @@ namespace Monsajem_Incs.Serialization
             InsertSerializer<sbyte>(
             (object Obj) =>
             {
-                S_Data.Write(new byte[] { (byte)((sbyte)Obj) }, 0, 1);
+                S_Data.WriteByte((byte)((sbyte)Obj));
             },
             () =>
             {

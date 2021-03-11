@@ -496,12 +496,12 @@ namespace Monsajem_Incs.Serialization
         {
             if (obj == null)
             {
-                S_Data.Write(Byte_PosN_2, 0, 4);
+                S_Data.Write(Byte_Int_N_2, 0, 4);
                 return;
             }
             if (serializer.CanStoreInVisit == false)
             {
-                S_Data.Write(Byte_PosN_1, 0, 4);
+                S_Data.Write(Byte_Int_N_1, 0, 4);
                 serializer.Serializer(obj);
                 return;
             }
@@ -526,7 +526,7 @@ namespace Monsajem_Incs.Serialization
             VisitedObj.obj = obj;
 #endif
             VisitedObj.FromPos = (int)S_Data.Position;
-            S_Data.Write(Byte_PosN_1, 0, 4);
+            S_Data.Write(Byte_Int_N_1, 0, 4);
             serializer.Serializer(obj);
         }
         private void VisitedDeserialize(
@@ -586,7 +586,7 @@ namespace Monsajem_Incs.Serialization
             VisitedObj.FromPos = (int)S_Data.Position;
             var Data = GetData();
             VisitedObj.obj = Data.Item2;
-            S_Data.Write(Byte_PosN_1, 0, 4);
+            S_Data.Write(Byte_Int_N_1, 0, 4);
             S_Data.Write(Data.Item1, 0, Data.Item1.Length);
             return VisitedObj.obj;
         }
