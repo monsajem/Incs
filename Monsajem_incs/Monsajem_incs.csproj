@@ -86,9 +86,9 @@
     <Compile Include="BasicFrameWorks\Datawork\KeyValueDB\DirBased.cs" />
     <Compile Include="BasicFrameWorks\Datawork\KeyValueDB\Table.cs" />
     <Compile Include="BasicFrameWorks\Datawork\KeyValueDB\WebStorageBased.cs" />
-    <Compile Include="BasicFrameWorks\Datawork\Serialization\DeepCopy.cs" />
     <Compile Include="BasicFrameWorks\Datawork\Serialization\Serialization\Classes.cs" />
     <Compile Include="BasicFrameWorks\Datawork\Serialization\Serialization\Serialization.cs" />
+    <Compile Include="BasicFrameWorks\Datawork\Serialization\DeepCopy.cs" />
     <Compile Include="BasicFrameWorks\Datawork\Serialization\WrapObjects.cs" />
     <Compile Include="BasicFrameWorks\Datawork\Serialization\Shared.cs" />
     <Compile Include="BasicFrameWorks\Datawork\StreamColection\StreamCollection\Base.cs" />
