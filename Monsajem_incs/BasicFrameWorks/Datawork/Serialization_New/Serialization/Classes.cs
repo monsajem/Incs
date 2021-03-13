@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Monsajem_Incs.Array.DynamicSize;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,10 +7,8 @@ using System.Reflection;
 using static Monsajem_Incs.ArrayExtentions.ArrayExtentions;
 using static System.Runtime.Serialization.FormatterServices;
 using static System.Text.Encoding;
-using Monsajem_Incs.Array.DynamicSize;
-using Monsajem_Incs.DynamicAssembly;
 
-namespace Monsajem_Incs.Serialization.New2
+namespace Monsajem_Incs.Serialization.New_NotForUse
 {
 
     public interface IWhenCanSerialize
@@ -77,6 +76,11 @@ namespace Monsajem_Incs.Serialization.New2
 
             public abstract void Make();
 
+            [ThreadStatic]
+            public static Action AtLast;
+            public abstract void VisitedSerialize(object obj);
+            public abstract void VisitedDeserialize(Action<object> Set);
+
 
             private static int[] SerializersHashCodes = new int[0];
             private static int[] SerializersNameCodes = new int[0];
@@ -96,7 +100,7 @@ namespace Monsajem_Incs.Serialization.New2
                         BaseType.MakeGenericType(Type).GetMethod("GetSerialize").
                             Invoke(null, null);
                     ItemsSerializer = System.Array.BinarySearch(SerializersHashCodes, HashCode);
-                    Insert(ref ExactSerializersByHashCode, Result,ItemsSerializer);
+                    Insert(ref ExactSerializersByHashCode, Result, ItemsSerializer);
                 }
                 Result = ExactSerializersByHashCode[ItemsSerializer];
 #if DEBUG
@@ -118,7 +122,7 @@ namespace Monsajem_Incs.Serialization.New2
                         BaseType.MakeGenericType(TypeName.GetTypeByName()).
                             GetMethod("GetSerialize").Invoke(null, null);
                     ItemsSerializer = System.Array.BinarySearch(SerializersNameCodes, HashCode);
-                    Insert(ref ExactSerializersByNameCode,Result, 
+                    Insert(ref ExactSerializersByNameCode, Result,
                         ItemsSerializer);
                 }
                 Result = ExactSerializersByNameCode[ItemsSerializer];
@@ -134,7 +138,6 @@ namespace Monsajem_Incs.Serialization.New2
         {
             public static Func<object> _Deserializer;
             public static Action<object> _Serializer;
-
             public static Func<t> ExactDeserializer;
             public static Action<t> ExactSerializer;
 
@@ -161,7 +164,7 @@ namespace Monsajem_Incs.Serialization.New2
                 if (Sr.IsMade == false)
                 {
                     Sr.IsMade = true;
-                    if(_Serializer==null)
+                    if (_Serializer == null)
                         Sr.Make();
                     else
                     {
@@ -198,15 +201,15 @@ namespace Monsajem_Incs.Serialization.New2
                     (obj) =>
                     {
                         var DType = obj.GetType();
-                        var Serializer = Serializere.FindSerializer(DType);
-                        Serializere.VisitedInfoSerialize(DType.GetHashCode(), () => (Serializer.NameAsByte, null));
+                        var Serializer = GetSerialize(DType);
+                        Serializere.VisitedInfoSerialize<object>(DType.GetHashCode(), () => (Serializer.NameAsByte, null));
                         Serializer.Serializer(obj);
                     },
                     () =>
                     {
                         var Info = Serializere.VisitedInfoDeserialize(() => Serializere.Read());
 
-                        return (t) Serializere.FindSerializer(Info).Deserializer();
+                        return (t)GetSerialize(Info).Deserializer();
                     });
                 }
                 else if (Type.GetInterfaces().Where((c) => c == typeof(Array.Base.IArray)).FirstOrDefault() != null)
@@ -223,7 +226,7 @@ namespace Monsajem_Incs.Serialization.New2
                     InsertSerializer(() =>
                     {
                         var Sr = SerializeInfo<object>.GetSerialize();
-                        return ((c)=>Sr.Serializer(c),()=>(t) Sr.Deserializer());
+                        return ((c) => Sr.Serializer(c), () => (t)Sr.Deserializer());
                     });
                 }
                 else if (Type.IsArray)
@@ -251,7 +254,7 @@ namespace Monsajem_Incs.Serialization.New2
                     InsertSerializer(() =>
                     {
                         var Sr = SerializeInfo<object>.GetSerialize();
-                        return ((c)=> Sr.Serializer(c),()=>(t) Sr.Deserializer());
+                        return ((c) => Sr.Serializer(c), () => (t)Sr.Deserializer());
                     });
                 }
                 else if (Type == typeof(System.Array))
@@ -303,16 +306,16 @@ namespace Monsajem_Incs.Serialization.New2
                 }
             }
 
-            private (Action<t> Serializer, Func<t> Deserializer) 
+            private (Action<t> Serializer, Func<t> Deserializer)
                 MakeSerializer_Serializable()
             {
                 var Type = typeof(t);
                 var InterfaceType = Type.GetInterfaces().Where(
-                    (c) =>c.GetGenericTypeDefinition() == ISerializableType).
+                    (c) => c.GetGenericTypeDefinition() == ISerializableType).
                     FirstOrDefault();
 
                 var InnerType = InterfaceType.GenericTypeArguments[0];
-                var innerSerializer = Serializere.FindSerializer(InnerType);
+                var innerSerializer = GetSerialize(InnerType);
                 var Getter = InterfaceType.GetMethod("GetData");
                 var Setter = InterfaceType.GetMethod("SetData");
                 Action<t> Serializer = (t obj) =>
@@ -324,7 +327,7 @@ namespace Monsajem_Incs.Serialization.New2
                     }
 
                     S_Data.Write(Byte_1, 0, 1);
-                    Serializere.VisitedSerialize(Getter.Invoke(obj, null), innerSerializer);
+                    innerSerializer.VisitedSerialize(Getter.Invoke(obj, null));
                 };
 
                 Func<t> Deserializer = () =>
@@ -337,15 +340,15 @@ namespace Monsajem_Incs.Serialization.New2
                     }
                     From += 1;
 
-                    var Result =(t) GetUninitializedObject(Type);
-                    Serializere.VisitedDeserialize((c) => Setter.Invoke(Result, new object[] { c }), innerSerializer);
+                    var Result = (t)GetUninitializedObject(Type);
+                    innerSerializer.VisitedDeserialize((c) => Setter.Invoke(Result, new object[] { c }));
                     return Result;
                 };
 
                 return (Serializer, Deserializer);
             }
 
-            private (Func<System.Array, int[]> Write, Func<(int[] Ends, System.Array ar)> Read) 
+            private (Func<System.Array, int[]> Write, Func<(int[] Ends, System.Array ar)> Read)
                 ArrayGetCreator()
             {
                 var Type = typeof(t);
@@ -406,11 +409,11 @@ namespace Monsajem_Incs.Serialization.New2
                 return (Write, Read);
             }
 
-            private (Action<t> Serializer, Func<t> Deserializer) 
+            private (Action<t> Serializer, Func<t> Deserializer)
                 MakeSerializer_Array_Class()
             {
                 var Type = typeof(t);
-                 var SR = ArrayMakeSerializer_Object();
+                var SR = ArrayMakeSerializer_Object();
                 var Creator = ArrayGetCreator();
                 Action<t> Serializer = (obj) =>
                 {
@@ -434,7 +437,7 @@ namespace Monsajem_Incs.Serialization.New2
                 var Setter = DynamicAssembly.TypeController.SetArray(Type);
                 var Getter = DynamicAssembly.TypeController.GetArray(Type);
                 var ElementType = Type.GetElementType();
-                var ItemsSerializer = Serializere.FindSerializer(Type.GetElementType());
+                var ItemsSerializer = GetSerialize(Type.GetElementType());
 
                 Action<(System.Array ar, int[] Ends)> Serializer = (obj) =>
                 {
@@ -446,7 +449,7 @@ namespace Monsajem_Incs.Serialization.New2
                     {
                         for (Currents[0] = 0; Currents[0] < Ends[0]; Currents[0]++)
                         {
-                            Serializere.VisitedSerialize(Getter(ar, Currents), ItemsSerializer);
+                            ItemsSerializer.VisitedSerialize(Getter(ar, Currents));
                         }
                         for (int i = 1; i < Rank; i++)
                         {
@@ -472,7 +475,7 @@ namespace Monsajem_Incs.Serialization.New2
                             var StandAloneCurrent = new int[Rank];
                             for (int i = 0; i < Rank; i++)
                                 StandAloneCurrent[i] = Currents[i];
-                            Serializere.VisitedDeserialize((c) => Setter(ar, c, StandAloneCurrent), ItemsSerializer);
+                            ItemsSerializer.VisitedDeserialize((c) => Setter(ar, c, StandAloneCurrent));
                         }
                         for (int i = 1; i < Rank; i++)
                         {
@@ -533,7 +536,7 @@ namespace Monsajem_Incs.Serialization.New2
                 };
                 return (Serializer, Deserializer);
             }
-            private (Action<t> Serializer, Func<t> Deserializer) 
+            private (Action<t> Serializer, Func<t> Deserializer)
                 MakeSerializer_Array_Struct(int size)
             {
                 var Type = typeof(t);
@@ -559,7 +562,7 @@ namespace Monsajem_Incs.Serialization.New2
             MakeSerializer_Monsajem_Array()
             {
                 var Type = typeof(t);
-                var ItemsSerializer = Serializere.FindSerializer(System.Array.CreateInstance(
+                var ItemsSerializer = GetSerialize(System.Array.CreateInstance(
                     ((Array.Base.IArray)GetUninitializedObject(Type)).ElementType, 0).GetType());
                 var ObjSerializer = SerializeInfo<object>.GetSerialize();
 
@@ -604,7 +607,7 @@ namespace Monsajem_Incs.Serialization.New2
                 return (Serializer, Deserializer);
             }
 
-            private (Action<t> Serializer, Func<t> Deserializer) 
+            private (Action<t> Serializer, Func<t> Deserializer)
                 MakeSerializer_Delegate()
             {
                 var Type = typeof(t);
@@ -636,7 +639,7 @@ namespace Monsajem_Incs.Serialization.New2
                                     NameAsByte = Serializere.Write(
                                         Delegate.Method.Name,
                                         Delegate.Method.ReflectedType.MidName()),
-                                    SerializerTarget = Serializere.FindSerializer(TargetType)
+                                    SerializerTarget = GetSerialize(TargetType)
                                 };
                                 BinaryInsert(ref Serializere.LoadedFuncs_Ser, LoadedFunc);
                             }
@@ -647,7 +650,7 @@ namespace Monsajem_Incs.Serialization.New2
                             return (LoadedFunc.NameAsByte, LoadedFunc);
                         });
                         var Target = Delegates[i].Target;
-                        Serializere.VisitedSerialize(Target, LoadedFunc.SerializerTarget);
+                        LoadedFunc.SerializerTarget.VisitedSerialize(Target);
                     }
                 };
 
@@ -679,7 +682,7 @@ namespace Monsajem_Incs.Serialization.New2
                                 {
                                     Delegate = Method.CreateDelegate(Type, null),
                                     Hash = (MethodName + TypeName).GetHashCode(),
-                                    SerializerTarget = Serializere.FindSerializer(TargetType)
+                                    SerializerTarget = GetSerialize(TargetType)
                                 };
                                 BinaryInsert(ref Serializere.LoadedFuncs_Des, LoadedFunc);
                             }
@@ -692,22 +695,22 @@ namespace Monsajem_Incs.Serialization.New2
 
                         var ThisDelegate = (Delegate)LoadedFunc.Delegate.Clone();
                         Results[i] = ThisDelegate;
-                        Serializere.VisitedDeserialize((c) => Deletage_Target.SetValue(ThisDelegate, c), LoadedFunc.SerializerTarget);
+                        LoadedFunc.SerializerTarget.VisitedDeserialize((c) => Deletage_Target.SetValue(ThisDelegate, c));
                     }
 
                     var Result = Delegate.Combine(Results);
-                    return (t)(object) Result;
+                    return (t)(object)Result;
                 };
 
                 return (Serializer, Deserializer);
             }
 
-            private (Action<t> Serializer, Func<t> Deserializer) 
+            private (Action<t> Serializer, Func<t> Deserializer)
                 MakeSerializer_Nullable()
             {
                 var Type = typeof(t);
                 var InnerType = Nullable.GetUnderlyingType(Type);
-                var innerSerializer = Serializere.FindSerializer(InnerType);
+                var innerSerializer = GetSerialize(InnerType);
 
                 Action<t> Serializer = (obj) =>
                 {
@@ -719,13 +722,13 @@ namespace Monsajem_Incs.Serialization.New2
                 Func<t> Deserializer = () =>
                 {
                     object Result = innerSerializer.Deserializer();
-                    return (t) CreateInstance.Invoke(new object[] { Result });
+                    return (t)CreateInstance.Invoke(new object[] { Result });
                 };
 
                 return (Serializer, Deserializer);
             }
 
-            private (Action<t> Serializer, Func<t> Deserializer) 
+            private (Action<t> Serializer, Func<t> Deserializer)
                 MakeSerializer_ValueType()
             {
                 var Type = typeof(t);
@@ -738,7 +741,7 @@ namespace Monsajem_Incs.Serialization.New2
                 return (Serializer, Deserializer);
             }
 
-            private (Action<t> Serializer, Func<t> Deserializer) 
+            private (Action<t> Serializer, Func<t> Deserializer)
                 MakeSerializer_Else()
             {
                 var Type = typeof(t);
@@ -804,7 +807,7 @@ namespace Monsajem_Incs.Serialization.New2
                 var FildsLen = Filds.Length;
                 for (int i = 0; i < FildsLen; i++)
                 {
-                    var ExactSerializer = Serializere.FindSerializer(Filds[i].Info.FieldType);
+                    var ExactSerializer = GetSerialize(Filds[i].Info.FieldType);
                     FildSerializer[i] = (ExactSerializer, Filds[i]);
                 }
 
@@ -822,7 +825,7 @@ namespace Monsajem_Incs.Serialization.New2
                     for (int i = 0; i < FildsLen; i++)
                     {
                         var Field = FildSerializer[i];
-                        Serializere.VisitedSerialize(Field.Controller.GetValue(obj), Field.Sr);
+                        Field.Sr.VisitedSerialize(Field.Controller.GetValue(obj));
                     }
                 };
 
@@ -860,7 +863,7 @@ namespace Monsajem_Incs.Serialization.New2
                     for (int i = 0; i < FildsLen; i++)
                     {
                         var Field = FildSerializer[i];
-                        Serializere.VisitedDeserialize((c) => Field.Controller.SetValue(Owner, c), Field.Sr);
+                        Field.Sr.VisitedDeserialize((c) => Field.Controller.SetValue(Owner, c));
                     }
                     return (t)Owner;
                 };
@@ -871,8 +874,8 @@ namespace Monsajem_Incs.Serialization.New2
                 Action<t> Serializer,
                 Func<t> Deserializer)
             {
-                _Serializer =(c)=> Serializer((t)c);
-                _Deserializer =()=> Deserializer();
+                _Serializer = (c) => Serializer((t)c);
+                _Deserializer = () => Deserializer();
                 return InsertSerializer(() => (Serializer, Deserializer));
             }
             private static SerializeInfo<t> InsertSerializer(
@@ -903,12 +906,92 @@ namespace Monsajem_Incs.Serialization.New2
                 };
 #endif
 
-                Serialize.Serializer =(c)=> Sr.Sr((t)c);
-                Serialize.Deserializer =()=> Sr.Dr();
+                Serialize.Serializer = (c) => Sr.Sr((t)c);
+                Serialize.Deserializer = () => Sr.Dr();
                 ExactSerializer = Sr.Sr;
                 ExactDeserializer = Sr.Dr;
                 return Serialize;
             }
+
+            public void VisitedSerialize(t obj)
+            {
+                if (obj == null)
+                {
+                    S_Data.Write(Byte_Int_N_2, 0, 4);
+                    return;
+                }
+                if (CanStoreInVisit == false)
+                {
+                    S_Data.Write(Byte_Int_N_1, 0, 4);
+                    ExactSerializer(obj);
+                    return;
+                }
+                var VisitedObj = new ObjectContainer()
+                {
+                    ObjHashCode = obj.GetHashCode(),
+                    TypeHashCode = TypeHashCode
+                };
+                var VisitedPos = Visitor.BinaryInsert(ref VisitedObj);
+                if (VisitedPos > -1)
+                {
+#if DEBUG
+                    if (VisitedObj.obj.GetType() != obj.GetType())
+                        throw new Exception("Type of visited object is wrong" +
+                                            "\nMain: " + obj.GetType().ToString() +
+                                            "\nVisited: " + VisitedObj.obj.GetType().ToString());
+#endif
+                    S_Data.Write(BitConverter.GetBytes(VisitedObj.FromPos), 0, 4);
+                    return;
+                }
+#if DEBUG
+                VisitedObj.obj = obj;
+#endif
+                VisitedObj.FromPos = (int)S_Data.Position;
+                S_Data.Write(Byte_Int_N_1, 0, 4);
+                ExactSerializer(obj);
+            }
+            public void VisitedDeserialize(Action<t> Set)
+            {
+                var LastFrom = From;
+                var Fr = BitConverter.ToInt32(D_Data, From);
+                From += 4;
+                if (CanStoreInVisit == false)
+                {
+                    if (Fr == -2)
+                        return;
+                    Set(ExactDeserializer());
+                    return;
+                }
+                ObjectContainer VisitedObj;
+                switch (Fr)
+                {
+                    case -1:
+                        VisitedObj = new ObjectContainer()
+                        {
+                            ObjHashCode = LastFrom
+                        };
+                        Visitor.BinaryInsert(VisitedObj);
+                        VisitedObj.obj = ExactDeserializer();
+                        Set((t)VisitedObj.obj);
+                        return;
+                    case -2:
+                        return;
+                }
+                VisitedObj = new ObjectContainer()
+                {
+                    ObjHashCode = Fr
+                };
+                VisitedObj = Visitor.BinarySearch(VisitedObj).Value;
+                if (VisitedObj.obj == null)
+                    AtLast += () => Set((t)VisitedObj.obj);
+                else
+                    Set((t)VisitedObj.obj);
+            }
+
+            public override void VisitedSerialize(object obj) =>
+                VisitedSerialize((t)obj);
+            public override void VisitedDeserialize(Action<object> Set) =>
+                VisitedDeserialize((t c) => Set(c));
 
 #if DEBUG
             private static void Check_SR()
@@ -941,7 +1024,6 @@ namespace Monsajem_Incs.Serialization.New2
             {
                 Traced = Traced.Substring(0, Traced.Length - (On.Length + "\n >> ".Length));
             }
-
 #endif
 
         }
@@ -1000,10 +1082,10 @@ namespace Monsajem_Incs.Serialization.New2
                     S_Data.Write(Byte_0, 0, 1);
                     return;
                 }
-                var Serializer = FindSerializer(Type);
+                var Serializer = SerializeInfo.GetSerialize(Type);
 
                 S_Data.Write(Byte_1, 0, 1);
-                VisitedInfoSerialize(Type.GetHashCode(), () => (Serializer.NameAsByte, null));
+                VisitedInfoSerialize<object>(Type.GetHashCode(), () => (Serializer.NameAsByte, null));
                 Serializer.Serializer(obj);
             },
             () =>
@@ -1019,7 +1101,7 @@ namespace Monsajem_Incs.Serialization.New2
                     return Read();
                 });
 
-                return FindSerializer(Info).Deserializer();
+                return SerializeInfo.GetSerialize(Info).Deserializer();
             });
 
             SerializeInfo<bool>.InsertSerializer(
@@ -1320,7 +1402,7 @@ namespace Monsajem_Incs.Serialization.New2
                         throw new Exception("Cant Access to Deletage Target field at serializer, Fields >>" + Fields_str);
                     }
 #endif
-                    VisitedSerialize(obj, SR);
+                    SR.VisitedSerialize(obj);
                     Result = S_Data.ToArray();
                 }
 #if DEBUG
@@ -1381,8 +1463,8 @@ namespace Monsajem_Incs.Serialization.New2
                         throw new Exception("Cant Access to Deletage Target field at serializer, Fields >>" + Fields_str);
                     }
 #endif
-                    VisitedDeserialize((c) => Result =(t) c, SerializeInfo<t>.GetSerialize());
-                    AtLast?.Invoke();
+                    SerializeInfo<t>.GetSerialize().VisitedDeserialize((c) => Result = c);
+                    SerializeInfo.AtLast?.Invoke();
                 }
 #if DEBUG
                 catch (Exception ex)
@@ -1399,7 +1481,7 @@ namespace Monsajem_Incs.Serialization.New2
                     Serialization.Visitor.Clear();
                     Serialization.Visitor_info.Clear();
                     Serialization.D_Data = null;
-                    AtLast = null;
+                    SerializeInfo.AtLast = null;
                 }
                 return Result;
             }

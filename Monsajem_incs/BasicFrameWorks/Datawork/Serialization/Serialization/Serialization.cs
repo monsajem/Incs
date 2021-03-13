@@ -1,26 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
 using static Monsajem_Incs.ArrayExtentions.ArrayExtentions;
-using static System.Runtime.Serialization.FormatterServices;
 using static System.Text.Encoding;
-using Monsajem_Incs.Array.DynamicSize;
 
 namespace Monsajem_Incs.Serialization
 {
     public partial class Serialization
     {
-        private SerializeInfo FindSerializer(Type Type)
-        {
-            return SerializeInfo.GetSerialize(Type);
-        }
-        private SerializeInfo FindSerializer(string TypeName)
-        {
-            return SerializeInfo.GetSerialize(TypeName);
-        }
-
         [ThreadStatic]
         private static Action AtLast;
         private void VisitedSerialize(
@@ -102,9 +87,9 @@ namespace Monsajem_Incs.Serialization
                 Set(VisitedObj.obj);
         }
 
-        private object VisitedInfoSerialize(
+        private t VisitedInfoSerialize<t>(
             int HashCode,
-            Func<(byte[], object)> GetData)
+            Func<(byte[], t)> GetData)
         {
             var VisitedObj = new ObjectContainer()
             {
@@ -114,14 +99,14 @@ namespace Monsajem_Incs.Serialization
             if (VisitedPos > -1)
             {
                 S_Data.Write(BitConverter.GetBytes(VisitedObj.FromPos), 0, 4);
-                return VisitedObj.obj;
+                return (t)VisitedObj.obj;
             }
             VisitedObj.FromPos = (int)S_Data.Position;
             var Data = GetData();
             VisitedObj.obj = Data.Item2;
             S_Data.Write(Byte_Int_N_1, 0, 4);
             S_Data.Write(Data.Item1, 0, Data.Item1.Length);
-            return VisitedObj.obj;
+            return Data.Item2;
         }
         private t VisitedInfoDeserialize<t>(
             Func<t> Get)
@@ -147,7 +132,7 @@ namespace Monsajem_Incs.Serialization
             return (t)Visitor_info.BinarySearch(VisitedObj).Value.obj;
         }
 
-        
+
 
         private byte[] Write(params string[] str)
         {

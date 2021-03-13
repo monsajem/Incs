@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Monsajem_Incs.Array.DynamicSize;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,8 +7,6 @@ using System.Reflection;
 using static Monsajem_Incs.ArrayExtentions.ArrayExtentions;
 using static System.Runtime.Serialization.FormatterServices;
 using static System.Text.Encoding;
-using Monsajem_Incs.Array.DynamicSize;
-using Monsajem_Incs.DynamicAssembly;
 
 namespace Monsajem_Incs.Serialization
 {
@@ -96,7 +95,7 @@ namespace Monsajem_Incs.Serialization
                         BaseType.MakeGenericType(Type).GetMethod("GetSerialize").
                             Invoke(null, null);
                     ItemsSerializer = System.Array.BinarySearch(SerializersHashCodes, HashCode);
-                    Insert(ref ExactSerializersByHashCode, Result,ItemsSerializer);
+                    Insert(ref ExactSerializersByHashCode, Result, ItemsSerializer);
                 }
                 Result = ExactSerializersByHashCode[ItemsSerializer];
 #if DEBUG
@@ -118,7 +117,7 @@ namespace Monsajem_Incs.Serialization
                         BaseType.MakeGenericType(TypeName.GetTypeByName()).
                             GetMethod("GetSerialize").Invoke(null, null);
                     ItemsSerializer = System.Array.BinarySearch(SerializersNameCodes, HashCode);
-                    Insert(ref ExactSerializersByNameCode,Result, 
+                    Insert(ref ExactSerializersByNameCode, Result,
                         ItemsSerializer);
                 }
                 Result = ExactSerializersByNameCode[ItemsSerializer];
@@ -158,7 +157,7 @@ namespace Monsajem_Incs.Serialization
                 if (Sr.IsMade == false)
                 {
                     Sr.IsMade = true;
-                    if(_Serializer==null)
+                    if (_Serializer == null)
                         Sr.Make();
                     else
                     {
@@ -195,15 +194,15 @@ namespace Monsajem_Incs.Serialization
                     (object obj) =>
                     {
                         var DType = obj.GetType();
-                        var Serializer = Serializere.FindSerializer(DType);
-                        Serializere.VisitedInfoSerialize(DType.GetHashCode(), () => (Serializer.NameAsByte, null));
+                        var Serializer = GetSerialize(DType);
+                        Serializere.VisitedInfoSerialize<object>(DType.GetHashCode(), () => (Serializer.NameAsByte, null));
                         Serializer.Serializer(obj);
                     },
                     () =>
                     {
                         var Info = Serializere.VisitedInfoDeserialize(() => Serializere.Read());
 
-                        return Serializere.FindSerializer(Info).Deserializer();
+                        return GetSerialize(Info).Deserializer();
                     });
                 }
                 else if (Type.GetInterfaces().Where((c) => c == typeof(Array.Base.IArray)).FirstOrDefault() != null)
@@ -300,16 +299,16 @@ namespace Monsajem_Incs.Serialization
                 }
             }
 
-            private (Action<object> Serializer, Func<object> Deserializer) 
+            private (Action<object> Serializer, Func<object> Deserializer)
                 MakeSerializer_Serializable()
             {
                 var Type = typeof(t);
                 var InterfaceType = Type.GetInterfaces().Where(
-                    (c) =>c.GetGenericTypeDefinition() == ISerializableType).
+                    (c) => c.GetGenericTypeDefinition() == ISerializableType).
                     FirstOrDefault();
 
                 var InnerType = InterfaceType.GenericTypeArguments[0];
-                var innerSerializer = Serializere.FindSerializer(InnerType);
+                var innerSerializer = GetSerialize(InnerType);
                 var Getter = InterfaceType.GetMethod("GetData");
                 var Setter = InterfaceType.GetMethod("SetData");
                 Action<object> Serializer = (object obj) =>
@@ -342,7 +341,7 @@ namespace Monsajem_Incs.Serialization
                 return (Serializer, Deserializer);
             }
 
-            private (Func<System.Array, int[]> Write, Func<(int[] Ends, System.Array ar)> Read) 
+            private (Func<System.Array, int[]> Write, Func<(int[] Ends, System.Array ar)> Read)
                 ArrayGetCreator()
             {
                 var Type = typeof(t);
@@ -403,11 +402,11 @@ namespace Monsajem_Incs.Serialization
                 return (Write, Read);
             }
 
-            private (Action<object> Serializer, Func<object> Deserializer) 
+            private (Action<object> Serializer, Func<object> Deserializer)
                 MakeSerializer_Array_Class()
             {
                 var Type = typeof(t);
-                 var SR = ArrayMakeSerializer_Object(Type);
+                var SR = ArrayMakeSerializer_Object(Type);
                 var Creator = ArrayGetCreator();
                 Action<object> Serializer = (object obj) =>
                 {
@@ -430,7 +429,7 @@ namespace Monsajem_Incs.Serialization
                 var Setter = DynamicAssembly.TypeController.SetArray(Type);
                 var Getter = DynamicAssembly.TypeController.GetArray(Type);
                 var ElementType = Type.GetElementType();
-                var ItemsSerializer = Serializere.FindSerializer(Type.GetElementType());
+                var ItemsSerializer = GetSerialize(Type.GetElementType());
 
                 Action<(System.Array ar, int[] Ends)> Serializer = (obj) =>
                 {
@@ -529,7 +528,7 @@ namespace Monsajem_Incs.Serialization
                 };
                 return (Serializer, Deserializer);
             }
-            private (Action<object> Serializer, Func<object> Deserializer) 
+            private (Action<object> Serializer, Func<object> Deserializer)
                 MakeSerializer_Array_Struct(int size)
             {
                 var Type = typeof(t);
@@ -555,7 +554,7 @@ namespace Monsajem_Incs.Serialization
             MakeSerializer_Monsajem_Array()
             {
                 var Type = typeof(t);
-                var ItemsSerializer = Serializere.FindSerializer(System.Array.CreateInstance(
+                var ItemsSerializer = GetSerialize(System.Array.CreateInstance(
                     ((Array.Base.IArray)GetUninitializedObject(Type)).ElementType, 0).GetType());
                 var ObjSerializer = SerializeInfo<object>.GetSerialize();
 
@@ -600,7 +599,7 @@ namespace Monsajem_Incs.Serialization
                 return (Serializer, Deserializer);
             }
 
-            private (Action<object> Serializer, Func<object> Deserializer) 
+            private (Action<object> Serializer, Func<object> Deserializer)
                 MakeSerializer_Delegate()
             {
                 var Type = typeof(t);
@@ -614,7 +613,7 @@ namespace Monsajem_Incs.Serialization
                         LoadedFunc LoadedFunc;
                         var Delegate = Delegates[i];
                         var HashCode = Delegate.Method.GetHashCode();
-                        LoadedFunc = (LoadedFunc)Serializere.VisitedInfoSerialize(HashCode,
+                        LoadedFunc = Serializere.VisitedInfoSerialize(HashCode,
                         () =>
                         {
                             var FuncPos = System.Array.BinarySearch(Serializere.LoadedFuncs_Ser,
@@ -632,7 +631,7 @@ namespace Monsajem_Incs.Serialization
                                     NameAsByte = Serializere.Write(
                                         Delegate.Method.Name,
                                         Delegate.Method.ReflectedType.MidName()),
-                                    SerializerTarget = Serializere.FindSerializer(TargetType)
+                                    SerializerTarget = GetSerialize(TargetType)
                                 };
                                 BinaryInsert(ref Serializere.LoadedFuncs_Ser, LoadedFunc);
                             }
@@ -675,7 +674,7 @@ namespace Monsajem_Incs.Serialization
                                 {
                                     Delegate = Method.CreateDelegate(Type, null),
                                     Hash = (MethodName + TypeName).GetHashCode(),
-                                    SerializerTarget = Serializere.FindSerializer(TargetType)
+                                    SerializerTarget = GetSerialize(TargetType)
                                 };
                                 BinaryInsert(ref Serializere.LoadedFuncs_Des, LoadedFunc);
                             }
@@ -698,12 +697,12 @@ namespace Monsajem_Incs.Serialization
                 return (Serializer, Deserializer);
             }
 
-            private (Action<object> Serializer, Func<object> Deserializer) 
+            private (Action<object> Serializer, Func<object> Deserializer)
                 MakeSerializer_Nullable()
             {
                 var Type = typeof(t);
                 var InnerType = Nullable.GetUnderlyingType(Type);
-                var innerSerializer = Serializere.FindSerializer(InnerType);
+                var innerSerializer = GetSerialize(InnerType);
 
                 Action<object> Serializer = (object obj) =>
                 {
@@ -721,7 +720,7 @@ namespace Monsajem_Incs.Serialization
                 return (Serializer, Deserializer);
             }
 
-            private (Action<object> Serializer, Func<object> Deserializer) 
+            private (Action<object> Serializer, Func<object> Deserializer)
                 MakeSerializer_ValueType()
             {
                 var Type = typeof(t);
@@ -734,7 +733,7 @@ namespace Monsajem_Incs.Serialization
                 return (Serializer, Deserializer);
             }
 
-            private (Action<object> Serializer, Func<object> Deserializer) 
+            private (Action<object> Serializer, Func<object> Deserializer)
                 MakeSerializer_Else()
             {
                 var Type = typeof(t);
@@ -800,7 +799,7 @@ namespace Monsajem_Incs.Serialization
                 var FildsLen = Filds.Length;
                 for (int i = 0; i < FildsLen; i++)
                 {
-                    var ExactSerializer = Serializere.FindSerializer(Filds[i].Info.FieldType);
+                    var ExactSerializer = GetSerialize(Filds[i].Info.FieldType);
                     FildSerializer[i] = (ExactSerializer, Filds[i]);
                 }
 
@@ -994,10 +993,10 @@ namespace Monsajem_Incs.Serialization
                     S_Data.Write(Byte_0, 0, 1);
                     return;
                 }
-                var Serializer = FindSerializer(Type);
+                var Serializer = SerializeInfo.GetSerialize(Type);
 
                 S_Data.Write(Byte_1, 0, 1);
-                VisitedInfoSerialize(Type.GetHashCode(), () => (Serializer.NameAsByte, null));
+                VisitedInfoSerialize<object>(Type.GetHashCode(), () => (Serializer.NameAsByte, null));
                 Serializer.Serializer(obj);
             },
             () =>
@@ -1013,7 +1012,7 @@ namespace Monsajem_Incs.Serialization
                     return Read();
                 });
 
-                return FindSerializer(Info).Deserializer();
+                return SerializeInfo.GetSerialize(Info).Deserializer();
             });
 
             SerializeInfo<bool>.InsertSerializer(
@@ -1376,7 +1375,7 @@ namespace Monsajem_Incs.Serialization
                         throw new Exception("Cant Access to Deletage Target field at serializer, Fields >>" + Fields_str);
                     }
 #endif
-                    VisitedDeserialize((c) => Result =(t) c, SerializeInfo<t>.GetSerialize());
+                    VisitedDeserialize((c) => Result = (t)c, SerializeInfo<t>.GetSerialize());
                     AtLast?.Invoke();
                 }
 #if DEBUG

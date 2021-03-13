@@ -17,9 +17,10 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
+    <Optimize>true</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG</DefineConstants>
+    <DefineConstants>
+    </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -86,8 +87,8 @@
     <Compile Include="BasicFrameWorks\Datawork\KeyValueDB\DirBased.cs" />
     <Compile Include="BasicFrameWorks\Datawork\KeyValueDB\Table.cs" />
     <Compile Include="BasicFrameWorks\Datawork\KeyValueDB\WebStorageBased.cs" />
-    <Compile Include="BasicFrameWorks\Datawork\Serialization2\Serialization\Classes.cs" />
-    <Compile Include="BasicFrameWorks\Datawork\Serialization2\Serialization\Serialization.cs" />
+    <Compile Include="BasicFrameWorks\Datawork\Serialization_New\Serialization\Classes.cs" />
+    <Compile Include="BasicFrameWorks\Datawork\Serialization_New\Serialization\Serialization.cs" />
     <Compile Include="BasicFrameWorks\Datawork\Serialization\Serialization\Classes.cs" />
     <Compile Include="BasicFrameWorks\Datawork\Serialization\Serialization\Serialization.cs" />
     <Compile Include="BasicFrameWorks\Datawork\Serialization\DeepCopy.cs" />
