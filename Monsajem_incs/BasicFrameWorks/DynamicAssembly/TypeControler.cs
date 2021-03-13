@@ -8,9 +8,28 @@ using static Monsajem_Incs.ArrayExtentions.ArrayExtentions;
 
 namespace Monsajem_Incs.DynamicAssembly
 {
-    public class TypeController<T>
+    public static class TypeController<T>
     {
-        public static Func<T> CreateInstance()
+        public static FieldInfo[] GetAllFields(
+            BindingFlags? bindingFlags = null,
+            Func<FieldInfo, bool> filter = null) =>
+                TypeController.GetAllFields(
+                    typeof(T), bindingFlags, filter);
+
+        public static MethodInfo[] GetAllMethods(
+            BindingFlags? bindingFlags = null,
+            Func<MethodInfo, bool> filter = null) =>
+                TypeController.GetAllMethods(
+                    typeof(T), bindingFlags, filter);
+
+        public static MemberInfo[] GetAllMembers(
+            BindingFlags? bindingFlags = null,
+            Func<MemberInfo, bool> filter = null) =>
+                TypeController.GetAllMembers(
+                    typeof(T), bindingFlags, filter);
+
+        public static T CreateInstance() => _CreateInstance();
+        private static Func<T> _CreateInstance=((Func<Func<T>>)(()=>
         {
             var t = typeof(T);
             var Rt = Type.GetType("System.RuntimeType");
@@ -24,7 +43,101 @@ namespace Monsajem_Incs.DynamicAssembly
                 il.Emit(OpCodes.Castclass, t);
                 il.Emit(OpCodes.Ret);
             }, Rt, t);
-        }
+        }))();
+
+
+        private static int _ArRank = ((Func<int>)(() =>
+        {
+            try{return typeof(T).GetArrayRank();}
+            catch{return 0;}
+        }))();
+
+        public static T CreateArray(params int[] Len) =>
+            _CreateArray(Len);
+        private static Func<int[], T> _CreateArray =
+        ((Func<Func<int[], T>>)(() =>
+        {
+            var Type = typeof(T);
+            if (Type.IsArray == false)
+                return (a) => throw new Exception($"Type of {Type} is not array type.");
+            var Rank = Type.GetArrayRank();
+            Type = Type.GetElementType();
+            Type = System.Array.CreateInstance(Type, new int[Rank]).GetType();
+
+            return DynamicMethodBuilder.Delegate<Func<int[], T>>("CreateInstance_",
+            (il) =>
+            {
+                for (int i = 0; i < Rank; i++)
+                {
+                    il.Emit(OpCodes.Ldarg_0);
+                    il.Emit(OpCodes.Ldc_I4_S, i);
+                    il.Emit(OpCodes.Ldelem_I4);
+                }
+
+                il.Emit(OpCodes.Newobj, Type.GetConstructors()[0]);
+                il.Emit(OpCodes.Ret);
+            });
+        }))();
+
+        private static int[] _ArLen=new int[_ArRank];
+        public static T CreateArray()=>
+            CreateArray(_ArLen);
+
+        public static object GetValueFromArray(T Array,params int[] Position) =>
+            _GetValueFromArray(Array, Position);
+        private static Func<T, int[], object> _GetValueFromArray =
+        ((Func<Func<T, int[], object>>)(() =>
+        {
+            var Type = typeof(T);
+            if (Type.IsArray == false)
+                return (a,b)=>throw new Exception($"Type of {Type} is not array type.");
+            var Rank = Type.GetArrayRank();
+            return DynamicMethodBuilder.Delegate<Func<T, int[], object>>("GetValue_", (il) =>
+            {
+                il.Emit(OpCodes.Ldarg_0);
+
+                for (int i = 0; i < Rank; i++)
+                {
+                    il.Emit(OpCodes.Ldarg_1);
+                    il.Emit(OpCodes.Ldc_I4_S, i);
+                    il.Emit(OpCodes.Ldelem_I4);
+                }
+
+                il.Emit(OpCodes.Call, Type.GetMethod("Get"));
+                il.Emit(OpCodes.Box, Type.GetElementType());
+                il.Emit(OpCodes.Ret);
+            });
+        }))();
+
+        public static void SetValueToArray(T Array, object Value,params int[] Position) =>
+            _SetValueToArray(Array, Value, Position);
+        private static Action<T, object, int[]> _SetValueToArray=
+        ((Func<Action<T, object, int[]>>)(()=>
+        {
+            var Type = typeof(T);
+            if (Type.IsArray == false)
+                return (a,b,c) => throw new Exception($"Type of {Type} is not array type.");
+            var Rank = Type.GetArrayRank();
+            return DynamicMethodBuilder.Delegate<Action<T, object, int[]>>("SetValue_",
+            (il) =>
+            {
+                il.Emit(OpCodes.Ldarg_0);
+
+                for (int i = 0; i < Rank; i++)
+                {
+                    il.Emit(OpCodes.Ldarg_2);
+                    il.Emit(OpCodes.Ldc_I4_S, i);
+                    il.Emit(OpCodes.Ldelem_I4);
+                }
+
+                il.Emit(OpCodes.Ldarg_1);
+                il.Emit(OpCodes.Unbox_Any, Type.GetElementType());
+
+                il.Emit(OpCodes.Call, Type.GetMethod("Set"));
+
+                il.Emit(OpCodes.Ret);
+            });
+        }))();
     }
 
     public class TypeController
