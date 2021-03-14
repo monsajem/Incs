@@ -77,55 +77,73 @@ namespace Monsajem_Incs.Serialization
             public abstract void Make();
 
 
-            private static int[] SerializersHashCodes = new int[0];
-            private static int[] SerializersNameCodes = new int[0];
+            private class ExactSerializer:
+                IComparable<ExactSerializer>
+            {
+                public int HashCode;
+                public SerializeInfo Serializer;
 
-            private static SerializeInfo[] ExactSerializersByHashCode = new SerializeInfo[0];
-            private static SerializeInfo[] ExactSerializersByNameCode = new SerializeInfo[0];
+                public int CompareTo(ExactSerializer other)
+                {
+                    return HashCode-other.HashCode;
+                }
+            }
+
+            private static Array.DynamicSize.SortedArray<ExactSerializer> 
+                SerializersByHashCode = new SortedArray<ExactSerializer>(10);
+            private static Array.DynamicSize.SortedArray<ExactSerializer> 
+                SerializersByNameCode = new SortedArray<ExactSerializer>(10);
 
             public static SerializeInfo GetSerialize(Type Type)
             {
-                SerializeInfo Result;
+                SerializeInfo SR;
                 var HashCode = Type.GetHashCode();
-                var ItemsSerializer = System.Array.BinarySearch(SerializersHashCodes, HashCode);
-                if (ItemsSerializer < 0)
+                var Result = SerializersByHashCode.BinarySearch(
+                    new ExactSerializer() { HashCode = HashCode });
+                if (Result.Index < 0)
                 {
-                    ItemsSerializer = BinaryInsert(ref SerializersHashCodes, HashCode);
-                    Result = (SerializeInfo)
-                        BaseType.MakeGenericType(Type).GetMethod("GetSerialize").
-                            Invoke(null, null);
-                    ItemsSerializer = System.Array.BinarySearch(SerializersHashCodes, HashCode);
-                    Insert(ref ExactSerializersByHashCode, Result, ItemsSerializer);
+                    SR = (SerializeInfo)
+                            BaseType.MakeGenericType(Type).GetMethod("GetSerialize").
+                        Invoke(null, null);
+                    Result = SerializersByHashCode.BinarySearch(
+                        new ExactSerializer() { HashCode = HashCode });
+                    if (Result.Index < 0)
+                        SerializersByHashCode.BinaryInsert(
+                            new ExactSerializer() { HashCode = HashCode, Serializer = SR });
                 }
-                Result = ExactSerializersByHashCode[ItemsSerializer];
+                else
+                    SR = Result.Value.Serializer;
 #if DEBUG
-                if (Result.Type != Type)
+                if (SR.Type != Type)
                     throw new Exception("invalid Serializers Found!");
 #endif
-                return Result;
+                return SR;
             }
 
             public static SerializeInfo GetSerialize(string TypeName)
             {
-                SerializeInfo Result;
+                SerializeInfo SR;
                 var HashCode = TypeName.GetHashCode();
-                var ItemsSerializer = System.Array.BinarySearch(SerializersNameCodes, HashCode);
-                if (ItemsSerializer < 0)
+                var Result = SerializersByNameCode.BinarySearch(
+                                new ExactSerializer() { HashCode = HashCode });
+                if (Result.Index < 0)
                 {
-                    ItemsSerializer = BinaryInsert(ref SerializersNameCodes, HashCode);
-                    Result = (SerializeInfo)
-                        BaseType.MakeGenericType(TypeName.GetTypeByName()).
-                            GetMethod("GetSerialize").Invoke(null, null);
-                    ItemsSerializer = System.Array.BinarySearch(SerializersNameCodes, HashCode);
-                    Insert(ref ExactSerializersByNameCode, Result,
-                        ItemsSerializer);
+                    SR = (SerializeInfo)
+                            BaseType.MakeGenericType(TypeName.GetTypeByName()).GetMethod("GetSerialize").
+                        Invoke(null, null);
+                    Result = SerializersByNameCode.BinarySearch(
+                        new ExactSerializer() { HashCode = HashCode });
+                    if (Result.Index < 0)
+                        SerializersByNameCode.BinaryInsert(
+                            new ExactSerializer() { HashCode = HashCode, Serializer = SR });
                 }
-                Result = ExactSerializersByNameCode[ItemsSerializer];
+                else
+                    SR = Result.Value.Serializer;
 #if DEBUG
-                if (Result.Type != TypeName.GetTypeByName())
+                if (SR.Type != TypeName.GetTypeByName())
                     throw new Exception("invalid Serializers Found!");
 #endif
-                return Result;
+                return SR;
             }
         }
 
