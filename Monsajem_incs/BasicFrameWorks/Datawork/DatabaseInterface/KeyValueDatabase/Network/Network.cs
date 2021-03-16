@@ -28,10 +28,8 @@ namespace Monsajem_Incs.Database.Base
             else
                 Place += 1;
 
-            ulong FirstCode;
-            if (Place == 0)
-                FirstCode = UpdateCodes[0].UpdateCode;
-            else
+            ulong FirstCode = 0;
+            if (Place > 0)
                 FirstCode = UpdateCodes[Place - 1].UpdateCode;
 
             var ResultCodes = UpdateCodes.Skip(Place);

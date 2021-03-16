@@ -47,7 +47,7 @@ namespace Monsajem_Incs.Net.Base.Socket
         IClientSocket
     {
 #if DEBUG
-        internal string WhyDisconnect;
+        public string WhyDisconnect;
 #endif
 
         private Locker<int> Sendings = new Locker<int>();
@@ -64,7 +64,7 @@ namespace Monsajem_Incs.Net.Base.Socket
         public virtual bool IsConnected
         {
             get => P_IsConnected.LockedValue;
-            protected set
+            internal set
             {
 #if DEBUG
                 if (WhyDisconnect == null)
@@ -246,6 +246,29 @@ namespace Monsajem_Incs.Net.Base.Socket
             {
                 await WaitForSend;
                 goto CheckSends;
+            }
+
+            try
+            {
+#if TRACE_NET
+                Console.WriteLine($"Net:{Address} Last hand shake 0/2");
+#endif
+                var lastShake = Send(new byte[1]);
+                await Recive(1);
+#if TRACE_NET
+                Console.WriteLine($"Net:{Address} Last hand shake 1/2");
+#endif
+                await lastShake;
+
+#if TRACE_NET
+                Console.WriteLine($"Net:{Address} Last hand shake 2/2");
+#endif
+            }
+            catch
+            {
+#if TRACE_NET
+                Console.WriteLine($"Net:{Address} Last hand shake faild but its ok.");
+#endif
             }
 
             await Close();

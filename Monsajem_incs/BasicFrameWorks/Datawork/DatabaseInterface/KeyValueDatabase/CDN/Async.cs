@@ -37,14 +37,24 @@ namespace Monsajem_Incs.Database.Base
             if (ServerTable.UpdateAble == null)
                 throw new Exception("UpdateAble at Server Not Found!");
 
-            Server.I_SendUpdate(ServerTable, ServerTable.UpdateAble.UpdateCodes,
+            var ServerTask = 
+                Server.I_SendUpdate(ServerTable, ServerTable.UpdateAble.UpdateCodes,
                 async (key) =>
                 {
                     return (await WebClient.GetByteArrayAsync(CDN.ToString() + "/V/" +
                         Convert.ToBase64String(key.Serialize()))).Deserialize<ValueType>();
                 }, false);
 
-            return await Client.I_GetUpdate(Table, MakeingUpdate, false);
+            var ClientTask = Client.I_GetUpdate(Table, MakeingUpdate, false);
+
+            var R1 = await Task.WhenAny(ServerTask, ClientTask);
+
+            if (R1.Id == ServerTask.Id)
+                await ServerTask;
+            else
+                await ClientTask;
+
+            return await ClientTask;
         }
 
         public static Task<bool> GetUpdate<ValueType_RLN, KeyType_RLN, ValueType, KeyType>(
@@ -104,14 +114,24 @@ namespace Monsajem_Incs.Database.Base
             ServerTable.ClearRelations = ClientTable.Parent.ClearRelations;
             ServerPartTable.Parent = ServerTable;
 
-            Server.I_SendUpdate(ServerPartTable, ServerTable.UpdateAble.UpdateCodes,
+            var ServerTask = Server.I_SendUpdate(ServerPartTable, ServerTable.UpdateAble.UpdateCodes,
                 async (key) =>
                 {
                     return (await WebClient.GetByteArrayAsync(RootCDN.ToString() + "/V/" +
                         Convert.ToBase64String(key.Serialize()))).Deserialize<ValueType>();
                 }, true);
 
-            return await Client.I_GetUpdate(ClientTable, MakeingUpdate, true);
+            var ClientTask = Client.I_GetUpdate(ClientTable, MakeingUpdate, true);
+
+            var R1 = await Task.WhenAny(ServerTask, ClientTask);
+
+            if (R1.Id == ServerTask.Id)
+                await ServerTask;
+            else
+                await ClientTask;
+
+            return await ClientTask;
+
         }
     }
 }

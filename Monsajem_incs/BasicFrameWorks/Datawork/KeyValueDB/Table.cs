@@ -19,11 +19,13 @@ namespace Monsajem_Incs.Database.KeyValue.Base
     }
 
     public class Table<ValueType, KeyType> :
-        Monsajem_Incs.Database.Base.Table<ValueType, KeyType>
+        Monsajem_Incs.Database.Base.Table<ValueType, KeyType>,
+        IDisposable
         where KeyType : IComparable<KeyType>
     {
         [Monsajem_Incs.Serialization.NonSerialized]
         private bool NeedToSave = true;
+        private Action Save;
 
         public Table(
             Action<byte[]> SaveKeys,
@@ -71,7 +73,7 @@ namespace Monsajem_Incs.Database.KeyValue.Base
             Ar._AddLength = (count) => Ar.Length += count;
             Ar.Length = KeysInfo.Keys.Length;
 
-            Action Save = () =>
+            Save = () =>
             {
                 SaveKeys(this.Serialize());
             };
@@ -133,6 +135,18 @@ namespace Monsajem_Incs.Database.KeyValue.Base
             else
             {
                 Runer.Run.OnEndBlocks += () => Save();
+            }
+        }
+
+        [Monsajem_Incs.Serialization.NonSerialized]
+        private bool IsDisposed;
+        public void Dispose()
+        {
+            if(IsDisposed==false)
+            {
+                IsDisposed = true;
+                Save();
+                System.GC.SuppressFinalize(this);
             }
         }
     }

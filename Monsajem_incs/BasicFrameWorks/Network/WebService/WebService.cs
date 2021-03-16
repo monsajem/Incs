@@ -17,21 +17,27 @@ namespace Monsajem_Incs.Net.Web
 
         private class Behavior : WebSocketBehavior
         {
-
-            public event Action Error;
+            public WebSocket Socket;
 
             protected override void OnError(ErrorEventArgs e)
             {
                 base.OnError(e);
-                Error?.Invoke();
+#if DEBUG
+                if (Socket.WhyDisconnect == null)
+                    Socket.WhyDisconnect = "Closed By this side Because of error >> "+e.Message;
+#endif
+                base.Close();
+                Socket.IsConnected = false;
             }
-
-            public event Action Closing;
 
             protected override void OnClose(CloseEventArgs e)
             {
+#if DEBUG
+                if (Socket.WhyDisconnect == null)
+                    Socket.WhyDisconnect = "Closed By Other side";
+#endif
                 base.OnClose(e);
-                Closing?.Invoke();
+                Socket.IsConnected = false;
             }
 
             public new void Send(byte[] Buffer)
@@ -40,13 +46,17 @@ namespace Monsajem_Incs.Net.Web
             }
 
             public new void Close(){
+#if DEBUG
+                if (Socket.WhyDisconnect == null)
+                    Socket.WhyDisconnect = "Closed By this side";
+#endif
                 base.Close();
+                Socket.IsConnected = false;
             }
 
-            public event Action<MessageEventArgs> OnMessageEvent;
             protected override void OnMessage(MessageEventArgs e)
             {
-                OnMessageEvent(e);
+                Socket.Recived(e.RawData);
             }
         }
         private class WebSocket :
@@ -55,13 +65,13 @@ namespace Monsajem_Incs.Net.Web
             public WebSocket(Behavior Client)
             {
                 this.Client = Client;
-                Client.OnMessageEvent += (e) => Recived(e.RawData);
-                Client.Closing += () => IsConnected = false;
-                Client.Error += () => Client.Close();
+                Client.Socket = this;
                 this.IsConnected = true;
             }
 
             private Behavior Client;
+
+            public new void Recived(byte[] Data) => base.Recived(Data);
 
             protected async override Task Inner_Send(byte[] Data)
             {
