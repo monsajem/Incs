@@ -5,6 +5,7 @@ using static Monsajem_Incs.ArrayExtentions.ArrayExtentions;
 using Monsajem_Incs.Net.Base.Socket.Exceptions;
 using Monsajem_Incs.DynamicAssembly;
 using System.Linq;
+using Monsajem_Incs.Threading;
 
 namespace Monsajem_Incs.Net.Base.Socket
 {
@@ -54,6 +55,11 @@ namespace Monsajem_Incs.Net.Base.Socket
         public event Action<Exception> OnError;
         private AddressType P_Address;
 
+#if DEBUG
+        public static int SendTimeOut = 3000;
+        public static int ReciveTimeOut = 3000;
+#endif
+
         public ClientSocket()
         {
             IsConnected = false;
@@ -102,11 +108,17 @@ namespace Monsajem_Incs.Net.Base.Socket
                         OnError?.Invoke(Ex);
                         throw Ex;
                     }
-                    Tasks = new Task[] { Inner_Send(Data), P_IsConnected.WaitForChange() };
+                    Tasks = new Task[] { 
+                        Inner_Send(Data), 
+                        P_IsConnected.WaitForChange()};
                 }
                 using (Sendings.Lock())
                     Sendings.Value++;
-                await Task.WhenAny(Tasks);
+#if DEBUG
+                var ResultTask = await Task.WhenAny(Tasks).TimeOut(SendTimeOut);
+#else
+                var ResultTask = await Task.WhenAny(Tasks);
+#endif
                 if (P_IsConnected.LockedValue == false)
                 {
                     var ExMSG = "socket connection Changed in _Send(byte[] Data)";
@@ -162,7 +174,7 @@ namespace Monsajem_Incs.Net.Base.Socket
                         throw Ex;
                     }
                     SomthingRecived = new Task[] { RecivedBuffer.WaitForChange(),
-                                                   P_IsConnected.WaitForChange() };
+                                                   P_IsConnected.WaitForChange()};
                 }
             }
             if (SomthingRecived != null)
@@ -170,7 +182,11 @@ namespace Monsajem_Incs.Net.Base.Socket
 #if TRACE_NET
                 Console.WriteLine($"Net:{Address} Reciveing Waiting ...");
 #endif
-                await Task.WhenAny(SomthingRecived);
+#if DEBUG
+                var ResultTask = await Task.WhenAny(SomthingRecived).TimeOut(ReciveTimeOut);
+#else
+                var ResultTask = await Task.WhenAny(SomthingRecived);
+#endif
             }
             using (RecivedBuffer.Lock())
             {
@@ -213,7 +229,11 @@ namespace Monsajem_Incs.Net.Base.Socket
 #if TRACE_NET
             Console.WriteLine($"Net:{Address} Disconnecting Close ...");
 #endif
+#if DEBUG
+            await Inner_Disconnect().TimeOut(ReciveTimeOut);
+#else
             await Inner_Disconnect();
+#endif
 #if TRACE_NET
             Console.WriteLine($"Net:{Address} Disconnected Close !");
 #endif
@@ -251,14 +271,12 @@ namespace Monsajem_Incs.Net.Base.Socket
             try
             {
 #if TRACE_NET
-                Console.WriteLine($"Net:{Address} Last hand shake 0/2");
+                Console.WriteLine($"Net:{Address} Last hand shaking...");
 #endif
-                var lastShake = Send(new byte[1]);
-                await Recive(1);
+                await Task_EX.CheckAll(Send(new byte[1]), Recive(1));
 #if TRACE_NET
-                Console.WriteLine($"Net:{Address} Last hand shake 1/2");
+                Console.WriteLine($"Net:{Address} Last hand shaked.");
 #endif
-                await lastShake;
 
 #if TRACE_NET
                 Console.WriteLine($"Net:{Address} Last hand shake 2/2");
