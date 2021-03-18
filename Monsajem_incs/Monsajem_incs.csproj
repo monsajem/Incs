@@ -210,7 +210,7 @@
     <Compile Include="BasicFrameWorks\SafeAccess\base.cs" />
     <Compile Include="BasicFrameWorks\States\State.cs" />
     <Compile Include="BasicFrameWorks\Tester\Tester.cs" />
-    <Compile Include="BasicFrameWorks\Threading\DelegatesExtentions.cs" />
+    <Compile Include="BasicFrameWorks\Threading\Task.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup />

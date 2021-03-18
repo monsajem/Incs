@@ -114,9 +114,9 @@ namespace Monsajem_Incs.Database.Base
         public void Delete(KeyType Key)
         {
             UpdateCode += 1;
-            Delete(Key, UpdateCode);
+            DeleteDontUpdate(Key);
         }
-        public void Delete(KeyType Key,ulong UpdateCode)
+        public void DeleteDontUpdate(KeyType Key)
         {
             var Place = System.Array.BinarySearch(UpdateKeys,
                 new UpdateAble<KeyType>() { Key = Key },

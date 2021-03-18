@@ -199,7 +199,6 @@ namespace Monsajem_Incs.Database.Base
                 }
                 var Key = UpdateCodes[EndPos].Key;
                 await Delete(Key);
-                Table.UpdateAble.Delete(Key, 0);
             }
         }
 
@@ -217,10 +216,8 @@ namespace Monsajem_Incs.Database.Base
                 Place = (Place * -1) - 1;
             else
                 Place += 1;
-            var UpdateAble = Table.UpdateAble;
             foreach (var Update in UpdateCodes.Skip(Place))
             {
-                UpdateAble.Delete(Update.Key, 0);
                 await Delete(Update.Key);
             }
         }
@@ -243,18 +240,31 @@ namespace Monsajem_Incs.Database.Base
                 ParentTable = PartTable.Parent;
                 if (ParentTable._UpdateAble == null)
                     ParentTable._UpdateAble = new UpdateAbles<KeyType>(0);
+                var Part_UpdateAble = PartTable.UpdateAble;
+                var Parent_UpdateAble = ParentTable.UpdateAble;
                 Delete = async (key) =>
                 {
                     await Client.SendData(-2);
                     await Client.SendData(key);
+                    Part_UpdateAble.DeleteDontUpdate(key);
                     if (await Client.GetCondition())
                         PartTable.Ignore(key);
                     else
+                    {
+                        Parent_UpdateAble.DeleteDontUpdate(key);
                         PartTable.Delete(key);
+                    }
                 };
             }
             else
-                Delete = async (key) => Table.Delete(key);
+            {
+                var UpdateAble = Table.UpdateAble;
+                Delete = async (key) =>
+                {
+                    UpdateAble.DeleteDontUpdate(key);
+                    Table.Delete(key);
+                };
+            }
 
             var Result = false;
 
