@@ -13,13 +13,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Monsajem_incs\Monsajem_incs.csproj" />
     <ProjectReference Include="..\WASM_NetCore\WASM_NetCore.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Monsajem_incs">
-      <HintPath>G:\Programing\Monsajem_incs\Monsajem_incs\Monsajem_incs\bin\Debug\Monsajem_incs.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
   <ItemGroup>
