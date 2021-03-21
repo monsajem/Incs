@@ -26,6 +26,23 @@ namespace Monsajem_Incs.TimeingTester
 
             return stopWatch.Elapsed - HaveLate.Elapsed;
         }
+
+        public static async Task<TimeSpan> run(Func<Task> Somthing)
+        {
+            Func<Task> InnerAction = async () => { };
+            Stopwatch HaveLate = new Stopwatch();
+            HaveLate.Start();
+            await InnerAction();
+            HaveLate.Stop();
+
+
+            Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Start();
+            await Somthing();
+            stopWatch.Stop();
+
+            return stopWatch.Elapsed - HaveLate.Elapsed;
+        }
     }
 
     public static class StreamLoger

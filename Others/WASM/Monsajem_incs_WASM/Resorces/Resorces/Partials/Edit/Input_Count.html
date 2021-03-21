@@ -1,0 +1,39 @@
+﻿<div id="Main">
+    <input id="txt_Count" type="tel" />
+    <script>
+        var input = document.getElementById("txt_Count");
+        var Last = input.value;
+        var LastStart = 0;
+        var LastEnd = 0;
+        input.onkeypress = function () {
+            LastStart = input.selectionStart;
+            LastEnd = input.selectionEnd;
+        };
+
+        input.oninput = function () {
+            if (Number(input.value).toString() == "NaN") {
+                input.value = Last;
+                input.setSelectionRange(LastStart, LastEnd);
+                return;
+            }
+
+            if (Number(input.value) < 0) {
+                input.value = Last;
+                input.setSelectionRange(LastStart, LastEnd);
+                return;
+            }
+
+            if (Math.round(Number(input.value)).toString() != input.value && input.value != "") {
+
+                input.value = Last;
+                input.setSelectionRange(LastStart, LastEnd);
+                return;
+            }
+            if (Number(input.value).toString() == "0") {
+                input.value = "";
+            }
+
+            Last = input.value;
+        };
+    </script>
+</div>
