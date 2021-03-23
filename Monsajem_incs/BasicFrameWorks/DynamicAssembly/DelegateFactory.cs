@@ -14,7 +14,7 @@ namespace Monsajem_Incs.DynamicAssembly
 
         public DelegateTypeFactory()
         {
-            var assembly = AppDomain.CurrentDomain.DefineDynamicAssembly(
+            var assembly = AssemblyBuilder.DefineDynamicAssembly(
                 new AssemblyName("MN_DynamicAssembly." + Guid.NewGuid().ToString()), AssemblyBuilderAccess.RunAndCollect);
             m_module = assembly.DefineDynamicModule("MN_DynamicDelegateTypeFactory");
         }
