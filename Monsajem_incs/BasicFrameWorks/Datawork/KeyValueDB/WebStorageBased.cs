@@ -14,7 +14,7 @@ namespace Monsajem_Incs.Database.KeyValue.WebStorageBased
     {
         public static byte[] GetBytes(string str)
         {
-            return System.Convert.FromBase64String(str);
+            return System.Convert.FromBase64String(ASCII.GetString(Unicode.GetBytes(str)));
             //byte[] bytes = new byte[str.Length * 2];
             //System.Buffer.BlockCopy(str.ToCharArray(), 0, bytes, 0, bytes.Length);
             //return bytes;
@@ -22,7 +22,7 @@ namespace Monsajem_Incs.Database.KeyValue.WebStorageBased
 
         public static string GetString(byte[] bytes)
         {
-            return System.Convert.ToBase64String(bytes);
+            return Unicode.GetString(ASCII.GetBytes(System.Convert.ToBase64String(bytes)));
             //char[] chars = new char[(bytes.Length / 2) + bytes.Length % 2];
             //System.Buffer.BlockCopy(bytes, 0, chars, 0, bytes.Length);
             //return new string(chars);

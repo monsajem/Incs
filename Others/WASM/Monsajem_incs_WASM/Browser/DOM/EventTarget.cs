@@ -11,7 +11,7 @@ namespace WebAssembly.Browser.DOM
 
 
     [Export("EventTarget", typeof(JSObject))]
-    public partial class EventTarget : DOMObject, IEventTarget
+    public class EventTarget : DOMObject, IEventTarget
     {
 
         static int nextEventId = 0;
@@ -79,6 +79,41 @@ namespace WebAssembly.Browser.DOM
 
         }
 
+        public int DispatchDOMEvent(string typeOfEvent, JSObject eventTarget)
+        {
+
+            var eventArgs = new DOMEventArgs(this, typeOfEvent, eventTarget);
+
+
+            lock (eventHandlers)
+            {
+                if (eventHandlers.TryGetValue(typeOfEvent, out DOMEventHandler eventHandler))
+                {
+                    eventHandler?.Invoke(this, eventArgs);
+                }
+            }
+
+            eventArgs.EventObject?.Dispose();
+            eventArgs.EventObject = null;
+            eventArgs.Source = null;
+            eventArgs = null;
+            return 0;
+        }
+
+        //protected internal override object ConvertTo(Type targetType)
+        //{
+
+        //    if (targetType.IsAssignableFrom(base.GetType()))
+        //    {
+        //        return this;
+        //    }
+        //    else if (targetType.IsSubclassOf(this.GetType()))
+        //    {
+        //        return CreateJSObjectFrom(targetType, this);
+        //    }
+
+        //    return base.ConvertTo(targetType);
+        //}
     }
 
 }
