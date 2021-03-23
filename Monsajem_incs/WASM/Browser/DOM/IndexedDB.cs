@@ -326,7 +326,8 @@ namespace WebAssembly.Browser.DOM
             {
                 this.OnError -= OnError;
                 Status = 0;
-                Completed.Start();
+                Completed?.Start();
+                Completed = null;
             };
             this.OnError += OnError;
 
@@ -335,7 +336,8 @@ namespace WebAssembly.Browser.DOM
             {
                 this.OnComplete -= OnAbort;
                 Status = 1;
-                Completed.Start();
+                Completed?.Start();
+                Completed = null;
             };
             this.OnAbort += OnAbort;
 
@@ -344,7 +346,8 @@ namespace WebAssembly.Browser.DOM
             {
                 this.OnComplete -= OnComplete;
                 Status = 2;
-                Completed.Start();
+                Completed?.Start();
+                Completed = null;
             };
             this.OnComplete += OnComplete;
 

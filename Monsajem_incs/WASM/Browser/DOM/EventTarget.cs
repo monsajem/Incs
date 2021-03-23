@@ -30,13 +30,6 @@ namespace WebAssembly.Browser.DOM
         [Export("addEventListener")]
         public void AddEventListener(string type, DOMEventHandler listener, object options)
         {
-            foreach (var unmanaged in
-                            listener.Target?.Wrap().Wraps.
-                            Select((c) => c.Get()).
-                            Where((c) => typeof(DOMObject).IsAssignableTo(c.GetType())).
-                            Select((c) => (DOMObject)c))
-                unmanaged.ReadyForManageObject();
-
             bool addNativeEventListener = false;
             lock (eventHandlers)
             {

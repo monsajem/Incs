@@ -9,13 +9,13 @@ namespace Monsajem_Incs.Database
         where KeyType:IComparable<KeyType>
         
     {
-        public Array.Hyper.Array<ValueType> Values= new Array.Hyper.Array<ValueType>();
         public ArrayTable(
             Func<ValueType,KeyType> GetKey,
-            bool IsUpdateAble):
+            bool IsUpdateAble,string Name=""):
             base(new Array.Hyper.Array<ValueType>(), GetKey,
                  IsUpdateAble)
         {
+            this.TableName = Name;
         }
     }
 }
