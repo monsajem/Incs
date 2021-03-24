@@ -133,6 +133,22 @@ namespace Monsajem_Incs.Serialization
         }
 
 
+        private SerializeInfo WriteSerializer(Type Type)
+        {
+            var Sr = SerializeInfo.GetSerialize(Type);
+            VisitedInfoSerialize<object>(Sr.Type.GetHashCode(), () => (Sr.NameAsByte, null));
+            return Sr;
+        }
+
+        private SerializeInfo ReadSerializer()
+        {
+            var Info = VisitedInfoDeserialize(() =>
+            {
+                return Read();
+            });
+            return SerializeInfo.GetSerialize(Info);
+        }
+
 
         private byte[] Write(params string[] str)
         {

@@ -333,11 +333,11 @@ namespace Monsajem_Incs.Serialization
                 {
                     if (obj == null)
                     {
-                        S_Data.Write(Byte_0, 0, 1);
+                        S_Data.WriteByte(0);
                         return;
                     }
 
-                    S_Data.Write(Byte_1, 0, 1);
+                    S_Data.WriteByte(1);
                     Serializere.VisitedSerialize(Getter.Invoke(obj, null), innerSerializer);
                 };
 
@@ -776,7 +776,7 @@ namespace Monsajem_Incs.Serialization
                     {
                         if (((IWhenCanSerialize)obj).CanSerialize == false)
                         {
-                            S_Data.Write(Byte_0, 0, 1);
+                            S_Data.WriteByte(0);
                         }
                         else
                         {
@@ -889,31 +889,64 @@ namespace Monsajem_Incs.Serialization
                 return InsertSerializer(() => (Serializer, Deserializer));
             }
             private static SerializeInfo<t> InsertSerializer(
-                Func<(Action<object> Sr, Func<object> Dr)> Serializer)
+                Func<(Action<object> Sr, Func<object> Dr)> Serializer,bool IsFixedType=false)
             {
                 var Serialize = GetSerialize();
                 var Sr = Serializer();
 
+                if(IsFixedType==false)
+                {
+                    var ThisType = typeof(t);
+                    var SR = Sr.Sr;
+                    var DR = Sr.Dr;
+                    Sr.Sr = (obj) =>
+                    {
+                        if (obj != null)
+                        {
+                            var ObjType = obj.GetType();
+                            if(ObjType!=ThisType)
+                            {
+                                S_Data.WriteByte(1);
+                                Serializere.WriteSerializer(ObjType).Serializer(obj);
+                                return;
+                            }
+                        }
+                        S_Data.WriteByte(0);
+                        SR(obj);
+                    };
+                    Sr.Dr = () =>
+                    {
+                        var Status = D_Data[From];
+                        From += 1;
+                        if (Status == 0)
+                            return DR();
+                        else
+                            return Serializere.ReadSerializer().Deserializer();
+                    };
+                }
+
 #if DEBUG
-                var SR = Sr.Sr;
-                var DR = Sr.Dr;
-                Sr.Sr = (obj) =>
                 {
-                    var Pos = S_Data.Position;
-                    Tracer($"Type: {Serialize.Type.ToString()} Pos:({Pos})");
-                    Check_SR();
-                    SR(obj);
-                    UnTracer($"Type: {Serialize.Type.ToString()} Pos:({Pos})");
-                };
-                Sr.Dr = () =>
-                {
-                    var Pos = From;
-                    Tracer($"Type: {Serialize.Type.ToString()} Pos:({Pos})");
-                    Check_DR();
-                    var Result = DR();
-                    UnTracer($"Type: {Serialize.Type.ToString()} Pos:({Pos})");
-                    return Result;
-                };
+                    var SR = Sr.Sr;
+                    var DR = Sr.Dr;
+                    Sr.Sr = (obj) =>
+                    {
+                        var Pos = S_Data.Position;
+                        Tracer($"Type: {Serialize.Type} Pos:({Pos})");
+                        Check_SR();
+                        SR(obj);
+                        UnTracer($"Type: {Serialize.Type} Pos:({Pos})");
+                    };
+                    Sr.Dr = () =>
+                    {
+                        var Pos = From;
+                        Tracer($"Type: {Serialize.Type} Pos:({Pos})");
+                        Check_DR();
+                        var Result = DR();
+                        UnTracer($"Type: {Serialize.Type} Pos:({Pos})");
+                        return Result;
+                    };
+                }
 #endif
 
                 Serialize.Serializer = Sr.Sr;
@@ -970,8 +1003,6 @@ namespace Monsajem_Incs.Serialization
             }
         }
         private static Type ISerializableType = typeof(ISerializable<object>).GetGenericTypeDefinition();
-        private static byte[] Byte_0 = new byte[] { 0 };
-        private static byte[] Byte_1 = new byte[] { 1 };
         private static byte[] Byte_Int_N_1 = BitConverter.GetBytes(-1);
         private static byte[] Byte_Int_N_2 = BitConverter.GetBytes(-2);
         internal static FieldInfo Deletage_Target = ((Func<FieldInfo>)(() =>
@@ -1008,14 +1039,12 @@ namespace Monsajem_Incs.Serialization
                 var Type = obj.GetType();
                 if (Type == typeof(object))
                 {
-                    S_Data.Write(Byte_0, 0, 1);
+                    S_Data.WriteByte(0);
                     return;
                 }
-                var Serializer = SerializeInfo.GetSerialize(Type);
+                S_Data.WriteByte(1);
 
-                S_Data.Write(Byte_1, 0, 1);
-                VisitedInfoSerialize<object>(Type.GetHashCode(), () => (Serializer.NameAsByte, null));
-                Serializer.Serializer(obj);
+                WriteSerializer(Type).Serializer(obj);
             },
             () =>
             {
@@ -1025,21 +1054,17 @@ namespace Monsajem_Incs.Serialization
                     return new object();
                 }
                 From += 1;
-                var Info = VisitedInfoDeserialize(() =>
-                {
-                    return Read();
-                });
 
-                return SerializeInfo.GetSerialize(Info).Deserializer();
+                return ReadSerializer().Deserializer();
             });
 
             SerializeInfo<bool>.InsertSerializer(
             (object obj) =>
             {
                 if ((bool)obj == true)
-                    S_Data.Write(Byte_1, 0, 1);
+                    S_Data.WriteByte(1);
                 else
-                    S_Data.Write(Byte_0, 0, 1);
+                    S_Data.WriteByte(0);
             },
             () =>
             {
@@ -1266,9 +1291,9 @@ namespace Monsajem_Incs.Serialization
                 (object obj) =>
                 {
                     if (obj == null)
-                        S_Data.Write(Byte_0, 0, 1);
+                        S_Data.WriteByte(0);
                     else
-                        S_Data.Write(Byte_1, 0, 1);
+                        S_Data.WriteByte(1);
                 },
                 () =>
                 {
