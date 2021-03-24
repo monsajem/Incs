@@ -882,11 +882,11 @@ namespace Monsajem_Incs.Serialization
 
             public static SerializeInfo<t> InsertSerializer(
                 Action<object> Serializer,
-                Func<object> Deserializer)
+                Func<object> Deserializer,bool IsFixedType = false)
             {
                 _Serializer = Serializer;
                 _Deserializer = Deserializer;
-                return InsertSerializer(() => (Serializer, Deserializer));
+                return InsertSerializer(() => (Serializer, Deserializer),IsFixedType);
             }
             private static SerializeInfo<t> InsertSerializer(
                 Func<(Action<object> Sr, Func<object> Dr)> Serializer,bool IsFixedType=false)
@@ -1056,7 +1056,7 @@ namespace Monsajem_Incs.Serialization
                 From += 1;
 
                 return ReadSerializer().Deserializer();
-            });
+            },true);
 
             SerializeInfo<bool>.InsertSerializer(
             (object obj) =>
@@ -1071,7 +1071,7 @@ namespace Monsajem_Incs.Serialization
                 int Position = From; From += 1;
                 var Result = (D_Data)[Position];
                 return Result > 0;
-            });
+            }, true);
 
             SerializeInfo<char>.InsertSerializer(
             (object Obj) =>
@@ -1082,7 +1082,7 @@ namespace Monsajem_Incs.Serialization
             {
                 int Position = From; From += 2;
                 return BitConverter.ToChar(D_Data, Position);
-            });
+            }, true);
 
             SerializeInfo<byte>.InsertSerializer(
             (object Obj) =>
@@ -1093,7 +1093,7 @@ namespace Monsajem_Incs.Serialization
             {
                 int Position = From; From += 1;
                 return D_Data[Position];
-            });
+            }, true);
 
             SerializeInfo<sbyte>.InsertSerializer(
             (object Obj) =>
@@ -1104,7 +1104,7 @@ namespace Monsajem_Incs.Serialization
             {
                 int Position = From; From += 1;
                 return (sbyte)D_Data[Position];
-            });
+            }, true);
 
             SerializeInfo<short>.InsertSerializer(
             (object obj) =>
@@ -1115,7 +1115,7 @@ namespace Monsajem_Incs.Serialization
             {
                 int Position = From; From += 2;
                 return BitConverter.ToInt16(D_Data, Position);
-            });
+            }, true);
 
             SerializeInfo<ushort>.InsertSerializer(
             (object Obj) =>
@@ -1126,7 +1126,7 @@ namespace Monsajem_Incs.Serialization
             {                 /// as UInt16
                 int Position = From; From += 2;
                 return BitConverter.ToUInt16(D_Data, Position);
-            });
+            }, true);
 
             SerializeInfo<int>.InsertSerializer(
             (object obj) =>
@@ -1137,7 +1137,7 @@ namespace Monsajem_Incs.Serialization
             {                 /// as Int32
                 int Position = From; From += 4;
                 return BitConverter.ToInt32(D_Data, Position);
-            });
+            }, true);
 
             SerializeInfo<uint>.InsertSerializer(
             (object obj) =>
@@ -1148,7 +1148,7 @@ namespace Monsajem_Incs.Serialization
             {                 /// as UInt32
                 int Position = From; From += 4;
                 return BitConverter.ToUInt32(D_Data, Position);
-            });
+            }, true);
 
             SerializeInfo<long>.InsertSerializer(
             (object obj) =>
@@ -1159,7 +1159,7 @@ namespace Monsajem_Incs.Serialization
             {                 /// as Int64
                 int Position = From; From += 8;
                 return BitConverter.ToInt64(D_Data, Position);
-            });
+            }, true);
 
             SerializeInfo<ulong>.InsertSerializer(
             (object obj) =>
@@ -1170,7 +1170,7 @@ namespace Monsajem_Incs.Serialization
             {
                 int Position = From; From += 8;
                 return BitConverter.ToUInt64(D_Data, Position);
-            });
+            }, true);
 
             SerializeInfo<float>.InsertSerializer(
             (object obj) =>
@@ -1181,7 +1181,7 @@ namespace Monsajem_Incs.Serialization
             {    /// as float
                 int Position = From; From += 4;
                 return BitConverter.ToSingle(D_Data, Position);
-            });
+            }, true);
 
             SerializeInfo<double>.InsertSerializer(
             (object obj) =>
@@ -1192,7 +1192,7 @@ namespace Monsajem_Incs.Serialization
             {                 /// as double
                 int Position = From; From += 8;
                 return BitConverter.ToDouble(D_Data, Position);
-            });
+            }, true);
 
             SerializeInfo<DateTime>.InsertSerializer(
             (object obj) =>
@@ -1203,7 +1203,7 @@ namespace Monsajem_Incs.Serialization
             {
                 int Position = From; From += 8;
                 return DateTime.FromBinary(BitConverter.ToInt64(D_Data, Position));
-            });
+            }, true);
 
             SerializeInfo<string>.InsertSerializer(
             (object obj) =>
@@ -1227,7 +1227,7 @@ namespace Monsajem_Incs.Serialization
                 var Position = From;
                 From += StrSize;
                 return UTF8.GetString(D_Data, Position, StrSize);
-            });
+            }, true);
 
             SerializeInfo<IntPtr>.InsertSerializer(
             (object obj) =>
@@ -1238,7 +1238,7 @@ namespace Monsajem_Incs.Serialization
             {                 /// as IntPtr
                 int Position = From; From += 8;
                 return new IntPtr(BitConverter.ToInt64(D_Data, Position));
-            });
+            }, true);
 
             SerializeInfo<UIntPtr>.InsertSerializer(
             (object obj) =>
@@ -1249,7 +1249,7 @@ namespace Monsajem_Incs.Serialization
             {                 /// as UIntPtr
                 int Position = From; From += 8;
                 return new UIntPtr(BitConverter.ToUInt64(D_Data, Position));
-            });
+            }, true);
 
             SerializeInfo<decimal>.InsertSerializer(
             (object obj) =>
@@ -1260,7 +1260,7 @@ namespace Monsajem_Incs.Serialization
             {                 /// as Decimal
                 int Position = From; From += 8;
                 return System.Convert.ToDecimal(BitConverter.ToDouble(D_Data, Position));
-            });
+            }, true);
 
             SerializeInfo<Type>.InsertSerializer(
                    (object obj) =>
@@ -1271,7 +1271,7 @@ namespace Monsajem_Incs.Serialization
                    () =>
                    {
                        return Read().GetTypeByName();
-                   });
+                   }, true);
 
             {
                 var SR = SerializeInfo<object>.GetSerialize();
@@ -1284,7 +1284,7 @@ namespace Monsajem_Incs.Serialization
                     () =>
                     {
                         return System.Runtime.InteropServices.GCHandle.Alloc(SR.Deserializer());
-                    });
+                    }, true);
             }
 
             SerializeInfo<IEqualityComparer<string>>.InsertSerializer(
@@ -1301,7 +1301,7 @@ namespace Monsajem_Incs.Serialization
                         return null;
                     else
                         return EqualityComparer<string>.Default;
-                });
+                }, true);
         }
 
         private LoadedFunc[] LoadedFuncs_Des = new LoadedFunc[0];
