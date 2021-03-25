@@ -23,7 +23,7 @@ namespace Monsajem_Incs.Database.Base
             Table<DataType, KeyType> Table,
             Action<DataType> MakeingUpdate = null)
             where KeyType : IComparable<KeyType>
-            => Client.I_GetUpdate(Table, MakeingUpdate,false).GetAwaiter().GetResult();
+            => Client.I_GetUpdate(Table, MakeingUpdate,null,false).GetAwaiter().GetResult();
 
         public static void SendUpdate<DataType, KeyType>
             (this ISyncOprations Client,
@@ -36,6 +36,6 @@ namespace Monsajem_Incs.Database.Base
             PartOfTable<DataType, KeyType> RelationTable,
             Action<DataType> MakeingUpdate = null)
             where KeyType : IComparable<KeyType>
-            => Client.I_GetUpdate(RelationTable, MakeingUpdate,true).GetAwaiter().GetResult();
+            => Client.I_GetUpdate(RelationTable, MakeingUpdate,null,true).GetAwaiter().GetResult();
     }
 }

@@ -225,6 +225,7 @@ namespace Monsajem_Incs.Database.Base
             this IAsyncOprations Client,
             Table<DataType, KeyType> Table,
             Action<DataType> MakeingUpdate,
+            Action<KeyType> Deleted,
             bool IsPartOfTable)
             where KeyType : IComparable<KeyType>
         {
@@ -253,6 +254,7 @@ namespace Monsajem_Incs.Database.Base
                     {
                         Parent_UpdateAble.DeleteDontUpdate(key);
                         PartTable.Delete(key);
+                        Deleted?.Invoke(key);
                     }
                 };
             }
@@ -263,6 +265,7 @@ namespace Monsajem_Incs.Database.Base
                 {
                     UpdateAble.DeleteDontUpdate(key);
                     Table.Delete(key);
+                    Deleted?.Invoke(key);
                 };
             }
 

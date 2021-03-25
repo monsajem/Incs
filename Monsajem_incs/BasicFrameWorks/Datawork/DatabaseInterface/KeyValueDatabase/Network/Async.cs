@@ -25,7 +25,7 @@ namespace Monsajem_Incs.Database.Base
             Table<DataType, KeyType> Table,
             Action<DataType> MakeingUpdate = null)
             where KeyType : IComparable<KeyType>
-            => Client.I_GetUpdate(Table, MakeingUpdate,false);
+            => Client.I_GetUpdate(Table, MakeingUpdate,null,false);
 
         public static Task SendUpdate<DataType, KeyType>
             (this IAsyncOprations Client,
@@ -41,6 +41,6 @@ namespace Monsajem_Incs.Database.Base
             PartOfTable<DataType, KeyType> RelationTable,
             Action<DataType> MakeingUpdate = null)
             where KeyType : IComparable<KeyType>
-            => Client.I_GetUpdate(RelationTable, MakeingUpdate,true);
+            => Client.I_GetUpdate(RelationTable, MakeingUpdate,null,true);
     }
 }

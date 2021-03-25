@@ -28,9 +28,13 @@ namespace Monsajem_Incs.Serialization
                 ObjHashCode = obj.GetHashCode(),
                 TypeHashCode = serializer.TypeHashCode
             };
-            var VisitedPos = Visitor.BinaryInsert(ref VisitedObj);
-            if (VisitedPos > -1)
+            if(Visitor.ContainsKey(VisitedObj)==false)
             {
+                Visitor.Add(VisitedObj,VisitedObj);
+            }
+            else
+            {
+                Visitor.TryGetValue(VisitedObj,out VisitedObj);
 #if DEBUG
                 if (VisitedObj.obj.GetType() != obj.GetType())
                     throw new Exception("Type of visited object is wrong" +
@@ -69,7 +73,7 @@ namespace Monsajem_Incs.Serialization
                     {
                         ObjHashCode = LastFrom
                     };
-                    Visitor.BinaryInsert(VisitedObj);
+                    Visitor.Add(VisitedObj,VisitedObj);
                     VisitedObj.obj = deserializer.Deserializer();
                     Set(VisitedObj.obj);
                     return;
@@ -80,7 +84,7 @@ namespace Monsajem_Incs.Serialization
             {
                 ObjHashCode = Fr
             };
-            VisitedObj = Visitor.BinarySearch(VisitedObj).Value;
+            Visitor.TryGetValue(VisitedObj, out VisitedObj);
             if (VisitedObj.obj == null)
                 AtLast += () => Set(VisitedObj.obj);
             else
@@ -95,9 +99,13 @@ namespace Monsajem_Incs.Serialization
             {
                 ObjHashCode = HashCode
             };
-            int VisitedPos = Visitor_info.BinaryInsert(ref VisitedObj);
-            if (VisitedPos > -1)
+            if (Visitor_info.ContainsKey(VisitedObj) == false)
             {
+                Visitor_info.Add(VisitedObj, VisitedObj);
+            }
+            else
+            {
+                Visitor_info.TryGetValue(VisitedObj, out VisitedObj);
                 S_Data.Write(BitConverter.GetBytes(VisitedObj.FromPos), 0, 4);
                 return (t)VisitedObj.obj;
             }
@@ -122,14 +130,14 @@ namespace Monsajem_Incs.Serialization
                     ObjHashCode = LastFrom,
                     obj = Get()
                 };
-                Visitor_info.BinaryInsert(VisitedObj);
+                Visitor_info.Add(VisitedObj,VisitedObj);
                 return (t)VisitedObj.obj;
             }
             VisitedObj = new ObjectContainer()
             {
                 ObjHashCode = Fr
             };
-            return (t)Visitor_info.BinarySearch(VisitedObj).Value.obj;
+            return (t)Visitor_info[VisitedObj].obj;
         }
 
 

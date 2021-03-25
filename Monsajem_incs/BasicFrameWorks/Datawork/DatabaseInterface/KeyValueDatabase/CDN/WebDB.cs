@@ -33,7 +33,7 @@ namespace Monsajem_Incs.Database.Base
                     var trs = db.Transaction("CDN");
                     var tbl = trs.ObjectStore("CDN");
                     return (await tbl.Get<Uint8Array>(c)).ToArray();
-                }, Table, MakeingUpdate);
+                }, Table, MakeingUpdate,null);
             }catch{}
             var Result = await GetUpdate(async (c) =>
             {
@@ -43,10 +43,16 @@ namespace Monsajem_Incs.Database.Base
                 var trs = db.Transaction("CDN");
                 var tbl = trs.ObjectStore("CDN");
 
-                tbl.Put(Uint8Array.From(Data), "Data");
+                tbl.Put(Uint8Array.From(Data), c);
                 await trs.Commit();
                 return Data;
-            }, Table, MakeingUpdate);
+            }, Table, MakeingUpdate,
+            async (c)=> {
+                var trs = db.Transaction("CDN");
+                var tbl = trs.ObjectStore("CDN");
+                await tbl.Delete(c);
+                await trs.Commit();
+            });
             db.Close();
             return Result;
         }
@@ -72,7 +78,7 @@ namespace Monsajem_Incs.Database.Base
                     var trs = db.Transaction("CDN");
                     var tbl = trs.ObjectStore("CDN");
                     return (await tbl.Get<Uint8Array>(c)).ToArray();
-                }, RLNTable, RLNKey, GetRelation, MakeingUpdate);
+                }, RLNTable, RLNKey, GetRelation, MakeingUpdate,null);
             }
             catch{}
             var Result = await GetUpdate(async (c) =>
@@ -86,7 +92,13 @@ namespace Monsajem_Incs.Database.Base
                 tbl.Put(Uint8Array.From(Data), "Data");
                 await trs.Commit();
                 return Data;
-            }, RLNTable, RLNKey, GetRelation, MakeingUpdate);
+            }, RLNTable, RLNKey, GetRelation, MakeingUpdate, 
+            async (c) => {
+                var trs = db.Transaction("CDN");
+                var tbl = trs.ObjectStore("CDN");
+                await tbl.Delete(c);
+                await trs.Commit();
+            });
             db.Close();
             return Result;
         }

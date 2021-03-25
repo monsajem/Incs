@@ -1315,9 +1315,9 @@ namespace Monsajem_Incs.Serialization
         [ThreadStaticAttribute]
         private static MemoryStream S_Data;
         [ThreadStaticAttribute]
-        private static SortedArray<ObjectContainer> Visitor;
+        private static SortedDictionary<ObjectContainer,ObjectContainer> Visitor;
         [ThreadStaticAttribute]
-        private static SortedArray<ObjectContainer> Visitor_info;
+        private static SortedDictionary<ObjectContainer,ObjectContainer> Visitor_info;
 
         public byte[] Serialize<t>(t obj)
         {
@@ -1339,8 +1339,8 @@ namespace Monsajem_Incs.Serialization
                 if (Serialization.S_Data == null)
                 {
                     Serialization.S_Data = new MemoryStream();
-                    Serialization.Visitor = new SortedArray<ObjectContainer>(20);
-                    Serialization.Visitor_info = new SortedArray<ObjectContainer>(20);
+                    Serialization.Visitor = new SortedDictionary<ObjectContainer, ObjectContainer>();
+                    Serialization.Visitor_info = new SortedDictionary<ObjectContainer, ObjectContainer>();
                 }
                 var SR = SerializeInfo<t>.GetSerialize();
                 try
@@ -1399,8 +1399,8 @@ namespace Monsajem_Incs.Serialization
                 t Result = default;
                 if (Serialization.Visitor_info == null)
                 {
-                    Serialization.Visitor = new SortedArray<ObjectContainer>(20);
-                    Serialization.Visitor_info = new SortedArray<ObjectContainer>(20);
+                    Serialization.Visitor = new SortedDictionary<ObjectContainer, ObjectContainer>();
+                    Serialization.Visitor_info = new SortedDictionary<ObjectContainer, ObjectContainer>();
                 }
                 Serialization.D_Data = Data;
                 Serialization.From = From;

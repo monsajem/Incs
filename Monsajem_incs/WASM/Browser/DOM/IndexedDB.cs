@@ -114,7 +114,7 @@ namespace WebAssembly.Browser.DOM
         public IDBIndex CreateIndex(string indexName, string keyPath,object objectParameters) => InvokeMethod<IDBIndex>("createIndex", indexName, keyPath, objectParameters);
 
         [Export("delete")]
-        public IDBRequest Delete(object KeyRange) => InvokeMethod<IDBRequest>("delete", KeyRange);
+        public Task Delete(object KeyRange) => InvokeMethod<IDBRequest>("delete", KeyRange).MakeTask();
 
         [Export("deleteIndex")]
         public void DeleteIndex(string indexName) => ManagedJSObject.Invoke("deleteIndex", indexName);

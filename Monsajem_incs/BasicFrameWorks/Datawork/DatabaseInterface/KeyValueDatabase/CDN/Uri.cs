@@ -24,7 +24,7 @@ namespace Monsajem_Incs.Database.Base
             {
                 var WebClient = new HttpClient();
                 return await WebClient.GetByteArrayAsync($"{CDN}{c}");
-            }, Table, MakeingUpdate);
+            }, Table, MakeingUpdate,null);
         }
 
         public static Task<bool> GetUpdate<ValueType_RLN, KeyType_RLN, ValueType, KeyType>(
@@ -40,7 +40,7 @@ namespace Monsajem_Incs.Database.Base
             {
                 var WebClient = new HttpClient();
                 return await WebClient.GetByteArrayAsync($"{CDN}{c}");
-            }, RLNTable,RLNKey,GetRelation, MakeingUpdate);
+            }, RLNTable,RLNKey,GetRelation, MakeingUpdate,null);
         }
     }
 }

@@ -12,10 +12,11 @@ namespace Monsajem_Incs.Database.Base
 {
     public static partial class Extentions
     {
-        public static async Task<bool> GetUpdate<ValueType, KeyType>(
-            Func<string,Task<byte[]>> CDN,
+        private static async Task<bool> GetUpdate<ValueType, KeyType>(
+            Func<string, Task<byte[]>> CDN,
             Table<ValueType, KeyType> Table,
-            Action<ValueType> MakeingUpdate = null)
+            Action<ValueType> MakeingUpdate,
+            Action<string> Deleted)
             where KeyType : IComparable<KeyType>
         {
 
@@ -43,24 +44,21 @@ namespace Monsajem_Incs.Database.Base
                         Convert.ToBase64String(key.Serialize()))).Deserialize<ValueType>();
                 }, false);
 
-            var ClientTask = Client.I_GetUpdate(Table, MakeingUpdate, false);
+            var ClientTask = Client.I_GetUpdate(Table, MakeingUpdate,
+                (key) =>Deleted?.Invoke("V/"+Convert.ToBase64String(key.Serialize())), false);
 
-            var R1 = await Task.WhenAny(ServerTask, ClientTask);
-
-            if (R1.Id == ServerTask.Id)
-                await ServerTask;
-            else
-                await ClientTask;
+             await Threading.Task_EX.CheckAll(ServerTask, ClientTask);
 
             return await ClientTask;
         }
 
-        public static Task<bool> GetUpdate<ValueType_RLN, KeyType_RLN, ValueType, KeyType>(
+        private static Task<bool> GetUpdate<ValueType_RLN, KeyType_RLN, ValueType, KeyType>(
             Func<string, Task<byte[]>> CDN,
             Table<ValueType_RLN, KeyType_RLN> RLNTable,
             KeyType_RLN RLNKey,
             Func<ValueType_RLN, PartOfTable<ValueType, KeyType>> GetRelation,
-            Action<ValueType> MakeingUpdate = null)
+            Action<ValueType> MakeingUpdate,
+            Action<string> Deleted)
             where KeyType : IComparable<KeyType>
             where KeyType_RLN : IComparable<KeyType_RLN>
         {
@@ -69,7 +67,7 @@ namespace Monsajem_Incs.Database.Base
                 async (c)=>await CDN($"/{PartTable.Parent.TableName}{c}");
             Func<string, Task<byte[]>> RelationCDN =
                 async (c)=>await CDN($"/{RLNTable.TableName}{c}");
-            return GetUpdate(RootCDN, RelationCDN, RLNTable, RLNKey, GetRelation, MakeingUpdate);
+            return GetUpdate(RootCDN, RelationCDN, RLNTable, RLNKey, GetRelation, MakeingUpdate,Deleted);
         }
 
         private static async Task<bool> GetUpdate<ValueType_RLN, KeyType_RLN, ValueType, KeyType>(
@@ -78,7 +76,8 @@ namespace Monsajem_Incs.Database.Base
             Table<ValueType_RLN, KeyType_RLN> RLNTable,
             KeyType_RLN RLNKey,
             Func<ValueType_RLN, PartOfTable<ValueType, KeyType>> GetRelation,
-            Action<ValueType> MakeingUpdate)
+            Action<ValueType> MakeingUpdate,
+            Action<string> Deleted)
             where KeyType : IComparable<KeyType>
             where KeyType_RLN : IComparable<KeyType_RLN>
         {
@@ -118,14 +117,10 @@ namespace Monsajem_Incs.Database.Base
                         Convert.ToBase64String(key.Serialize()))).Deserialize<ValueType>();
                 }, true);
 
-            var ClientTask = Client.I_GetUpdate(ClientTable, MakeingUpdate, true);
+            var ClientTask = Client.I_GetUpdate(ClientTable, MakeingUpdate,
+                (key)=>Deleted?.Invoke("/V/" +Convert.ToBase64String(key.Serialize())), true);
 
-            var R1 = await Task.WhenAny(ServerTask, ClientTask);
-
-            if (R1.Id == ServerTask.Id)
-                await ServerTask;
-            else
-                await ClientTask;
+            await Threading.Task_EX.CheckAll(ServerTask, ClientTask);
 
             return await ClientTask;
 
