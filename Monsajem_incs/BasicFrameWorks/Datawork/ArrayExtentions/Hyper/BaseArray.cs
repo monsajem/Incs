@@ -20,7 +20,7 @@ namespace Monsajem_Incs.Array.Hyper
             IComparable<ArrayInstance>
         {
             public int FromPos;
-            public DynamicSize.Array<ArrayType> ar;
+            public FixedSize.Array<ArrayType> ar;
             public int CompareTo(ArrayInstance other)
             {
                 return this.FromPos - other.FromPos;
@@ -54,7 +54,7 @@ namespace Monsajem_Incs.Array.Hyper
                     this.ar = new DynamicSize.Array<ArrayInstance>();
                     ar.Insert(new ArrayInstance()
                     {
-                        ar = new DynamicSize.Array<ArrayType>(MinCount),
+                        ar = new FixedSize.Array<ArrayType>(MinCount),
                         FromPos = 0
                     }, 0);
                 }
@@ -118,7 +118,7 @@ namespace Monsajem_Incs.Array.Hyper
                 ar.Insert(new ArrayInstance()
                 {
                     FromPos = OldAr.FromPos + OldAr.ar.Length,
-                    ar = new DynamicSize.Array<ArrayType>(NewAr, MinCount)
+                    ar = NewAr
                 },
                 Pos + 1);
                 return 1;
@@ -264,7 +264,7 @@ namespace Monsajem_Incs.Array.Hyper
 
                 var Instance = new ArrayInstance()
                 {
-                    ar = new DynamicSize.Array<ArrayType>((ArrayType[])Ar, MinCount),
+                    ar = new FixedSize.Array<ArrayType>((ArrayType[])Ar),
                     FromPos = From
                 };
 

@@ -780,7 +780,7 @@ namespace Monsajem_Incs.Array.Base
         public OwnerType From(int from)
         {
             var Result = MakeSameNew();
-            Result.Insert(this,0);
+            Result.Insert(0, this, from,Length-from);
             return Result;
         }
 

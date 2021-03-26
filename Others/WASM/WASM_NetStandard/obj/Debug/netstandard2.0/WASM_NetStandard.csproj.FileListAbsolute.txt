@@ -34,3 +34,4 @@ G:\Programing\Monsajem_incs\Monsajem_incs\Others\WASM\WASM_NetStandard\obj\Debug
 G:\Programing\Monsajem_incs\Monsajem_incs\Others\WASM\WASM_NetStandard\obj\Debug\netstandard2.0\WASM_NetStandard.csproj.CoreCompileInputs.cache
 G:\Programing\Monsajem_incs\Monsajem_incs\Others\WASM\WASM_NetStandard\obj\Debug\netstandard2.0\WebAssembly.Bindings.dll
 G:\Programing\Monsajem_incs\Monsajem_incs\Others\WASM\WASM_NetStandard\obj\Debug\netstandard2.0\WebAssembly.Bindings.pdb
+G:\Programing\Monsajem_incs\Monsajem_incs\Others\WASM\WASM_NetStandard\obj\Debug\netstandard2.0\WASM_NetStandard.csprojAssemblyReference.cache
