@@ -6,14 +6,13 @@ using System.Threading;
 using static Monsajem_Incs.ArrayExtentions.ArrayExtentions;
 namespace Monsajem_Incs.SafeAccess
 {
-
     public class SafeAccess<KeyType>
         where KeyType:IComparable<KeyType>
     {
         private ReaderWriterLockSlim ThisSafe = new ReaderWriterLockSlim();
 
-        private KeyType[] Keys = new KeyType[0];
-        private ReaderWriterLockSlim[] Access = new ReaderWriterLockSlim[0];
+        private SortedDictionary<KeyType, ReaderWriterLockSlim> Keys = 
+            new SortedDictionary<KeyType, ReaderWriterLockSlim>();
 
         public void Read(KeyType Key, Action Action)
         {
@@ -40,12 +39,8 @@ namespace Monsajem_Incs.SafeAccess
                 RwLock.WaitingWriteCount == 0)
             {
                 ThisSafe.EnterWriteLock();
-                var position = System.Array.BinarySearch(Keys, Key);
-                if(position>-1)
-                {
-                    DeleteByPosition(ref this.Access, position);
-                    DeleteByPosition(ref this.Keys, position);
-                }
+                if (Keys.ContainsKey(Key))
+                    Keys.Remove(Key);
                 ThisSafe.ExitWriteLock();
             }
         }
@@ -54,19 +49,12 @@ namespace Monsajem_Incs.SafeAccess
         {
             ThisSafe.EnterWriteLock();
 
-            int position;
             ReaderWriterLockSlim RwLock;
-            position = System.Array.BinarySearch(Keys, Key);
-            if (position < 0)
+            Keys.TryGetValue(Key, out RwLock);
+            if (RwLock==null)
             {
-                position = BinaryInsert(ref Keys, Key);
                 RwLock = new ReaderWriterLockSlim();
-                Insert(ref this.Access, RwLock, position);
-                
-            }
-            else
-            {
-                RwLock = this.Access[position];
+                Keys.Add(Key, RwLock);
             }
             ThisSafe.ExitWriteLock();
             return RwLock;

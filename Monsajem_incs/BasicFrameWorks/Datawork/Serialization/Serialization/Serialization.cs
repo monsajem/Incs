@@ -28,9 +28,9 @@ namespace Monsajem_Incs.Serialization
                 ObjHashCode = obj.GetHashCode(),
                 TypeHashCode = serializer.TypeHashCode
             };
-            if(Visitor.ContainsKey(VisitedObj)==false)
+            if(Visitor.Contains(VisitedObj)==false)
             {
-                Visitor.Add(VisitedObj,VisitedObj);
+                Visitor.Add(VisitedObj);
             }
             else
             {
@@ -73,7 +73,7 @@ namespace Monsajem_Incs.Serialization
                     {
                         ObjHashCode = LastFrom
                     };
-                    Visitor.Add(VisitedObj,VisitedObj);
+                    Visitor.Add(VisitedObj);
                     VisitedObj.obj = deserializer.Deserializer();
                     Set(VisitedObj.obj);
                     return;
@@ -99,9 +99,9 @@ namespace Monsajem_Incs.Serialization
             {
                 ObjHashCode = HashCode
             };
-            if (Visitor_info.ContainsKey(VisitedObj) == false)
+            if (Visitor_info.Contains(VisitedObj) == false)
             {
-                Visitor_info.Add(VisitedObj, VisitedObj);
+                Visitor_info.Add(VisitedObj);
             }
             else
             {
@@ -130,14 +130,15 @@ namespace Monsajem_Incs.Serialization
                     ObjHashCode = LastFrom,
                     obj = Get()
                 };
-                Visitor_info.Add(VisitedObj,VisitedObj);
+                Visitor_info.Add(VisitedObj);
                 return (t)VisitedObj.obj;
             }
             VisitedObj = new ObjectContainer()
             {
                 ObjHashCode = Fr
             };
-            return (t)Visitor_info[VisitedObj].obj;
+            Visitor_info.TryGetValue(VisitedObj, out VisitedObj);
+            return (t)VisitedObj.obj;
         }
 
 
