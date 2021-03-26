@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "tXanTMteKtclDROpdhcaeHg6+YJfaFfSe7TPzp3HStk+m/TRYaGhj5r09LhkU2DC2a5JmASekjzPqXr/WtUI3w==",
+  "success": true,
+  "projectFilePath": "G:\\Programing\\Monsajem_incs\\Monsajem_incs\\Others\\WASM\\WASM_NetCore\\WASM_NetCore.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\xtron\\.nuget\\packages\\microsoft.jsinterop\\5.0.3\\microsoft.jsinterop.5.0.3.nupkg.sha512"
+  ],
+  "logs": []
+}
