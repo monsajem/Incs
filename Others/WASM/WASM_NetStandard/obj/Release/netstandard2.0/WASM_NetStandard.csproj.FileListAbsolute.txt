@@ -1,9 +1,0 @@
-G:\Programing\Monsajem_incs\Monsajem_incs\Others\netstandard2.0\WebAssembly.Bindings.xml
-G:\Programing\Monsajem_incs\Monsajem_incs\Others\netstandard2.0\WebAssembly.Bindings.deps.json
-G:\Programing\Monsajem_incs\Monsajem_incs\Others\netstandard2.0\WebAssembly.Bindings.dll
-G:\Programing\Monsajem_incs\Monsajem_incs\Others\netstandard2.0\WebAssembly.Bindings.pdb
-G:\Programing\Monsajem_incs\Monsajem_incs\Others\WASM\WASM_NetStandard\obj\Release\netstandard2.0\WASM_NetStandard.AssemblyInfoInputs.cache
-G:\Programing\Monsajem_incs\Monsajem_incs\Others\WASM\WASM_NetStandard\obj\Release\netstandard2.0\WASM_NetStandard.AssemblyInfo.cs
-G:\Programing\Monsajem_incs\Monsajem_incs\Others\WASM\WASM_NetStandard\obj\Release\netstandard2.0\WASM_NetStandard.csproj.CoreCompileInputs.cache
-G:\Programing\Monsajem_incs\Monsajem_incs\Others\WASM\WASM_NetStandard\obj\Release\netstandard2.0\WebAssembly.Bindings.dll
-G:\Programing\Monsajem_incs\Monsajem_incs\Others\WASM\WASM_NetStandard\obj\Release\netstandard2.0\WebAssembly.Bindings.pdb
