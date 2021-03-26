@@ -4,7 +4,7 @@ using System.Linq;
 using System.IO;
 using System.Collections;
 using System.Runtime.Serialization;
-using Monsajem_Incs.Array;
+using Monsajem_Incs.Array.Hyper;
 using Monsajem_Incs.Serialization;
 
 namespace Monsajem_Incs.Database.Base

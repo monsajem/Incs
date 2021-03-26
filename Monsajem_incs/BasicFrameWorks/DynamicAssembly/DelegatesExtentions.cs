@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Monsajem_Incs.Array;
+using Monsajem_Incs.Array.Hyper;
 namespace Monsajem_Incs.DynamicAssembly
 {
     public static class DelegatesExtentions

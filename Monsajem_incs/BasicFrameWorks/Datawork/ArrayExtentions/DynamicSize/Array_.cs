@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Monsajem_Incs.Array.DynamicSize
 {
-    internal class Array<ArrayType>:
+    public class Array<ArrayType>:
         OneArrayBase.Array<ArrayType, Array<ArrayType>>
     {
         public int MinLen;

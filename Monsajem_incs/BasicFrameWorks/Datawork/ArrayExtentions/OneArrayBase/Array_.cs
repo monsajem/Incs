@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Monsajem_Incs.Array.OneArrayBase
 {
-    internal abstract class Array<ArrayType,OwnerType> :
+    public abstract class Array<ArrayType,OwnerType> :
         Base.IArray<ArrayType, OwnerType>
         where OwnerType: Array<ArrayType, OwnerType>
     {
@@ -31,22 +31,6 @@ namespace Monsajem_Incs.Array.OneArrayBase
             get => ar[Pos];
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set => ar[Pos] = value;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public new Array<t> Browse<t>(Func<ArrayType, t> Selector)
-        {
-            var Result = new Array<t>();
-            Result.Insert(base.Browse(Selector));
-            return Result;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public new Array<ArrayType> Browse(Func<ArrayType, bool> Selector)
-        {
-            var Result = new Array<ArrayType>();
-            Result.Insert(base.Browse(Selector));
-            return Result;
         }
 
         internal override System.Array GetArrayFrom(int From, out int Ar_From, out int Ar_Len)

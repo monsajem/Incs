@@ -6,7 +6,7 @@ using System.Threading;
 using Monsajem_Incs.Database.Base;
 using Monsajem_Incs.Serialization;
 using Monsajem_Incs.Database;
-using Monsajem_Incs.Array;
+using Monsajem_Incs.Array.Hyper;
 
 namespace Monsajem_Incs.StreamCollection
 {

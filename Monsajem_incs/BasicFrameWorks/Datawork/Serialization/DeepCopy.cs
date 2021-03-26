@@ -5,7 +5,7 @@ using System.Reflection;
 using static Monsajem_Incs.ArrayExtentions.ArrayExtentions;
 using Monsajem_Incs.ArrayExtentions;
 using static System.Runtime.Serialization.FormatterServices;
-using Monsajem_Incs.Array;
+using Monsajem_Incs.Array.DynamicSize;
 
 namespace Monsajem_Incs.Serialization
 {
@@ -49,7 +49,7 @@ namespace Monsajem_Incs.Serialization
         {
             ObjectExtensions.OrginalTargetForDelegates = OrginalTargetForDelegates;
             var Pos = InternalCopy(originalObject.GetType());
-            visited = new Array<ObjectContainer>();
+            visited = new Array<ObjectContainer>(5);
             var Result = InternalCopys[Pos]
                 (originalObject);
             AtLast?.Invoke();

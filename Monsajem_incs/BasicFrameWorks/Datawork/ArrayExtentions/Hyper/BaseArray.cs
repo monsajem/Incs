@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Monsajem_Incs.Array.Hyper
 {
-    internal class Array<ArrayType> :
+    public class Array<ArrayType> :
         Base.IArray<ArrayType, Array<ArrayType>>
     {
         protected override Array<ArrayType> MakeSameNew()
