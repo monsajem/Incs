@@ -42,14 +42,16 @@ namespace Monsajem_Incs.Array.Hyper
             Insert(ar);
         }
 
-        public override object MyOptions { get => MinCount;
-            set 
+        public override object MyOptions
+        {
+            get => MinCount;
+            set
             {
-                this.MinCount =(int) value;
+                this.MinCount = (int)value;
                 this.MaxLen = MinCount - 1;
                 this.MaxLen_Div2 = MaxLen / 2;
 
-                if(this.ar==null)
+                if (this.ar == null)
                 {
                     this.ar = new DynamicSize.Array<ArrayInstance>();
                     ar.Insert(new ArrayInstance()
@@ -58,7 +60,7 @@ namespace Monsajem_Incs.Array.Hyper
                         FromPos = 0
                     }, 0);
                 }
-            } 
+            }
         }
 
         public override ArrayType this[int Pos]
@@ -89,7 +91,7 @@ namespace Monsajem_Incs.Array.Hyper
                 {
                     Index = (Index * -1) - 2;
                     Myar = ar[Index];
-                    Myar.ar[Pos - Myar.FromPos]=value;
+                    Myar.ar[Pos - Myar.FromPos] = value;
                     return;
                 }
 
@@ -104,7 +106,7 @@ namespace Monsajem_Incs.Array.Hyper
         {
             for (int i = 0; i < ar.Length; i++)
             {
-                i+=Optimization(ar, i);
+                i += Optimization(ar, i);
             }
         }
 
@@ -127,7 +129,7 @@ namespace Monsajem_Incs.Array.Hyper
             {
                 if (ar.Length > 1)
                 {
-                    
+
                     ar.DeleteByPosition(Pos);
                     return -1;
                 }
@@ -194,13 +196,57 @@ namespace Monsajem_Incs.Array.Hyper
             {
                 arPos = (arPos * -1) - 2;
                 MyAr = ar[arPos];
+
+                if (MyAr.ar.IsFull)
+                {
+                    Position = Position - MyAr.FromPos;
+                    if (Position == MyAr.ar.Length)
+                    {
+                        var InnerAr = new FixedSize.Array<ArrayType>(MinCount);
+                        InnerAr.Insert(Value);
+                        var NewAr = new ArrayInstance()
+                        {
+                            FromPos = MyAr.FromPos + MyAr.ar.Length,
+                            ar = InnerAr
+                        };
+                        arPos += 1;
+                        ar.Insert(NewAr, arPos);
+                    }
+                    else
+                    {
+                        var InnerAr = MyAr.ar.PopFrom(Position);
+                        MyAr.ar.Insert(Value);
+                        var NewAr = new ArrayInstance()
+                        {
+                            FromPos = MyAr.FromPos + MyAr.ar.Length,
+                            ar = InnerAr
+                        };
+                        arPos += 1;
+                        ar.Insert(NewAr, arPos);
+                    }
+                }
+                else
+                    MyAr.ar.Insert(Value, Position - MyAr.FromPos);
             }
             else
+            {
                 MyAr = arInfo.Value;
-            MyAr.ar.Insert(Value, Position - MyAr.FromPos);
+                if (MyAr.ar.IsFull)
+                {
+                    var InnerAr = new FixedSize.Array<ArrayType>(MinCount);
+                    InnerAr.Insert(Value);
+                    var NewAr = new ArrayInstance()
+                    {
+                        FromPos = MyAr.FromPos,
+                        ar = InnerAr
+                    };
+                    ar.Insert(NewAr, arPos);
+                }
+                else
+                    MyAr.ar.Insert(Value, 0);
+            }
             for (int i = arPos + 1; i < ar.Length; i++)
                 ar[i].FromPos += 1;
-            Optimization(ar, arPos);
             Length++;
         }
 
@@ -262,11 +308,11 @@ namespace Monsajem_Incs.Array.Hyper
                 }, arPos);
             }
 
-                var Instance = new ArrayInstance()
-                {
-                    ar = new FixedSize.Array<ArrayType>((ArrayType[])Ar),
-                    FromPos = From
-                };
+            var Instance = new ArrayInstance()
+            {
+                ar = new FixedSize.Array<ArrayType>((ArrayType[])Ar),
+                FromPos = From
+            };
 
             var Opt = new DynamicSize.Array<ArrayInstance>(10);
             Opt.Insert(Instance);
@@ -292,7 +338,12 @@ namespace Monsajem_Incs.Array.Hyper
             if (ar.Length > 0)
                 From = ar[0].FromPos - From;
 
-            return ar[arPos].ar.GetArrayFrom(From, out Ar_From,out Ar_Len);
+            return ar[arPos].ar.GetArrayFrom(From, out Ar_From, out Ar_Len);
+        }
+
+        internal override System.Array GetArrayPos(int Ar_Pos, out int Ar_From, out int Ar_Len)
+        {
+            return ar[Ar_Pos].ar.GetArrayFrom(0, out Ar_From, out Ar_Len);
         }
     }
 }

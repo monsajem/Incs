@@ -528,18 +528,7 @@ namespace Monsajem_Incs.Array.Base
             return BinarySearch(key, 0, Length);
         }
 
-        private static Comparer<ArrayType> DefaultComparer =
-            ((Func<Comparer<ArrayType>>)(()=> {
-                if(typeof(IComparable<ArrayType>).IsAssignableFrom(typeof(ArrayType)))
-                {
-                    return Comparer<ArrayType>.Create((c1,c2) =>
-                    {
-                        return ((IComparable<ArrayType>)c1).CompareTo(c2);
-                    });
-                }
-                return null;
-            }))();
-        protected IComparer<ArrayType> Comparer = DefaultComparer;
+        protected IComparer<ArrayType> Comparer = Comparer<ArrayType>.Default;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public (int Index, ArrayType Value) BinarySearch(ArrayType key, int minNum, int maxNum)
@@ -715,7 +704,7 @@ namespace Monsajem_Incs.Array.Base
 
         internal virtual System.Array GetArrayFrom(int From, out int Ar_From, out int Ar_Len)
         {
-            var Result = new ArrayType[(Length - From)+1];
+            var Result = new ArrayType[Length - From];
             Ar_From = 0;
             Ar_Len = Result.Length;
             for (int i = 0; i < Ar_Len; i++)
