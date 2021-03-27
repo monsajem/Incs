@@ -14,12 +14,12 @@ namespace Monsajem_Incs.Array.MultiplierSize
         public int MinLen;
         public int MaxLen;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public Array()
         {
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public Array(ArrayType[] ar)
         {
             Length = ar.Length;
@@ -32,7 +32,7 @@ namespace Monsajem_Incs.Array.MultiplierSize
             set { }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public override void DeleteFrom(int from)
         {
             Length = from;
@@ -45,7 +45,7 @@ namespace Monsajem_Incs.Array.MultiplierSize
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         internal override void AddLength(int Count)
         {
             Length = Length + Count;
@@ -58,7 +58,7 @@ namespace Monsajem_Incs.Array.MultiplierSize
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public new Array<t> Browse<t>(Func<ArrayType, t> Selector)
         {
             var Result = new Array<t>();
@@ -66,7 +66,7 @@ namespace Monsajem_Incs.Array.MultiplierSize
             return Result;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public new Array<ArrayType> Browse(Func<ArrayType, bool> Selector)
         {
             var Result = new Array<ArrayType>();
@@ -74,7 +74,7 @@ namespace Monsajem_Incs.Array.MultiplierSize
             return Result;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static implicit operator ArrayType[](Array<ArrayType> ar)
         {
             var NewAr = new ArrayType[ar.Length];
@@ -82,7 +82,7 @@ namespace Monsajem_Incs.Array.MultiplierSize
             return NewAr;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         protected override Array<ArrayType> MakeSameNew()
         {
             return new Array<ArrayType>();

@@ -27,7 +27,7 @@ namespace Monsajem_Incs.Array.Base
         IArray,IEnumerable<ArrayType>
     {
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         void IArray.SetLen(int Len) => Length = Len;
         public virtual int Length { get; internal set; }
 
@@ -39,22 +39,22 @@ namespace Monsajem_Incs.Array.Base
 
         Type IArray.ElementType => throw new NotImplementedException();
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         internal abstract void AddLength(int Count);
 
         public abstract ArrayType this[int Pos] {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(MethodImplOptions.AggressiveOptimization)]
             get;
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(MethodImplOptions.AggressiveOptimization)]
             set; }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public virtual void Clear()
         {
             DeleteFromTo(0, Length - 1);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         protected static void Copy(
             IArray<ArrayType> sourceArray,
             int sourceIndex,
@@ -86,7 +86,7 @@ namespace Monsajem_Incs.Array.Base
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         protected static void Copy(
             IArray<ArrayType> sourceArray,
             int sourceIndex,
@@ -118,7 +118,7 @@ namespace Monsajem_Incs.Array.Base
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         protected static void Copy(
             ArrayType[] sourceArray,
             int sourceIndex,
@@ -129,13 +129,13 @@ namespace Monsajem_Incs.Array.Base
             destinationArray.SetFromTo(destinationIndex, sourceArray, sourceIndex, length);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         protected void CopyTo(int From, ArrayType[] destination, int destinationIndex, int Length)
         {
             Copy(this, From, destination, destinationIndex, Length);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         protected void CopyTo(int From, IArray<ArrayType> destination, int destinationIndex, int Length)
         {
             Copy(this, From, destination, destinationIndex, Length);
@@ -206,7 +206,7 @@ namespace Monsajem_Incs.Array.Base
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         internal virtual ((int From, int Len, System.Array Ar)[] Ar, int MaxLen)
             GetAllArrays()
         {
@@ -226,7 +226,7 @@ namespace Monsajem_Incs.Array.Base
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public ArrayType[] ToArray()
         {
             var NewAr = new ArrayType[Length];
@@ -234,13 +234,13 @@ namespace Monsajem_Incs.Array.Base
             return NewAr;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static implicit operator ArrayType[](IArray<ArrayType> ar)
         {
             return ar.ToArray();
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public virtual void DeleteByPosition(int Position)
         {
             if (Position == Length - 1)
@@ -253,24 +253,24 @@ namespace Monsajem_Incs.Array.Base
             DeleteFrom(Length - 1);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public abstract void DeleteFrom(int from);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void DeleteFromTo(int from, int To)
         {
             CopyTo(To + 1, this, from, Length - (To + 1));
             DeleteFrom(Length - (To - from + 1));
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void DeleteTo(int To)
         {
             CopyTo(To + 1, this, 0, Length - (To + 1));
             DeleteFrom(Length - (To + 1));
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public ArrayType Pop()
         {
             var Item = this[Length - 1];
@@ -278,13 +278,13 @@ namespace Monsajem_Incs.Array.Base
             return Item;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public virtual void Insert(ArrayType Value)
         {
             Insert(Value, Length);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void Insert(int From,IArray<ArrayType> sourceArray, int sourceIndex, int length)
         {
             int Source_From; int Source_Len;
@@ -311,14 +311,14 @@ namespace Monsajem_Incs.Array.Base
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void Insert(params ArrayType[] Values)
         {
             var From = Length;
             AddFromTo(Length,Values,0,Values.Length);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void Insert(IEnumerable<ArrayType> Values)
         {
             var From = Length;
@@ -337,14 +337,14 @@ namespace Monsajem_Incs.Array.Base
             Reader.Dispose();
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void Insert(int From,ArrayType[] Values,int Values_From,int ValuesLen)
         {
             var ArLen = Length;
             AddFromTo(From,Values,Values_From, ValuesLen);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void Insert(IEnumerable<ArrayType> Values, int From)
         {
             var ArLen = Length;
@@ -364,7 +364,7 @@ namespace Monsajem_Incs.Array.Base
             Reader.Dispose();
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public virtual void Insert(ArrayType Value, int Position)
         {
             AddLength(1);
@@ -377,7 +377,7 @@ namespace Monsajem_Incs.Array.Base
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void DropFromInsertTo(int From, int To, ArrayType Value)
         {
             if (From < To)
@@ -391,7 +391,7 @@ namespace Monsajem_Incs.Array.Base
             this[To] = Value;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void DropFromInsertTo(int From, int To)
         {
             var Value = this[From];
@@ -406,19 +406,19 @@ namespace Monsajem_Incs.Array.Base
             this[To] = Value;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         System.Array IArray.ToArray()
         {
             return ToArray();
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         void IArray.Insert(System.Array Array)
         {
             Insert((ArrayType[])Array);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public t[] Browse<t>(Func<ArrayType, t> Selector)
         {
             var Result = new t[Length];
@@ -427,7 +427,7 @@ namespace Monsajem_Incs.Array.Base
             return Result;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public ArrayType[] Browse(Func<ArrayType, bool> Selector)
         {
             var Result = new ArrayType[Length];
@@ -444,14 +444,14 @@ namespace Monsajem_Incs.Array.Base
             return Result;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void Browse(Action<ArrayType> Visitor)
         {
             foreach (var Value in this)
                 Visitor(Value);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public int Count(Func<ArrayType, bool> Selector)
         {
             var Count = 0;
@@ -461,7 +461,7 @@ namespace Monsajem_Incs.Array.Base
             return Count;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public (int Index, ArrayType Value) BinaryDelete(ArrayType Value)
         {
             var Place = BinarySearch(Value, 0, Length);
@@ -473,14 +473,14 @@ namespace Monsajem_Incs.Array.Base
             return Place;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void BinaryDelete(IEnumerable<ArrayType> Values)
         {
             foreach (var Value in Values)
                 BinaryDelete(Value);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public int BinaryInsert(ArrayType Value)
         {
             var Place = BinarySearch(Value, 0, Length).Index;
@@ -490,7 +490,7 @@ namespace Monsajem_Incs.Array.Base
             return Place;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public int BinaryInsert(ref ArrayType Value)
         {
             var Place = BinarySearch(Value, 0, Length);
@@ -504,7 +504,7 @@ namespace Monsajem_Incs.Array.Base
             return Index;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void BinaryInsert(params ArrayType[] Values)
         {
             for (int i = 0; i < Values.Length; i++)
@@ -513,7 +513,7 @@ namespace Monsajem_Incs.Array.Base
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void BinaryInsert(IEnumerable<ArrayType> Values)
         {
             foreach (var Value in Values)
@@ -522,7 +522,7 @@ namespace Monsajem_Incs.Array.Base
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public (int Index, ArrayType Value) BinarySearch(ArrayType key)
         {
             return BinarySearch(key, 0, Length);
@@ -530,7 +530,7 @@ namespace Monsajem_Incs.Array.Base
 
         protected IComparer<ArrayType> Comparer = Comparer<ArrayType>.Default;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public (int Index, ArrayType Value) BinarySearch(ArrayType key, int minNum, int maxNum)
         {
             var Comparer = this.Comparer;
@@ -558,56 +558,56 @@ namespace Monsajem_Incs.Array.Base
             return ((minNum + 1) * -1, default);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void shiftEnd(int Count) =>
             shiftEnd(0, Length - 1, Count);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void shiftBegin(int Count) =>
             shiftBegin(0, Length - 1, Count);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void shiftRollEnd(int Count) =>
             shiftRollEnd(0, Length - 1, Count);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void shiftRollBegin(int Count) =>
             shiftRollBegin(0, Length - 1, Count);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public ArrayType[] shiftExtraEnd(int Count) =>
             shiftExtraEnd(0, Length - 1, Count);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public ArrayType[] shiftExtraBegin(int Count) =>
             shiftExtraBegin(0, Length - 1, Count);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void shiftEndFrom(int From, int Count) =>
             shiftEnd(From, Length - 1, Count);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void shiftBeginFrom(int From, int Count) =>
             shiftBegin(From, Length - 1, Count);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void shiftRollEndFrom(int From, int Count) =>
             shiftRollEnd(From, Length - 1, Count);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void shiftRollBeginFrom(int From, int Count) =>
             shiftRollBegin(From, Length - 1, Count);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public ArrayType[] shiftExtraEndFrom(int From, int Count) =>
             shiftExtraEnd(From, Length - 1, Count);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public ArrayType[] shiftExtraBeginFrom(int From, int Count) =>
             shiftExtraBegin(From, Length - 1, Count);
 
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void shiftEnd(int From, int To, int Count)
         {
             var ArLen = (To - From) + 1;
@@ -616,13 +616,13 @@ namespace Monsajem_Incs.Array.Base
             _shiftEnd(From, Count, ArLen);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private void _shiftEnd(int From, int Count, int ArLen)
         {
             Copy(this, From, this, From + Count, ArLen - Count);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void shiftBegin(int From, int To, int Count)
         {
             var ArLen = (To - From) + 1;
@@ -631,13 +631,13 @@ namespace Monsajem_Incs.Array.Base
             _shiftBegin(From, Count, ArLen);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private void _shiftBegin(int From, int Count, int ArLen)
         {
             Copy(this, From + Count, this, From, ArLen - Count);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public ArrayType[] shiftExtraEnd(int From, int To, int Count)
         {
             var ArLen = (To - From) + 1;
@@ -650,7 +650,7 @@ namespace Monsajem_Incs.Array.Base
             return _shiftExtraEnd(From, To, Count, ArLen);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private ArrayType[] _shiftExtraEnd(int From, int To, int Count, int ArLen)
         {
             var Roll = new ArrayType[Count];
@@ -659,7 +659,7 @@ namespace Monsajem_Incs.Array.Base
             return Roll;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public ArrayType[] shiftExtraBegin(int From, int To, int Count)
         {
             var ArLen = (To - From) + 1;
@@ -672,7 +672,7 @@ namespace Monsajem_Incs.Array.Base
             return _shiftExtraBegin(From, To, Count, ArLen);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private ArrayType[] _shiftExtraBegin(int From, int To, int Count, int ArLen)
         {
             var Roll = new ArrayType[Count];
@@ -681,7 +681,7 @@ namespace Monsajem_Incs.Array.Base
             return Roll;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void shiftRollEnd(int From, int To, int Count)
         {
             var ArLen = (To - From) + 1;
@@ -691,7 +691,7 @@ namespace Monsajem_Incs.Array.Base
             Copy(Roll, 0, this, From, Count);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void shiftRollBegin(int From, int To, int Count)
         {
             var ArLen = (To - From) + 1;
@@ -754,10 +754,10 @@ namespace Monsajem_Incs.Array.Base
         IArray<ArrayType>
         where OwnerType : IArray<ArrayType, OwnerType>
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         protected abstract OwnerType MakeSameNew();
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public OwnerType Copy()
         {
             var NewAr = MakeSameNew();
@@ -765,7 +765,7 @@ namespace Monsajem_Incs.Array.Base
             return NewAr;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public OwnerType From(int from)
         {
             var Result = MakeSameNew();
@@ -773,7 +773,7 @@ namespace Monsajem_Incs.Array.Base
             return Result;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public OwnerType To(int to)
         {
             var Result = MakeSameNew();
@@ -781,7 +781,7 @@ namespace Monsajem_Incs.Array.Base
             return Result;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public OwnerType FromTo(int from, int to)
         {
             var Result = MakeSameNew();
@@ -789,7 +789,7 @@ namespace Monsajem_Incs.Array.Base
             return Result;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public OwnerType PopFrom(int From)
         {
 #if DEBUG
@@ -801,7 +801,7 @@ namespace Monsajem_Incs.Array.Base
             return Result;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public OwnerType PopTo(int to)
         {
             var Result = this.To(to);
@@ -809,7 +809,7 @@ namespace Monsajem_Incs.Array.Base
             return Result;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public OwnerType PopFromTo(int From, int To)
         {
             var Result = this.From(From).To(To);

@@ -14,12 +14,12 @@ namespace Monsajem_Incs.Array.OneArrayBase
     {
         public ArrayType[] ar;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public Array()
         {
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public Array(ArrayType[] ar)
         {
             this.ar = ar;
@@ -27,9 +27,9 @@ namespace Monsajem_Incs.Array.OneArrayBase
 
         public override ArrayType this[int Pos]
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(MethodImplOptions.AggressiveOptimization)]
             get => ar[Pos];
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(MethodImplOptions.AggressiveOptimization)]
             set => ar[Pos] = value;
         }
 

@@ -65,7 +65,7 @@ namespace Monsajem_Incs.Array.Hyper
 
         public override ArrayType this[int Pos]
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(MethodImplOptions.AggressiveOptimization)]
             get
             {
                 ArrayInstance Myar;
@@ -81,7 +81,7 @@ namespace Monsajem_Incs.Array.Hyper
                 Myar = arInfo.Value;
                 return Myar.ar[Pos - Myar.FromPos];
             }
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(MethodImplOptions.AggressiveOptimization)]
             set
             {
                 ArrayInstance Myar;
@@ -101,7 +101,7 @@ namespace Monsajem_Incs.Array.Hyper
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private void Optimization(DynamicSize.Array<ArrayInstance> ar)
         {
             for (int i = 0; i < ar.Length; i++)
@@ -110,7 +110,7 @@ namespace Monsajem_Incs.Array.Hyper
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private int Optimization(DynamicSize.Array<ArrayInstance> ar, int Pos)
         {
             var OldAr = ar[Pos];
@@ -185,7 +185,7 @@ namespace Monsajem_Incs.Array.Hyper
             return 0;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public override void Insert(ArrayType Value, int Position)
         {
 
