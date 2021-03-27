@@ -8,19 +8,26 @@ using System.Threading.Tasks;
 
 namespace Monsajem_Incs.Array.Hyper
 {
+
+    public class ArrayHuge<ArrayType> :Array<ArrayType>
+    {
+        public ArrayHuge() : base(50000, 100, 500) { }
+    }
     public class Array<ArrayType> :
         Base.IArray<ArrayType, Array<ArrayType>>
     {
+
+        private Func<Base.IArray<ArrayType>> MakeInner;
         protected override Array<ArrayType> MakeSameNew()
         {
-            return new Array<ArrayType>(MinCount);
+            return new Array<ArrayType>(MinCount, Sub,MinSub);
         }
 
         public class ArrayInstance :
             IComparable<ArrayInstance>
         {
             public int FromPos;
-            public FixedSize.Array<ArrayType> ar;
+            public Base.IArray<ArrayType> ar;
             public int CompareTo(ArrayInstance other)
             {
                 return this.FromPos - other.FromPos;
@@ -28,26 +35,43 @@ namespace Monsajem_Incs.Array.Hyper
         }
         public DynamicSize.Array<ArrayInstance> ar;
         internal int MinCount;
+        private int Sub;
+        private int MinSub;
         private int MaxLen;
         private int MaxLen_Div2;
 
-        public Array() : this(500) { }
+        public Array() : this(500,0,0) { }
 
-        public Array(int MinCount)
+        public Array(int MinCount,int Sub,int MinSub)
         {
-            this.MyOptions = MinCount;
+            if (Sub == 0)
+                Sub = MinCount + 1;
+            this.MyOptions =(MinCount, Sub,MinSub);
         }
-        public Array(ArrayType[] ar, int MinCount = 500) : this(MinCount)
+        public Array(ArrayType[] ar, int MinCount = 500, int Sub=0,int MinSub=0) : 
+            this(MinCount, Sub,MinSub)
         {
             Insert(ar);
         }
 
         public override object MyOptions
         {
-            get => MinCount;
+            get => (MinCount, Sub, MinSub);
             set
             {
-                this.MinCount = (int)value;
+                var Option = ((int MinCount, int Sub,int MinSub))value;
+                this.Sub = Option.Sub;
+                this.MinCount = Option.MinCount;
+                this.MinSub = Option.MinSub;
+                var SubMinCount = this.MinCount / this.Sub;
+                if (MinSub > SubMinCount)
+                    SubMinCount = 0;
+
+                if (SubMinCount == 0)
+                    this.MakeInner = () => new FixedSize.Array<ArrayType>(this.MinCount);
+                else
+                    this.MakeInner = () => new Array<ArrayType>(SubMinCount,Sub,MinSub);
+
                 this.MaxLen = MinCount - 1;
                 this.MaxLen_Div2 = MaxLen / 2;
 
@@ -197,12 +221,12 @@ namespace Monsajem_Incs.Array.Hyper
                 arPos = (arPos * -1) - 2;
                 MyAr = ar[arPos];
 
-                if (MyAr.ar.IsFull)
+                if (MyAr.ar.Length==MinCount)
                 {
                     Position = Position - MyAr.FromPos;
                     if (Position == MyAr.ar.Length)
                     {
-                        var InnerAr = new FixedSize.Array<ArrayType>(MinCount);
+                        var InnerAr = MakeInner();
                         InnerAr.Insert(Value);
                         var NewAr = new ArrayInstance()
                         {
@@ -231,9 +255,9 @@ namespace Monsajem_Incs.Array.Hyper
             else
             {
                 MyAr = arInfo.Value;
-                if (MyAr.ar.IsFull)
+                if (MyAr.ar.Length == MinCount)
                 {
-                    var InnerAr = new FixedSize.Array<ArrayType>(MinCount);
+                    var InnerAr = MakeInner();
                     InnerAr.Insert(Value);
                     var NewAr = new ArrayInstance()
                     {

@@ -141,14 +141,14 @@ namespace Monsajem_Incs.Array.Base
             Copy(this, From, destination, destinationIndex, Length);
         }
 
-        public IEnumerator<ArrayType> GetEnumerator()
+        protected virtual IEnumerator<ArrayType> _GetEnumerator()
         {
             return new MyEnum() { ar = this.GetAllArrays().Ar };
         }
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return this.GetEnumerator();
-        }
+
+        public IEnumerator<ArrayType> GetEnumerator() => _GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator()=>this.GetEnumerator();
+        
 
         private class MyEnum : IEnumerator<ArrayType>
         {
@@ -254,7 +254,11 @@ namespace Monsajem_Incs.Array.Base
         }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public abstract void DeleteFrom(int from);
+        public virtual void DeleteFrom(int from)
+        {
+            while (Length > from)
+                DeleteByPosition(Length - 1);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void DeleteFromTo(int from, int To)
@@ -276,6 +280,24 @@ namespace Monsajem_Incs.Array.Base
             var Item = this[Length - 1];
             DeleteFrom(Length - 1);
             return Item;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        public ArrayType Pop(int Position)
+        {
+            if (Position == Length - 1)
+                return Pop();
+            var Item = this[Position];
+            DeleteByPosition(Position);
+            return Item;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        public ArrayType BinaryPop(ArrayType Key)
+        {
+            var Result = BinarySearch(Key);
+            DeleteByPosition(Result.Index);
+            return Result.Value;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
@@ -528,7 +550,7 @@ namespace Monsajem_Incs.Array.Base
             return BinarySearch(key, 0, Length);
         }
 
-        protected IComparer<ArrayType> Comparer = Comparer<ArrayType>.Default;
+        public IComparer<ArrayType> Comparer = Comparer<ArrayType>.Default;
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public (int Index, ArrayType Value) BinarySearch(ArrayType key, int minNum, int maxNum)
@@ -702,6 +724,69 @@ namespace Monsajem_Incs.Array.Base
             Copy(Roll, 0, this, To, Count);
         }
 
+        public Func<IArray<ArrayType>> MakeSameNew=()=>
+            throw new NotImplementedException($"MakeSameNew in array of {typeof(ArrayType)} not implementd!");
+
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        public IArray<ArrayType> Copy()
+        {
+            var NewAr = MakeSameNew();
+            NewAr.Insert(this);
+            return NewAr;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        public IArray<ArrayType> From(int from)
+        {
+            var Result = MakeSameNew();
+            Result.Insert(0, this, from, Length - from);
+            return Result;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        public IArray<ArrayType> To(int to)
+        {
+            var Result = MakeSameNew();
+            Result.Insert(0, this, 0, to + 1);
+            return Result;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        public IArray<ArrayType> FromTo(int from, int to)
+        {
+            var Result = MakeSameNew();
+            Result.Insert(0, this, from, this.Length);
+            return Result;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        public IArray<ArrayType> PopFrom(int From)
+        {
+#if DEBUG
+            if (From > this.Length)
+                throw new Exception("From Bigger Than Len");
+#endif
+            var Result = this.From(From);
+            DeleteFrom(From);
+            return Result;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        public IArray<ArrayType> PopTo(int to)
+        {
+            var Result = this.To(to);
+            DeleteTo(to);
+            return Result;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        public IArray<ArrayType> PopFromTo(int From, int To)
+        {
+            var Result = this.From(From).To(To);
+            DeleteFromTo(From, To);
+            return Result;
+        }
+
         internal virtual System.Array GetArrayFrom(int From, out int Ar_From, out int Ar_Len)
         {
             var Result = new ArrayType[Length - From];
@@ -755,10 +840,10 @@ namespace Monsajem_Incs.Array.Base
         where OwnerType : IArray<ArrayType, OwnerType>
     {
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        protected abstract OwnerType MakeSameNew();
+        protected abstract new OwnerType MakeSameNew();
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public OwnerType Copy()
+        public new OwnerType Copy()
         {
             var NewAr = MakeSameNew();
             NewAr.Insert(this);
@@ -766,7 +851,7 @@ namespace Monsajem_Incs.Array.Base
         }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public OwnerType From(int from)
+        public new OwnerType From(int from)
         {
             var Result = MakeSameNew();
             Result.Insert(0, this, from,Length-from);
@@ -774,7 +859,7 @@ namespace Monsajem_Incs.Array.Base
         }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public OwnerType To(int to)
+        public new OwnerType To(int to)
         {
             var Result = MakeSameNew();
             Result.Insert(0,this,0,to+1);
@@ -782,7 +867,7 @@ namespace Monsajem_Incs.Array.Base
         }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public OwnerType FromTo(int from, int to)
+        public new OwnerType FromTo(int from, int to)
         {
             var Result = MakeSameNew();
             Result.Insert(0,this,from,this.Length);
@@ -790,7 +875,7 @@ namespace Monsajem_Incs.Array.Base
         }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public OwnerType PopFrom(int From)
+        public new OwnerType PopFrom(int From)
         {
 #if DEBUG
             if (From > this.Length)
@@ -802,7 +887,7 @@ namespace Monsajem_Incs.Array.Base
         }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public OwnerType PopTo(int to)
+        public new OwnerType PopTo(int to)
         {
             var Result = this.To(to);
             DeleteTo(to);
@@ -810,7 +895,7 @@ namespace Monsajem_Incs.Array.Base
         }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public OwnerType PopFromTo(int From, int To)
+        public new OwnerType PopFromTo(int From, int To)
         {
             var Result = this.From(From).To(To);
             DeleteFromTo(From, To);
