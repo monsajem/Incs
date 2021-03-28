@@ -7,51 +7,11 @@ using Monsajem_Incs.Database.Base;
 using Monsajem_Incs.Serialization;
 using Monsajem_Incs.Database;
 using Monsajem_Incs.Array.Hyper;
+using Monsajem_Incs.StreamCollection;
 
-namespace Monsajem_Incs.StreamCollection
+namespace Monsajem_Incs.Collection
 {
-    internal struct Data : IComparable<Data>
-    {
-        public int From;
-        public int To;
-        public int Len;
-
-        public int CompareTo(Data other)
-        {
-            return From - other.From;
-        }
-    }
-    internal struct DataByForm : IComparable<DataByForm>
-    {
-        public Data Data;
-        public int CompareTo(DataByForm other)
-        {
-            return Data.From - other.Data.From;
-        }
-    }
-    internal struct DataByTo : IComparable<DataByTo>
-    {
-        public Data Data;
-        public int CompareTo(DataByTo other)
-        {
-            return Data.To - other.Data.To;
-        }
-    }
-    internal struct DataByLen : IComparable<DataByLen>
-    {
-        public Data Data;
-        public int CompareTo(DataByLen other)
-        {
-            var c = other.Data.Len - Data.Len;
-            if (c == 0)
-                c = Data.From - other.Data.From;
-            return c;
-        }
-    }
-
-    public partial class StreamCollection<ValueType> :
-        Array.Base.IArray<ValueType, StreamCollection<ValueType>>,
-        ISerializable<StreamCollection<ValueType>.MyData>
+    public partial class StreamDictionary<KeyType, ValueType>
     {
 #if DEBUG
         public MyData Info = new MyData();
@@ -64,9 +24,9 @@ namespace Monsajem_Incs.StreamCollection
 #else
         internal
 #endif
-            class MyData : ISerializable<(Array<Data> Keys, long StreamLen)>
+            class MyData
         {
-            internal Array<Data> Keys;
+            internal SortedDictionary<KeyType,Data> Keys;
             internal SortedSet<DataByForm> GapsByFrom;
             internal SortedSet<DataByLen> GapsByLen;
             internal SortedSet<DataByTo> GapsByTo;
@@ -77,23 +37,23 @@ namespace Monsajem_Incs.StreamCollection
             [CopyOrginalObject]
             public long StreamLen;
 
-            internal Data GetData(int Pos)
+            internal Data GetData(KeyType Key)
             {
-                return Keys[Pos];
+                return Keys[Key];
             }
-            internal Data PopData(int Pos)
+            internal Data PopData(KeyType Key)
             {
-                var Result = Keys[Pos];
-                Keys.DeleteByPosition(Pos);
+                var Result = Keys[Key];
+                Keys.Remove(Key);
                 return Result;
             }
-            internal void InsertData(Data Data, int Pos)
+            internal void InsertData(Data Data, KeyType Key)
             {
-                Keys.Insert(Data, Pos);
+                Keys.Add(Key,Data);
             }
-            internal void DeleteData(int Pos)
+            internal void DeleteData(KeyType Key)
             {
-                Keys.DeleteByPosition(Pos);
+                Keys.Remove(Key);
             }
             internal bool PopGapMinLen(int Len, ref Data Gap)
             {
@@ -169,9 +129,9 @@ namespace Monsajem_Incs.StreamCollection
                         ;
             }
 #if DEBUG
-            public void Browse(StreamCollection<ValueType> Parent)
+            public void Browse(StreamDictionary<KeyType,ValueType> Parent)
             {
-                if (Parent.Length != this.Keys.Length)
+                if (Parent.Count != this.Keys.Count)
                     throw new Exception("miss match Len");
                 if (GapsByFrom.Where((c) =>
                      GapsByLen.Contains(new DataByLen() { Data = c.Data })==false).
@@ -180,7 +140,7 @@ namespace Monsajem_Incs.StreamCollection
                 var Datas = new List<(string Role, Data Data)>(
                     GapsByFrom.Select((c) => ("isGap", c.Data)));
                 foreach (var Key in this.Keys)
-                    Datas.Add(("key", Key));
+                    Datas.Add(("key", Key.Value));
                 var Keys = Datas.OrderBy((c) => c.Data.From).ToArray();
                 for (int i = 0; i < Keys.Length; i++)
                 {
@@ -211,38 +171,7 @@ namespace Monsajem_Incs.StreamCollection
                 }
             }
 #endif
-            (Array<Data> Keys, long StreamLen) ISerializable<(Array<Data> Keys, long StreamLen)>.
-                GetData()
-            {
-                return (Keys, StreamLen);
-            }
 
-            void ISerializable<(Array<Data> Keys, long StreamLen)>.
-                SetData((Array<Data> Keys, long StreamLen) Data)
-            {
-                Keys = Data.Keys;
-                StreamLen = Data.StreamLen;
-                GapsByFrom = new SortedSet<DataByForm>();
-                GapsByLen = new SortedSet<DataByLen>();
-                GapsByTo = new SortedSet<DataByTo>();
-                var NewDatas = new Array<Data>();
-                NewDatas.BinaryInsert(Keys.ToArray());
-                var CurrentPos = 0;
-                for (int i = 0; i < NewDatas.Length; i++)
-                {
-                    var NewData = NewDatas[i];
-                    if (CurrentPos != NewData.From)
-                    {
-                        InsertGap(new Data()
-                        {
-                            From = CurrentPos,
-                            Len = (NewData.From - CurrentPos),
-                            To = NewData.From - 1
-                        });
-                    }
-                    CurrentPos = NewData.To + 1;
-                }
-            }
         }
     }
 }
