@@ -22,16 +22,14 @@ namespace Monsajem_Incs.DynamicAssembly
 
     public struct RunOnceInStack
     {
-        private Array<string> RunIfNotRuning_Name;
+        private SortedSet<string> RunIfNotRuning_Name;
         public bool Use(string Name)
         {
             if (RunIfNotRuning_Name == null)
-                RunIfNotRuning_Name = new Array<string>();
-            var Pos =RunIfNotRuning_Name.BinarySearch(Name).Index;
-            if (Pos < 0)
+                RunIfNotRuning_Name = new SortedSet<string>();
+            if (RunIfNotRuning_Name.Contains(Name)==false)
             {
-                Pos = ((Pos * -1) - 1);
-                RunIfNotRuning_Name.Insert(Name, Pos);
+                RunIfNotRuning_Name.Add(Name);
                 return true;
             }
             else
@@ -40,15 +38,15 @@ namespace Monsajem_Incs.DynamicAssembly
 
         public void EndUse(string Name)
         {
-            RunIfNotRuning_Name.BinaryDelete(Name);
+            RunIfNotRuning_Name.Remove(Name);
         }
 
         private bool RunIfAnyNotRuning_flag;
         public bool AnyUse()
         {
             if (RunIfNotRuning_Name == null)
-                RunIfNotRuning_Name =new Array<string>();
-            if (RunIfNotRuning_Name.Length == 0 &&
+                RunIfNotRuning_Name =new SortedSet<string>();
+            if (RunIfNotRuning_Name.Count == 0 &&
                 RunIfAnyNotRuning_flag == false)
             {
                 RunIfAnyNotRuning_flag = true;
