@@ -5,6 +5,7 @@ using Monsajem_Incs.StreamCollection;
 using Monsajem_Incs.Serialization;
 using Monsajem_Incs.Database.Base;
 using Monsajem_Incs.DynamicAssembly;
+using Monsajem_Incs.Collection;
 namespace Monsajem_Incs.Database.DirectoryTable
 {
     public class DirectoryTable<ValueType,KeyType>:
@@ -14,34 +15,34 @@ namespace Monsajem_Incs.Database.DirectoryTable
         [Serialization.NonSerialized]
         private volatile bool NeedToSave=true;
 
-        private StreamCollection<ValueType> StreamCollection
+        private StreamDictionary<KeyType,ValueType> StreamDictionary
         {
-            get => _StreamCollection;
+            get => _StreamDictionary;
             set
             {
-                this.BasicActions.Items = value;
-                _StreamCollection = value;
+                this.BasicActions = value;
+                _StreamDictionary = value;
             }
         }
         
-        private StreamCollection<ValueType> _StreamCollection;
+        private StreamDictionary<KeyType,ValueType> _StreamDictionary;
 
         public DirectoryTable(
             string DirectoryAddress,
             Func<ValueType, KeyType> GetKey,
             bool IsUpdateAble,
             bool FastSave):
-            base(new StreamCollection.StreamCollection<ValueType>(),GetKey,false)
+            base(new StreamDictionary<KeyType, ValueType>(),GetKey,false)
         {
             this.TableName = new DirectoryInfo(DirectoryAddress).Name;
-            _StreamCollection =(StreamCollection<ValueType>) this.BasicActions.Items;
+            _StreamDictionary =(StreamDictionary<KeyType, ValueType>) this.BasicActions;
             Directory.CreateDirectory(DirectoryAddress);
             if (File.Exists(DirectoryAddress + "\\PK"))
             {
                 var OldTable = File.ReadAllBytes(DirectoryAddress + "\\PK").Deserialize(this);
                 this.KeysInfo.Keys = OldTable.KeysInfo.Keys;
-                StreamCollection = OldTable.StreamCollection;
-                StreamCollection.Stream = File.Open(DirectoryAddress + "\\Data", FileMode.OpenOrCreate);
+                StreamDictionary = OldTable.StreamDictionary;
+                StreamDictionary.Stream = File.Open(DirectoryAddress + "\\Data", FileMode.OpenOrCreate);
                 ////StreamCollection.StreamLen = this.StreamCollection.Stream.Length;
                 if (IsUpdateAble)
                 {
@@ -56,7 +57,7 @@ namespace Monsajem_Incs.Database.DirectoryTable
                     ReadyForUpdateAble();
                     this.UpdateAble = new UpdateAbles<KeyType>();
                 }
-                StreamCollection.Stream = File.Open(DirectoryAddress + "\\Data", FileMode.OpenOrCreate);
+                StreamDictionary.Stream = File.Open(DirectoryAddress + "\\Data", FileMode.OpenOrCreate);
             }
 
             var Stream_PK = File.Open(DirectoryAddress + "\\PK", FileMode.OpenOrCreate);

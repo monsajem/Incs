@@ -35,7 +35,6 @@ namespace Monsajem_Incs.Database.Base
                 using (Run.Block())
                 {
                     AutoFillRelations?.Invoke(Value);
-                    var KeysLen = BasicActions.Keys;
                     var Info = (Value, new Events<ValueType>.ValueInfo[KeysLen]);
                     for (int i = 0; i < KeysLen; i++)
                         Info.Item2[i] = new Events<ValueType>.ValueInfo();

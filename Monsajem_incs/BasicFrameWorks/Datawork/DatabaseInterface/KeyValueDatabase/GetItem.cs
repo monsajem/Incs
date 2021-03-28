@@ -48,13 +48,12 @@ namespace Monsajem_Incs.Database.Base
             {
                 using (Run.Block())
                 {
-                    var Item = BasicActions.Items[Position];
-                    Events.loading?.Invoke(Item);
+                    var Pos = KeysInfo.Keys[Position];
                     return new ValueInfo()
                     {
-                        Value = Item,
-                        Pos = Position,
-                        Parent = this
+                            Value = BasicActions[Pos],
+                            Pos = Position,
+                            Parent = this
                     };
                 }
             }
@@ -66,9 +65,14 @@ namespace Monsajem_Incs.Database.Base
             {
                 using (Run.Block())
                 {
-                    var Pos = KeysInfo.Keys.BinarySearch(Key).Index;
-                    if (Pos > -1)
-                        return GetItem(Pos);
+                    var Pos = KeysInfo.Keys.BinarySearch(Key);
+                    if (Pos.Index > -1)
+                        return new ValueInfo()
+                        {
+                            Value = BasicActions[Key],
+                            Pos = Pos.Index,
+                            Parent = this
+                        };
                     else
                         throw new ArgumentOutOfRangeException("Key", Key, "Key Not Exist");
                 }
@@ -171,7 +175,7 @@ namespace Monsajem_Incs.Database.Base
                 var Position = KeysInfo.Keys.BinarySearch(Key).Index;
                 if (Position > -1)
                 {
-                    Result = BasicActions.Items[Position];
+                    Result = BasicActions[Key];
                 }
                 else
                 {

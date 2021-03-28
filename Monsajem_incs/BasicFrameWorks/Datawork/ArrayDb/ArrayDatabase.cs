@@ -1,6 +1,7 @@
 ﻿using System;
 using Monsajem_Incs.Database.Base;
 using Monsajem_Incs.Serialization;
+using System.Collections.Generic;
 
 namespace Monsajem_Incs.Database
 {
@@ -12,7 +13,7 @@ namespace Monsajem_Incs.Database
         public ArrayTable(
             Func<ValueType,KeyType> GetKey,
             bool IsUpdateAble,string Name=""):
-            base(new Array.Hyper.Array<ValueType>(), GetKey,
+            base(new SortedDictionary<KeyType,ValueType>(), GetKey,
                  IsUpdateAble)
         {
             this.TableName = Name;

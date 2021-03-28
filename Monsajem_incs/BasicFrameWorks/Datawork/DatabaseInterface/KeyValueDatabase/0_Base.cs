@@ -16,11 +16,6 @@ namespace Monsajem_Incs.Database.Base
         object Parent { get; set; }
     }
 
-    public partial class BasicActions<ValueType>
-    {
-        public Array.Base.IArray<ValueType> Items;
-    }
-
     public class Runer
     {
         [ThreadStatic]
@@ -48,7 +43,7 @@ namespace Monsajem_Incs.Database.Base
         public KeyInfo KeysInfo = new KeyInfo();
 
         [Serialization.NonSerialized]
-        public BasicActions<ValueType> BasicActions;
+        public IDictionary<KeyType, ValueType> BasicActions;
         [Serialization.NonSerialized]
         public Events<ValueType> Events;
         [Serialization.NonSerialized]
@@ -60,7 +55,7 @@ namespace Monsajem_Incs.Database.Base
 
         protected int KeyPos;
 
-        internal Table(BasicActions<ValueType> BasicActions,
+        internal Table(IDictionary<KeyType, ValueType> BasicActions,
                        Func<ValueType, KeyType> GetKey,
                        KeyType[] XNewKeys,
                        int KeyPos,
@@ -163,12 +158,12 @@ namespace Monsajem_Incs.Database.Base
 
                     if(OldPos!=NewPos)
                     {
-                        this.BasicActions.Items.DeleteByPosition(OldPos);
-                        this.BasicActions.Items.Insert(MyValue, NewPos);
+                        this.BasicActions.Remove(OldKey);
+                        this.BasicActions.Add(NewKey,MyValue);
                     }
                     else
                     {
-                        this.BasicActions.Items[OldPos]= MyValue;
+                        this.BasicActions[OldKey]= MyValue;
                     }
 
                     if (OldKey.CompareTo(NewKey) != 0)
@@ -250,7 +245,7 @@ namespace Monsajem_Incs.Database.Base
                     var MyInfo = info.Info[KeyPos];
                     var Pos = MyInfo.Pos;
                     KeysInfo.Keys.Insert((KeyType)MyInfo.Key, Pos);
-                    this.BasicActions.Items.Insert(info.Value, Pos);
+                    this.BasicActions.Add((KeyType)MyInfo.Key,info.Value);
                 };
             }
             else
@@ -278,9 +273,9 @@ namespace Monsajem_Incs.Database.Base
             {
                 Events.Deleted += (info) =>
                 {
-                    var Pos = info.Info[KeyPos].Pos;
-                    this.BasicActions.Items.DeleteByPosition(Pos);
-                    KeysInfo.Keys.DeleteByPosition(Pos);
+                    var MyInfo = info.Info[KeyPos];
+                    this.BasicActions.Remove((KeyType)MyInfo.Key);
+                    KeysInfo.Keys.DeleteByPosition(MyInfo.Pos);
                 };
             }
             else
@@ -319,13 +314,10 @@ namespace Monsajem_Incs.Database.Base
         internal Table() { }
 
         public Table(
-            Array.Base.IArray<ValueType> Items,
+            IDictionary<KeyType,ValueType> Items,
             Func<ValueType, KeyType> GetKey,
             bool IsUpdateAble) :
-            this(new BasicActions<ValueType>()
-            {
-                Items=Items
-            }, GetKey, new KeyType[0], 0, true, IsUpdateAble)
+            this(Items, GetKey, new KeyType[0], 0, true, IsUpdateAble)
         { }
 
 

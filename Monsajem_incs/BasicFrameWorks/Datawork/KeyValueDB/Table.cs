@@ -7,6 +7,7 @@ using Monsajem_Incs.Array.Base;
 using static System.Text.Encoding;
 using System.Threading.Tasks;
 using System.Collections;
+using Monsajem_Incs.Collection;
 
 namespace Monsajem_Incs.Database.KeyValue.Base
 {
@@ -32,7 +33,7 @@ namespace Monsajem_Incs.Database.KeyValue.Base
             Func<byte[]> LoadKeys,
             IDictionary<KeyType, ValueType> Data, 
             Func<ValueType, KeyType> GetKey, bool IsUpdateAble) :
-            base(new DynamicArray<ValueType>(), GetKey, false)
+            base(new DynamicDictionary<KeyType,ValueType>(), GetKey, false)
         {
             var OldData = LoadKeys();
 
@@ -55,21 +56,20 @@ namespace Monsajem_Incs.Database.KeyValue.Base
                 }
             }
 
-            var Ar = (DynamicArray<ValueType>)this.BasicActions.Items;
+            var Ar = (DynamicDictionary<KeyType, ValueType>)this.BasicActions;
             
-            Ar._GetItem = (Pos) =>
+            Ar._GetItem = (Key) =>
             {
-                return Data.GetItem(this.KeysInfo.Keys[Pos]);
+                return Data.GetItem(Key);
             };
 
-            Ar._SetItem = (Pos, Value) => Data.SetItem(this.KeysInfo.Keys[Pos],Value);
-            Ar._DeleteByPosition = (c) =>
+            Ar._SetItem = (Key, Value) => Data.SetItem(Key, Value);
+            Ar._Remove = (Key) =>
             {
-                Data.DeleteItem(this.KeysInfo.Keys[c]);
-                Ar.Length -= 1;
+                Data.DeleteItem(Key);
+                return true;
             };
-            Ar._AddLength = (count) => Ar.Length += count;
-            Ar.Length = KeysInfo.Keys.Length;
+            Ar._Count =()=> KeysInfo.Keys.Length;
 
             Save = () =>
             {

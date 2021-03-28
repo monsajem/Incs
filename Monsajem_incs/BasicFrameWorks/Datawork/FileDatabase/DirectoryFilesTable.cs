@@ -19,7 +19,7 @@ namespace Monsajem_Incs.Database.DirectoryTable
             Func<ValueType, KeyType> GetKey,
             bool IsUpdateAble,
             bool FastSave):
-            base(new StreamCollection.StreamCollection<ValueType>(),GetKey,false)
+            base(new Collection.StreamDictionary<KeyType,ValueType>(),GetKey,false)
         {
             this.TableName = new DirectoryInfo(DirectoryAddress).Name;
             Directory.CreateDirectory(DirectoryAddress);
