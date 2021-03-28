@@ -71,7 +71,6 @@ namespace Monsajem_Incs.Array.Hyper
                     this.MakeInner = () => new FixedSize.Array<ArrayType>(this.MinCount);
                 else
                     this.MakeInner = () => new Array<ArrayType>(SubMinCount,Sub,MinSub);
-
                 this.MaxLen = MinCount - 1;
                 this.MaxLen_Div2 = MaxLen / 2;
 
@@ -80,7 +79,7 @@ namespace Monsajem_Incs.Array.Hyper
                     this.ar = new DynamicSize.Array<ArrayInstance>();
                     ar.Insert(new ArrayInstance()
                     {
-                        ar = new FixedSize.Array<ArrayType>(MinCount),
+                        ar = this.MakeInner(),
                         FromPos = 0
                     }, 0);
                 }

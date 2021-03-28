@@ -8,7 +8,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WASM_NetCore", "Others\WASM
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WASM_NetStandard", "Others\WASM\WASM_NetStandard\WASM_NetStandard.csproj", "{6844BB49-613E-41ED-8866-0CBF5B99CB9C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monsajem_incs", "Monsajem_incs\Monsajem_incs.csproj", "{96844A4C-4CF7-470F-8ACB-6B2C693B57EE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monsajem_incs", "Monsajem_incs\Monsajem_incs.csproj", "{96844A4C-4CF7-470F-8ACB-6B2C693B57EE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

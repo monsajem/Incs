@@ -25,9 +25,9 @@ namespace Monsajem_Incs.StreamCollection
             Info.MinLen = -1 * Info.minCount;
             Info.MaxLen = Info.minCount;
             Info.Keys = new Array<Data>();
-            Info.GapsByFrom = new Array<DataByForm>();
-            Info.GapsByLen = new Array<DataByLen>();
-            Info.GapsByTo = new Array<DataByTo>();
+            Info.GapsByFrom = new SortedSet<DataByForm>();
+            Info.GapsByLen = new SortedSet<DataByLen>();
+            Info.GapsByTo = new SortedSet<DataByTo>();
         }
 
         public override object MyOptions { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }

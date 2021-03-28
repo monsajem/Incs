@@ -67,7 +67,7 @@ namespace Monsajem_Incs.DynamicAssembly
     public class RunOnceInBlock:IDisposable 
     {
         public event Action OnEndBlocks;
-        private Array<string> Used;
+        private SortedSet<string> Used;
         private int Blocks;
         public int BlockLengths
         {
@@ -76,12 +76,10 @@ namespace Monsajem_Incs.DynamicAssembly
         public bool Use(string Name)
         {
             if (Used == null)
-                Used = new Array<string>();
-            var Pos = Used.BinarySearch(Name).Index;
-            if (Pos < 0)
+                Used = new SortedSet<string>();
+            if (Used.Contains(Name)==false)
             {
-                Pos = ((Pos * -1) - 1);
-                Used.Insert(Name, Pos);
+                Used.Add(Name);
                 return true;
             }
             else
@@ -90,7 +88,7 @@ namespace Monsajem_Incs.DynamicAssembly
 
         public void EndUse(string Name)
         {
-            Used.BinaryDelete(Name);
+            Used.Remove(Name);
         }
 
         public RunOnceInBlock Block()
@@ -104,7 +102,7 @@ namespace Monsajem_Incs.DynamicAssembly
             Blocks--;
             if (Blocks == 0)
             {
-                Used = new Array<string>();
+                Used = new SortedSet<string>();
                 OnEndBlocks?.Invoke();
             }
         }
@@ -114,7 +112,7 @@ namespace Monsajem_Incs.DynamicAssembly
             Blocks--;
             if (Blocks == 0)
             {
-                Used = new Array<string>();
+                Used = new SortedSet<string>();
                 OnEndBlocks?.Invoke();
             };
         }

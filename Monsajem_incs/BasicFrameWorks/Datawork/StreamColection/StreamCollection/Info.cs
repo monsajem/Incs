@@ -10,7 +10,7 @@ using Monsajem_Incs.Array.Hyper;
 
 namespace Monsajem_Incs.StreamCollection
 {
-    internal struct Data:IComparable<Data>
+    internal struct Data : IComparable<Data>
     {
         public int From;
         public int To;
@@ -42,7 +42,7 @@ namespace Monsajem_Incs.StreamCollection
         public Data Data;
         public int CompareTo(DataByLen other)
         {
-            var c = Data.Len - other.Data.Len;
+            var c = other.Data.Len - Data.Len;
             if (c == 0)
                 c = Data.From - other.Data.From;
             return c;
@@ -64,12 +64,12 @@ namespace Monsajem_Incs.StreamCollection
 #else
         internal
 #endif
-            class MyData:ISerializable<(Array<Data> Keys, long StreamLen)>
+            class MyData : ISerializable<(Array<Data> Keys, long StreamLen)>
         {
             internal Array<Data> Keys;
-            internal Array<DataByForm> GapsByFrom;
-            internal Array<DataByLen> GapsByLen;
-            internal Array<DataByTo> GapsByTo;
+            internal SortedSet<DataByForm> GapsByFrom;
+            internal SortedSet<DataByLen> GapsByLen;
+            internal SortedSet<DataByTo> GapsByTo;
 
             internal long MinLen = -500;
             internal long MaxLen = 500;
@@ -97,39 +97,24 @@ namespace Monsajem_Incs.StreamCollection
             }
             internal bool PopGapMinLen(int Len, ref Data Gap)
             {
-                var Finded =
-                    GapsByLen.BinarySearch(new DataByLen() { Data = new Data() { Len = Len } });
-                var Index = Finded.Index;
-                if (Index < 0)
-                {
-                    Index = Index * -1;
-                    if (Index > GapsByLen.Length)
-                        return false;
-                    else
-                    {
-                        Gap = GapsByLen[Index - 1].Data;
-                        DeleteGap(Gap);
-                        return true;
-                    }
-                }
-                else
-                {
-                    Gap = Finded.Value.Data;
-                    DeleteGap(Gap);
-                    return true;
-                }
+                if (GapsByLen.Count == 0)
+                    return false;
+                var Finded = GapsByLen.FirstOrDefault();
+                if (Finded.Data.Len < Gap.Len)
+                    return false;
+                Gap = Finded.Data;
+                return true;
             }
 
             internal bool PopNextGap(ref Data Data)
             {
-                var Finded =
-                    GapsByFrom.BinarySearch(new DataByForm()
-                    {
-                        Data = new Data() { From = Data.To + 1 }
-                    });
-                if (Finded.Index > -1)
+                var Finded = new DataByForm()
                 {
-                    Data = Finded.Value.Data;
+                    Data = new Data() { From = Data.To + 1 }
+                };
+                if (GapsByFrom.TryGetValue(Finded, out Finded))
+                {
+                    Data = Finded.Data;
                     DeleteGap(Data);
                     return true;
                 }
@@ -137,14 +122,13 @@ namespace Monsajem_Incs.StreamCollection
             }
             internal bool PopBeforeGap(ref Data Data)
             {
-                var Finded =
-                    GapsByTo.BinarySearch(new DataByTo()
-                    {
-                        Data = new Data() { To = Data.From - 1 }
-                    });
-                if (Finded.Index > -1)
+                var Finded = new DataByTo()
                 {
-                    Data = Finded.Value.Data;
+                    Data = new Data() { To = Data.From - 1 }
+                };
+                if (GapsByTo.TryGetValue(Finded,out Finded))
+                {
+                    Data = Finded.Data;
                     DeleteGap(Data);
                     return true;
                 }
@@ -153,34 +137,34 @@ namespace Monsajem_Incs.StreamCollection
 
             internal void InsertGap(Data Gap)
             {
-                GapsByFrom.BinaryInsert(new DataByForm() { Data = Gap });
-                GapsByLen.BinaryInsert(new DataByLen() { Data = Gap });
-                GapsByTo.BinaryInsert(new DataByTo() { Data = Gap });
+                GapsByFrom.Add(new DataByForm() { Data = Gap });
+                GapsByLen.Add(new DataByLen() { Data = Gap });
+                GapsByTo.Add(new DataByTo() { Data = Gap });
             }
             internal void DeleteGap(Data Gap)
             {
 #if DEBUG
                 if (
 #endif
-                    GapsByFrom.BinaryDelete(new DataByForm() { Data = Gap })
+                    GapsByFrom.Remove(new DataByForm() { Data = Gap })
 #if DEBUG
-                   .Index < 0)throw new Exception()
+                   ==false) throw new Exception()
 #endif
                     ;
 #if DEBUG
                 if (
 #endif
-                GapsByLen.BinaryDelete(new DataByLen() { Data = Gap })
+                GapsByLen.Remove(new DataByLen() { Data = Gap })
 #if DEBUG
-                  .Index < 0) throw new Exception()
+                  ==false) throw new Exception()
 #endif
                         ;
 #if DEBUG
                 if (
 #endif
-                    GapsByTo.BinaryDelete(new DataByTo() { Data = Gap })
+                    GapsByTo.Remove(new DataByTo() { Data = Gap })
 #if DEBUG
-                  .Index < 0) throw new Exception()
+                  ==false) throw new Exception()
 #endif
                         ;
             }
@@ -190,8 +174,8 @@ namespace Monsajem_Incs.StreamCollection
                 if (Parent.Length != this.Keys.Length)
                     throw new Exception("miss match Len");
                 if (GapsByFrom.Where((c) =>
-                     GapsByLen.BinarySearch(new DataByLen() { Data = c.Data }).Index < 0).
-                    Count()>0)
+                     GapsByLen.Contains(new DataByLen() { Data = c.Data })==false).
+                    Count() > 0)
                     throw new Exception();
                 var Datas = new List<(string Role, Data Data)>(
                     GapsByFrom.Select((c) => ("isGap", c.Data)));
@@ -217,7 +201,7 @@ namespace Monsajem_Incs.StreamCollection
                     var NextKey = Keys[i + 1];
                     if (Key.Data.To + 1 != NextKey.Data.From)
                         throw new Exception();
-                    if(Key.Role== "isGap"& NextKey.Role== "isGap")
+                    if (Key.Role == "isGap" & NextKey.Role == "isGap")
                         throw new Exception();
                 }
                 else
@@ -238,13 +222,13 @@ namespace Monsajem_Incs.StreamCollection
             {
                 Keys = Data.Keys;
                 StreamLen = Data.StreamLen;
-                GapsByFrom = new Array<DataByForm>();
-                GapsByLen = new Array<DataByLen>();
-                GapsByTo = new Array<DataByTo>();
+                GapsByFrom = new SortedSet<DataByForm>();
+                GapsByLen = new SortedSet<DataByLen>();
+                GapsByTo = new SortedSet<DataByTo>();
                 var NewDatas = new Array<Data>();
                 NewDatas.BinaryInsert(Keys.ToArray());
                 var CurrentPos = 0;
-                for(int i=0;i<NewDatas.Length;i++)
+                for (int i = 0; i < NewDatas.Length; i++)
                 {
                     var NewData = NewDatas[i];
                     if (CurrentPos != NewData.From)
@@ -252,11 +236,11 @@ namespace Monsajem_Incs.StreamCollection
                         InsertGap(new Data()
                         {
                             From = CurrentPos,
-                            Len=(NewData.From-CurrentPos),
-                            To = NewData.From-1
+                            Len = (NewData.From - CurrentPos),
+                            To = NewData.From - 1
                         });
                     }
-                    CurrentPos = NewData.To+1;
+                    CurrentPos = NewData.To + 1;
                 }
             }
         }
