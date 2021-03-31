@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Monsajem_Incs.Collection
 {
-    public partial class TreeArray<ValueType>
+    public partial class SortedTree<ValueType>
     {
 
 #if DEBUG
@@ -15,27 +15,27 @@ namespace Monsajem_Incs.Collection
 
         private void Check()
         {
-            for (int i=0; i<Items.Length;i++)
+            foreach (var Value in Items)
             {
                 Node Before; Node Next;
-                var Current = GetItem(i, out Before, out Next);
+                var Current = Find(Value, out Before, out Next);
                 if (Current == null)
                     throw new Exception("Some Item lost!");
-                //if (Current.Equality > 2 || Current.Equality < -2)
-                //    throw new Exception("Equality Faild!");
+                if (Current.Equality > 2 || Current.Equality < -2)
+                    throw new Exception("Equality Faild!");
                 if (Current.Holder == null && Current != Root)
                     throw new Exception("Some Data lost!");
                 if (Current.Next != null)
                 {
-                    //if (Comparer.Compare(Current.Next.Value, Current.Value) < 0)
-                    //    throw new Exception("Data not correct!");
+                    if (Comparer.Compare(Current.Next.Value, Current.Value) < 0)
+                        throw new Exception("Data not correct!");
 
-                    if (Current.NextDeep > 0)
+                    if(Current.NextDeep>0)
                     {
                         if (Current.NextDeep != Current.Next.NextDeep + Current.Next.BeforeDeep + 1)
                             throw new Exception("Data not correct!");
                     }
-                    else if (Current.Next != null)
+                    else if(Current.Next!=null)
                         throw new Exception("Data not correct!");
 
                     if (Current.BeforeDeep > 0)
@@ -51,8 +51,8 @@ namespace Monsajem_Incs.Collection
                 }
                 if (Current.Before != null)
                 {
-                    //if (Comparer.Compare(Current.Before.Value, Current.Value) > 0)
-                    //    throw new Exception("Data not correct!");
+                    if (Comparer.Compare(Current.Before.Value, Current.Value) > 0)
+                        throw new Exception("Data not correct!");
                     if (Current.Before.Holder != Current)
                         throw new Exception("Some Data lost!");
                 }
@@ -81,14 +81,13 @@ namespace Monsajem_Incs.Collection
             public int BeforeDeep;
 
             public bool WayIsNext;
-            public bool WayIsEnd=true;
 
 #if DEBUG
             private void Set<t>(t From, ref t To)
             {
-                //if (From != null && To != null)
-                //    if (From.GetHashCode() == To.GetHashCode())
-                //        throw new Exception("Extra Action");
+                if (From != null && To != null)
+                    if (From.GetHashCode() == To.GetHashCode())
+                        throw new Exception("Extra Action");
                 To = From;
             }
 
@@ -125,105 +124,7 @@ namespace Monsajem_Incs.Collection
             }
         }
 
-        private Node GetItem(
-            int position,
-            out Node Before,
-            out Node Next)
-        {
-            Before = default;
-            Next = default;
-            if (position < 0)
-                throw new Exception("Position must start at zero.");
-            position++;
-            var Current = Root;
-            while (Current != null)
-            {
-                Current.WayIsEnd = false;
-                var cmp = position - (Current.BeforeDeep + 1);
-                if (cmp == 0)
-                    return Current;
-                else if (cmp > 0)
-                {
-                    Before = Current;
-                    position -= Current.BeforeDeep + 1;
-                    Current.WayIsNext = true;
-                    Current = Current.Next;
-                }
-                else
-                {
-                    Next = Current;
-                    Current.WayIsNext = false;
-                    Current = Current.Before;
-                }
-            }
-
-            return null;
-        }
-
-        public ValueType this[int Position]
-        {
-            get => GetItem(Position,out var x,out var y).Value;
-            set => GetItem(Position, out var x, out var y).Value = value;
-        }
-
-        public void Insert(ValueType Value, int Position)
-        {
-            if (Root == null)
-            {
-                Root = new Node(Value);
-#if DEBUG
-                Items.BinaryInsert(Value);
-                Check();
-#endif
-                return;
-            }
-
-            Node Before; Node Next;
-            var Current = GetItem(Position, out Before, out Next);
-            if (Current != null)
-            {
-                Next = Current;
-                Next.WayIsNext = false;
-            }
-            Current = new Node(Value);
-
-            if (Before != null)
-            {
-                Current.IsNext = true;
-                Current.Holder = Before;
-                Next = Before.Next;
-                Before.Next = Current;
-                if (Next != null)
-                {
-                    Current.Next = Next;
-                    Current.NextDeep = Next.NextDeep + Next.BeforeDeep + 1;
-                    Next.Holder = Current;
-                }
-                Before.NextDeep = Current.NextDeep;
-            }
-            else
-            {
-                Current.IsNext = false;
-                Current.Holder = Next;
-                Before = Next.Before;
-                Next.Before = Current;
-                if (Before != null)
-                {
-                    Current.Before = Before;
-                    Current.BeforeDeep = Before.NextDeep + Before.BeforeDeep + 1;
-                    Before.Holder = Current;
-                }
-                Next.BeforeDeep = Current.BeforeDeep;
-            }
-
-            FixEquality();
-#if DEBUG
-            Items.BinaryInsert(Value);
-            Check();
-#endif
-        }
-
-        public void BinaryInsert(ValueType Value)
+        public void Add(ValueType Value)
         {
             if (Root == null)
             {
@@ -261,7 +162,7 @@ namespace Monsajem_Incs.Collection
                 Next.Before = Current;
                 if (Before != null)
                 {
-                    Current.Next = Before;
+                    Current.Next = Next;
                     Before.Holder = Current;
                 }
             }
@@ -344,7 +245,6 @@ namespace Monsajem_Incs.Collection
             var Current = Root;
             while (Current != null)
             {
-                Current.WayIsEnd = false;
                 var cmp = Comparer.Compare(Current.Value, Value);
                 if (cmp == 0)
                     return Current;
@@ -377,32 +277,27 @@ namespace Monsajem_Incs.Collection
             var node = Root;
             while (node != null)
             {
-                if(node.WayIsEnd==false)
+                if (node.WayIsNext == true && node.Next != null)
                 {
-                    if (node.WayIsNext == true && node.Next != null)
+                    node.NextDeep++;
+                    if (node.Equality > 1)
                     {
-                        node.NextDeep++;
-                        if (node.Equality > 1)
-                        {
-                            MoveToHolder(node.Next);
-                            node = node.Holder;
-                        }
-                        else
-                            node = node.Next;
-                    }
-                    else if (node.WayIsNext == false && node.Before != null)
-                    {
-                        node.BeforeDeep++;
-                        if (node.Equality < -1)
-                        {
-                            MoveToHolder(node.Before);
-                            node = node.Holder;
-                        }
-                        else
-                            node = node.Before;
+                        MoveToHolder(node.Next);
+                        node = node.Holder;
                     }
                     else
-                        node = null;
+                        node = node.Next;
+                }
+                else if (node.WayIsNext == false && node.Before != null)
+                {
+                    node.BeforeDeep++;
+                    if (node.Equality < -1)
+                    {
+                        MoveToHolder(node.Before);
+                        node = node.Holder;
+                    }
+                    else
+                        node = node.Before;
                 }
                 else
                     node = null;
