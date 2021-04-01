@@ -31,10 +31,7 @@ namespace Monsajem_Incs.Collection.Array.Base
 
         public override void DeleteByPosition(int Position)
         {
-            if (_DeleteByPosition != null)
-                _DeleteByPosition(Position);
-            else
-                base.DeleteByPosition(Position);
+            _DeleteByPosition?.Invoke(Position);
         }
 
         public override void Insert(ArrayType Value, int Position)

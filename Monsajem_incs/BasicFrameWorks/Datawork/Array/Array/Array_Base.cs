@@ -14,6 +14,20 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.Base
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         internal abstract void AddLength(int Count);
 
+
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        public override void DeleteByPosition(int Position)
+        {
+            if (Position == Length - 1)
+            {
+                DeleteFrom(Position);
+                return;
+            }
+            //System.Array.Copy(ar, 0, ar, 0, Position);
+            CopyTo(Position + 1, this, Position, (Length - Position) - 1);
+            DeleteFrom(Length - 1);
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static void Copy(
             IArray<ArrayType> sourceArray,
@@ -86,7 +100,7 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.Base
 
         public override void CopyTo(int sourceIndex, Array.Base.IArray<ArrayType> destination, int destinationIndex, int Length)
         {
-            if (destination.GetType().IsAssignableFrom(typeof(IArray<ArrayType>)))
+            if (destination.GetType().IsAssignableTo(typeof(IArray<ArrayType>)))
                 CopyTo(sourceIndex,(IArray<ArrayType>) destination, destinationIndex, Length);
             else
                 base.CopyTo(sourceIndex, destination, destinationIndex, Length);

@@ -26,7 +26,8 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             {
                 Node Before; Node Next;
                 var Current = GetItem(i, out Before, out Next);
-                if (Current == null)
+                var ItemValue = Items[i];
+                if (Current == null||Comparer.Compare(Current.Value,ItemValue)!=0)
                     throw new Exception("Some Item lost!");
                 //if (Current.Equality > 2 || Current.Equality < -2)
                 //    throw new Exception("Equality Faild!");
@@ -63,11 +64,13 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
                     if (Current.Before.Holder != Current)
                         throw new Exception("Some Data lost!");
                 }
-                if (Current != Root)
+                if (Current.Holder != null)
                 {
                     if (Current.IsNext && Current != Current.Holder.Next)
                         throw new Exception("Some Data lost!");
                     else if (Current.IsNext == false && Current != Current.Holder.Before)
+                        throw new Exception("Some Data lost!");
+                    if(Items.Count((c)=>Comparer.Compare(c,Current.Holder.Value)==0)==0)
                         throw new Exception("Some Data lost!");
                 }
             }
@@ -90,33 +93,13 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             public bool WayIsNext;
             public bool WayIsEnd=true;
 
-#if DEBUG
-            private void Set<t>(t From, ref t To)
-            {
-                //if (From != null && To != null)
-                //    if (From.GetHashCode() == To.GetHashCode())
-                //        throw new Exception("Extra Action");
-                To = From;
-            }
-
-            public ValueType Value;
-            private Node _Holder;
-            public Node Holder { get => _Holder; set => Set(value, ref _Holder); }
-            private Node _Next;
-            public Node Next { get => _Next; set => Set(value, ref _Next); }
-            private Node _Before;
-            public Node Before { get => _Before; set => Set(value, ref _Before); }
-            private bool _IsNext;
-            public bool IsNext { get => _IsNext; set => _IsNext = value; }
-            public int Hash;
-#else
             public ValueType Value;
             public Node Holder;
             public bool IsNext;
             public Node Next;
             public Node Before;
             public int Hash;
-#endif
+
 
             public override string ToString()
             {
@@ -178,6 +161,10 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             Node Before; Node Next;
             var Current = GetItem(Position, out Before, out Next);
             Insert(Value,ref Current, Before, Next);
+#if DEBUG
+            Items.Insert(Value, Position);
+            Check();
+#endif
         }
 
         public override int BinaryInsert(ValueType Value)
@@ -185,22 +172,23 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             Node Before; Node Next;
             var Current = Find(Value, out Before, out Next);
             Insert(Value,ref Current, Before, Next);
+#if DEBUG
+            Items.BinaryInsert(Value);
+            Check();
+#endif
             return Current.BeforeDeep;
         }
 
-        private void Insert(ValueType Value,ref Node FindedSame, Node Before, Node Next)
+        private void Insert(ValueType Value,ref Node Current, Node Before, Node Next)
         {
             if (Root == null)
             {
-                Root = new Node(Value);
-#if DEBUG
-                Items.BinaryInsert(Value);
-                Check();
-#endif
+                Current = new Node(Value);
+                Root = Current;
+                Length++;
                 return;
             }
 
-            var Current = FindedSame;
             if (Current != null)
             {
                 Next = Current;
@@ -238,13 +226,41 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             }
 
             FixEquality();
+            Length++;
+        }
+
+        public override void DeleteByPosition(int Position)
+        {
+            Node Before; Node Next;
+            var Item = GetItem(Position, out Before, out Next);
+            Item.WayIsEnd = true;
+            Drop(Item);
+            Length--;
+
 #if DEBUG
-            Items.BinaryInsert(Value);
+            Items.DeleteByPosition(Position);
             Check();
 #endif
         }
 
-        public void MoveToHolder(Node Node)
+        public override (int Index, ValueType Value) BinaryDelete(ValueType Value)
+        {
+            Node Before; Node Next;
+            var Item = Find(Value, out Before, out Next);
+            if (Item == null)
+                throw new Exception($"{Value} not found!");
+            Item.WayIsEnd = true;
+            var Result = (Item.BeforeDeep, Item.Value);
+            Drop(Item);
+            Length--;
+            return Result;
+#if DEBUG
+            Items.BinaryDelete(Value);
+            Check();
+#endif
+        }
+
+        private void MoveToHolder(Node Node)
         {
             var Holder = Node.Holder;
             var Root = Holder.Holder;
@@ -292,6 +308,114 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
                 Node.Holder = Root;
             else
                 Node.Holder = null;
+        }
+
+        private void Drop(Node Node)
+        {
+            DropWayLen();
+            var BeforeLen = Node.BeforeDeep;
+            var NextLen = Node.NextDeep;
+            if (BeforeLen == 0 && NextLen == 0)
+            {
+                DropFromHolder(Node, null);
+                return;
+            }
+            else if (BeforeLen == 0)
+            {
+                DropFromHolder(Node, Node.Next);
+                return;
+            }
+            else if (NextLen == 0)
+            {
+                DropFromHolder(Node, Node.Before);
+                return;
+            }
+
+            var Holder = Node;
+            if (Node.BeforeDeep > Node.NextDeep)
+            {
+                Node = Node.Before; 
+                while (Node.NextDeep > 0)
+                {
+                    Node.NextDeep--;
+                    Node = Node.Next;
+                }
+                DropFromHolder(Node, Node.Before); 
+            }
+            else
+            {
+                Node = Node.Next;
+                while (Node.BeforeDeep > 0)
+                {
+                    Node.BeforeDeep--;
+                    Node = Node.Before;
+                }
+                DropFromHolder(Node, Node.Next);
+            }
+            var Before = Holder.Before;
+            var Next = Holder.Next;
+            Node.Before = Before;
+            Node.Next = Next;
+            Node.BeforeDeep = Before.BeforeDeep + Before.NextDeep + 1;
+            Node.NextDeep = Next.BeforeDeep + Next.NextDeep + 1;
+            DropFromHolder(Holder, Node);
+        }
+
+        private void DropFromHolder(Node Node,Node Replace)
+        {
+            var Holder = Node.Holder;
+            if (Holder == null)
+            {
+                Root = Replace;
+                if(Replace!=null)
+                    Replace.Holder = null;
+            }
+            else
+            {
+                var len = 0;
+                if (Replace != null)
+                    len = Replace.NextDeep + Replace.BeforeDeep + 1;
+
+                if (Node.IsNext)
+                {
+                    Holder.Next = Replace;
+                    if(Replace!=null)
+                    {
+                        Replace.Holder = Holder;
+                        Replace.IsNext = true;
+                    }
+                    Holder.NextDeep = len;
+                }
+                else
+                {
+                    Holder.Before = Replace;
+                    if(Replace!=null)
+                    {
+                        Replace.Holder = Holder;
+                        Replace.IsNext = false;
+                    }
+                    Holder.BeforeDeep = len;
+                }
+            }
+            return;
+        }
+
+        private void DropWayLen()
+        {
+            var Holder = Root;
+            while (Holder.WayIsEnd != true)
+            {
+                if (Holder.WayIsNext)
+                {
+                    Holder.NextDeep--;
+                    Holder = Holder.Next;
+                }
+                else
+                {
+                    Holder.BeforeDeep--;
+                    Holder = Holder.Before;
+                }
+            }
         }
 
         public Node Find(ValueType Value)

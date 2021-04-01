@@ -57,8 +57,7 @@ namespace Monsajem_Incs.Collection.Array.Base
             int destinationIndex,
             int length)
         {
-            for (int i = 0; i < length; i++)
-                destinationArray[i + destinationIndex] = sourceArray[i + sourceIndex];
+            sourceArray.CopyTo(sourceIndex, destinationArray, destinationIndex, length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
@@ -69,8 +68,7 @@ namespace Monsajem_Incs.Collection.Array.Base
             int destinationIndex,
             int length)
         {
-            for (int i = 0; i < length; i++)
-                destinationArray[i + destinationIndex] = sourceArray[i + sourceIndex];
+            sourceArray.CopyTo(sourceIndex, destinationArray, destinationIndex, length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
@@ -79,8 +77,10 @@ namespace Monsajem_Incs.Collection.Array.Base
             int sourceIndex,
             IArray<ArrayType> destinationArray,
             int destinationIndex,
-            int length) => destinationArray.CopyFrom(sourceIndex, sourceArray, destinationIndex,length);
-
+            int length)
+        {
+            destinationArray.CopyFrom(sourceIndex, sourceArray, destinationIndex, length);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public virtual void CopyTo(int sourceIndex, ArrayType[] destination, int destinationIndex, int Length)
@@ -92,8 +92,9 @@ namespace Monsajem_Incs.Collection.Array.Base
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public virtual void CopyTo(int sourceIndex, IArray<ArrayType> destination, int destinationIndex, int Length)
         {
-            for (int i = 0; i < Length; i++)
-                destination[i + destinationIndex] = this[i + sourceIndex];
+            var Ar = new ArrayType[Length];
+            CopyTo(sourceIndex, Ar, 0, Length);
+            CopyFrom(0, Ar, destinationIndex, Length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
@@ -126,17 +127,7 @@ namespace Monsajem_Incs.Collection.Array.Base
         }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public virtual void DeleteByPosition(int Position)
-        {
-            if (Position == Length - 1)
-            {
-                DeleteFrom(Position);
-                return;
-            }
-            //System.Array.Copy(ar, 0, ar, 0, Position);
-            CopyTo(Position + 1, this, Position, (Length - Position) - 1);
-            DeleteFrom(Length - 1);
-        }
+        public abstract void DeleteByPosition(int Position);
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public virtual void DeleteFrom(int from)
@@ -313,7 +304,7 @@ namespace Monsajem_Incs.Collection.Array.Base
         }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public (int Index, ArrayType Value) BinaryDelete(ArrayType Value)
+        public virtual (int Index, ArrayType Value) BinaryDelete(ArrayType Value)
         {
             var Place = BinarySearch(Value, 0, Length);
             var Index = Place.Index;
