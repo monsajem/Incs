@@ -4,7 +4,7 @@ using System.Linq;
 using System.IO;
 using System.Collections;
 using System.Runtime.Serialization;
-using static Monsajem_Incs.ArrayExtentions.ArrayExtentions;
+using static Monsajem_Incs.Collection.Array.Extentions;
 using Monsajem_Incs.Serialization;
 using System.Threading.Tasks;
 
@@ -105,9 +105,9 @@ namespace Monsajem_Incs.Database.Base
         private void _Insert(KeyType Key, ulong UpdateCode)
         {
             var Update = new UpdateAble<KeyType>() { Key = Key, UpdateCode = UpdateCode };
-            ArrayExtentions.ArrayExtentions.BinaryInsert(
+            Collection.Array.Extentions.BinaryInsert(
                 ref UpdateCodes, Update, UpdateAble<KeyType>.CompareCode);
-            ArrayExtentions.ArrayExtentions.BinaryInsert(
+            Collection.Array.Extentions.BinaryInsert(
                 ref UpdateKeys, Update, UpdateAble<KeyType>.CompareKey);
         }
 
@@ -124,9 +124,9 @@ namespace Monsajem_Incs.Database.Base
             if (Place < 0)
                 return;
             var Update = UpdateKeys[Place];
-            ArrayExtentions.ArrayExtentions.BinaryDelete(
+            Collection.Array.Extentions.BinaryDelete(
                 ref UpdateCodes, Update, UpdateAble<KeyType>.CompareCode);
-            ArrayExtentions.ArrayExtentions.DeleteByPosition(
+            Collection.Array.Extentions.DeleteByPosition(
                 ref UpdateKeys, Place);
         }
 
@@ -153,9 +153,9 @@ namespace Monsajem_Incs.Database.Base
             var OldUpdate = UpdateKeys[OldPlace_key];
             var NewUpdate = new UpdateAble<KeyType>() { Key = New, UpdateCode = UpdateCode };
 
-            ArrayExtentions.ArrayExtentions.BinaryUpdate(
+            Collection.Array.Extentions.BinaryUpdate(
                 UpdateKeys, OldUpdate, NewUpdate, UpdateAble<KeyType>.CompareKey);
-            ArrayExtentions.ArrayExtentions.BinaryUpdate(
+            Collection.Array.Extentions.BinaryUpdate(
                 UpdateCodes, OldUpdate, NewUpdate, UpdateAble<KeyType>.CompareCode);
         }
 

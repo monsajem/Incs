@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using System.Collections;
-using Monsajem_Incs.Array.Hyper;
+using Monsajem_Incs.Collection.Array.TreeBased;
 using Monsajem_Incs.Serialization;
 using static System.Runtime.Serialization.FormatterServices;
 using Monsajem_Incs.Net.Base.Service;

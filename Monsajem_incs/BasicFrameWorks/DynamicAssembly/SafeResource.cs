@@ -6,7 +6,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Monsajem_Incs.Array.DynamicSize;
+using Monsajem_Incs.Collection.Array.ArrayBased.DynamicSize;
 using System.Collections.Generic;
 
 namespace Monsajem_Incs.DynamicAssembly

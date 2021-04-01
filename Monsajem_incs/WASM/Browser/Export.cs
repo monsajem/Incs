@@ -1,5 +1,5 @@
 ﻿using System;
-using Monsajem_Incs.Array.DynamicSize;
+using Monsajem_Incs.Collection.Array.ArrayBased.DynamicSize;
 using System.Runtime.InteropServices.JavaScript;
 
 namespace WebAssembly.Browser.DOM

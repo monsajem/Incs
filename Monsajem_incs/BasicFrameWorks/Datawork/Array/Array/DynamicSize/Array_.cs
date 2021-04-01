@@ -2,79 +2,86 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Monsajem_Incs.Array.MultiplierSize
+namespace Monsajem_Incs.Collection.Array.ArrayBased.DynamicSize
 {
-    internal class Array<ArrayType> :
+    public class Array<ArrayType>:
         OneArrayBase.Array<ArrayType, Array<ArrayType>>
     {
         public int MinLen;
         public int MaxLen;
+        public int MinCount;
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public Array()
+        public Array() : this(500) { }
+
+        public Array(int MinCount)
         {
+            this.SetMyOptions(MinCount);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public Array(ArrayType[] ar)
+        public Array(ArrayType[] ar,int MinCount=500)
         {
             Length = ar.Length;
-            this.ar = ar;
+            this.ar=ar;
+            this.SetMyOptions(MinCount);
         }
 
-        public override object MyOptions
+        private void SetMyOptions(int value)
         {
-            get => null;
-            set { }
+            this.MinCount = value;
+            if (ar == null)
+            {
+                this.MinLen = Length - MinCount;
+                this.MaxLen = Length + MinCount;
+                this.ar = new ArrayType[MaxLen];
+            }
+            else
+            {
+                this.MinLen = Length;
+                this.MaxLen = Length;
+            }
+        }
+        public override object MyOptions { 
+            get => MinCount;
+            set=> SetMyOptions((int) value);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public override void DeleteFrom(int from)
         {
             Length = from;
-            from = Length + 1000;
             if (Length < MinLen)
             {
-                MaxLen = from * 2;
-                MinLen = from / 2;
+                MaxLen = Length + MinCount;
+                MinLen = Length - MinCount;
                 System.Array.Resize(ref ar, MaxLen);
             }
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         internal override void AddLength(int Count)
         {
             Length = Length + Count;
-            Count = Length + 1000;
             if (Length > MaxLen)
             {
-                MaxLen = Count * 2;
-                MinLen = Count / 2;
+                MaxLen = Length + MinCount;
+                MinLen = Length - MinCount;
                 System.Array.Resize(ref ar, MaxLen);
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public new Array<t> Browse<t>(Func<ArrayType, t> Selector)
         {
-            var Result = new Array<t>();
+            var Result = new Array<t>(this.MinCount);
             Result.Insert(base.Browse(Selector));
             return Result;
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public new Array<ArrayType> Browse(Func<ArrayType, bool> Selector)
         {
-            var Result = new Array<ArrayType>();
+            var Result = new Array<ArrayType>(this.MinCount);
             Result.Insert(base.Browse(Selector));
             return Result;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static implicit operator ArrayType[](Array<ArrayType> ar)
         {
             var NewAr = new ArrayType[ar.Length];
@@ -82,10 +89,9 @@ namespace Monsajem_Incs.Array.MultiplierSize
             return NewAr;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         protected override Array<ArrayType> MakeSameNew()
         {
-            return new Array<ArrayType>();
+            return new Array<ArrayType>(MinCount);
         }
     }
 }

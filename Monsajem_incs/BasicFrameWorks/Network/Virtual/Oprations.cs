@@ -2,11 +2,12 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Monsajem_Incs.Serialization;
-using static Monsajem_Incs.ArrayExtentions.ArrayExtentions;
+using static Monsajem_Incs.Collection.Array.Extentions;
 using Monsajem_Incs.Net.Base.Service;
 using Monsajem_Incs.DynamicAssembly;
 using System.Collections.Generic;
 using Monsajem_Incs.Net.Base;
+using Monsajem_Incs.Collection.Array.ArrayBased.DynamicSize;
 
 namespace Monsajem_Incs.Net.Virtual
 {
@@ -15,7 +16,7 @@ namespace Monsajem_Incs.Net.Virtual
     {
         public readonly Socket OtherSide;
         private Action Getting;
-        private Array.DynamicSize.Array<object> Data = new Array.DynamicSize.Array<object>(10);
+        private Array<object> Data = new Array<object>(10);
 
         public Socket()
         {

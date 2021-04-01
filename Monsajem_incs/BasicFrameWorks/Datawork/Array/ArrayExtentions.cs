@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Monsajem_Incs.ArrayExtentions
+namespace Monsajem_Incs.Collection.Array
 {
-    public static class ArrayExtentions
+    public static partial class Extentions
     {
         public static void ForEach<t>(
             this t[] array,

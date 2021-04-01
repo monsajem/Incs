@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
-using static Monsajem_Incs.ArrayExtentions.ArrayExtentions;
-using static Monsajem_Incs.ArrayExtentions.ArrayReturns;
+using static Monsajem_Incs.Collection.Array.Extentions;
+
 using Monsajem_Incs.Serialization;
 using static Monsajem_Incs.DynamicAssembly.DelegatesExtentions;
 

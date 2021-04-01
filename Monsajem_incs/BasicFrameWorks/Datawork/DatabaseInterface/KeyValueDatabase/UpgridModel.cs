@@ -16,7 +16,7 @@ namespace Monsajem_Incs.Database.Base
                 fiels = fiels.Where((c) => filter(c)).ToArray();
             if (typeToReflect.BaseType != null)
             {
-               ArrayExtentions.ArrayExtentions.Insert(ref fiels, GetFields(typeToReflect.BaseType, BindingFlags.Instance | BindingFlags.NonPublic, info => info.IsPrivate));
+                Collection.Array.Extentions.Insert(ref fiels, GetFields(typeToReflect.BaseType, BindingFlags.Instance | BindingFlags.NonPublic, info => info.IsPrivate));
             }
             return fiels;
         }
@@ -38,7 +38,7 @@ namespace Monsajem_Incs.Database.Base
                     if(NewField != null)
                     {
                         if(OldField.FieldType==NewField.FieldType)
-                            ArrayExtentions.ArrayExtentions.Insert(ref Fields,(OldField,NewField));
+                            Collection.Array.Extentions.Insert(ref Fields,(OldField,NewField));
                     }
                 }
             }

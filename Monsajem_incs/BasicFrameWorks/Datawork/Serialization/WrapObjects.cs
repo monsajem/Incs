@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using static Monsajem_Incs.ArrayExtentions.ArrayExtentions;
-using Monsajem_Incs.ArrayExtentions;
+using static Monsajem_Incs.Collection.Array.Extentions;
+using Monsajem_Incs.Collection.Array;
 using static System.Runtime.Serialization.FormatterServices;
-using Monsajem_Incs.Array.DynamicSize;
+using Monsajem_Incs.Collection.Array.ArrayBased.DynamicSize;
 
 namespace Monsajem_Incs.Serialization
 {

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Reflection;
 using System.Runtime.InteropServices.JavaScript;
-using Monsajem_Incs.Array.DynamicSize;
-using static Monsajem_Incs.ArrayExtentions.ArrayExtentions;
+using Monsajem_Incs.Collection.Array.ArrayBased.DynamicSize;
+using static Monsajem_Incs.Collection.Array.Extentions;
 
 namespace WebAssembly.Browser.DOM
 {

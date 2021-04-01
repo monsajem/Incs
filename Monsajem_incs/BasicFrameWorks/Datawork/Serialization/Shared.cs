@@ -2,7 +2,8 @@
 using System;
 using System.Linq;
 using System.Reflection;
-using static Monsajem_Incs.ArrayExtentions.ArrayExtentions;
+using static Monsajem_Incs.Collection.Array.Extentions;
+using Monsajem_Incs.Collection.Array.ArrayBased.DynamicSize;
 
 namespace Monsajem_Incs
 {
@@ -57,7 +58,7 @@ namespace Monsajem_Incs
             return Type.ToString();
         }
 
-        private static Array.DynamicSize.Array<TypeHolder> Types = new Array.DynamicSize.Array<TypeHolder>();
+        private static Array<TypeHolder> Types = new Array<TypeHolder>();
         internal static Type GetTypeByName(this string TypeName)
         {
             var Type = Types.BinarySearch(new TypeHolder(TypeName)).Value?.Type;

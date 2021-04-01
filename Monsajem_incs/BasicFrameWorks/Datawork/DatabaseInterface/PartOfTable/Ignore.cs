@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static Monsajem_Incs.ArrayExtentions.ArrayExtentions;
+using static Monsajem_Incs.Collection.Array.Extentions;
 using static Monsajem_Incs.Database.Base.Runer;
 using static System.Runtime.Serialization.FormatterServices;
 

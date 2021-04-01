@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Monsajem_Incs.Serialization;
-using static Monsajem_Incs.ArrayExtentions.ArrayExtentions;
+using static Monsajem_Incs.Collection.Array.Extentions;
 
-namespace Monsajem_Incs.StreamCollection
+namespace Monsajem_Incs.Collection
 {
 
     public partial class StreamCollection<ValueType>

@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 using Monsajem_Incs.Net.Base.Service;
 using Monsajem_Incs.Database;
 using System.Linq;
-using Monsajem_Incs.Array.Hyper;
+using Monsajem_Incs.Collection.Array.TreeBased;
 using System.Linq.Expressions;
-using static Monsajem_Incs.ArrayExtentions.ArrayExtentions;
+using static Monsajem_Incs.Collection.Array.Extentions;
 
 namespace Monsajem_Incs.Database.Base
 {

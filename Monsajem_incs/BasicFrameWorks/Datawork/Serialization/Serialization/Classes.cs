@@ -1,12 +1,13 @@
-﻿using Monsajem_Incs.Array.DynamicSize;
+﻿using Monsajem_Incs.Collection.Array.ArrayBased.DynamicSize;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using static Monsajem_Incs.ArrayExtentions.ArrayExtentions;
+using static Monsajem_Incs.Collection.Array.Extentions;
 using static System.Runtime.Serialization.FormatterServices;
 using static System.Text.Encoding;
+using Monsajem_Incs.Collection.Array.ArrayBased.DynamicSize;
 
 namespace Monsajem_Incs.Serialization
 {
@@ -89,9 +90,9 @@ namespace Monsajem_Incs.Serialization
                 }
             }
 
-            private static Array.DynamicSize.Array<ExactSerializer> 
+            private static Array<ExactSerializer> 
                 SerializersByHashCode = new Array<ExactSerializer>(10);
-            private static Array.DynamicSize.Array<ExactSerializer> 
+            private static Array<ExactSerializer> 
                 SerializersByNameCode = new Array<ExactSerializer>(10);
 
             public static SerializeInfo GetSerialize(Type Type)
@@ -223,7 +224,7 @@ namespace Monsajem_Incs.Serialization
                         return GetSerialize(Info).Deserializer();
                     });
                 }
-                else if (Type.GetInterfaces().Where((c) => c == typeof(Array.Base.IArray)).FirstOrDefault() != null)
+                else if (Type.GetInterfaces().Where((c) => c == typeof(Collection.Array.Base.IArray)).FirstOrDefault() != null)
                 {
 
                     InsertSerializer(() =>
@@ -573,45 +574,20 @@ namespace Monsajem_Incs.Serialization
             {
                 var Type = typeof(t);
                 var ItemsSerializer = GetSerialize(System.Array.CreateInstance(
-                    ((Array.Base.IArray)GetUninitializedObject(Type)).ElementType, 0).GetType());
+                    ((Collection.Array.Base.IArray)GetUninitializedObject(Type)).ElementType, 0).GetType());
                 var ObjSerializer = SerializeInfo<object>.GetSerialize();
 
                 Action<object> Serializer = (object obj) =>
                 {
-                    var ar = (Array.Base.IArray)obj;
+                    var ar = (Collection.Array.Base.IArray)obj;
                     ObjSerializer.Serializer(ar.MyOptions);
-                    var AllArrays = ar.GetAllArrays();
-                    var Arrays = AllArrays.Ar;
-                    var ArraysLen = Arrays.Length;
-                    S_Data.Write(BitConverter.GetBytes(ArraysLen), 0, 4);
-                    for (int i = 0; i < ArraysLen; i++)
-                    {
-                        var Array = Arrays[i];
-                        S_Data.Write(BitConverter.GetBytes(Array.From), 0, 4);
-                        S_Data.Write(BitConverter.GetBytes(Array.Len), 0, 4);
-                        ItemsSerializer.Serializer(Array.Ar);
-                    }
+                    ItemsSerializer.Serializer(ar.ToArray());
                 };
                 Func<object> Deserializer = () =>
                 {
-                    var ar = (Array.Base.IArray)GetUninitializedObject(Type);
+                    var ar = (Collection.Array.Base.IArray)GetUninitializedObject(Type);
                     ar.MyOptions = ObjSerializer.Deserializer();
-                    var ArraysLen = BitConverter.ToInt32(D_Data, From);
-                    From += 4;
-                    var AllArrays = (Ar: new (int From, int To, System.Array Ar)[ArraysLen], MaxLen: 0);
-                    var AllLen = 0;
-                    for (int i = 0; i < ArraysLen; i++)
-                    {
-                        var ArFrom = BitConverter.ToInt32(D_Data, From);
-                        From += 4;
-                        var ArLen = BitConverter.ToInt32(D_Data, From);
-                        From += 4;
-                        var Array = ItemsSerializer.Deserializer();
-                        AllLen += ArLen;
-                        AllArrays.Ar[i] = (ArFrom, ArLen, (System.Array)Array);
-                    }
-                    ar.SetAllArrays(AllArrays);
-                    ar.SetLen(AllLen);
+                    ar.Insert((Array)ItemsSerializer.Deserializer());
                     return ar;
                 };
                 return (Serializer, Deserializer);

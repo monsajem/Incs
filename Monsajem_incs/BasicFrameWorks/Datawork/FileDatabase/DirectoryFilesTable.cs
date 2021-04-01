@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq.Expressions;
-using Monsajem_Incs.StreamCollection;
+using Monsajem_Incs.Collection;
 using Monsajem_Incs.Serialization;
 using Monsajem_Incs.Database.Base;
 using Monsajem_Incs.DynamicAssembly;

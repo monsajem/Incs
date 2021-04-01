@@ -2,86 +2,79 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Monsajem_Incs.Array.DynamicSize
+namespace Monsajem_Incs.Collection.Array.ArrayBased.MultiplierSize
 {
-    public class Array<ArrayType>:
+    internal class Array<ArrayType> :
         OneArrayBase.Array<ArrayType, Array<ArrayType>>
     {
         public int MinLen;
         public int MaxLen;
-        public int MinCount;
 
-        public Array() : this(500) { }
-
-        public Array(int MinCount)
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        public Array()
         {
-            this.SetMyOptions(MinCount);
         }
 
-        public Array(ArrayType[] ar,int MinCount=500)
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        public Array(ArrayType[] ar)
         {
             Length = ar.Length;
-            this.ar=ar;
-            this.SetMyOptions(MinCount);
+            this.ar = ar;
         }
 
-        private void SetMyOptions(int value)
+        public override object MyOptions
         {
-            this.MinCount = value;
-            if (ar == null)
-            {
-                this.MinLen = Length - MinCount;
-                this.MaxLen = Length + MinCount;
-                this.ar = new ArrayType[MaxLen];
-            }
-            else
-            {
-                this.MinLen = Length;
-                this.MaxLen = Length;
-            }
-        }
-        public override object MyOptions { 
-            get => MinCount;
-            set=> SetMyOptions((int) value);
+            get => null;
+            set { }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public override void DeleteFrom(int from)
         {
             Length = from;
+            from = Length + 1000;
             if (Length < MinLen)
             {
-                MaxLen = Length + MinCount;
-                MinLen = Length - MinCount;
+                MaxLen = from * 2;
+                MinLen = from / 2;
                 System.Array.Resize(ref ar, MaxLen);
             }
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         internal override void AddLength(int Count)
         {
             Length = Length + Count;
+            Count = Length + 1000;
             if (Length > MaxLen)
             {
-                MaxLen = Length + MinCount;
-                MinLen = Length - MinCount;
+                MaxLen = Count * 2;
+                MinLen = Count / 2;
                 System.Array.Resize(ref ar, MaxLen);
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public new Array<t> Browse<t>(Func<ArrayType, t> Selector)
         {
-            var Result = new Array<t>(this.MinCount);
-            Result.Insert(base.Browse(Selector));
-            return Result;
-        }
-        public new Array<ArrayType> Browse(Func<ArrayType, bool> Selector)
-        {
-            var Result = new Array<ArrayType>(this.MinCount);
+            var Result = new Array<t>();
             Result.Insert(base.Browse(Selector));
             return Result;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        public new Array<ArrayType> Browse(Func<ArrayType, bool> Selector)
+        {
+            var Result = new Array<ArrayType>();
+            Result.Insert(base.Browse(Selector));
+            return Result;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static implicit operator ArrayType[](Array<ArrayType> ar)
         {
             var NewAr = new ArrayType[ar.Length];
@@ -89,9 +82,10 @@ namespace Monsajem_Incs.Array.DynamicSize
             return NewAr;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         protected override Array<ArrayType> MakeSameNew()
         {
-            return new Array<ArrayType>(MinCount);
+            return new Array<ArrayType>();
         }
     }
 }

@@ -4,8 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Monsajem_Incs.Serialization;
-using static Monsajem_Incs.ArrayExtentions.ArrayExtentions;
-using Monsajem_Incs.StreamCollection;
+using static Monsajem_Incs.Collection.Array.Extentions;
+using Monsajem_Incs.Collection;
 
 namespace Monsajem_Incs.Collection
 {

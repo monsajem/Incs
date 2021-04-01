@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Monsajem_Incs.Array.FixedSize
+namespace Monsajem_Incs.Collection.Array.ArrayBased.FixedSize
 {
     public class Array<ArrayType>:
         OneArrayBase.Array<ArrayType, Array<ArrayType>>

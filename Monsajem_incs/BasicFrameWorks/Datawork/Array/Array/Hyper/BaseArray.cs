@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Monsajem_Incs.Array.Hyper
+namespace Monsajem_Incs.Collection.Array.ArrayBased.Hyper
 {
 
     public class ArrayHuge<ArrayType> :Array<ArrayType>
@@ -139,7 +139,7 @@ namespace Monsajem_Incs.Array.Hyper
             var OldAr = ar[Pos];
             if (OldAr.ar.Length > MaxLen)
             {
-                var NewAr = OldAr.ar.PopFrom(MaxLen_Div2);
+                var NewAr =(Base.IArray<ArrayType>) OldAr.ar.PopFrom(MaxLen_Div2);
                 ar.Insert(new ArrayInstance()
                 {
                     FromPos = OldAr.FromPos + OldAr.ar.Length,
@@ -166,7 +166,7 @@ namespace Monsajem_Incs.Array.Hyper
                         var NextAr = ar[1];
                         if ((NextAr.ar.Length + OldAr.ar.Length) < (MaxLen_Div2))
                         {
-                            NextAr.ar.Insert(OldAr.ar.ToArray(), 0);
+                            NextAr.ar.Insert(0,OldAr.ar.ToArray());
                             NextAr.FromPos = 0;
                             ar.DeleteByPosition(0);
                             return -1;
@@ -188,7 +188,7 @@ namespace Monsajem_Incs.Array.Hyper
                     var NextAr = ar[Pos + 1];
                     if ((NextAr.ar.Length + OldAr.ar.Length) < (MaxLen_Div2))
                     {
-                        NextAr.ar.Insert(OldAr.ar.ToArray(), 0);
+                        NextAr.ar.Insert(0,OldAr.ar.ToArray());
                         NextAr.FromPos = OldAr.FromPos;
                         ar.DeleteByPosition(Pos);
                         return -1;
@@ -242,7 +242,7 @@ namespace Monsajem_Incs.Array.Hyper
                         var NewAr = new ArrayInstance()
                         {
                             FromPos = MyAr.FromPos + MyAr.ar.Length,
-                            ar = InnerAr
+                            ar = (Base.IArray<ArrayType>)InnerAr
                         };
                         arPos += 1;
                         ar.Insert(NewAr, arPos);
@@ -321,7 +321,7 @@ namespace Monsajem_Incs.Array.Hyper
                 var FromAr = ar[arPos];
                 FromAr = new ArrayInstance()
                 {
-                    ar = FromAr.ar.PopFrom(From - FromAr.FromPos)
+                    ar = (Base.IArray<ArrayType>)FromAr.ar.PopFrom(From - FromAr.FromPos)
                 };
                 arPos += 1;
                 ar.Insert(new ArrayInstance()
@@ -340,7 +340,7 @@ namespace Monsajem_Incs.Array.Hyper
             var Opt = new DynamicSize.Array<ArrayInstance>(10);
             Opt.Insert(Instance);
             Optimization(Opt);
-            ar.Insert(Opt.ToArray(), arPos);
+            ar.Insert(arPos,Opt.ToArray());
             for (int i = arPos + Opt.Length; i < ar.Length; i++)
             {
                 ar[i].FromPos += Ar_Len;

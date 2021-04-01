@@ -4,7 +4,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using static Monsajem_Incs.ArrayExtentions.ArrayExtentions;
+using static Monsajem_Incs.Collection.Array.Extentions;
 
 namespace Monsajem_Incs.DynamicAssembly
 {

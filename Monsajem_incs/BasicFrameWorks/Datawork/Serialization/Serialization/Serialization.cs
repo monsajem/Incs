@@ -1,5 +1,5 @@
 ﻿using System;
-using static Monsajem_Incs.ArrayExtentions.ArrayExtentions;
+using static Monsajem_Incs.Collection.Array.Extentions;
 using static System.Text.Encoding;
 
 namespace Monsajem_Incs.Serialization

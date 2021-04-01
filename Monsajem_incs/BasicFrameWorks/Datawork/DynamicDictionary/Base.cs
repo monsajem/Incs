@@ -6,10 +6,10 @@ using System.Threading;
 using Monsajem_Incs.Database.Base;
 using Monsajem_Incs.Serialization;
 using Monsajem_Incs.Database;
-using Monsajem_Incs.Array.Hyper;
+using Monsajem_Incs.Collection.Array.TreeBased;
 using System.Diagnostics.CodeAnalysis;
 using System.Collections;
-using Monsajem_Incs.StreamCollection;
+using Monsajem_Incs.Collection;
 
 namespace Monsajem_Incs.Collection
 {

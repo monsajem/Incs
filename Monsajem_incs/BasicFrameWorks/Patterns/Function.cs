@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static Monsajem_Incs.ArrayExtentions.ArrayExtentions;
-using Monsajem_Incs.ArrayExtentions;
+using static Monsajem_Incs.Collection.Array.Extentions;
+using Monsajem_Incs.Collection.Array;
 
 namespace Monsajem_Incs.Pattern
 {

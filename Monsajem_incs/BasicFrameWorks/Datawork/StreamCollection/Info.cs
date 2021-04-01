@@ -6,9 +6,9 @@ using System.Threading;
 using Monsajem_Incs.Database.Base;
 using Monsajem_Incs.Serialization;
 using Monsajem_Incs.Database;
-using Monsajem_Incs.Array.Hyper;
+using Monsajem_Incs.Collection.Array.TreeBased;
 
-namespace Monsajem_Incs.StreamCollection
+namespace Monsajem_Incs.Collection
 {
     internal struct Data : IComparable<Data>
     {

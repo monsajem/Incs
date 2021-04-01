@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Monsajem_Incs.Array.Base
+namespace Monsajem_Incs.Collection.Array.Base
 {
     public class ValueOf<ValueType>
     {

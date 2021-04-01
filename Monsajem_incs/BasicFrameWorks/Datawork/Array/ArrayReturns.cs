@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Monsajem_Incs.ArrayExtentions
+namespace Monsajem_Incs.Collection.Array
 {
-    public static class ArrayReturns
+    public static partial class Extentions
     {
         public static ref t first<t>(this t[] ar)
         {
@@ -72,12 +72,6 @@ namespace Monsajem_Incs.ArrayExtentions
         {
             var Result = ar.To(to);
             ar=ar.DeleteTo(to);
-            return (Result,ar);
-        }
-        public static (t[] Poped, t[] Array) PopFromTo<t>(ref t[] ar,int From,int To)
-        {
-            var Result = ar.From(From).To(To);
-            ar=ar.DeleteFromTo(From, To);
             return (Result,ar);
         }
 

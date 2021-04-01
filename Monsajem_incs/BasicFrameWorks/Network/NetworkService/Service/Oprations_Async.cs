@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Monsajem_Incs.Serialization;
 using System.Reflection;
-using static Monsajem_Incs.ArrayExtentions.ArrayExtentions;
+using static Monsajem_Incs.Collection.Array.Extentions;
 using static System.Runtime.Serialization.FormatterServices;
 
 namespace Monsajem_Incs.Net.Base.Service

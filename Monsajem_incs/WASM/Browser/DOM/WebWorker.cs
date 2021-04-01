@@ -79,8 +79,8 @@ namespace WebAssembly.Browser.DOM
             public Task Handle;
             public MessageEvent Result;
         }
-        private Monsajem_Incs.Array.DynamicSize.Array<MessageEventHandle>
-            MessageQuque = new Monsajem_Incs.Array.DynamicSize.Array<MessageEventHandle>(20);
+        private Monsajem_Incs.Collection.Array.ArrayBased.DynamicSize.Array<MessageEventHandle>
+            MessageQuque = new Monsajem_Incs.Collection.Array.ArrayBased.DynamicSize.Array<MessageEventHandle>(20);
         private void OnMessage(MessageEvent e)
         { 
             if(MessageQuque.Length>0)

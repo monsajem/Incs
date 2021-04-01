@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Monsajem_Incs.Serialization;
 
-namespace Monsajem_Incs.StreamCollection
+namespace Monsajem_Incs.Collection
 {
     public partial class StreamCollection<ValueType>
     {

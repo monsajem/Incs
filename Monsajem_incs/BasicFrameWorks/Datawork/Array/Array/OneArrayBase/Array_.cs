@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Monsajem_Incs.Array.OneArrayBase
+namespace Monsajem_Incs.Collection.Array.ArrayBased.OneArrayBase
 {
     public abstract class Array<ArrayType,OwnerType> :
         Base.IArray<ArrayType, OwnerType>
