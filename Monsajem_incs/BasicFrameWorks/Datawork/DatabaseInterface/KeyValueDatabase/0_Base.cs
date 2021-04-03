@@ -214,8 +214,7 @@ namespace Monsajem_Incs.Database.Base
                     var NewPos = KeysInfo.Keys.BinarySearch(NewKey).Index;
                     if (NewPos > -1)
                         throw new InvalidOperationException("Value be exist!");
-                    NewPos = NewPos * -1;
-                    NewPos -= 1;
+                    NewPos = ~NewPos;
                     var MyInfo = info.Info[KeyPos];
                     MyInfo.Key = NewKey;
                     MyInfo.Pos = NewPos;

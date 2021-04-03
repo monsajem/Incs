@@ -24,13 +24,13 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
         {
             for (int i = 0; i < Items.Length; i++)
             {
-                Node Before; Node Next;int Deep;
-                var Current = GetItem(i, out Before, out Next,out Deep);
+                Node Before; Node Next;
+                var Current = GetItem(i, out Before, out Next);
                 var ItemValue = Items[i];
                 if (Current == null || Comparer.Compare(Current.Value, ItemValue) != 0)
                     throw new Exception("Some Item lost!");
-                if (Current.Balance > 1 || Current.Balance < -1)
-                    throw new Exception("Equality Faild!");
+                //if (Current.Balance > 1 || Current.Balance < -1)
+                //    throw new Exception("Equality Faild!");
                 if (Current.Holder == null && Current != Root)
                     throw new Exception("Some Data lost!");
                 if (Current.Next != null)
@@ -38,12 +38,36 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
                     //if (Comparer.Compare(Current.Next.Value, Current.Value) < 0)
                     //    throw new Exception("Data not correct!");
 
+                    if (Current.NextDeep > 0)
+                    {
+                        if (Current.NextDeep != Math.Max(Current.Next.BeforeDeep , Current.Next.NextDeep) + 1)
+                            throw new Exception("Data not correct!");
+                    }
+                    else
+                        throw new Exception("Data not correct!");
+
                     if (Current.NextLen > 0)
                     {
                         if (Current.NextLen != Current.Next.NextLen + Current.Next.BeforeLen + 1)
                             throw new Exception("Data not correct!");
                     }
                     else if (Current.Next != null)
+                        throw new Exception("Data not correct!");
+
+                    if (Current.Next.Holder != Current)
+                        throw new Exception("Some Data lost!");
+                }
+                if (Current.Before != null)
+                {
+                    //if (Comparer.Compare(Current.Before.Value, Current.Value) > 0)
+                    //    throw new Exception("Data not correct!");
+
+                    if (Current.BeforeDeep > 0)
+                    {
+                        if (Current.BeforeDeep != Math.Max(Current.Before.BeforeDeep, Current.Before.NextDeep) + 1)
+                            throw new Exception("Data not correct!");
+                    }
+                    else
                         throw new Exception("Data not correct!");
 
                     if (Current.BeforeLen > 0)
@@ -54,13 +78,6 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
                     else if (Current.Before != null)
                         throw new Exception("Data not correct!");
 
-                    if (Current.Next.Holder != Current)
-                        throw new Exception("Some Data lost!");
-                }
-                if (Current.Before != null)
-                {
-                    //if (Comparer.Compare(Current.Before.Value, Current.Value) > 0)
-                    //    throw new Exception("Data not correct!");
                     if (Current.Before.Holder != Current)
                         throw new Exception("Some Data lost!");
                 }
@@ -92,9 +109,6 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             public int NextLen;
             public int BeforeLen;
 
-            public bool WayIsNext;
-            public bool WayIsEnd = true;
-
             public ValueType Value;
             public Node Holder;
             public bool IsNext;
@@ -120,10 +134,8 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
         private Node GetItem(
             int position,
             out Node Before,
-            out Node Next,
-            out int Deep)
+            out Node Next)
         {
-            Deep = 0;
             Before = default;
             Next = default;
             if (position < 0)
@@ -132,7 +144,6 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             var Current = Root;
             while (Current != null)
             {
-                Current.WayIsEnd = false;
                 var cmp = position - (Current.BeforeLen + 1);
                 if (cmp == 0)
                     return Current;
@@ -140,16 +151,13 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
                 {
                     Before = Current;
                     position -= Current.BeforeLen + 1;
-                    Current.WayIsNext = true;
                     Current = Current.Next;
                 }
                 else
                 {
                     Next = Current;
-                    Current.WayIsNext = false;
                     Current = Current.Before;
                 }
-                Deep++;
             }
 
             return null;
@@ -157,15 +165,15 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
 
         public override ValueType this[int Position]
         {
-            get => GetItem(Position, out var x, out var y,out var z).Value;
-            set => GetItem(Position, out var x, out var y, out var z).Value = value;
+            get => GetItem(Position, out var x, out var y).Value;
+            set => GetItem(Position, out var x, out var y).Value = value;
         }
 
         public override void Insert(ValueType Value, int Position)
         {
             Node Before; Node Next;int Deep;
-            var Current = GetItem(Position, out Before, out Next,out Deep);
-            Insert(Value, Current, Before, Next,Deep);
+            var Current = GetItem(Position, out Before, out Next);
+            Insert(Value, Current, Before, Next);
 #if DEBUG
             Items.Insert(Value, Position);
             Check();
@@ -174,9 +182,9 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
 
         public override int BinaryInsert(ValueType Value)
         {
-            Node Before; Node Next; int Pos; int Deep;
-            var Current = Find(Value, out Before, out Next, out Pos,out Deep);
-            Insert(Value, Current, Before, Next,Deep);
+            Node Before; Node Next; int Pos;
+            var Current = Find(Value, out Before, out Next, out Pos);
+            Insert(Value, Current, Before, Next);
 #if DEBUG
             Items.BinaryInsert(Value);
             Check();
@@ -193,8 +201,8 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
         public override (int Index, ValueType Value) BinarySearch(ValueType key, int minNum, int maxNum)
         {
             (int Index, ValueType Value) Result = default;
-            Node Before; Node Next; int Pos;int Deep;
-            var Current = Find(key, out Before, out Next, out Pos,out Deep);
+            Node Before; Node Next; int Pos;
+            var Current = Find(key, out Before, out Next, out Pos);
             if (Current != null)
                 Result = (Pos, Current.Value);
             else
@@ -207,7 +215,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             return Result;
         }
 
-        private void Insert(ValueType Value, Node Current, Node Before, Node Next,int Deep)
+        private void Insert(ValueType Value, Node Current, Node Before, Node Next)
         {
             if (Root == null)
             {
@@ -220,7 +228,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             if (Current != null)
             {
                 Next = Current;
-                Next.WayIsNext = false;
+                Before = null;
             }
             Current = new Node(Value);
 
@@ -256,18 +264,14 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
                     Next.BeforeDeep = Current.BeforeDeep;
                 }
             }
-
-            Current.WayIsEnd = true;
-
-            FixEquality(Deep);
+            FixEquality(Current);
             Length++;
         }
 
         public override void DeleteByPosition(int Position)
         {
-            Node Before; Node Next;int Deep;
-            var Item = GetItem(Position, out Before, out Next,out Deep);
-            Item.WayIsEnd = true;
+            Node Before; Node Next;
+            var Item = GetItem(Position, out Before, out Next);
             Drop(Item);
             Length--;
 
@@ -279,11 +283,10 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
 
         public override (int Index, ValueType Value) BinaryDelete(ValueType Value)
         {
-            Node Before; Node Next; int Pos;int Deep;
-            var Item = Find(Value, out Before, out Next, out Pos,out Deep);
+            Node Before; Node Next; int Pos;
+            var Item = Find(Value, out Before, out Next, out Pos);
             if (Item == null)
                 throw new Exception($"{Value} not found!");
-            Item.WayIsEnd = true;
             var Result = (Item.BeforeLen, Item.Value);
             Drop(Item);
             Length--;
@@ -355,14 +358,20 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             
             Holder.Holder = Node;
             if (Root != null)
+            {
                 Node.Holder = Root;
+                if(Node.IsNext)
+                    Root.NextDeep = Math.Max(Node.NextDeep, Node.BeforeDeep) + 1;
+                else
+                    Root.BeforeDeep = Math.Max(Node.NextDeep, Node.BeforeDeep) + 1;
+            }
             else
                 Node.Holder = null;
         }
 
         private void Drop(Node Node)
         {
-            DropWayLen();
+            DropWayLen(Node);
             var BeforeLen = Node.BeforeLen;
             var NextLen = Node.NextLen;
             if (BeforeLen == 0 && NextLen == 0)
@@ -450,28 +459,23 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             return;
         }
 
-        private void DropWayLen()
+        private void DropWayLen(Node Child)
         {
-            var Holder = Root;
-            while (Holder.WayIsEnd != true)
+            var Holder = Child.Holder;
+            while (Holder != null)
             {
-                if (Holder.WayIsNext)
-                {
+                if (Child.IsNext)
                     Holder.NextLen--;
-                    Holder = Holder.Next;
-                }
                 else
-                {
                     Holder.BeforeLen--;
-                    Holder = Holder.Before;
-                }
+                Holder = Child.Holder;
             }
         }
 
         public Node Find(ValueType Value)
         {
-            Node Before; Node Next; int Pos;int Deep;
-            return Find(Value, out Before, out Next, out Pos,out Deep);
+            Node Before; Node Next; int Pos;
+            return Find(Value, out Before, out Next, out Pos);
         }
 
         public override object MyOptions { get => null; set { } }
@@ -480,133 +484,62 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             ValueType Value,
             out Node Before,
             out Node Next, 
-            out int Position,
-            out int Deep)
+            out int Position)
         {
             Before = default;
             Next = default;
             Position = 0;
-            Deep = 0;
             var Current = Root;
             while (Current != null)
             {
-                Current.WayIsEnd = false;
                 var cmp = Comparer.Compare(Current.Value, Value);
                 if (cmp == 0)
+                {
+                    Position += Current.BeforeLen;
                     return Current;
+                }
                 else if (cmp < 0)
                 {
                     Position += Current.BeforeLen + 1;
                     Before = Current;
-                    Current.WayIsNext = true;
                     Current = Current.Next;
                 }
                 else
                 {
                     Next = Current;
-                    Current.WayIsNext = false;
                     Current = Current.Before;
                 }
-                Deep += 1;
             }
+            if (Before != null)
+                Position += Before.BeforeLen;
             return null;
         }
 
-
-        //private void FixEquality()
-        //{
-        //    var node = Root;
-        //    while (node != null)
-        //    {
-        //        if (node.WayIsEnd == false)
-        //        {
-        //            if (node.WayIsNext == true && node.Next != null)
-        //            {
-        //                node.NextDeep++;
-        //                if (node.Equality > 1)
-        //                {
-        //                    MoveToHolder(node.Next);
-        //                    node = node.Holder;
-        //                }
-        //                else
-        //                    node = node.Next;
-        //            }
-        //            else if (node.WayIsNext == false && node.Before != null)
-        //            {
-        //                node.BeforeDeep++;
-        //                if (node.Equality < -1)
-        //                {
-        //                    MoveToHolder(node.Before);
-        //                    node = node.Holder;
-        //                }
-        //                else
-        //                    node = node.Before;
-        //            }
-        //            else
-        //                node = null;
-        //        }
-        //        else
-        //            node = null;
-        //    }
-        //}
-
-        private void FixEquality(int Deep)
+        private void FixEquality(Node node)
         {
-            var node = Root;
-            while (node != null)
+            var Node = node;
+            while (node!=null && node.Holder != null)
             {
-                if (node.WayIsEnd == false)
+                var Holder = node.Holder;
+                var HolderDeep = Math.Max(node.NextDeep, node.BeforeDeep) + 1;
+                if (node.IsNext == true)
                 {
-                    if (node.WayIsNext == true)
-                    {
-                        node.NextLen++;
-                        if (node.NextDeep - Deep != 0)
-                            node.NextDeep++;
-                        node = node.Next;
-                    }
-                    else if (node.WayIsNext == false)
-                    {
-                        if (node.BeforeDeep - Deep != 0)
-                            node.BeforeDeep++;
-                        node.BeforeLen++;
-                        node = node.Before;
-                    }
-                    Deep--;
+                    Holder.NextLen++;
+                    Holder.NextDeep = HolderDeep;
                 }
                 else
-                    break;
-            }
-
-            node = Root;
-            while (node != null)
-            {
-                if (node.WayIsEnd == false)
                 {
-                    if (node.WayIsNext == true)
-                    {
-                        if (node.Balance > 1)
-                        {
-                            MoveToHolder(node.Next);
-                            node = node.Holder;
-                        }
-                        else
-                            node = node.Next;
-                    }
-                    else if (node.WayIsNext == false)
-                    {
-                        if (node.Balance < -1)
-                        {
-                            MoveToHolder(node.Before);
-                            node = node.Holder;
-                        }
-                        else
-                            node = node.Before;
-                    }
+                    Holder.BeforeLen++;
+                    Holder.BeforeDeep = HolderDeep;
+                }
+
+                if (Holder.Balance > 1 || Holder.Balance < -1)
+                {
+                    MoveToHolder(node);
                 }
                 else
-                    break;
+                    node = node.Holder;
             }
-
         }
 
         protected override Array<ValueType> MakeSameNew()
