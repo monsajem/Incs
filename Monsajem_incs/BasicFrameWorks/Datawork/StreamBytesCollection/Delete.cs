@@ -7,7 +7,7 @@ using Monsajem_Incs.Serialization;
 
 namespace Monsajem_Incs.Collection
 {
-    public partial class StreamCollection<ValueType>
+    public partial class StreamCollection
     {
         public override void DeleteByPosition(int Position)
         {
@@ -46,7 +46,7 @@ namespace Monsajem_Incs.Collection
 #endif
         }
 
-        protected override StreamCollection<ValueType> MakeSameNew()
+        protected override StreamCollection MakeSameNew()
         {
             throw new NotImplementedException();
         }

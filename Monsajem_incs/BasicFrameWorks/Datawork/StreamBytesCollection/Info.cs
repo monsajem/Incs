@@ -10,6 +10,7 @@ using Monsajem_Incs.Collection.Array.TreeBased;
 
 namespace Monsajem_Incs.Collection
 {
+
     internal struct Data : IComparable<Data>
     {
         public int From;
@@ -49,9 +50,9 @@ namespace Monsajem_Incs.Collection
         }
     }
 
-    public partial class StreamCollection<ValueType> :
-        Array.Base.IArray<ValueType, StreamCollection<ValueType>>,
-        ISerializable<StreamCollection<ValueType>.MyData>
+    public partial class StreamCollection :
+        Array.Base.IArray<byte[], StreamCollection>,
+        ISerializable<StreamCollection.MyData>
     {
 #if DEBUG
         public MyData Info = new MyData();
@@ -67,9 +68,9 @@ namespace Monsajem_Incs.Collection
             class MyData : ISerializable<(Array<Data> Keys, long StreamLen)>
         {
             internal Array<Data> Keys;
-            internal SortedSet<DataByForm> GapsByFrom;
-            internal SortedSet<DataByLen> GapsByLen;
-            internal SortedSet<DataByTo> GapsByTo;
+            internal Array<DataByForm> GapsByFrom;
+            internal Array<DataByLen> GapsByLen;
+            internal Array<DataByTo> GapsByTo;
 
             internal long MinLen = -500;
             internal long MaxLen = 500;
@@ -98,7 +99,7 @@ namespace Monsajem_Incs.Collection
             internal bool PopGapMinLen(int Len, out Data Gap)
             {
                 Gap = default;
-                if (GapsByLen.Count == 0)
+                if (GapsByLen.Length == 0)
                     return false;
                 var Finded = GapsByLen.FirstOrDefault();
                 if (Finded.Data.Len < Len)
@@ -109,13 +110,13 @@ namespace Monsajem_Incs.Collection
 
             internal bool PopNextGap(ref Data Data)
             {
-                var Finded = new DataByForm()
+                var Result = GapsByFrom.BinarySearch(new DataByForm()
                 {
                     Data = new Data() { From = Data.To + 1 }
-                };
-                if (GapsByFrom.TryGetValue(Finded, out Finded))
+                });
+                if (Result.Index>-1)
                 {
-                    Data = Finded.Data;
+                    Data = Result.Value.Data;
                     DeleteGap(Data);
                     return true;
                 }
@@ -123,13 +124,13 @@ namespace Monsajem_Incs.Collection
             }
             internal bool PopBeforeGap(ref Data Data)
             {
-                var Finded = new DataByTo()
+                var Result = GapsByTo.BinarySearch(new DataByTo()
                 {
                     Data = new Data() { To = Data.From - 1 }
-                };
-                if (GapsByTo.TryGetValue(Finded,out Finded))
+                });
+                if (Result.Index>-1)
                 {
-                    Data = Finded.Data;
+                    Data = Result.Value.Data;
                     DeleteGap(Data);
                     return true;
                 }
@@ -138,39 +139,39 @@ namespace Monsajem_Incs.Collection
 
             internal void InsertGap(Data Gap)
             {
-                GapsByFrom.Add(new DataByForm() { Data = Gap });
-                GapsByLen.Add(new DataByLen() { Data = Gap });
-                GapsByTo.Add(new DataByTo() { Data = Gap });
+                GapsByFrom.BinaryInsert(new DataByForm() { Data = Gap });
+                GapsByLen.BinaryInsert(new DataByLen() { Data = Gap });
+                GapsByTo.BinaryInsert(new DataByTo() { Data = Gap });
             }
             internal void DeleteGap(Data Gap)
             {
 #if DEBUG
                 if (
 #endif
-                    GapsByFrom.Remove(new DataByForm() { Data = Gap })
+                    GapsByFrom.BinaryDelete(new DataByForm() { Data = Gap })
 #if DEBUG
-                   ==false) throw new Exception()
+                   .Index<0) throw new Exception()
 #endif
                     ;
 #if DEBUG
                 if (
 #endif
-                GapsByLen.Remove(new DataByLen() { Data = Gap })
+                GapsByLen.BinaryDelete(new DataByLen() { Data = Gap })
 #if DEBUG
-                  ==false) throw new Exception()
+                  .Index<0) throw new Exception()
 #endif
                         ;
 #if DEBUG
                 if (
 #endif
-                    GapsByTo.Remove(new DataByTo() { Data = Gap })
+                    GapsByTo.BinaryDelete(new DataByTo() { Data = Gap })
 #if DEBUG
-                  ==false) throw new Exception()
+                  .Index<0) throw new Exception()
 #endif
                         ;
             }
 #if DEBUG
-            public void Browse(StreamCollection<ValueType> Parent)
+            public void Browse(StreamCollection Parent)
             {
                 if (Parent.Length != this.Keys.Length)
                     throw new Exception("miss match Len");
@@ -223,9 +224,9 @@ namespace Monsajem_Incs.Collection
             {
                 Keys = Data.Keys;
                 StreamLen = Data.StreamLen;
-                GapsByFrom = new SortedSet<DataByForm>();
-                GapsByLen = new SortedSet<DataByLen>();
-                GapsByTo = new SortedSet<DataByTo>();
+                GapsByFrom = new Array<DataByForm>();
+                GapsByLen = new Array<DataByLen>();
+                GapsByTo = new Array<DataByTo>();
                 var NewDatas = new Array<Data>();
                 NewDatas.BinaryInsert(Keys.ToArray());
                 var CurrentPos = 0;

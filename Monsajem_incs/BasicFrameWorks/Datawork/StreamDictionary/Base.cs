@@ -17,123 +17,70 @@ namespace Monsajem_Incs.Collection
     public partial class StreamDictionary<KeyType,ValueType>:
         IDictionary<KeyType,ValueType>
     { 
-        [Serialization.NonSerialized]
-        [CopyOrginalObject]
-        public System.IO.Stream Stream;
+        public StreamCollection Collection;
+        public Array<KeyType> MyKeys;
         
         public StreamDictionary(int MinCount = 5000)
         {
-            Info.minCount = MinCount;
-            Info.MinLen = -1 * Info.minCount;
-            Info.MaxLen = Info.minCount;
-            Info.Keys = new SortedDictionary<KeyType, Data>();
-            Info.GapsByFrom = new SortedSet<DataByForm>();
-            Info.GapsByLen = new SortedSet<DataByLen>();
-            Info.GapsByTo = new SortedSet<DataByTo>();
+            Collection = new StreamCollection(MinCount);
+            MyKeys = new Array<KeyType>();
         }
 
-        public ICollection<KeyType> Keys => Info.Keys.Keys;
+        public ValueType this[KeyType key] 
+        {
+            get
+            {
+                var Position = MyKeys.BinarySearch(key).Index;
+                if (Position < 0)
+                    throw new Exception("Key not found!");
+                return Collection[Position].Deserialize<ValueType>();
+            }
+            set
+            {
+                var Position = MyKeys.BinarySearch(key).Index;
+                if (Position < 0)
+                    throw new Exception("Key not found!");
+                Collection[Position] = value.Serialize();
+            } 
+        }
+
+        public ICollection<KeyType> Keys => throw new NotImplementedException();
 
         public ICollection<ValueType> Values => throw new NotImplementedException();
 
-        public int Count => Info.Keys.Count;
+        public int Count => Collection.Length;
 
         public bool IsReadOnly => false;
 
-        public ValueType this[KeyType key]
-        {
-            get => GetItem(key);
-            set => SetItem(key, value);
-        }
-
-        private void DeleteLen(int Count)
-        {
-            Info.StreamLen = Info.StreamLen - Count;
-            if (Info.StreamLen < Info.MinLen)
-            {
-                Info.MaxLen = Info.StreamLen + Info.minCount;
-                Info.MinLen = Info.StreamLen - Info.minCount;
-                Stream.SetLength(Info.MaxLen);
-            }
-        }
-        private void AddLen(long Count)
-        {
-            Info.StreamLen = Info.StreamLen + Count;
-            if (Info.StreamLen > Info.MaxLen)
-            {
-                Info.MaxLen = Info.StreamLen + Info.minCount;
-                Info.MinLen = Info.StreamLen - Info.minCount;
-                Stream.SetLength(Info.MaxLen);
-            }
-        }
-
         public void Add(KeyType key, ValueType value)
         {
-            InnerInser(value.Serialize(), key);
-        }
-
-        public bool ContainsKey(KeyType key)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool Remove(KeyType key)
-        {
-            if (Info.Keys.ContainsKey(key) == false)
-                return false;
-#if DEBUG
-            Info.Browse(this);
-#endif
-            var DataLoc = Info.PopData(key);
-            var NGap = DataLoc;
-            Data BGap;
-            if (Info.PopNextGap(ref NGap))
-            {
-                DataLoc.To = NGap.To;
-                DataLoc.Len += NGap.Len;
-            }
-            if (DataLoc.To == Info.StreamLen - 1)//// is last data;
-            {
-                BGap = DataLoc;
-                if (Info.PopBeforeGap(ref BGap))
-                    DataLoc.Len += BGap.Len;
-                DeleteLen(DataLoc.Len);
-                Stream.Flush();
-            }
-            else
-            {
-                BGap = DataLoc;
-                if (Info.PopBeforeGap(ref BGap))
-                {
-                    DataLoc.From = BGap.From;
-                    DataLoc.Len += BGap.Len;
-                }
-                Info.InsertGap(DataLoc);
-            }
-#if DEBUG
-            Info.Browse(this);
-#endif
-            return true;
-        }
-
-        public bool TryGetValue(KeyType key, [MaybeNullWhen(false)] out ValueType value)
-        {
-            throw new NotImplementedException();
+            var Position = MyKeys.BinarySearch(key).Index;
+            if (Position > -1)
+                throw new Exception("Key is exist!");
+            Position =~Position;
+            MyKeys.Insert(key,Position);
+            Collection.Insert(value.Serialize(),Position);
         }
 
         public void Add(KeyValuePair<KeyType, ValueType> item)
         {
-            Add(item.Key,item.Value);
+            throw new NotImplementedException();
         }
 
         public void Clear()
         {
-            throw new NotImplementedException();
+            Collection.Clear();
+            MyKeys.Clear();
         }
 
         public bool Contains(KeyValuePair<KeyType, ValueType> item)
         {
-            throw new NotImplementedException();
+            return ContainsKey(item.Key);
+        }
+
+        public bool ContainsKey(KeyType key)
+        {
+            return MyKeys.BinarySearch(key).Index > -1;
         }
 
         public void CopyTo(KeyValuePair<KeyType, ValueType>[] array, int arrayIndex)
@@ -141,12 +88,28 @@ namespace Monsajem_Incs.Collection
             throw new NotImplementedException();
         }
 
+        public IEnumerator<KeyValuePair<KeyType, ValueType>> GetEnumerator()
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Remove(KeyType key)
+        {
+            var Position = MyKeys.BinaryDelete(key).Index;
+            if(Position>-1)
+            {
+                Collection.DeleteByPosition(Position);
+                return true;
+            }
+            return false;
+        }
+
         public bool Remove(KeyValuePair<KeyType, ValueType> item)
         {
             throw new NotImplementedException();
         }
 
-        public IEnumerator<KeyValuePair<KeyType, ValueType>> GetEnumerator()
+        public bool TryGetValue(KeyType key, [MaybeNullWhen(false)] out ValueType value)
         {
             throw new NotImplementedException();
         }

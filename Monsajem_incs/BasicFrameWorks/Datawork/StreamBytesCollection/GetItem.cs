@@ -7,9 +7,9 @@ using Monsajem_Incs.Serialization;
 
 namespace Monsajem_Incs.Collection
 {
-    public partial class StreamCollection<ValueType>
+    public partial class StreamCollection
     {
-        public ValueType GetItem(int Position)
+        public byte[] GetItem(int Position)
         {
             //Info.Browse();
             var DataLoc = Info.GetData(Position);
@@ -25,16 +25,14 @@ namespace Monsajem_Incs.Collection
                 Len -= CLen;
                 Pos += CLen;
             }
-            return DataAsByte.Deserialize<ValueType>();
+            return DataAsByte;
         }
 
-        public void SetItem(int Pos,ValueType value)
+        public void SetItem(int Pos,byte[] Data)
         {
 #if DEBUG
             Info.Browse(this);
-            value.Serialize().Deserialize(value);
 #endif
-            var Data = value.Serialize();
             var DataLoc = Info.GetData(Pos);
             if(DataLoc.Len!=Data.Length)
             {
@@ -75,7 +73,7 @@ namespace Monsajem_Incs.Collection
                         Info.DeleteData(Pos);
                         Length -= 1;
                         Info.InsertGap(DataLoc);
-                        InnerInser(Data, Pos);
+                        Insert(Data, Pos);
                     }
                     else
                     {
@@ -109,7 +107,7 @@ namespace Monsajem_Incs.Collection
 #endif
         }
 
-        public override ValueType this[int Pos] { 
+        public override byte[] this[int Pos] { 
             get => GetItem(Pos);
             set => SetItem(Pos, value);
         }

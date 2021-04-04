@@ -7,11 +7,71 @@ using System.Reflection;
 using static Monsajem_Incs.Collection.Array.Extentions;
 using static System.Runtime.Serialization.FormatterServices;
 using static System.Text.Encoding;
-using Monsajem_Incs.Collection.Array.ArrayBased.DynamicSize;
 
 namespace Monsajem_Incs.Serialization
 {
 
+    public class MemoryCacheSerialize : ICacheSerialize
+    {
+        [NonSerialized]
+        private byte[] _Cache;
+        public byte[] Cache { get =>_Cache; set =>_Cache=value; }
+    }
+    public class StreamCacheSerialize : ICacheSerialize,IDisposable
+    {
+        public static Stream Stream 
+        {
+            set
+            {
+                Data = new Collection.StreamCollection();
+                Data.Stream = value;
+                HashCode = new Collection.Array.TreeBased.Array<int>();
+            } 
+        }
+        private static Collection.StreamCollection Data;
+        private static Collection.Array.TreeBased.Array<int> HashCode;
+        public byte[] Cache { 
+            get 
+            {
+                var Position = HashCode.BinarySearch(this.GetHashCode()).Index;
+                if(Position>-1)
+                {
+                    return Data[Position];
+                }
+                return null;
+            }
+            set
+            {
+                var Position = HashCode.BinarySearch(this.GetHashCode()).Index;
+                if (Position > -1)
+                {
+                    Data[Position]=value;
+                }
+                else
+                {
+                    Position = ~Position;
+                    HashCode.Insert(this.GetHashCode(),Position);
+                    Data.Insert(value,Position);
+
+                }
+            }
+        }
+
+        void IDisposable.Dispose()
+        {
+            var Position = HashCode.BinarySearch(this.GetHashCode()).Index;
+            if (Position > -1)
+            {
+                HashCode.DeleteByPosition(Position);
+                Data.DeleteByPosition(Position);
+
+            }
+        }
+    }
+    public interface ICacheSerialize
+    {
+        byte[] Cache { get; set; }
+    }
     public interface IWhenCanSerialize
     {
         bool CanSerialize { get; }
@@ -517,9 +577,8 @@ namespace Monsajem_Incs.Serialization
                             System.Runtime.InteropServices.GCHandleType.Pinned);
 
                     var ptr = h.AddrOfPinnedObject();
-                    h.Free();
                     System.Runtime.InteropServices.Marshal.Copy(ptr, bytes, 0, bytes.Length);
-
+                    h.Free();
 
                     S_Data.Write(bytes, 0, bytes.Length);
                 };
@@ -541,8 +600,8 @@ namespace Monsajem_Incs.Serialization
                             System.Runtime.InteropServices.GCHandleType.Pinned);
 
                     var ptr = h.AddrOfPinnedObject();
-                    h.Free();
                     System.Runtime.InteropServices.Marshal.Copy(D_Data, From, ptr, Len);
+                    h.Free();
                     From += Len;
                 };
                 return (Serializer, Deserializer);
@@ -898,6 +957,48 @@ namespace Monsajem_Incs.Serialization
                             return DR();
                         else
                             return Serializere.ReadSerializer().Deserializer();
+                    };
+                }
+
+                if (typeof(t).IsAssignableTo(typeof(ICacheSerialize)))
+                {
+                    var ThisType = typeof(t);
+                    var SR = Sr.Sr;
+                    var DR = Sr.Dr;
+                    Sr.Sr = (obj) =>
+                    {
+                        if (obj != null)
+                        {
+                            var ICache = (ICacheSerialize)obj;
+                            var Cache = ICache.Cache;
+                            if (Cache == null)
+                            {
+                                var FromPosition = S_Data.Position;
+                                SR(obj);
+                                var len =(int)(S_Data.Length-FromPosition);
+                                Cache = new byte[len];
+                                S_Data.Seek(FromPosition, SeekOrigin.Begin);
+                                var AllLen = len;
+                                while (len > 0)
+                                    len-=S_Data.Read(Cache, AllLen - len, len);
+                                ICache.Cache = Cache;
+                                S_Data.Seek(S_Data.Length, SeekOrigin.Begin);
+                            }
+                            else
+                            {
+                                S_Data.Write(Cache, 0, Cache.Length);
+                            }
+                        }
+                    };
+                    Sr.Dr = () =>
+                    {
+                        var FromPosition = From;
+                        var Result = DR();
+                        var len = (int)(D_Data.Length - FromPosition);
+                        var Cache = new byte[len];
+                        Array.Copy(D_Data, FromPosition, Cache, 0, len);
+                        ((ICacheSerialize)Result).Cache = Cache;
+                        return Result;
                     };
                 }
 

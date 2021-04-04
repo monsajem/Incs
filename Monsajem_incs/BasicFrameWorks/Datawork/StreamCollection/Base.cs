@@ -12,56 +12,30 @@ namespace Monsajem_Incs.Collection
 {
 
     public partial class StreamCollection<ValueType>:
-        Array.Base.IArray<ValueType, StreamCollection<ValueType>>,
-        ISerializable<StreamCollection<ValueType>.MyData>
+        Array.Base.IArray<ValueType, StreamCollection<ValueType>>
     { 
-        [Serialization.NonSerialized]
-        [CopyOrginalObject]
-        public System.IO.Stream Stream;
+        public StreamCollection Collection;
         
         public StreamCollection(int MinCount = 5000)
         {
-            Info.minCount = MinCount;
-            Info.MinLen = -1 * Info.minCount;
-            Info.MaxLen = Info.minCount;
-            Info.Keys = new Array<Data>();
-            Info.GapsByFrom = new SortedSet<DataByForm>();
-            Info.GapsByLen = new SortedSet<DataByLen>();
-            Info.GapsByTo = new SortedSet<DataByTo>();
+            Collection = new StreamCollection(MinCount);
         }
 
-        public override object MyOptions { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public override ValueType this[int Pos] { 
+            get =>Collection[Pos].Deserialize<ValueType>(); 
+            set =>Collection[Pos]=value.Serialize(); }
 
-        private void DeleteLen(int Count)
-        {
-            Info.StreamLen = Info.StreamLen - Count;
-            if (Info.StreamLen < Info.MinLen)
-            {
-                Info.MaxLen = Info.StreamLen + Info.minCount;
-                Info.MinLen = Info.StreamLen - Info.minCount;
-                Stream.SetLength(Info.MaxLen);
-            }
-        }
-        private void AddLen(long Count)
-        {
-            Info.StreamLen = Info.StreamLen + Count;
-            if (Info.StreamLen > Info.MaxLen)
-            {
-                Info.MaxLen = Info.StreamLen + Info.minCount;
-                Info.MinLen = Info.StreamLen - Info.minCount;
-                Stream.SetLength(Info.MaxLen);
-            }
-        }
+        public override object MyOptions { get =>null; set { } }
 
-        MyData ISerializable<MyData>.GetData()
-        {
-            return Info;
-        }
+        public override void DeleteByPosition(int Position) =>
+            Collection.DeleteByPosition(Position);
 
-        void ISerializable<MyData>.SetData(MyData Data)
+        public override void Insert(ValueType Value, int Position) =>
+            Collection.Insert(Value.Serialize(), Position);
+
+        protected override StreamCollection<ValueType> MakeSameNew()
         {
-            Info = Data;
-            this.Length = Info.Keys.Length;
+            throw new NotImplementedException();
         }
     }
 }

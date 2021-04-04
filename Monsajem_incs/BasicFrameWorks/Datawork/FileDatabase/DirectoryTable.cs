@@ -42,7 +42,7 @@ namespace Monsajem_Incs.Database.DirectoryTable
                 var OldTable = File.ReadAllBytes(DirectoryAddress + "\\PK").Deserialize(this);
                 this.KeysInfo.Keys = OldTable.KeysInfo.Keys;
                 StreamDictionary = OldTable.StreamDictionary;
-                StreamDictionary.Stream = File.Open(DirectoryAddress + "\\Data", FileMode.OpenOrCreate);
+                StreamDictionary.Collection.Stream = File.Open(DirectoryAddress + "\\Data", FileMode.OpenOrCreate);
                 ////StreamCollection.StreamLen = this.StreamCollection.Stream.Length;
                 if (IsUpdateAble)
                 {
@@ -57,7 +57,7 @@ namespace Monsajem_Incs.Database.DirectoryTable
                     ReadyForUpdateAble();
                     this.UpdateAble = new UpdateAbles<KeyType>();
                 }
-                StreamDictionary.Stream = File.Open(DirectoryAddress + "\\Data", FileMode.OpenOrCreate);
+                StreamDictionary.Collection.Stream = File.Open(DirectoryAddress + "\\Data", FileMode.OpenOrCreate);
             }
 
             var Stream_PK = File.Open(DirectoryAddress + "\\PK", FileMode.OpenOrCreate);

@@ -9,14 +9,10 @@ using static Monsajem_Incs.Collection.Array.Extentions;
 namespace Monsajem_Incs.Collection
 {
 
-    public partial class StreamCollection<ValueType>
+    public partial class StreamCollection
     {
-        public override void Insert(ValueType Data, int Position)
-        {
-            InnerInser(Data.Serialize(), Position);
-        }
 
-        private void InnerInser(byte[] DataAsByte, int Pos)
+        public override void Insert(byte[] DataAsByte, int Position)
         {
 #if DEBUG
             Info.Browse(this);
@@ -56,7 +52,7 @@ namespace Monsajem_Incs.Collection
                     Info.InsertGap(Gap);
                 }
             }
-            Info.InsertData(Data, Pos);
+            Info.InsertData(Data, Position);
             
             Stream.Seek(Data.From, System.IO.SeekOrigin.Begin);
             Stream.Write(DataAsByte, 0, Data.Len);
