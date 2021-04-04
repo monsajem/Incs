@@ -19,21 +19,28 @@ namespace Monsajem_Incs.Serialization
     }
     public class StreamCacheSerialize : ICacheSerialize,IDisposable
     {
+        public StreamCacheSerialize()
+        {
+            if (Data == null)
+                throw new Exception("Please set \"Monsajem_Incs.Serialization.StreamCacheSerialize.Stream\".");
+        }
         public static Stream Stream 
         {
             set
             {
                 Data = new Collection.StreamCollection();
                 Data.Stream = value;
-                HashCode = new Collection.Array.TreeBased.Array<int>();
+                GUID = new Collection.Array.TreeBased.Array<string>();
             } 
         }
         private static Collection.StreamCollection Data;
-        private static Collection.Array.TreeBased.Array<int> HashCode;
+        private static Collection.Array.TreeBased.Array<string> GUID;
+        [NonSerialized]
+        private string MyGUID = Guid.NewGuid().ToString();
         public byte[] Cache { 
             get 
             {
-                var Position = HashCode.BinarySearch(this.GetHashCode()).Index;
+                var Position = GUID.BinarySearch(MyGUID).Index;
                 if(Position>-1)
                 {
                     return Data[Position];
@@ -42,7 +49,7 @@ namespace Monsajem_Incs.Serialization
             }
             set
             {
-                var Position = HashCode.BinarySearch(this.GetHashCode()).Index;
+                var Position = GUID.BinarySearch(MyGUID).Index;
                 if (Position > -1)
                 {
                     Data[Position]=value;
@@ -50,7 +57,7 @@ namespace Monsajem_Incs.Serialization
                 else
                 {
                     Position = ~Position;
-                    HashCode.Insert(this.GetHashCode(),Position);
+                    GUID.Insert(MyGUID, Position);
                     Data.Insert(value,Position);
 
                 }
@@ -59,10 +66,10 @@ namespace Monsajem_Incs.Serialization
 
         void IDisposable.Dispose()
         {
-            var Position = HashCode.BinarySearch(this.GetHashCode()).Index;
+            var Position = GUID.BinarySearch(MyGUID).Index;
             if (Position > -1)
             {
-                HashCode.DeleteByPosition(Position);
+                GUID.DeleteByPosition(Position);
                 Data.DeleteByPosition(Position);
 
             }
