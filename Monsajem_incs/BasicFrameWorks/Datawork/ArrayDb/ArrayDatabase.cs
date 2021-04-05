@@ -13,7 +13,7 @@ namespace Monsajem_Incs.Database
         public ArrayTable(
             Func<ValueType,KeyType> GetKey,
             bool IsUpdateAble,string Name=""):
-            base(new SortedDictionary<KeyType,ValueType>(), GetKey,
+            base(new Collection.Array.TreeBased.Array<ValueType>(), GetKey,
                  IsUpdateAble)
         {
             this.TableName = Name;

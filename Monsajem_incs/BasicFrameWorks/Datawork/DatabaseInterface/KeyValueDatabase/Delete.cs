@@ -29,13 +29,15 @@ namespace Monsajem_Incs.Database.Base
 
     public partial class Table<ValueType, KeyType>
     {
-        internal int KeysLen=1;
+
         private void IDelete(ValueType Value, KeyType Key, int Pos)
         {
             lock(this)
             {
                 using (Run.Block())
                 {
+
+                    var KeysLen = BasicActions.Keys;
                     var info = (Value, new Events<ValueType>.ValueInfo[KeysLen]);
                     for (int i = 0; i < KeysLen; i++)
                         info.Item2[i] = new Events<ValueType>.ValueInfo();

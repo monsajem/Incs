@@ -22,6 +22,8 @@ namespace Monsajem_Incs.Collection.Array.Base
 
         }
 
+        public new int Length { get =>base.Length;set => base.Length = value; }
+
         public override ArrayType this[int Pos] { get => _GetItem(Pos); set => _SetItem(Pos, value); }
 
         public override void DeleteFrom(int from)

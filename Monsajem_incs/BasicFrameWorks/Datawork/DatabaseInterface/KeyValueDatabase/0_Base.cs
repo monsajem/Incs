@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using System.Collections;
-using Monsajem_Incs.Collection.Array.TreeBased;
 using Monsajem_Incs.Serialization;
 using static System.Runtime.Serialization.FormatterServices;
 using Monsajem_Incs.Net.Base.Service;
@@ -14,6 +13,11 @@ namespace Monsajem_Incs.Database.Base
     public interface IFactualyData
     {
         object Parent { get; set; }
+    }
+
+    public partial class BasicActions<ValueType>
+    {
+        public Collection.Array.Base.IArray<ValueType> Items;
     }
 
     public class Runer
@@ -43,7 +47,7 @@ namespace Monsajem_Incs.Database.Base
         public KeyInfo KeysInfo = new KeyInfo();
 
         [Serialization.NonSerialized]
-        public IDictionary<KeyType, ValueType> BasicActions;
+        public BasicActions<ValueType> BasicActions;
         [Serialization.NonSerialized]
         public Events<ValueType> Events;
         [Serialization.NonSerialized]
@@ -55,7 +59,7 @@ namespace Monsajem_Incs.Database.Base
 
         protected int KeyPos;
 
-        internal Table(IDictionary<KeyType, ValueType> BasicActions,
+        internal Table(BasicActions<ValueType> BasicActions,
                        Func<ValueType, KeyType> GetKey,
                        KeyType[] XNewKeys,
                        int KeyPos,
@@ -66,7 +70,7 @@ namespace Monsajem_Incs.Database.Base
             this.BasicActions = BasicActions;
             this.KeyPos = KeyPos;
 
-            this.KeysInfo.Keys = new Array<KeyType>(XNewKeys);
+            this.KeysInfo.Keys = new Collection.Array.TreeBased.Array<KeyType>(XNewKeys);
 
             this.SecurityEvents = new SecurityEvents<ValueType>();
             this.Events = new Events<ValueType>();
@@ -158,12 +162,12 @@ namespace Monsajem_Incs.Database.Base
 
                     if(OldPos!=NewPos)
                     {
-                        this.BasicActions.Remove(OldKey);
-                        this.BasicActions.Add(NewKey,MyValue);
+                        this.BasicActions.Items.DeleteByPosition(OldPos);
+                        this.BasicActions.Items.Insert(MyValue, NewPos);
                     }
                     else
                     {
-                        this.BasicActions[OldKey]= MyValue;
+                        this.BasicActions.Items[OldPos]= MyValue;
                     }
 
                     if (OldKey.CompareTo(NewKey) != 0)
@@ -214,7 +218,8 @@ namespace Monsajem_Incs.Database.Base
                     var NewPos = KeysInfo.Keys.BinarySearch(NewKey).Index;
                     if (NewPos > -1)
                         throw new InvalidOperationException("Value be exist!");
-                    NewPos = ~NewPos;
+                    NewPos = NewPos * -1;
+                    NewPos -= 1;
                     var MyInfo = info.Info[KeyPos];
                     MyInfo.Key = NewKey;
                     MyInfo.Pos = NewPos;
@@ -244,7 +249,7 @@ namespace Monsajem_Incs.Database.Base
                     var MyInfo = info.Info[KeyPos];
                     var Pos = MyInfo.Pos;
                     KeysInfo.Keys.Insert((KeyType)MyInfo.Key, Pos);
-                    this.BasicActions.Add((KeyType)MyInfo.Key,info.Value);
+                    this.BasicActions.Items.Insert(info.Value, Pos);
                 };
             }
             else
@@ -272,9 +277,9 @@ namespace Monsajem_Incs.Database.Base
             {
                 Events.Deleted += (info) =>
                 {
-                    var MyInfo = info.Info[KeyPos];
-                    this.BasicActions.Remove((KeyType)MyInfo.Key);
-                    KeysInfo.Keys.DeleteByPosition(MyInfo.Pos);
+                    var Pos = info.Info[KeyPos].Pos;
+                    this.BasicActions.Items.DeleteByPosition(Pos);
+                    KeysInfo.Keys.DeleteByPosition(Pos);
                 };
             }
             else
@@ -313,10 +318,13 @@ namespace Monsajem_Incs.Database.Base
         internal Table() { }
 
         public Table(
-            IDictionary<KeyType,ValueType> Items,
+            Collection.Array.Base.IArray<ValueType> Items,
             Func<ValueType, KeyType> GetKey,
             bool IsUpdateAble) :
-            this(Items, GetKey, new KeyType[0], 0, true, IsUpdateAble)
+            this(new BasicActions<ValueType>()
+            {
+                Items=Items
+            }, GetKey, new KeyType[0], 0, true, IsUpdateAble)
         { }
 
 

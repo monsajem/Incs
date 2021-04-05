@@ -10,7 +10,7 @@ namespace Monsajem_Incs.Database.Base
     {
         public class KeyInfo
         {
-            public Monsajem_Incs.Collection.Array.TreeBased.Array<KeyType> Keys;
+            public Monsajem_Incs.Collection.Array.Base.IArray<KeyType> Keys;
         }
     }
 }

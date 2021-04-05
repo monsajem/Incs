@@ -7,6 +7,7 @@ using Monsajem_Incs.Collection.Array.Base;
 using static System.Text.Encoding;
 using System.Threading.Tasks;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace Monsajem_Incs.Database.KeyValue.WebStorageBased
 {
@@ -37,7 +38,8 @@ namespace Monsajem_Incs.Database.KeyValue.WebStorageBased
         public static Action<string> DeleteItem;
     }
 
-    public class StorageDictionary<KeyType, ValueType> : Base.IDictionary<KeyType, ValueType>
+    public class StorageDictionary<KeyType, ValueType> : 
+        Collection.IDictionary<KeyType, ValueType>
     {
         private string StorageKey;
         public StorageDictionary(string Key)
@@ -45,27 +47,67 @@ namespace Monsajem_Incs.Database.KeyValue.WebStorageBased
             this.StorageKey = Key;
         }
 
+        public ValueType this[KeyType Key] { 
+            get
+            {
+                var Str_Key = SharedActions.GetItem(StorageKey + MyUTF.GetString(Key.Serialize()));
+                return MyUTF.GetBytes(Str_Key).Deserialize<ValueType>();
+            }
+            set
+            {
+                SharedActions.SetItem(
+                      StorageKey + MyUTF.GetString(Key.Serialize()),
+                      MyUTF.GetString(value.Serialize()));
+            }
+        }
+        public ValueType this[int Position] { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+        public IArray<KeyType> Keys { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+        public int Count => Keys.Length;
+
+        public void Add(KeyType key, ValueType value)
+        {
+            if (Keys.BinarySearch(key).Index > -1)
+                throw new Exception("Value Is Exist");
+            Keys.BinaryInsert(key);
+            this[key] = value;
+        }
+
         public bool ContainKey(KeyType Key)
         {
-            return SharedActions.ContainKey(StorageKey + MyUTF.GetString(Key.Serialize()));
+            return Keys.BinarySearch(Key).Index>-1;
         }
 
-        public void DeleteItem(KeyType Key)
+        public IEnumerator<KeyValuePair<KeyType, ValueType>> GetEnumerator()
         {
-            SharedActions.DeleteItem(StorageKey + MyUTF.GetString(Key.Serialize()));
+            throw new NotImplementedException();
         }
 
-        public ValueType GetItem(KeyType Key)
+        public bool Remove(KeyType key)
         {
-            var Str_Key = SharedActions.GetItem(StorageKey + MyUTF.GetString(Key.Serialize()));
-            return MyUTF.GetBytes(Str_Key).Deserialize<ValueType>();
+            if(Keys.BinaryDelete(key).Index>-1)
+            {
+                SharedActions.DeleteItem(StorageKey + MyUTF.GetString(key.Serialize()));
+                return true;
+            }
+            return false;
         }
 
-        public void SetItem(KeyType Key, ValueType Value)
+        public bool TryGetValue(KeyType key, out ValueType value)
         {
-            SharedActions.SetItem(
-                  StorageKey + MyUTF.GetString(Key.Serialize()),
-                  MyUTF.GetString(Value.Serialize()));
+            if (Keys.BinarySearch(key).Index > -1)
+            {
+                value = this[key];
+                return true;
+            }
+            value = default;
+            return false;
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            throw new NotImplementedException();
         }
     }
 

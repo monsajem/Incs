@@ -3,22 +3,13 @@ using System.IO;
 using System.Linq.Expressions;
 using Monsajem_Incs.Serialization;
 using Monsajem_Incs.Database.Base;
-using Monsajem_Incs.Collection.Array.Base;
 using static System.Text.Encoding;
 using System.Threading.Tasks;
 using System.Collections;
-using Monsajem_Incs.Collection;
+using Monsajem_Incs.Collection.Array.Base;
 
 namespace Monsajem_Incs.Database.KeyValue.Base
 {
-    public interface IDictionary<KeyType,ValueType>
-    {
-        bool ContainKey(KeyType Key);
-        ValueType GetItem(KeyType Key);
-        void SetItem(KeyType Key,ValueType Value);
-        void DeleteItem(KeyType Key);
-    }
-
     public class Table<ValueType, KeyType> :
         Monsajem_Incs.Database.Base.Table<ValueType, KeyType>,
         IDisposable
@@ -31,9 +22,9 @@ namespace Monsajem_Incs.Database.KeyValue.Base
         public Table(
             Action<byte[]> SaveKeys,
             Func<byte[]> LoadKeys,
-            IDictionary<KeyType, ValueType> Data, 
+            Collection.IDictionary<KeyType, ValueType> Data, 
             Func<ValueType, KeyType> GetKey, bool IsUpdateAble) :
-            base(new DynamicDictionary<KeyType,ValueType>(), GetKey, false)
+            base(new DynamicArray<ValueType>(), GetKey, false)
         {
             var OldData = LoadKeys();
 
@@ -56,20 +47,21 @@ namespace Monsajem_Incs.Database.KeyValue.Base
                 }
             }
 
-            var Ar = (DynamicDictionary<KeyType, ValueType>)this.BasicActions;
+            var Ar = (DynamicArray<ValueType>)this.BasicActions.Items;
             
-            Ar._GetItem = (Key) =>
+            Ar._GetItem = (Pos) =>
             {
-                return Data.GetItem(Key);
+                return Data[this.KeysInfo.Keys[Pos]];
             };
 
-            Ar._SetItem = (Key, Value) => Data.SetItem(Key, Value);
-            Ar._Remove = (Key) =>
+            Ar._SetItem = (Pos, Value) => Data[this.KeysInfo.Keys[Pos]]=Value;
+            Ar._DeleteByPosition = (c) =>
             {
-                Data.DeleteItem(Key);
-                return true;
+                Data.Remove(this.KeysInfo.Keys[c]);
+                Ar.Length -= 1;
             };
-            Ar._Count =()=> KeysInfo.Keys.Length;
+            Ar._AddLength = (count) => Ar.Length += count;
+            Ar.Length = KeysInfo.Keys.Length;
 
             Save = () =>
             {

@@ -42,16 +42,17 @@ namespace Monsajem_Incs.Database.Base
                     }
                 }
             }
-            foreach (var Item in Oldtbl.BasicActions)
+            for (int i=0;i<Oldtbl.KeysInfo.Keys.Length;i++)
             {
+                var Item = Oldtbl.BasicActions.Items[i];
                 var NewItem = (NewValueType)GetUninitializedObject(typeof(NewValueType));
                 foreach(var Field in Fields)
                 {
                     Field.NewField.SetValue(NewItem,Field.OldField.GetValue(Item));
                 }
-                Upgrid?.Invoke((Item.Value, NewItem));
-                NewTbl.BasicActions.Remove(Item.Key);
-                NewTbl.BasicActions.Add(Item.Key,NewItem);
+                Upgrid?.Invoke((Item, NewItem));
+                NewTbl.BasicActions.Items.DeleteByPosition(i);
+                NewTbl.BasicActions.Items.Insert(NewItem, i);
             }
 
             //if (tbl.KeysInfo.Keys.Length > 0)

@@ -27,14 +27,15 @@ namespace Monsajem_Incs.Database.Base
         {
             this.Parent = Parent;
 
+            base.BasicActions = new BasicActions<ValueType>();
             base.Events = new Events<ValueType>();
             base.SecurityEvents = new SecurityEvents<ValueType>();
 
-            base.BasicActions = new Collection.DynamicDictionary<KeyType,ValueType>()
+            base.BasicActions.Items = new Collection.Array.Base.DynamicArray<ValueType>()
             {
-                _GetItem = (Key) => Parent.GetItem(Key).Value
+                _GetItem = (pos) => Parent.GetItem(KeysInfo.Keys[pos]).Value
             };
-            base.KeysLen = Parent.KeysLen;
+            base.BasicActions.Keys = Parent.BasicActions.Keys;
 
             base.Events.Inserting += (inf) => Parent.Events.Inserting?.Invoke(inf);
             base.SecurityEvents.Inserting += (inf) => Parent.SecurityEvents.Inserting?.Invoke(inf);
