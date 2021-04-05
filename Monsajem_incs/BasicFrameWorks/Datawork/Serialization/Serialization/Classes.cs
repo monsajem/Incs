@@ -71,10 +71,10 @@ namespace Monsajem_Incs.Serialization
             {
                 GUID.DeleteByPosition(Position);
                 Data.DeleteByPosition(Position);
-
             }
         }
     }
+
     public interface ICacheSerialize
     {
         byte[] Cache { get; set; }
