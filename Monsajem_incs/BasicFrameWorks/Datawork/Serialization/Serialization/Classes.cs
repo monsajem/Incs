@@ -389,8 +389,9 @@ namespace Monsajem_Incs.Serialization
                 MakeSerializer_Serializable()
             {
                 var Type = typeof(t);
-                var InterfaceType = Type.GetInterfaces().Where(
-                    (c) => c.GetGenericTypeDefinition() == ISerializableType).
+                var InterfaceType = Type.GetInterfaces().
+                    Where((c)=>c.IsGenericType).
+                    Where((c) => c.GetGenericTypeDefinition() == ISerializableType).
                     FirstOrDefault();
 
                 var InnerType = InterfaceType.GenericTypeArguments[0];
@@ -1393,8 +1394,25 @@ namespace Monsajem_Incs.Serialization
 
         [ThreadStaticAttribute]
         private static byte[] D_Data;
+
+#if DEBUG
+        [ThreadStaticAttribute]
+        private static int _From;
+        private static int From 
+        {
+            get
+            {
+                return _From;
+            }
+            set
+            {
+                _From = value;
+            }
+        }
+#else
         [ThreadStaticAttribute]
         private static int From;
+#endif
 
         [ThreadStaticAttribute]
         private static MemoryStream S_Data;

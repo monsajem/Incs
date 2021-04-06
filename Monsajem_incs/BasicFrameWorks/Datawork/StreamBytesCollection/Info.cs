@@ -105,6 +105,7 @@ namespace Monsajem_Incs.Collection
                 if (Finded.Data.Len < Len)
                     return false;
                 Gap = Finded.Data;
+                DeleteGap(Gap);
                 return true;
             }
 
@@ -202,9 +203,9 @@ namespace Monsajem_Incs.Collection
                 {
                     var NextKey = Keys[i + 1];
                     if (Key.Data.To + 1 != NextKey.Data.From)
-                        throw new Exception();
+                        throw new Exception("Conflict Key place and NextKey Place!");
                     if (Key.Role == "isGap" & NextKey.Role == "isGap")
-                        throw new Exception();
+                        throw new Exception("Gap is in wrong place!");
                 }
                 else
                 {

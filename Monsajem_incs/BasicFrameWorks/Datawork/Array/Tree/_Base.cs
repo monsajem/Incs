@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 namespace Monsajem_Incs.Collection.Array.TreeBased
 {
-    public partial class Array<ValueType> : Base.IArray<ValueType, Array<ValueType>>
+    public partial class Array<ValueType> : 
+        Base.IArray<ValueType, Array<ValueType>>,
+        Serialization.ISerializable<object>
     {
 
         public Array()
@@ -98,7 +100,8 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
 #endif
 
         public Node Root;
-        public class Node
+        public class Node:
+            Serialization.StreamCacheSerialize
         {
             public Node(ValueType Value)
             {
@@ -649,6 +652,26 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
         protected override Array<ValueType> MakeSameNew()
         {
             return new Array<ValueType>();
+        }
+
+        public object GetData()
+        {
+            return (this.Root,Length);
+            return this.ToArray();
+        }
+
+        public void SetData(object Data)
+        {
+#if DEBUG
+            this.Items = new ArrayBased.DynamicSize.Array<ValueType>(100);
+#endif
+            Comparer = Comparer<ValueType>.Default;
+            var MyData = ((Node, int))Data;
+            this.Root =MyData.Item1;
+            this.Length = MyData.Item2;
+            return;
+
+            this.Insert((ValueType[])Data);
         }
     }
 }
