@@ -932,88 +932,107 @@ namespace Monsajem_Incs.Serialization
                 return InsertSerializer(() => (Serializer, Deserializer),IsFixedType);
             }
             private static SerializeInfo<t> InsertSerializer(
-                Func<(Action<object> Sr, Func<object> Dr)> Serializer,bool IsFixedType=false)
+                Func<(Action<object> Sr, Func<object> Dr)> Serializer,
+                bool IsFixedType=false)
             {
+                var ThisType = typeof(t);
                 var Serialize = GetSerialize();
-                var Sr = Serializer();
-
-                if(IsFixedType==false)
+                if (ThisType.IsAbstract&&Serialize.Serializer==null)
                 {
-                    var ThisType = typeof(t);
-                    var SR = Sr.Sr;
-                    var DR = Sr.Dr;
-                    Sr.Sr = (obj) =>
+                    Serialize.Serializer = (obj) =>
                     {
-                        if (obj != null)
-                        {
-                            var ObjType = obj.GetType();
-                            if(ObjType!=ThisType)
-                            {
-                                S_Data.WriteByte(1);
-                                Serializere.WriteSerializer(ObjType).Serializer(obj);
-                                return;
-                            }
-                        }
-                        S_Data.WriteByte(0);
-                        SR(obj);
+                        var ObjType = obj.GetType();
+                        Serializere.WriteSerializer(ObjType).Serializer(obj);
                     };
-                    Sr.Dr = () =>
+                    Serialize.Deserializer = () =>
                     {
-                        var Status = D_Data[From];
-                        From += 1;
-                        if (Status == 0)
-                            return DR();
-                        else
-                            return Serializere.ReadSerializer().Deserializer();
+                        return Serializere.ReadSerializer().Deserializer();
                     };
                 }
-
-                if (typeof(t).IsAssignableTo(typeof(ICacheSerialize)))
+                else
                 {
-                    var ThisType = typeof(t);
-                    var SR = Sr.Sr;
-                    var DR = Sr.Dr;
-                    Sr.Sr = (obj) =>
+                    var Sr = Serializer();
+
+                    if (IsFixedType == false)
                     {
-                        if (obj != null)
+                        var SR = Sr.Sr;
+                        var DR = Sr.Dr;
+                        Sr.Sr = (obj) =>
                         {
-                            var ICache = (ICacheSerialize)obj;
-                            var Cache = ICache.Cache;
-                            if (Cache == null)
+                            if (obj != null)
                             {
-                                var FromPosition = S_Data.Position;
-                                SR(obj);
-                                var len =(int)(S_Data.Length-FromPosition);
-                                Cache = new byte[len];
-                                S_Data.Seek(FromPosition, SeekOrigin.Begin);
-                                var AllLen = len;
-                                while (len > 0)
-                                    len-=S_Data.Read(Cache, AllLen - len, len);
-                                ICache.Cache = Cache;
-                                S_Data.Seek(S_Data.Length, SeekOrigin.Begin);
+                                var ObjType = obj.GetType();
+                                if (ObjType != ThisType)
+                                {
+                                    S_Data.WriteByte(1);
+                                    Serializere.WriteSerializer(ObjType).Serializer(obj);
+                                    return;
+                                }
                             }
+                            S_Data.WriteByte(0);
+                            SR(obj);
+                        };
+                        Sr.Dr = () =>
+                        {
+                            var Status = D_Data[From];
+                            From += 1;
+                            if (Status == 0)
+                                return DR();
                             else
-                            {
-                                S_Data.Write(Cache, 0, Cache.Length);
-                            }
-                        }
-                    };
-                    Sr.Dr = () =>
+                                return Serializere.ReadSerializer().Deserializer();
+                        };
+                    }
+
+                    if (typeof(t).IsAssignableTo(typeof(ICacheSerialize)))
                     {
-                        var FromPosition = From;
-                        var Result = DR();
-                        var len = (int)(D_Data.Length - FromPosition);
-                        var Cache = new byte[len];
-                        Array.Copy(D_Data, FromPosition, Cache, 0, len);
-                        ((ICacheSerialize)Result).Cache = Cache;
-                        return Result;
-                    };
+                        var SR = Sr.Sr;
+                        var DR = Sr.Dr;
+                        Sr.Sr = (obj) =>
+                        {
+                            if (obj != null)
+                            {
+                                var ICache = (ICacheSerialize)obj;
+                                var Cache = ICache.Cache;
+                                if (Cache == null)
+                                {
+                                    var FromPosition = S_Data.Position;
+                                    SR(obj);
+                                    var len = (int)(S_Data.Length - FromPosition);
+                                    Cache = new byte[len];
+                                    S_Data.Seek(FromPosition, SeekOrigin.Begin);
+                                    var AllLen = len;
+                                    while (len > 0)
+                                        len -= S_Data.Read(Cache, AllLen - len, len);
+                                    ICache.Cache = Cache;
+                                    S_Data.Seek(S_Data.Length, SeekOrigin.Begin);
+                                }
+                                else
+                                {
+                                    S_Data.Write(Cache, 0, Cache.Length);
+                                }
+                            }
+                        };
+                        Sr.Dr = () =>
+                        {
+                            var FromPosition = From;
+                            var Result = DR();
+                            var len = (int)(D_Data.Length - FromPosition);
+                            var Cache = new byte[len];
+                            Array.Copy(D_Data, FromPosition, Cache, 0, len);
+                            ((ICacheSerialize)Result).Cache = Cache;
+                            return Result;
+                        };
+                    }
+                    Serialize.Serializer = Sr.Sr;
+                    Serialize.Deserializer = Sr.Dr;
                 }
 
 #if DEBUG
                 {
+                    var Sr = (Sr:Serialize.Serializer,Dr: Serialize.Deserializer);
                     var SR = Sr.Sr;
                     var DR = Sr.Dr;
+
                     Sr.Sr = (obj) =>
                     {
                         var Pos = S_Data.Position;
@@ -1031,11 +1050,10 @@ namespace Monsajem_Incs.Serialization
                         UnTracer($"Type: {Serialize.Type} Pos:({Pos})");
                         return Result;
                     };
+                    Serialize.Serializer = Sr.Sr;
+                    Serialize.Deserializer = Sr.Dr;
                 }
 #endif
-
-                Serialize.Serializer = Sr.Sr;
-                Serialize.Deserializer = Sr.Dr;
                 return Serialize;
             }
 
@@ -1463,14 +1481,14 @@ namespace Monsajem_Incs.Serialization
                     Result = S_Data.ToArray();
                 }
 #if DEBUG
-                catch (Exception ex)
-                {
-                    var Traced = Serialization.Traced;
-                    if (Traced != null)
-                        Traced = "On " + Traced;
-                    Serialization.Traced = null;
-                    throw new Exception($"Serialize Of Type >> {obj.GetType().FullName} Is Failed " + Traced, ex);
-                }
+                //catch (Exception ex)
+                //{
+                //    var Traced = Serialization.Traced;
+                //    if (Traced != null)
+                //        Traced = "On " + Traced;
+                //    Serialization.Traced = null;
+                //    throw new Exception($"Serialize Of Type >> {obj.GetType().FullName} Is Failed " + Traced, ex);
+                //}
 #endif
                 finally
                 {
@@ -1524,14 +1542,14 @@ namespace Monsajem_Incs.Serialization
                     AtLast?.Invoke();
                 }
 #if DEBUG
-                catch (Exception ex)
-                {
-                    var Traced = Serialization.Traced;
-                    if (Traced != null)
-                        Traced = "On " + Traced;
-                    Serialization.Traced = null;
-                    throw new Exception($"Deserialize From Point {Serialization.From} Of Type >> {typeof(t).FullName} Is Failed {Traced}\nDatas As B64:\n" + System.Convert.ToBase64String(Data), ex);
-                }
+                //catch (Exception ex)
+                //{
+                //    var Traced = Serialization.Traced;
+                //    if (Traced != null)
+                //        Traced = "On " + Traced;
+                //    Serialization.Traced = null;
+                //    throw new Exception($"Deserialize From Point {Serialization.From} Of Type >> {typeof(t).FullName} Is Failed {Traced}\nDatas As B64:\n" + System.Convert.ToBase64String(Data), ex);
+                //}
 #endif
                 finally
                 {

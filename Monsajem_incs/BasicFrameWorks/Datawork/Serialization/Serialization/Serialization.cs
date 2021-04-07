@@ -26,7 +26,7 @@ namespace Monsajem_Incs.Serialization
             var VisitedObj = new ObjectContainer()
             {
                 ObjHashCode = obj.GetHashCode(),
-                TypeHashCode = serializer.TypeHashCode
+                TypeHashCode = obj.GetType().GetHashCode() // serializer.TypeHashCode
             };
             if(Visitor.Contains(VisitedObj)==false)
             {
@@ -38,8 +38,8 @@ namespace Monsajem_Incs.Serialization
 #if DEBUG
                 if (VisitedObj.obj.GetType() != obj.GetType())
                     throw new Exception("Type of visited object is wrong" +
-                                        "\nMain: " + obj.GetType().ToString() +
-                                        "\nVisited: " + VisitedObj.obj.GetType().ToString());
+                                        "\n\nMain: " + obj.GetType().ToString() +
+                                        "\n\nVisited: " + VisitedObj.obj.GetType().ToString());
 #endif
                 S_Data.Write(BitConverter.GetBytes(VisitedObj.FromPos), 0, 4);
                 return;

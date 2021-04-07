@@ -12,7 +12,8 @@ namespace Monsajem_Incs.Collection
 {
 
     public partial class StreamCollection<ValueType>:
-        Array.Base.IArray<ValueType, StreamCollection<ValueType>>
+        Array.Base.IArray<ValueType, StreamCollection<ValueType>>,
+        ISerializable<StreamCollection>
     { 
         public StreamCollection Collection;
         
@@ -32,6 +33,16 @@ namespace Monsajem_Incs.Collection
 
         public override void Insert(ValueType Value, int Position) =>
             Collection.Insert(Value.Serialize(), Position);
+
+        public StreamCollection GetData()
+        {
+            return Collection; ;
+        }
+
+        public void SetData(StreamCollection Data)
+        {
+            this.Collection = Data;
+        }
 
         protected override StreamCollection<ValueType> MakeSameNew()
         {

@@ -32,7 +32,7 @@ namespace Monsajem_Incs.Collection.Array.Base
 
         object IArray.MyOptions { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-        Type IArray.ElementType => throw new NotImplementedException();
+        Type IArray.ElementType => typeof(ArrayType);
 
 
         public abstract ArrayType this[int Pos] 
