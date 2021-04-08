@@ -679,16 +679,17 @@ namespace Monsajem_Incs.Serialization
                 var ItemsSerializer = GetSerialize(System.Array.CreateInstance(
                     ((Collection.Array.Base.IArray)GetUninitializedObject(Type)).ElementType, 0).GetType());
                 var ObjSerializer = SerializeInfo<object>.GetSerialize();
-
                 Action<object> Serializer = (object obj) =>
                 {
                     var ar = (Collection.Array.Base.IArray)obj;
+                    ObjSerializer.Serializer(ar.Comparer);
                     ObjSerializer.Serializer(ar.MyOptions);
                     ItemsSerializer.Serializer(ar.ToArray());
                 };
                 Func<object> Deserializer = () =>
                 {
                     var ar = (Collection.Array.Base.IArray)GetUninitializedObject(Type);
+                    ar.Comparer = ObjSerializer.Deserializer();
                     ar.MyOptions = ObjSerializer.Deserializer();
                     ar.Insert((Array)ItemsSerializer.Deserializer());
                     return ar;

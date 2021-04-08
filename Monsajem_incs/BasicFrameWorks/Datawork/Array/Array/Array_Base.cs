@@ -294,6 +294,8 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.Base
         }
         internal virtual void AddFromTo(int From, System.Array Ar, int Ar_From, int Ar_Len)
         {
+            if (Ar_Len == 0)
+                return;
             var OldCount = Length;
             AddLength(Ar_Len);
             shiftEndFrom(From, 1);

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Monsajem_Incs.Serialization;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +9,12 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
 {
     public partial class Array<ValueType> : 
         Base.IArray<ValueType, Array<ValueType>>,
-        Serialization.ISerializable<object>
+#if DEBUG
+        Serialization.ISerializable<(Array<ValueType>.Node Root,int Len, 
+            ArrayBased.DynamicSize.Array<ValueType> ItemsForDebug)>
+#else
+        Serialization.ISerializable<(Array<ValueType>.Node Root,int Len)>
+#endif
     {
 
         public Array()
@@ -19,16 +25,16 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
         }
 
 #if DEBUG
-        private Array.ArrayBased.DynamicSize.Array<ValueType> Items =
+        private Array.ArrayBased.DynamicSize.Array<ValueType> ItemsForDebug =
             new Array.ArrayBased.DynamicSize.Array<ValueType>(100);
 
         private void CheckBugs()
         {
-            for (int i = 0; i < Items.Length; i++)
+            for (int i = 0; i < ItemsForDebug.Length; i++)
             {
                 Node Before; Node Next;
                 var Current = GetItem(i, out Before, out Next);
-                var ItemValue = Items[i];
+                var ItemValue = ItemsForDebug[i];
                 if (Current == null || Comparer.Compare(Current.Value, ItemValue) != 0)
                     throw new Exception("Some Item lost!");
                 if (Current.Balance > 1 || Current.Balance < -1)
@@ -106,7 +112,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
                         throw new Exception("Some Data lost!");
                     else if (Current.IsNext == false && Current != Current.Holder.Before)
                         throw new Exception("Some Data lost!");
-                    if (Items.Count((c) => Comparer.Compare(c, Current.Holder.Value) == 0) == 0)
+                    if (ItemsForDebug.Count((c) => Comparer.Compare(c, Current.Holder.Value) == 0) == 0)
                         throw new Exception("Some Data lost!");
                 }
             }
@@ -115,7 +121,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
 
         public Node Root;
         public class Node
-            //:Serialization.StreamCacheSerialize
+            : Serialization.StreamCacheSerialize
         {
             public Node(ValueType Value)
             {
@@ -190,7 +196,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             {
                  GetItem(Position, out var x, out var y).Value = value;
 #if DEBUG
-                Items[Position] = value;
+                ItemsForDebug[Position] = value;
                 CheckBugs();
 #endif
             }
@@ -202,7 +208,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             var Current = GetItem(Position, out Before, out Next);
             Insert(Value, Current, Before, Next);
 #if DEBUG
-            Items.Insert(Value, Position);
+            ItemsForDebug.Insert(Value, Position);
             CheckBugs();
 #endif
         }
@@ -213,12 +219,12 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             var Current = Find(Value, out Before, out Next, out Pos);
             Insert(Value, Current, Before, Next);
 #if DEBUG
-            Items.BinaryInsert(Value);
+            ItemsForDebug.BinaryInsert(Value);
             CheckBugs();
 #endif
 
 #if DEBUG
-            var ItemResult = Items.BinarySearch(Value);
+            var ItemResult = ItemsForDebug.BinarySearch(Value);
             if (Pos != ItemResult.Index)
                 throw new Exception("Binary insert result is wrong!");
 #endif
@@ -235,7 +241,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             else
                 Result = (~Pos, default);
 #if DEBUG
-            var ItemResult = Items.BinarySearch(key);
+            var ItemResult = ItemsForDebug.BinarySearch(key);
             if (Result.Index != ItemResult.Index)
                 throw new Exception("Binary search result is wrong!");
 #endif
@@ -316,7 +322,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             Length--;
 
 #if DEBUG
-            Items.DeleteByPosition(Position);
+            ItemsForDebug.DeleteByPosition(Position);
             CheckBugs();
 #endif
         }
@@ -331,7 +337,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             Drop(Item);
             Length--;
 #if DEBUG
-           var ItemResult = Items.BinaryDelete(Value);
+           var ItemResult = ItemsForDebug.BinaryDelete(Value);
             CheckBugs();
             if (Pos != ItemResult.Index)
                 throw new Exception("Binary delete result is wrong!");
@@ -690,24 +696,36 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             return new Array<ValueType>();
         }
 
-        public object GetData()
-        {
-            return (this.Root,Length);
-            return this.ToArray();
-        }
-
-        public void SetData(object Data)
-        {
 #if DEBUG
-            this.Items = new ArrayBased.DynamicSize.Array<ValueType>(100);
-#endif
-            Comparer = Comparer<ValueType>.Default;
-            var MyData = ((Node, int))Data;
-            this.Root =MyData.Item1;
-            this.Length = MyData.Item2;
-            return;
-
-            this.Insert((ValueType[])Data);
+        (Node Root, int Len, ArrayBased.DynamicSize.Array<ValueType> ItemsForDebug) 
+            ISerializable<(Node Root, int Len, ArrayBased.DynamicSize.Array<ValueType> ItemsForDebug)>.
+            GetData()
+        {
+            return (Root, Length,ItemsForDebug);
         }
+
+        void ISerializable<(Node Root, int Len, ArrayBased.DynamicSize.Array<ValueType> ItemsForDebug)>.
+            SetData((Node Root, int Len, ArrayBased.DynamicSize.Array<ValueType> ItemsForDebug) Data)
+        {
+            Comparer = Comparer<ValueType>.Default;
+            this.Root = Data.Root;
+            this.Length = Data.Len;
+            this.ItemsForDebug = Data.ItemsForDebug;
+            return;
+        }
+#else
+        (Node Root, int Len) ISerializable<(Node Root, int Len)>.GetData()
+        {
+            return (this.Root, Length);
+        }
+
+        void ISerializable<(Node Root, int Len)>.SetData((Node Root, int Len) Data)
+        {
+            Comparer = Comparer<ValueType>.Default;
+            this.Root = Data.Root;
+            this.Length = Data.Len;
+        }
+#endif
+
     }
 }

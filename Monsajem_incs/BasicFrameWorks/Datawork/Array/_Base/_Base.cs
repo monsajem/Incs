@@ -14,6 +14,7 @@ namespace Monsajem_Incs.Collection.Array.Base
         object MyOptions { get; set; }
         Type ElementType { get; }
         void Insert(System.Array Array);
+        object Comparer { get; set; }
     }
 
     public abstract partial class IArray<ArrayType> :
@@ -30,7 +31,7 @@ namespace Monsajem_Incs.Collection.Array.Base
 
         public Type ElementType => typeof(ArrayType);
 
-        object IArray.MyOptions { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        object IArray.MyOptions { get => MyOptions; set => MyOptions=value; }
 
         Type IArray.ElementType => typeof(ArrayType);
 
@@ -47,61 +48,6 @@ namespace Monsajem_Incs.Collection.Array.Base
         public virtual void Clear()
         {
             DeleteFromTo(0, Length - 1);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        protected static void Copy(
-            IArray<ArrayType> sourceArray,
-            int sourceIndex,
-            IArray<ArrayType> destinationArray,
-            int destinationIndex,
-            int length)
-        {
-            sourceArray.CopyTo(sourceIndex, destinationArray, destinationIndex, length);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        protected static void Copy(
-            IArray<ArrayType> sourceArray,
-            int sourceIndex,
-            ArrayType[] destinationArray,
-            int destinationIndex,
-            int length)
-        {
-            sourceArray.CopyTo(sourceIndex, destinationArray, destinationIndex, length);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        protected static void Copy(
-            ArrayType[] sourceArray,
-            int sourceIndex,
-            IArray<ArrayType> destinationArray,
-            int destinationIndex,
-            int length)
-        {
-            destinationArray.CopyFrom(sourceIndex, sourceArray, destinationIndex, length);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public virtual void CopyTo(int sourceIndex, ArrayType[] destination, int destinationIndex, int Length)
-        {
-            for (int i = 0; i < Length; i++)
-                destination[i + destinationIndex] = this[i + sourceIndex];
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public virtual void CopyTo(int sourceIndex, IArray<ArrayType> destination, int destinationIndex, int Length)
-        {
-            var Ar = new ArrayType[Length];
-            CopyTo(sourceIndex, Ar, 0, Length);
-            CopyFrom(0, Ar, destinationIndex, Length);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public virtual void CopyFrom(int sourceIndex, ArrayType[] sourceArray, int destinationIndex, int Length)
-        {
-            for (int i = 0; i < Length; i++)
-                this[i + destinationIndex] = sourceArray[i + sourceIndex];
         }
 
         public virtual IEnumerator<ArrayType> GetEnumerator()
@@ -371,6 +317,8 @@ namespace Monsajem_Incs.Collection.Array.Base
         }
 
         public IComparer<ArrayType> Comparer = Comparer<ArrayType>.Default;
+        
+        object IArray.Comparer { get => Comparer; set => Comparer = (IComparer<ArrayType>)value; }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public virtual (int Index, ArrayType Value) BinarySearch(ArrayType key, int minNum, int maxNum)
@@ -398,150 +346,6 @@ namespace Monsajem_Incs.Collection.Array.Base
                 }
             }
             return ((minNum + 1) * -1, default);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public void shiftEnd(int Count) =>
-            shiftEnd(0, Length - 1, Count);
-
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public void shiftBegin(int Count) =>
-            shiftBegin(0, Length - 1, Count);
-
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public void shiftRollEnd(int Count) =>
-            shiftRollEnd(0, Length - 1, Count);
-
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public void shiftRollBegin(int Count) =>
-            shiftRollBegin(0, Length - 1, Count);
-
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public ArrayType[] shiftExtraEnd(int Count) =>
-            shiftExtraEnd(0, Length - 1, Count);
-
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public ArrayType[] shiftExtraBegin(int Count) =>
-            shiftExtraBegin(0, Length - 1, Count);
-
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public void shiftEndFrom(int From, int Count) =>
-            shiftEnd(From, Length - 1, Count);
-
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public void shiftBeginFrom(int From, int Count) =>
-            shiftBegin(From, Length - 1, Count);
-
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public void shiftRollEndFrom(int From, int Count) =>
-            shiftRollEnd(From, Length - 1, Count);
-
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public void shiftRollBeginFrom(int From, int Count) =>
-            shiftRollBegin(From, Length - 1, Count);
-
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public ArrayType[] shiftExtraEndFrom(int From, int Count) =>
-            shiftExtraEnd(From, Length - 1, Count);
-
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public ArrayType[] shiftExtraBeginFrom(int From, int Count) =>
-            shiftExtraBegin(From, Length - 1, Count);
-
-
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public void shiftEnd(int From, int To, int Count)
-        {
-            var ArLen = (To - From) + 1;
-            if (Count == ArLen)
-                return;
-            _shiftEnd(From, Count, ArLen);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        private void _shiftEnd(int From, int Count, int ArLen)
-        {
-            Copy(this, From, this, From + Count, ArLen - Count);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public void shiftBegin(int From, int To, int Count)
-        {
-            var ArLen = (To - From) + 1;
-            if (Count == ArLen)
-                return;
-            _shiftBegin(From, Count, ArLen);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        private void _shiftBegin(int From, int Count, int ArLen)
-        {
-            Copy(this, From + Count, this, From, ArLen - Count);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public ArrayType[] shiftExtraEnd(int From, int To, int Count)
-        {
-            var ArLen = (To - From) + 1;
-            if (Count == ArLen)
-            {
-                var Roll = new ArrayType[Count];
-                Copy(this, From, Roll, 0, Count);
-                return Roll;
-            }
-            return _shiftExtraEnd(From, To, Count, ArLen);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        private ArrayType[] _shiftExtraEnd(int From, int To, int Count, int ArLen)
-        {
-            var Roll = new ArrayType[Count];
-            Copy(this, To + 1 - Count, Roll, 0, Count);
-            _shiftEnd(From, Count, ArLen);
-            return Roll;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public ArrayType[] shiftExtraBegin(int From, int To, int Count)
-        {
-            var ArLen = (To - From) + 1;
-            if (Count == ArLen)
-            {
-                var Roll = new ArrayType[Count];
-                Copy(this, From, Roll, 0, Count);
-                return Roll;
-            }
-            return _shiftExtraBegin(From, To, Count, ArLen);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        private ArrayType[] _shiftExtraBegin(int From, int To, int Count, int ArLen)
-        {
-            var Roll = new ArrayType[Count];
-            Copy(this, From, Roll, 0, Count);
-            _shiftBegin(From, Count, ArLen);
-            return Roll;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public void shiftRollEnd(int From, int To, int Count)
-        {
-            var ArLen = (To - From) + 1;
-            if (Count == ArLen)
-                return;
-            var Roll = _shiftExtraEnd(From, To, Count, ArLen);
-            Copy(Roll, 0, this, From, Count);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public void shiftRollBegin(int From, int To, int Count)
-        {
-            var ArLen = (To - From) + 1;
-            if (Count == ArLen)
-                return;
-            var Roll = _shiftExtraBegin(From, To, Count, ArLen);
-            To = To + 1 - Count;
-            Copy(Roll, 0, this, To, Count);
         }
 
         public Func<IArray<ArrayType>> MakeSameNew=()=>
