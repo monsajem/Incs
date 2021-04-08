@@ -19,11 +19,6 @@ namespace Monsajem_Incs.Serialization
     }
     public class StreamCacheSerialize : ICacheSerialize,IDisposable
     {
-        public StreamCacheSerialize()
-        {
-            if (Data == null)
-                throw new Exception("Please set \"Monsajem_Incs.Serialization.StreamCacheSerialize.Stream\".");
-        }
         public static Stream Stream 
         {
             set
@@ -40,6 +35,10 @@ namespace Monsajem_Incs.Serialization
         public byte[] Cache { 
             get 
             {
+#if DEBUG
+                if (Data == null)
+                    return null;
+#endif
                 var Position = GUID.BinarySearch(MyGUID).Index;
                 if(Position>-1)
                 {
@@ -49,20 +48,57 @@ namespace Monsajem_Incs.Serialization
             }
             set
             {
-                var Position = GUID.BinarySearch(MyGUID).Index;
-                if (Position > -1)
+#if DEBUG
+                bool IsSafe = false;
+                if (Data == null)
                 {
-                    Data[Position]=value;
+                    if (value == null)
+                    {
+                        IsSafe = true;
+                        return;
+                    }
+                    throw new Exception("Please set \"Monsajem_Incs.Serialization.StreamCacheSerialize.Stream\".");
                 }
-                else
+                try
                 {
-                    Position = ~Position;
-                    GUID.Insert(MyGUID, Position);
-                    Data.Insert(value,Position);
+#endif
+                    var Position = GUID.BinarySearch(MyGUID).Index;
+                    if (Position > -1)
+                    {
+                        if (value == null)
+                            GUID.DeleteByPosition(Position);
+                        else
+                            Data[Position] = value;
+                    }
+                    else
+                    {
+                        if (value == null)
+                        {
+#if DEBUG
+                            IsSafe = true;
+#endif
+                            return;
+                        }
+                        Position = ~Position;
+                        GUID.Insert(MyGUID, Position);
+                        Data.Insert(value, Position);
 
+                    }
+
+#if DEBUG
+                    IsSafe = true;
                 }
+                finally
+                {
+                    if(IsSafe==false)
+                    {
+
+                    }
+                }
+
+#endif
             }
-        }
+            }
 
         void IDisposable.Dispose()
         {
@@ -992,6 +1028,9 @@ namespace Monsajem_Incs.Serialization
                             if (obj != null)
                             {
                                 var ICache = (ICacheSerialize)obj;
+#if DEBUG
+                                ICache.Cache = null;
+#endif
                                 var Cache = ICache.Cache;
                                 if (Cache == null)
                                 {
@@ -1016,10 +1055,13 @@ namespace Monsajem_Incs.Serialization
                         {
                             var FromPosition = From;
                             var Result = DR();
+
+#if !DEBUG
                             var len = (int)(D_Data.Length - FromPosition);
                             var Cache = new byte[len];
                             Array.Copy(D_Data, FromPosition, Cache, 0, len);
                             ((ICacheSerialize)Result).Cache = Cache;
+#endif
                             return Result;
                         };
                     }

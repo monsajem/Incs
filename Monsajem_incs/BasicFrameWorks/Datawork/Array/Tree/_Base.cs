@@ -22,7 +22,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
         private Array.ArrayBased.DynamicSize.Array<ValueType> Items =
             new Array.ArrayBased.DynamicSize.Array<ValueType>(100);
 
-        private void Check()
+        private void CheckBugs()
         {
             for (int i = 0; i < Items.Length; i++)
             {
@@ -59,6 +59,13 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
                     if (Current.Next.Holder != Current)
                         throw new Exception("Some Data lost!");
                 }
+                else
+                {
+
+                    if (Current.NextLen>0 || Current.NextDeep>0)
+                        throw new Exception("Data not correct!");
+                    
+                }
                 if (Current.Before != null)
                 {
                     //if (Comparer.Compare(Current.Before.Value, Current.Value) > 0)
@@ -83,6 +90,13 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
                     if (Current.Before.Holder != Current)
                         throw new Exception("Some Data lost!");
                 }
+                else
+                {
+
+                    if (Current.BeforeLen > 0 || Current.BeforeDeep > 0)
+                        throw new Exception("Data not correct!");
+
+                }
                 if (Current.Holder != null)
                 {
                     if (Current.Holder == Current)
@@ -100,8 +114,8 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
 #endif
 
         public Node Root;
-        public class Node:
-            Serialization.StreamCacheSerialize
+        public class Node
+            //:Serialization.StreamCacheSerialize
         {
             public Node(ValueType Value)
             {
@@ -172,17 +186,24 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
         public override ValueType this[int Position]
         {
             get => GetItem(Position, out var x, out var y).Value;
-            set => GetItem(Position, out var x, out var y).Value = value;
+            set 
+            {
+                 GetItem(Position, out var x, out var y).Value = value;
+#if DEBUG
+                Items[Position] = value;
+                CheckBugs();
+#endif
+            }
         }
 
         public override void Insert(ValueType Value, int Position)
         {
-            Node Before; Node Next;int Deep;
+            Node Before; Node Next;
             var Current = GetItem(Position, out Before, out Next);
             Insert(Value, Current, Before, Next);
 #if DEBUG
             Items.Insert(Value, Position);
-            Check();
+            CheckBugs();
 #endif
         }
 
@@ -193,7 +214,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             Insert(Value, Current, Before, Next);
 #if DEBUG
             Items.BinaryInsert(Value);
-            Check();
+            CheckBugs();
 #endif
 
 #if DEBUG
@@ -234,7 +255,13 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             if (Current != null)
             {
                 Next = Current;
-                Before = null;
+                Before = Next.Before;
+                if(Before!=null)
+                {
+                        while (Before.Next != null)
+                            Before = Before.Next;
+                        Next = null;
+                }
             }
             else if(Before!=null&&Next!=null)
             {
@@ -290,7 +317,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
 
 #if DEBUG
             Items.DeleteByPosition(Position);
-            Check();
+            CheckBugs();
 #endif
         }
 
@@ -305,7 +332,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             Length--;
 #if DEBUG
            var ItemResult = Items.BinaryDelete(Value);
-            Check();
+            CheckBugs();
             if (Pos != ItemResult.Index)
                 throw new Exception("Binary delete result is wrong!");
 #endif
@@ -417,7 +444,11 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
                     Node.NextLen--;
                     Node = Node.Next;
                 }
-                DropFromHolder(Node, Node.Before);
+                var Replace = Node.Before;
+                DropFromHolder(Node, Replace);
+                if (Replace == null)
+                    Replace = Node;
+                FixWay(Replace);
             }
             else
             {
@@ -427,7 +458,11 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
                     Node.BeforeLen--;
                     Node = Node.Before;
                 }
-                DropFromHolder(Node, Node.Next);
+                var Replace = Node.Next;
+                DropFromHolder(Node, Replace);
+                if (Replace == null)
+                    Replace = Node;
+                FixWay(Replace);
             }
             var Before = Holder.Before;
             var Next = Holder.Next;
@@ -621,7 +656,8 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
                     Holder.BeforeDeep = HolderDeep;
                 }
 
-                if (Holder.Balance > 1)
+                var HolderBalance = Holder.Balance;
+                if (HolderBalance > 1)
                 {
                     if(node.Balance>=0)
                         MoveToHolder(node);
@@ -632,7 +668,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
                         MoveToHolder(Before);
                         node = Before;
                     }
-                }else if (Holder.Balance < -1)
+                }else if (HolderBalance < -1)
                 {
                     if (node.Balance <= 0)
                         MoveToHolder(node);

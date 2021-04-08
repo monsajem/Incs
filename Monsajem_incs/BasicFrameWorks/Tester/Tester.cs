@@ -98,11 +98,10 @@ namespace Monsajem_Incs.TimeingTester
                     IsDone = true;
                     Save();
                 }
-                catch
+                finally
                 {
-                    IsDone = false;
-                    Save();
-                    throw;
+                    if(IsDone==false)
+                        Save();
                 }
             }
         }

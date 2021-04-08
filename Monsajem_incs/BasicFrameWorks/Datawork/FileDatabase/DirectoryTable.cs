@@ -64,11 +64,11 @@ namespace Monsajem_Incs.Database.DirectoryTable
 
             Action Save = () =>
             {
-                var sr = this.Serialize();
-                Stream_PK.Seek(0, SeekOrigin.Begin);
-                Stream_PK.SetLength(sr.Length);
-                Stream_PK.Write(sr, 0, sr.Length);
-                Stream_PK.FlushAsync();
+                    var sr = this.Serialize();
+                    Stream_PK.Seek(0, SeekOrigin.Begin);
+                    Stream_PK.SetLength(sr.Length);
+                    Stream_PK.Write(sr, 0, sr.Length);
+                    Stream_PK.FlushAsync();
             };
 
             if(FastSave==true)
@@ -84,28 +84,40 @@ namespace Monsajem_Incs.Database.DirectoryTable
                     {
                         goto save;
                     }
+                    lock (this)
+                    {
                         if (this.NeedToSave == true)
                         {
                             Save();
                             NeedToSave = false;
                         }
+                    }
                     goto save;
                 });
                 Save_trd.Start();
 
                 this.Events.Inserted += (info) => {
 
+                    lock (this)
+                    {
                         if (this.NeedToSave == false)
                             this.NeedToSave = true;
+                    }
                 };
                 this.Events.Deleted += (info) =>
                 {
+                    lock (this)
+                    {
                         if (this.NeedToSave == false)
                             this.NeedToSave = true;
+                    }
                 };
                 this.Events.Updated += (info) => {
+                    lock (this)
+                    {
                         if (this.NeedToSave == false)
                             this.NeedToSave = true;
+                    }
                 };
             }
             else
@@ -121,39 +133,4 @@ namespace Monsajem_Incs.Database.DirectoryTable
         }
     }
 
-    public class SecondaryKeysContainer<ValueType,KeyType,Drived>
-        where Drived: SecondaryKeysContainer<ValueType,KeyType, Drived>
-        where KeyType:IComparable<KeyType>
-    {
-        [Serialization.NonSerialized]
-        private Action<Drived> AfterDs;
-        [Serialization.NonSerialized]
-        private string DirectoryAddress;
-        public Table<ValueType, KeyType> PrimaryKey;
-
-        public SecondaryKeysContainer()
-        { }
-
-        public SecondaryKeysContainer(
-            string DirectoryAddress)
-        {
-            this.DirectoryAddress = DirectoryAddress;
-            Begin();
-            AfterDs((Drived)File.ReadAllBytes(DirectoryAddress + "/Keys").Deserialize(this));
-        }
-
-        protected virtual void Begin()
-        { }
-
-        public void SecondaryKey<KeyType>(
-            Expression<Func<Drived,Table<ValueType, KeyType>>> Sk)
-            where KeyType : IComparable<KeyType>
-        {
-            var Field = FieldControler.Make(Sk);
-            AfterDs += (c) =>
-            {
-                Field.Value((Drived)this).KeysInfo.Keys = Field.Value(c).KeysInfo.Keys;
-            };
-        }
-    }
 }
