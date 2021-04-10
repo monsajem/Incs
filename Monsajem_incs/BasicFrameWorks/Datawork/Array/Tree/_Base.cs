@@ -10,17 +10,35 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
     public partial class Array<ValueType> : 
         Base.IArray<ValueType, Array<ValueType>>,
 #if DEBUG
-        Serialization.ISerializable<(Array<ValueType>.Node Root,int Len, 
+        Serialization.ISerializable<(Array<ValueType>.INode Root,int Len, 
             ArrayBased.DynamicSize.Array<ValueType> ItemsForDebug)>
 #else
-        Serialization.ISerializable<(Array<ValueType>.Node Root,int Len)>
+        Serialization.ISerializable<(Array<ValueType>.INode Root,int Len)>
 #endif
     {
 
         public Array()
-        { }
+        {
+            CreateNode = (Value) => new Node(Value);
+        }
         public Array(ValueType[] Values)
         {
+            CreateNode = (Value) => new Node(Value);
+            this.Insert(Values);
+        }
+        public Array(bool CacheSerialize)
+        {
+            if (CacheSerialize)
+                CreateNode = (Value) => new CacheSerializeNode(Value);
+            else
+                CreateNode = (Value) => new Node(Value);
+        }
+        public Array(ValueType[] Values,bool CacheSerialize)
+        {
+            if (CacheSerialize)
+                CreateNode = (Value) => new CacheSerializeNode(Value);
+            else
+                CreateNode = (Value) => new Node(Value);
             this.Insert(Values);
         }
 
@@ -30,79 +48,57 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
 
         private void CheckBugs()
         {
-            for (int i = 0; i < ItemsForDebug.Length; i++)
+
+            (int Len, int Deep) CheckInners(INode Current)
             {
-                Node Before; Node Next;
-                var Current = GetItem(i, out Before, out Next);
-                var ItemValue = ItemsForDebug[i];
-                if (Current == null || Comparer.Compare(Current.Value, ItemValue) != 0)
-                    throw new Exception("Some Item lost!");
+                var Next = Current.Next;
+                var Before = Current.Before;
+                var NextLen = 0;
+                var BeforeLen = 0;
+                var NextDeep = 0;
+                var BeforeDeep = 0;
+
+                if (Next != null)
+                {
+                    var Result = CheckInners(Next);
+                    NextLen = Result.Len;
+                    NextDeep = Result.Deep;
+                }
+
+                if (Before != null)
+                {
+                    var Result = CheckInners(Before);
+                    BeforeLen = Result.Len;
+                    BeforeDeep = Result.Deep;
+                }
+
                 if (Current.Balance > 1 || Current.Balance < -1)
                     throw new Exception("Balance Faild!");
                 if (Current.Holder == null && Current != Root)
                     throw new Exception("Some Data lost!");
-                if (Current.Next != null)
+
+                if (Current.NextDeep !=NextDeep)
+                    throw new Exception("Data not correct!");
+                if (Current.NextLen != NextLen )
+                    throw new Exception("Data not correct!");
+
+                if (Next != null)
                 {
-                    //if (Comparer.Compare(Current.Next.Value, Current.Value) < 0)
-                    //    throw new Exception("Data not correct!");
-
-                    if (Current.NextDeep > 0)
-                    {
-                        if (Current.NextDeep != Math.Max(Current.Next.BeforeDeep , Current.Next.NextDeep) + 1)
-                            throw new Exception("Data not correct!");
-                    }
-                    else
-                        throw new Exception("Data not correct!");
-
-                    if (Current.NextLen > 0)
-                    {
-                        if (Current.NextLen != Current.Next.NextLen + Current.Next.BeforeLen + 1)
-                            throw new Exception("Data not correct!");
-                    }
-                    else if (Current.Next != null)
-                        throw new Exception("Data not correct!");
-
                     if (Current.Next.Holder != Current)
                         throw new Exception("Some Data lost!");
                 }
-                else
-                {
 
-                    if (Current.NextLen>0 || Current.NextDeep>0)
-                        throw new Exception("Data not correct!");
-                    
-                }
+                if (Current.BeforeDeep !=BeforeDeep)
+                    throw new Exception("Data not correct!");
+                if (Current.BeforeLen !=BeforeLen)
+                    throw new Exception("Data not correct!");
+
                 if (Current.Before != null)
                 {
-                    //if (Comparer.Compare(Current.Before.Value, Current.Value) > 0)
-                    //    throw new Exception("Data not correct!");
-
-                    if (Current.BeforeDeep > 0)
-                    {
-                        if (Current.BeforeDeep != Math.Max(Current.Before.BeforeDeep, Current.Before.NextDeep) + 1)
-                            throw new Exception("Data not correct!");
-                    }
-                    else
-                        throw new Exception("Data not correct!");
-
-                    if (Current.BeforeLen > 0)
-                    {
-                        if (Current.BeforeLen != Current.Before.NextLen + Current.Before.BeforeLen + 1)
-                            throw new Exception("Data not correct!");
-                    }
-                    else if (Current.Before != null)
-                        throw new Exception("Data not correct!");
-
                     if (Current.Before.Holder != Current)
                         throw new Exception("Some Data lost!");
                 }
-                else
-                {
 
-                    if (Current.BeforeLen > 0 || Current.BeforeDeep > 0)
-                        throw new Exception("Data not correct!");
-
-                }
                 if (Current.Holder != null)
                 {
                     if (Current.Holder == Current)
@@ -115,13 +111,45 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
                     if (ItemsForDebug.Count((c) => Comparer.Compare(c, Current.Holder.Value) == 0) == 0)
                         throw new Exception("Some Data lost!");
                 }
+
+                return (NextLen + BeforeLen + 1, Math.Max(NextDeep, BeforeDeep) + 1);
+            }
+
+            if (Root != null)
+            {
+                if (CheckInners(Root).Len != Length)
+                    throw new Exception("Length is wrong or bad data exist!");
+            }
+
+            for (int i = 0; i < ItemsForDebug.Length; i++)
+            {
+                var Current = GetItem(i,out var Before,out var Next);
+                var ItemValue = ItemsForDebug[i];
+                if (Current == null || Comparer.Compare(Current.Value, ItemValue) != 0)
+                    throw new Exception("Some Item lost!");
+
             }
         }
 #endif
 
-        public Node Root;
-        public class Node
-            : Serialization.StreamCacheSerialize
+        public INode Root;
+        public interface INode
+        {
+            int Balance { get=> NextDeep - BeforeDeep; }
+            int NextDeep{get;set;}
+            int BeforeDeep{get;set;}
+            int NextLen{get;set; }
+            int BeforeLen{get;set;}
+            ValueType Value{ get; set; }
+            INode Holder{get;set;}
+            bool IsNext{get;set;}
+            INode Next{get;set;}
+            public INode Before{get;set;}
+            int Hash { get; }
+        }
+        public Func<ValueType,INode> CreateNode;
+
+        public class Node:INode
         {
             public Node(ValueType Value)
             {
@@ -129,19 +157,105 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
                 this.Value = Value;
             }
 
-            public int NextDeep;
-            public int BeforeDeep;
-            public int Balance { get => NextDeep - BeforeDeep; }
-            public int NextLen;
-            public int BeforeLen;
+            public int NextDeep { get; set; }
+            public int BeforeDeep { get ; set; }
+            public int NextLen { get; set; }
+            public int BeforeLen { get; set; }
+            public ValueType Value { get; set; }
+            public INode Holder { get; set; }
+            public bool IsNext { get; set; }
+            public INode Next { get; set; }
+            public INode Before { get; set; }
 
-            public ValueType Value;
-            public Node Holder;
-            public bool IsNext;
-            public Node Next;
-            public Node Before;
-            public int Hash;
+            public int Hash { get; }
 
+            public override string ToString()
+            {
+                if (Holder == null)
+                    return "Root";
+                else
+                {
+                    if (IsNext)
+                        return $"Body next: {Value}";
+                    else
+                        return $"Body before: {Value}";
+                }
+            }
+        }
+        public class CacheSerializeNode
+            : Serialization.StreamCacheSerialize, INode
+        {
+            public CacheSerializeNode(ValueType Value)
+            {
+                this._Hash = this.GetHashCode();
+                this.Value = Value;
+            }
+
+            private int _NextDeep;
+            public int NextDeep
+            {
+                get => _NextDeep;
+                set { Cache = null; _NextDeep = value; }
+            }
+
+            private int _BeforeDeep;
+            public int BeforeDeep
+            {
+                get => _BeforeDeep;
+                set { Cache = null; _BeforeDeep = value; }
+            }
+
+            private int _NextLen;
+            public int NextLen
+            {
+                get => _NextLen;
+                set { Cache = null; _NextLen = value; }
+            }
+
+            private int _BeforeLen;
+            public int BeforeLen
+            {
+                get => _BeforeLen;
+                set { Cache = null; _BeforeLen = value; }
+            }
+
+            private ValueType _Value;
+            public ValueType Value
+            {
+                get => _Value;
+                set { Cache = null; _Value = value; }
+            }
+
+            private INode _Holder;
+            public INode Holder
+            {
+                get => _Holder;
+                set { Cache = null; _Holder = value; }
+            }
+
+            public bool _IsNext;
+            public bool IsNext
+            {
+                get => _IsNext;
+                set { Cache = null; _IsNext = value; }
+            }
+
+            private INode _Next;
+            public INode Next
+            {
+                get => _Next;
+                set { Cache = null; _Next = value; }
+            }
+
+            private INode _Before;
+            public INode Before
+            {
+                get => _Before;
+                set { Cache = null; _Before = value; }
+            }
+
+            private int _Hash;
+            public int Hash { get => _Hash; }
 
             public override string ToString()
             {
@@ -157,10 +271,10 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             }
         }
 
-        private Node GetItem(
+        private INode GetItem(
             int position,
-            out Node Before,
-            out Node Next)
+            out INode Before,
+            out INode Next)
         {
             Before = default;
             Next = default;
@@ -204,7 +318,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
 
         public override void Insert(ValueType Value, int Position)
         {
-            Node Before; Node Next;
+            INode Before; INode Next;
             var Current = GetItem(Position, out Before, out Next);
             Insert(Value, Current, Before, Next);
 #if DEBUG
@@ -215,18 +329,23 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
 
         public override int BinaryInsert(ValueType Value)
         {
-            Node Before; Node Next; int Pos;
+#if DEBUG
+            if (
+            BinarySearch(Value)
+                .Index > -1)
+                throw new Exception("Dup")
+                ;
+#endif
+            INode Before; INode Next; int Pos;
             var Current = Find(Value, out Before, out Next, out Pos);
             Insert(Value, Current, Before, Next);
-#if DEBUG
-            ItemsForDebug.BinaryInsert(Value);
-            CheckBugs();
-#endif
 
 #if DEBUG
+            ItemsForDebug.BinaryInsert(Value);
             var ItemResult = ItemsForDebug.BinarySearch(Value);
             if (Pos != ItemResult.Index)
                 throw new Exception("Binary insert result is wrong!");
+            CheckBugs();
 #endif
             return Pos;
         }
@@ -234,13 +353,14 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
         public override (int Index, ValueType Value) BinarySearch(ValueType key, int minNum, int maxNum)
         {
             (int Index, ValueType Value) Result = default;
-            Node Before; Node Next; int Pos;
+            INode Before; INode Next; int Pos;
             var Current = Find(key, out Before, out Next, out Pos);
             if (Current != null)
                 Result = (Pos, Current.Value);
             else
                 Result = (~Pos, default);
 #if DEBUG
+            CheckBugs();
             var ItemResult = ItemsForDebug.BinarySearch(key);
             if (Result.Index != ItemResult.Index)
                 throw new Exception("Binary search result is wrong!");
@@ -248,11 +368,11 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             return Result;
         }
 
-        private void Insert(ValueType Value, Node Current, Node Before, Node Next)
+        private void Insert(ValueType Value, INode Current, INode Before, INode Next)
         {
             if (Root == null)
             {
-                Current = new Node(Value);
+                Current = CreateNode(Value);
                 Root = Current;
                 Length++;
                 return;
@@ -274,7 +394,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
                 if (Before.NextDeep > Next.BeforeDeep)
                     Before = null;
             }
-            Current = new Node(Value);
+            Current = CreateNode(Value);
 
             if (Before != null)
             {
@@ -316,7 +436,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
 
         public override void DeleteByPosition(int Position)
         {
-            Node Before; Node Next;
+            INode Before; INode Next;
             var Item = GetItem(Position, out Before, out Next);
             Drop(Item);
             Length--;
@@ -329,7 +449,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
 
         public override (int Index, ValueType Value) BinaryDelete(ValueType Value)
         {
-            Node Before; Node Next; int Pos;
+            INode Before; INode Next; int Pos;
             var Item = Find(Value, out Before, out Next, out Pos);
             if (Item == null)
                 throw new Exception($"{Value} not found!");
@@ -345,7 +465,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             return Result;
         }
 
-        private void MoveToHolder(Node Node)
+        private void MoveToHolder(INode Node)
         {
             var Holder = Node.Holder;
             var Root = Holder.Holder;
@@ -417,7 +537,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
                 Node.Holder = null;
         }
 
-        private void Drop(Node Node)
+        private void Drop(INode Node)
         {
             var Root = Node.Holder;
             var BeforeLen = Node.BeforeLen;
@@ -500,7 +620,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             FixWay(Root);
         }
 
-        private void DropFromHolder(Node Node, Node Replace)
+        private void DropFromHolder(INode Node, INode Replace)
         {
             var Holder = Node.Holder;
             if (Holder == null)
@@ -539,7 +659,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             return;
         }
 
-        private void FixWay(Node Holder)
+        private void FixWay(INode Holder)
         {
             while (Holder != null)
             {
@@ -603,18 +723,17 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             }
         }
 
-        public Node Find(ValueType Value)
+        public INode Find(ValueType Value)
         {
-            Node Before; Node Next; int Pos;
-            return Find(Value, out Before, out Next, out Pos);
+            return Find(Value,out var Before,out var Next,out var Pos);
         }
 
         public override object MyOptions { get => null; set { } }
 
-        public Node Find(
+        public INode Find(
             ValueType Value,
-            out Node Before,
-            out Node Next, 
+            out INode Before,
+            out INode Next, 
             out int Position)
         {
             Before = default;
@@ -641,10 +760,12 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
                     Current = Current.Before;
                 }
             }
+            //if (Next != null)
+            //    Position += Next.BeforeLen + Next.NextLen + 1;
             return null;
         }
 
-        private void FixBalance(Node node)
+        private void FixBalance(INode node)
         {
             while (node!=null && node.Holder != null)
             {
@@ -697,15 +818,15 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
         }
 
 #if DEBUG
-        (Node Root, int Len, ArrayBased.DynamicSize.Array<ValueType> ItemsForDebug) 
-            ISerializable<(Node Root, int Len, ArrayBased.DynamicSize.Array<ValueType> ItemsForDebug)>.
+        (INode Root, int Len, ArrayBased.DynamicSize.Array<ValueType> ItemsForDebug) 
+            ISerializable<(INode Root, int Len, ArrayBased.DynamicSize.Array<ValueType> ItemsForDebug)>.
             GetData()
         {
             return (Root, Length,ItemsForDebug);
         }
 
-        void ISerializable<(Node Root, int Len, ArrayBased.DynamicSize.Array<ValueType> ItemsForDebug)>.
-            SetData((Node Root, int Len, ArrayBased.DynamicSize.Array<ValueType> ItemsForDebug) Data)
+        void ISerializable<(INode Root, int Len, ArrayBased.DynamicSize.Array<ValueType> ItemsForDebug)>.
+            SetData((INode Root, int Len, ArrayBased.DynamicSize.Array<ValueType> ItemsForDebug) Data)
         {
             Comparer = Comparer<ValueType>.Default;
             this.Root = Data.Root;
@@ -714,12 +835,12 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             return;
         }
 #else
-        (Node Root, int Len) ISerializable<(Node Root, int Len)>.GetData()
+        (INode Root, int Len) ISerializable<(INode Root, int Len)>.GetData()
         {
             return (this.Root, Length);
         }
 
-        void ISerializable<(Node Root, int Len)>.SetData((Node Root, int Len) Data)
+        void ISerializable<(INode Root, int Len)>.SetData((INode Root, int Len) Data)
         {
             Comparer = Comparer<ValueType>.Default;
             this.Root = Data.Root;

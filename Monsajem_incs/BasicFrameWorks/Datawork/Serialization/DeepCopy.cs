@@ -12,22 +12,28 @@ namespace Monsajem_Incs.Serialization
     public class CopyOrginalObject : Attribute
     { }
     internal class ObjectContainer :
-        IComparable<ObjectContainer>
+        IEquatable<ObjectContainer>
     {
         public object obj;
-        public int TypeHashCode;
-        public int ObjHashCode;
+        public bool IsUniqueHashCode;
+        public int HashCode;
         public int FromPos;
-        public byte[] Data;
+        public (byte[] Bytes, object Obj) Data;
 
         public Action<object> Set;
         public Func<object> Get;
 
-        public int CompareTo(ObjectContainer other)
+        public bool Equals(ObjectContainer other)
         {
-            if(TypeHashCode!=other.TypeHashCode)
-                return TypeHashCode - other.TypeHashCode;
-            return ObjHashCode - other.ObjHashCode;
+            if (IsUniqueHashCode)
+                return HashCode == other.HashCode;
+            else
+                return object.Equals(obj,other.obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode;
         }
     }
     public static class ObjectExtensions
@@ -35,7 +41,7 @@ namespace Monsajem_Incs.Serialization
         [ThreadStatic]
         private static bool OrginalTargetForDelegates;
         [ThreadStatic]
-        private static Array<ObjectContainer> visited;
+        private static HashSet<ObjectContainer> visited;
         [ThreadStatic]
         private static Action AtLast;
         public static bool IsPrimitive(this Type type)
@@ -49,7 +55,7 @@ namespace Monsajem_Incs.Serialization
         {
             ObjectExtensions.OrginalTargetForDelegates = OrginalTargetForDelegates;
             var Pos = InternalCopy(originalObject.GetType());
-            visited = new Array<ObjectContainer>(5);
+            visited = new HashSet<ObjectContainer>();
             var Result = InternalCopys[Pos]
                 (originalObject);
             AtLast?.Invoke();
@@ -72,22 +78,20 @@ namespace Monsajem_Incs.Serialization
         {
             if (originalObject == null)
                 return;
-            var VisitedObj = new ObjectContainer()
+            var Key = new ObjectContainer()
             {
-                ObjHashCode = originalObject.GetHashCode()
+                HashCode = originalObject.GetHashCode(),
+                obj = originalObject
             };
-            var VisitedPos = visited.BinarySearch(VisitedObj);
-            if (VisitedPos.Index > -1)
+            if (visited.TryGetValue(Key, out var VisitedObj))
             {
-                VisitedObj = visited[VisitedPos.Index];
                 AtLast += () => SetValue(VisitedObj.obj);
             }
             else
             {
-                visited.BinaryInsert(VisitedObj);
+                visited.Add(Key);
                 var Obj = Copy(originalObject);
                 SetValue(Obj);
-                VisitedObj.obj = Obj;
             }
         }
 
@@ -140,10 +144,10 @@ namespace Monsajem_Incs.Serialization
                                         (obj) => cloneObject.SetValue(obj, StandAloneCurrent),
                                         Info.InternalCopy);
                                 });
-                                visited.BinaryInsert(new ObjectContainer()
+                                visited.Add(new ObjectContainer()
                                 {
                                     obj = cloneObject,
-                                    ObjHashCode = originalObject.GetHashCode()
+                                    HashCode = originalObject.GetHashCode()
                                 });
                                 return cloneObject;
                             };
@@ -266,9 +270,9 @@ namespace Monsajem_Incs.Serialization
                             MyInternalCopy = (originalObject) =>
                             {
                                 var cloneObject = GetUninitializedObject(originalObject.GetType());
-                                visited.BinaryInsert(new ObjectContainer
+                                visited.Add(new ObjectContainer
                                 {
-                                    ObjHashCode = originalObject.GetHashCode(),
+                                    HashCode = originalObject.GetHashCode(),
                                     obj = cloneObject
                                 });
                                 for (int i = 0; i < FieldLen; i++)

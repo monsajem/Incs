@@ -15,53 +15,50 @@ namespace Monsajem_Incs.Serialization
     {
         [NonSerialized]
         private byte[] _Cache;
-        public byte[] Cache { get =>_Cache; set =>_Cache=value; }
+        public byte[] Cache { get => _Cache; set => _Cache = value; }
+        public bool IsReady => true;
     }
-    public class StreamCacheSerialize : ICacheSerialize,IDisposable
+    public class StreamCacheSerialize : ICacheSerialize, IDisposable
     {
-        public static Stream Stream 
+        public static Stream Stream
         {
             set
             {
                 Data = new Collection.StreamCollection();
                 Data.Stream = value;
                 GUID = new Collection.Array.TreeBased.Array<string>();
-            } 
+            }
         }
         private static Collection.StreamCollection Data;
         private static Collection.Array.TreeBased.Array<string> GUID;
         [NonSerialized]
         private string MyGUID = Guid.NewGuid().ToString();
-        public byte[] Cache { 
-            get 
+        public byte[] Cache
+        {
+            get
             {
 #if DEBUG
                 if (Data == null)
-                    return null;
+                    throw new Exception("Please set \"Monsajem_Incs.Serialization.StreamCacheSerialize.Stream\".");
 #endif
-                var Position = GUID.BinarySearch(MyGUID).Index;
-                if(Position>-1)
+                lock(Data)
                 {
-                    return Data[Position];
+                    var Position = GUID.BinarySearch(MyGUID).Index;
+                    if (Position > -1)
+                    {
+                        return Data[Position];
+                    }
+                    return null;
                 }
-                return null;
             }
             set
             {
 #if DEBUG
-                bool IsSafe = false;
                 if (Data == null)
-                {
-                    if (value == null)
-                    {
-                        IsSafe = true;
-                        return;
-                    }
-                    throw new Exception("Please set \"Monsajem_Incs.Serialization.StreamCacheSerialize.Stream\".");
-                }
-                try
-                {
+                    return;
 #endif
+                lock(Data)
+                {
                     var Position = GUID.BinarySearch(MyGUID).Index;
                     if (Position > -1)
                     {
@@ -74,9 +71,6 @@ namespace Monsajem_Incs.Serialization
                     {
                         if (value == null)
                         {
-#if DEBUG
-                            IsSafe = true;
-#endif
                             return;
                         }
                         Position = ~Position;
@@ -84,21 +78,11 @@ namespace Monsajem_Incs.Serialization
                         Data.Insert(value, Position);
 
                     }
-
-#if DEBUG
-                    IsSafe = true;
                 }
-                finally
-                {
-                    if(IsSafe==false)
-                    {
-
-                    }
-                }
-
-#endif
             }
-            }
+        }
+
+        public bool IsReady => Data != null;
 
         void IDisposable.Dispose()
         {
@@ -114,6 +98,7 @@ namespace Monsajem_Incs.Serialization
     public interface ICacheSerialize
     {
         byte[] Cache { get; set; }
+        bool IsReady { get; }
     }
     public interface IWhenCanSerialize
     {
@@ -167,7 +152,8 @@ namespace Monsajem_Incs.Serialization
     public partial class Serialization
     {
         public static Serialization Serializere;
-        private abstract class SerializeInfo
+        private abstract class SerializeInfo:
+            IEquatable<SerializeInfo>
         {
             public Type Type;
             public int TypeHashCode;
@@ -181,42 +167,57 @@ namespace Monsajem_Incs.Serialization
             public abstract void Make();
 
 
-            private class ExactSerializer:
-                IComparable<ExactSerializer>
+            private class ExactSerializer
             {
                 public int HashCode;
                 public SerializeInfo Serializer;
-
-                public int CompareTo(ExactSerializer other)
+                public override int GetHashCode()
                 {
-                    return HashCode-other.HashCode;
+                    return HashCode;
                 }
             }
 
-            private static Array<ExactSerializer> 
-                SerializersByHashCode = new Array<ExactSerializer>(10);
-            private static Array<ExactSerializer> 
-                SerializersByNameCode = new Array<ExactSerializer>(10);
+            private class ExactSerializerByType :
+                ExactSerializer,IEquatable<ExactSerializerByType>
+            {
+                public Type Type;
+                public bool Equals(ExactSerializerByType other)
+                {
+                    return Type.IsEquivalentTo(other.Type);
+                }
+            }
+
+            private class ExactSerializerByTypeName :
+                ExactSerializer,IEquatable<ExactSerializerByTypeName>
+            {
+                public string TypeName;
+                public bool Equals(ExactSerializerByTypeName other)
+                {
+                    return TypeName == other.TypeName;
+                }
+            }
+
+            private static HashSet<ExactSerializerByType>
+                SerializersByHashCode = new HashSet<ExactSerializerByType>();
+            private static HashSet<ExactSerializerByTypeName>
+                SerializersByNameCode = new HashSet<ExactSerializerByTypeName>();
 
             public static SerializeInfo GetSerialize(Type Type)
             {
                 SerializeInfo SR;
-                var HashCode = Type.GetHashCode();
-                var Result = SerializersByHashCode.BinarySearch(
-                    new ExactSerializer() { HashCode = HashCode });
-                if (Result.Index < 0)
+                var Key = new ExactSerializerByType()
+                                { HashCode = Type.GetHashCode(), Type = Type };
+                if (SerializersByHashCode.TryGetValue(Key,out var Result)==false)
                 {
                     SR = (SerializeInfo)
                             BaseType.MakeGenericType(Type).GetMethod("GetSerialize").
                         Invoke(null, null);
-                    Result = SerializersByHashCode.BinarySearch(
-                        new ExactSerializer() { HashCode = HashCode });
-                    if (Result.Index < 0)
-                        SerializersByHashCode.BinaryInsert(
-                            new ExactSerializer() { HashCode = HashCode, Serializer = SR });
+                    Key.Serializer = SR;
+                    if (SerializersByHashCode.Contains(Key) ==false)
+                        SerializersByHashCode.Add(Key);
                 }
                 else
-                    SR = Result.Value.Serializer;
+                    SR = Result.Serializer;
 #if DEBUG
                 if (SR.Type != Type)
                     throw new Exception("invalid Serializers Found!");
@@ -228,26 +229,34 @@ namespace Monsajem_Incs.Serialization
             {
                 SerializeInfo SR;
                 var HashCode = TypeName.GetHashCode();
-                var Result = SerializersByNameCode.BinarySearch(
-                                new ExactSerializer() { HashCode = HashCode });
-                if (Result.Index < 0)
+                var Key = new ExactSerializerByTypeName() 
+                                { HashCode = HashCode ,TypeName =TypeName};
+                if (SerializersByNameCode.TryGetValue(Key,out var Result) == false)
                 {
                     SR = (SerializeInfo)
                             BaseType.MakeGenericType(TypeName.GetTypeByName()).GetMethod("GetSerialize").
                         Invoke(null, null);
-                    Result = SerializersByNameCode.BinarySearch(
-                        new ExactSerializer() { HashCode = HashCode });
-                    if (Result.Index < 0)
-                        SerializersByNameCode.BinaryInsert(
-                            new ExactSerializer() { HashCode = HashCode, Serializer = SR });
+                    Key.Serializer = SR;
+                    if (SerializersByNameCode.Contains(Key) == false)
+                        SerializersByNameCode.Add(Key);
                 }
                 else
-                    SR = Result.Value.Serializer;
+                    SR = Result.Serializer;
 #if DEBUG
                 if (SR.Type != TypeName.GetTypeByName())
                     throw new Exception("invalid Serializers Found!");
 #endif
                 return SR;
+            }
+
+            public bool Equals(SerializeInfo other)
+            {
+                return Type.IsEquivalentTo(other.Type);
+            }
+
+            public override int GetHashCode()
+            {
+                return Type.GetHashCode();
             }
         }
 
@@ -317,7 +326,7 @@ namespace Monsajem_Incs.Serialization
                     {
                         var DType = obj.GetType();
                         var Serializer = GetSerialize(DType);
-                        Serializere.VisitedInfoSerialize<object>(DType.GetHashCode(), () => (Serializer.NameAsByte, null));
+                        Serializere.VisitedInfoSerialize<object>(DType, () => (Serializer.NameAsByte, null));
                         Serializer.Serializer(obj);
                     },
                     () =>
@@ -426,7 +435,7 @@ namespace Monsajem_Incs.Serialization
             {
                 var Type = typeof(t);
                 var InterfaceType = Type.GetInterfaces().
-                    Where((c)=>c.IsGenericType).
+                    Where((c) => c.IsGenericType).
                     Where((c) => c.GetGenericTypeDefinition() == ISerializableType).
                     FirstOrDefault();
 
@@ -711,31 +720,22 @@ namespace Monsajem_Incs.Serialization
                         LoadedFunc LoadedFunc;
                         var Delegate = Delegates[i];
                         var HashCode = Delegate.Method.GetHashCode();
-                        LoadedFunc = Serializere.VisitedInfoSerialize(HashCode,
+                        LoadedFunc = Serializere.VisitedInfoSerialize(Delegate.Method,
                         () =>
                         {
-                            var FuncPos = System.Array.BinarySearch(Serializere.LoadedFuncs_Ser,
-                            new LoadedFunc()
-                            {
-                                Hash = HashCode
-                            });
-                            if (FuncPos < 0)
+
+                            var Key = new LoadedFunc(Delegate.Method);
+                            if (Serializere.LoadedFuncs_Ser.TryGetValue(Key,out LoadedFunc)==false)
                             {
                                 var TargetType = Delegate.Method.DeclaringType;
 
-                                LoadedFunc = new LoadedFunc()
-                                {
-                                    Hash = HashCode,
-                                    NameAsByte = Serializere.Write(
+                                LoadedFunc = Key;
+                                LoadedFunc.NameAsByte = 
+                                    Serializere.Write(
                                         Delegate.Method.Name,
-                                        Delegate.Method.ReflectedType.MidName()),
-                                    SerializerTarget = GetSerialize(TargetType)
-                                };
-                                BinaryInsert(ref Serializere.LoadedFuncs_Ser, LoadedFunc);
-                            }
-                            else
-                            {
-                                LoadedFunc = Serializere.LoadedFuncs_Ser[FuncPos];
+                                        Delegate.Method.ReflectedType.MidName());
+                                LoadedFunc.SerializerTarget = GetSerialize(TargetType);
+                                Serializere.LoadedFuncs_Ser.Add(LoadedFunc);
                             }
                             return (LoadedFunc.NameAsByte, LoadedFunc);
                         });
@@ -757,8 +757,8 @@ namespace Monsajem_Incs.Serialization
                             var MethodName = Serializere.Read();
                             var TypeName = Serializere.Read();
 
-                            var FuncPos = System.Array.BinarySearch(Serializere.LoadedFuncs_Des, new LoadedFunc() { Hash = (MethodName + TypeName).GetHashCode() });
-                            if (FuncPos < 0)
+                            var Key =new LoadedFunc(MethodName + TypeName);
+                            if (Serializere.LoadedFuncs_Des.TryGetValue(Key,out LoadedFunc)==false)
                             {
                                 var ReflectedType = TypeName.GetTypeByName();
                                 var Method = ReflectedType.GetMethod(MethodName,
@@ -768,17 +768,10 @@ namespace Monsajem_Incs.Serialization
                                     BindingFlags.Instance);
 
                                 var TargetType = Method.DeclaringType;
-                                LoadedFunc = new LoadedFunc()
-                                {
-                                    Delegate = Method.CreateDelegate(Type, null),
-                                    Hash = (MethodName + TypeName).GetHashCode(),
-                                    SerializerTarget = GetSerialize(TargetType)
-                                };
-                                BinaryInsert(ref Serializere.LoadedFuncs_Des, LoadedFunc);
-                            }
-                            else
-                            {
-                                LoadedFunc = Serializere.LoadedFuncs_Des[FuncPos];
+                                LoadedFunc = Key;
+                                LoadedFunc.Delegate = Method.CreateDelegate(Type, null);
+                                LoadedFunc.SerializerTarget = GetSerialize(TargetType);
+                                Serializere.LoadedFuncs_Des.Add(LoadedFunc);
                             }
                             return LoadedFunc;
                         });
@@ -962,19 +955,19 @@ namespace Monsajem_Incs.Serialization
 
             public static SerializeInfo<t> InsertSerializer(
                 Action<object> Serializer,
-                Func<object> Deserializer,bool IsFixedType = false)
+                Func<object> Deserializer, bool IsFixedType = false)
             {
                 _Serializer = Serializer;
                 _Deserializer = Deserializer;
-                return InsertSerializer(() => (Serializer, Deserializer),IsFixedType);
+                return InsertSerializer(() => (Serializer, Deserializer), IsFixedType);
             }
             private static SerializeInfo<t> InsertSerializer(
                 Func<(Action<object> Sr, Func<object> Dr)> Serializer,
-                bool IsFixedType=false)
+                bool IsFixedType = false)
             {
                 var ThisType = typeof(t);
                 var Serialize = GetSerialize();
-                if (ThisType.IsAbstract&&Serialize.Serializer==null)
+                if (ThisType.IsAbstract && Serialize.Serializer == null)
                 {
                     Serialize.Serializer = (obj) =>
                     {
@@ -1026,12 +1019,9 @@ namespace Monsajem_Incs.Serialization
                         var DR = Sr.Dr;
                         Sr.Sr = (obj) =>
                         {
-                            if (obj != null)
+                            var ICache = (ICacheSerialize)obj;
+                            if (ICache.IsReady)
                             {
-                                var ICache = (ICacheSerialize)obj;
-#if DEBUG
-                                ICache.Cache = null;
-#endif
                                 var Cache = ICache.Cache;
                                 if (Cache == null)
                                 {
@@ -1048,21 +1038,44 @@ namespace Monsajem_Incs.Serialization
                                 }
                                 else
                                 {
+#if DEBUG
+                                    var DebugCache = (byte[])ICache.Cache.Clone();
+                                    var FromPosition = S_Data.Position;
+                                    SR(obj);
+                                    var len = (int)(S_Data.Length - FromPosition);
+                                    Cache = new byte[len];
+                                    S_Data.Seek(FromPosition, SeekOrigin.Begin);
+                                    var AllLen = len;
+                                    while (len > 0)
+                                        len -= S_Data.Read(Cache, AllLen - len, len);
+                                    S_Data.Seek(S_Data.Length, SeekOrigin.Begin);
+
+                                    if (DebugCache.Length != Cache.Length)
+                                        throw new Exception("Cache having wrong data!");
+                                    for (int i = 0; i < DebugCache.Length; i++)
+                                        if (DebugCache[i] != Cache[i])
+                                            throw new Exception("Cache having wrong data!");
+#else
                                     S_Data.Write(Cache, 0, Cache.Length);
+#endif
                                 }
                             }
+                            else
+                                SR(obj);
                         };
                         Sr.Dr = () =>
                         {
+
                             var FromPosition = From;
                             var Result = DR();
-
-#if !DEBUG
-                            var len = (int)(D_Data.Length - FromPosition);
-                            var Cache = new byte[len];
-                            Array.Copy(D_Data, FromPosition, Cache, 0, len);
-                            ((ICacheSerialize)Result).Cache = Cache;
-#endif
+                            var ICache = (ICacheSerialize)Result;
+                            if (ICache.IsReady)
+                            {
+                                var len = (int)(D_Data.Length - FromPosition);
+                                var Cache = new byte[len];
+                                Array.Copy(D_Data, FromPosition, Cache, 0, len);
+                                ICache.Cache = Cache;
+                            }
                             return Result;
                         };
                     }
@@ -1137,15 +1150,25 @@ namespace Monsajem_Incs.Serialization
         }
 
         private class LoadedFunc :
-            IComparable<LoadedFunc>
+            IEquatable<LoadedFunc>
         {
-            public int Hash;
+            public LoadedFunc(object Obj)
+            {
+                this.HashCode = Obj.GetHashCode();
+                this.Obj = Obj;
+            }
+            private object Obj;
+            private int HashCode;
             public Delegate Delegate;
             public byte[] NameAsByte;
             public SerializeInfo SerializerTarget;
-            public int CompareTo(LoadedFunc other)
+            public bool Equals(LoadedFunc other)
             {
-                return this.Hash - other.Hash;
+                return object.Equals(Obj,other.Obj);
+            }
+            public override int GetHashCode()
+            {
+                return HashCode;
             }
         }
         private static Type ISerializableType = typeof(ISerializable<object>).GetGenericTypeDefinition();
@@ -1202,7 +1225,7 @@ namespace Monsajem_Incs.Serialization
                 From += 1;
 
                 return ReadSerializer().Deserializer();
-            },true);
+            }, true);
 
             SerializeInfo<bool>.InsertSerializer(
             (object obj) =>
@@ -1450,8 +1473,8 @@ namespace Monsajem_Incs.Serialization
                 }, true);
         }
 
-        private LoadedFunc[] LoadedFuncs_Des = new LoadedFunc[0];
-        private LoadedFunc[] LoadedFuncs_Ser = new LoadedFunc[0];
+        private HashSet<LoadedFunc> LoadedFuncs_Des = new HashSet<LoadedFunc>();
+        private HashSet<LoadedFunc> LoadedFuncs_Ser = new HashSet<LoadedFunc>();
 
         [ThreadStaticAttribute]
         private static byte[] D_Data;
@@ -1478,9 +1501,9 @@ namespace Monsajem_Incs.Serialization
         [ThreadStaticAttribute]
         private static MemoryStream S_Data;
         [ThreadStaticAttribute]
-        private static SortedSet<ObjectContainer> Visitor;
+        private static HashSet<ObjectContainer> Visitor;
         [ThreadStaticAttribute]
-        private static SortedSet<ObjectContainer> Visitor_info;
+        private static HashSet<ObjectContainer> Visitor_info;
 
         public byte[] Serialize<t>(t obj)
         {
@@ -1502,8 +1525,8 @@ namespace Monsajem_Incs.Serialization
                 if (Serialization.S_Data == null)
                 {
                     Serialization.S_Data = new MemoryStream();
-                    Serialization.Visitor = new SortedSet<ObjectContainer>();
-                    Serialization.Visitor_info = new SortedSet<ObjectContainer>();
+                    Serialization.Visitor = new HashSet<ObjectContainer>();
+                    Serialization.Visitor_info = new HashSet<ObjectContainer>();
                 }
                 var SR = SerializeInfo<t>.GetSerialize();
                 try
@@ -1562,8 +1585,8 @@ namespace Monsajem_Incs.Serialization
                 t Result = default;
                 if (Serialization.Visitor_info == null)
                 {
-                    Serialization.Visitor = new SortedSet<ObjectContainer>();
-                    Serialization.Visitor_info = new SortedSet<ObjectContainer>();
+                    Serialization.Visitor = new HashSet<ObjectContainer>();
+                    Serialization.Visitor_info = new HashSet<ObjectContainer>();
                 }
                 Serialization.D_Data = Data;
                 Serialization.From = From;
@@ -1585,14 +1608,14 @@ namespace Monsajem_Incs.Serialization
                     AtLast?.Invoke();
                 }
 #if DEBUG
-                //catch (Exception ex)
-                //{
-                //    var Traced = Serialization.Traced;
-                //    if (Traced != null)
-                //        Traced = "On " + Traced;
-                //    Serialization.Traced = null;
-                //    throw new Exception($"Deserialize From Point {Serialization.From} Of Type >> {typeof(t).FullName} Is Failed {Traced}\nDatas As B64:\n" + System.Convert.ToBase64String(Data), ex);
-                //}
+                catch (Exception ex)
+                {
+                    var Traced = Serialization.Traced;
+                    if (Traced != null)
+                        Traced = "On " + Traced;
+                    Serialization.Traced = null;
+                    throw new Exception($"Deserialize From Point {Serialization.From} Of Type >> {typeof(t).FullName} Is Failed {Traced}\nDatas As B64:\n" + System.Convert.ToBase64String(Data), ex);
+                }
 #endif
                 finally
                 {

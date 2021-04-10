@@ -23,18 +23,23 @@ namespace Monsajem_Incs.Serialization
                 serializer.Serializer(obj);
                 return;
             }
-            var VisitedObj = new ObjectContainer()
+            var Key = new ObjectContainer()
             {
-                ObjHashCode = obj.GetHashCode(),
-                TypeHashCode = obj.GetType().GetHashCode() // serializer.TypeHashCode
+                HashCode = obj.GetHashCode(),
+                obj = obj
             };
-            if(Visitor.Contains(VisitedObj)==false)
+            if(Visitor.TryGetValue(Key, out var VisitedObj)== false)
             {
-                Visitor.Add(VisitedObj);
+                Visitor.Add(Key);
+#if DEBUG
+                Key.obj = obj;
+#endif
+                Key.FromPos = (int)S_Data.Position;
+                S_Data.Write(Byte_Int_N_1, 0, 4);
+                serializer.Serializer(obj);
             }
             else
             {
-                Visitor.TryGetValue(VisitedObj,out VisitedObj);
 #if DEBUG
                 if (VisitedObj.obj.GetType() != obj.GetType())
                     throw new Exception("Type of visited object is wrong" +
@@ -42,14 +47,7 @@ namespace Monsajem_Incs.Serialization
                                         "\n\nVisited: " + VisitedObj.obj.GetType().ToString());
 #endif
                 S_Data.Write(BitConverter.GetBytes(VisitedObj.FromPos), 0, 4);
-                return;
             }
-#if DEBUG
-            VisitedObj.obj = obj;
-#endif
-            VisitedObj.FromPos = (int)S_Data.Position;
-            S_Data.Write(Byte_Int_N_1, 0, 4);
-            serializer.Serializer(obj);
         }
         private void VisitedDeserialize(
             Action<object> Set,
@@ -71,7 +69,8 @@ namespace Monsajem_Incs.Serialization
                 case -1:
                     VisitedObj = new ObjectContainer()
                     {
-                        ObjHashCode = LastFrom
+                        HashCode = LastFrom,
+                        IsUniqueHashCode = true
                     };
                     Visitor.Add(VisitedObj);
                     VisitedObj.obj = deserializer.Deserializer();
@@ -82,7 +81,8 @@ namespace Monsajem_Incs.Serialization
             }
             VisitedObj = new ObjectContainer()
             {
-                ObjHashCode = Fr
+                HashCode = Fr,
+                IsUniqueHashCode = true
             };
             Visitor.TryGetValue(VisitedObj, out VisitedObj);
             if (VisitedObj.obj == null)
@@ -92,29 +92,30 @@ namespace Monsajem_Incs.Serialization
         }
 
         private t VisitedInfoSerialize<t>(
-            int HashCode,
-            Func<(byte[], t)> GetData)
+            object obj,
+            Func<(byte[] Bytes, t Obj)> GetData)
         {
-            var VisitedObj = new ObjectContainer()
+            var Key = new ObjectContainer()
             {
-                ObjHashCode = HashCode
+                HashCode = obj.GetHashCode(),
+                obj = obj
             };
-            if (Visitor_info.Contains(VisitedObj) == false)
+            if (Visitor_info.TryGetValue(Key, out var VisitedObj)== false)
             {
-                Visitor_info.Add(VisitedObj);
+                Visitor_info.Add(Key);
+                Key.FromPos = (int)S_Data.Position;
+                var Data = GetData();
+                var DataBytes = Data.Bytes;
+                Key.Data =(DataBytes, Data.Obj);
+                S_Data.Write(Byte_Int_N_1, 0, 4);
+                S_Data.Write(DataBytes, 0, DataBytes.Length);
+                return Data.Obj;
             }
             else
             {
-                Visitor_info.TryGetValue(VisitedObj, out VisitedObj);
                 S_Data.Write(BitConverter.GetBytes(VisitedObj.FromPos), 0, 4);
-                return (t)VisitedObj.obj;
+                return (t)VisitedObj.Data.Obj;
             }
-            VisitedObj.FromPos = (int)S_Data.Position;
-            var Data = GetData();
-            VisitedObj.obj = Data.Item2;
-            S_Data.Write(Byte_Int_N_1, 0, 4);
-            S_Data.Write(Data.Item1, 0, Data.Item1.Length);
-            return Data.Item2;
         }
         private t VisitedInfoDeserialize<t>(
             Func<t> Get)
@@ -127,7 +128,8 @@ namespace Monsajem_Incs.Serialization
             {
                 VisitedObj = new ObjectContainer()
                 {
-                    ObjHashCode = LastFrom,
+                    HashCode = LastFrom,
+                    IsUniqueHashCode = true,
                     obj = Get()
                 };
                 Visitor_info.Add(VisitedObj);
@@ -135,7 +137,8 @@ namespace Monsajem_Incs.Serialization
             }
             VisitedObj = new ObjectContainer()
             {
-                ObjHashCode = Fr
+                HashCode = Fr,
+                IsUniqueHashCode = true
             };
             Visitor_info.TryGetValue(VisitedObj, out VisitedObj);
             return (t)VisitedObj.obj;
@@ -145,7 +148,7 @@ namespace Monsajem_Incs.Serialization
         private SerializeInfo WriteSerializer(Type Type)
         {
             var Sr = SerializeInfo.GetSerialize(Type);
-            VisitedInfoSerialize<object>(Sr.Type.GetHashCode(), () => (Sr.NameAsByte, null));
+            VisitedInfoSerialize<object>(Sr.Type, () => (Sr.NameAsByte, null));
             return Sr;
         }
 

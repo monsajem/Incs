@@ -12,14 +12,14 @@ namespace Monsajem_Incs.Serialization
     public static class WrapObjectExtensions
     {
         [ThreadStatic]
-        private static Array<ObjectContainer> visited;
+        private static HashSet<ObjectContainer> visited;
 
         public static ((Action<object> Set, Func<object> Get)[] Wraps, Func<object> Root) Wrap(this object originalObject)
         {
             if (originalObject == null)
                 return (new (Action<object> Set, Func<object> Get)[0], () => null);
             var Pos = InternalCopy(originalObject.GetType());
-            visited = new Array<ObjectContainer>(5);
+            visited = new HashSet<ObjectContainer>();
             InternalCopys[Pos](originalObject);
             Clone((obj) => originalObject = obj,
                   () => originalObject);
@@ -40,23 +40,21 @@ namespace Monsajem_Incs.Serialization
             object originalObject = Get();
             if (originalObject == null)
                 return;
-            var VisitedObj = new ObjectContainer()
+            var Key = new ObjectContainer()
             {
-                ObjHashCode = originalObject.GetHashCode(),
-                TypeHashCode = originalObject.GetType().GetHashCode()
+                HashCode = originalObject.GetHashCode(),
+                obj = originalObject
             };
-            var VisitedPos = visited.BinarySearch(VisitedObj);
-            if (VisitedPos.Index < 0)
+            if (visited.TryGetValue(Key, out var VisitedObj)==false)
             {
-                visited.BinaryInsert(VisitedObj);
-                VisitedObj.obj = originalObject;
-                VisitedObj.Set = Set;
-                VisitedObj.Get = Get;
+                visited.Add(Key);
+                Key.obj = originalObject;
+                Key.Set = Set;
+                Key.Get = Get;
                 Copy?.Invoke(originalObject);
             }
             else
             {
-                VisitedObj = VisitedPos.Value;
                 VisitedObj.Set += Set;
             }
         }

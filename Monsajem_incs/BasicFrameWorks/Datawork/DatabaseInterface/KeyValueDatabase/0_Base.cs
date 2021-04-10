@@ -70,7 +70,7 @@ namespace Monsajem_Incs.Database.Base
             this.BasicActions = BasicActions;
             this.KeyPos = KeyPos;
 
-            this.KeysInfo.Keys = new Collection.Array.TreeBased.Array<KeyType>(XNewKeys);
+            this.KeysInfo.Keys = new Collection.Array.TreeBased.Array<KeyType>(XNewKeys,true);
 
             this.SecurityEvents = new SecurityEvents<ValueType>();
             this.Events = new Events<ValueType>();
