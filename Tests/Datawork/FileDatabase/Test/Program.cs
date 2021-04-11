@@ -40,8 +40,8 @@ namespace Test
             try { System.IO.File.Delete(Address); } catch { }
             Monsajem_Incs.Serialization.StreamCacheSerialize.Stream =
                 new System.IO.FileStream(Address, System.IO.FileMode.CreateNew);
-            //Test();
-            PerformanceTestMixed();
+            Test();
+            //PerformanceTestMixed();
             //PerformanceTest();
         }
 
@@ -57,15 +57,17 @@ namespace Test
                 CurrentDirectory + "/Persons",
                 (person) => person.Name, true, true);
 
-            var X = Persons.AsEnumerable().ToArray();
-
             var Products = new DirectoryTable<Product, string>(
                 CurrentDirectory + "/Products",
                 (Product) => (string)Product.Name, true, true);
 
             //(Products.Relation((c) => c.Person_1_1), Persons.Relation((c) => c.Product_1_1)).Join();//1 to 1
             (Products.Relation((c) => c.Persons_M_N), Persons.Relation((c) => c.Products_M_N)).Join();//m to n
-            //(Products.Relation((c) => c.Person_1_X), Persons.Relation((c) => c.Products_X_1)).Join();// 1 to n
+                                                                                                      //(Products.Relation((c) => c.Person_1_X), Persons.Relation((c) => c.Products_X_1)).Join();// 1 to n
+
+            var X = Persons.AsEnumerable().ToArray();
+            var Y = Products.AsEnumerable().ToArray();
+
 
             Persons.Delete();
             Products.Delete();

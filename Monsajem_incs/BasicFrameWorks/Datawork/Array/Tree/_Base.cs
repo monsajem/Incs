@@ -10,37 +10,40 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
     public partial class Array<ValueType> : 
         Base.IArray<ValueType, Array<ValueType>>,
 #if DEBUG
-        Serialization.ISerializable<(Array<ValueType>.INode Root,int Len, 
+        Serialization.ISerializable<(Array<ValueType>.INode Root,int Len,bool CacheSerialize, 
             ArrayBased.DynamicSize.Array<ValueType> ItemsForDebug)>
 #else
-        Serialization.ISerializable<(Array<ValueType>.INode Root,int Len)>
+        Serialization.ISerializable<(Array<ValueType>.INode Root,int Len,bool CacheSerialize)>
 #endif
     {
 
         public Array()
         {
-            CreateNode = (Value) => new Node(Value);
+            CreateNode = _CreateNode;
         }
         public Array(ValueType[] Values)
         {
-            CreateNode = (Value) => new Node(Value);
+            CreateNode = _CreateNode;
             this.Insert(Values);
         }
         public Array(bool CacheSerialize)
         {
             if (CacheSerialize)
-                CreateNode = (Value) => new CacheSerializeNode(Value);
+                CreateNode = _CreateCacheSerializeNode;
             else
-                CreateNode = (Value) => new Node(Value);
+                CreateNode = _CreateNode;
         }
         public Array(ValueType[] Values,bool CacheSerialize)
         {
             if (CacheSerialize)
-                CreateNode = (Value) => new CacheSerializeNode(Value);
+                CreateNode = _CreateCacheSerializeNode;
             else
-                CreateNode = (Value) => new Node(Value);
+                CreateNode = _CreateNode;
             this.Insert(Values);
         }
+
+        private static Func<ValueType,INode> _CreateCacheSerializeNode = (Value) => new CacheSerializeNode(Value);
+        private static Func<ValueType, INode> _CreateNode = (Value) => new Node(Value);
 
 #if DEBUG
         private Array.ArrayBased.DynamicSize.Array<ValueType> ItemsForDebug =
@@ -818,33 +821,41 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
         }
 
 #if DEBUG
-        (INode Root, int Len, ArrayBased.DynamicSize.Array<ValueType> ItemsForDebug) 
-            ISerializable<(INode Root, int Len, ArrayBased.DynamicSize.Array<ValueType> ItemsForDebug)>.
+        (INode Root, int Len, bool CacheSerialize, ArrayBased.DynamicSize.Array<ValueType> ItemsForDebug) 
+            ISerializable<(INode Root, int Len, bool CacheSerialize, ArrayBased.DynamicSize.Array<ValueType> ItemsForDebug)>.
             GetData()
         {
-            return (Root, Length,ItemsForDebug);
+            return (Root, Length,CreateNode==_CreateCacheSerializeNode,ItemsForDebug);
         }
 
-        void ISerializable<(INode Root, int Len, ArrayBased.DynamicSize.Array<ValueType> ItemsForDebug)>.
-            SetData((INode Root, int Len, ArrayBased.DynamicSize.Array<ValueType> ItemsForDebug) Data)
+        void ISerializable<(INode Root, int Len, bool CacheSerialize, ArrayBased.DynamicSize.Array<ValueType> ItemsForDebug)>.
+            SetData((INode Root, int Len, bool CacheSerialize, ArrayBased.DynamicSize.Array<ValueType> ItemsForDebug) Data)
         {
             Comparer = Comparer<ValueType>.Default;
             this.Root = Data.Root;
             this.Length = Data.Len;
             this.ItemsForDebug = Data.ItemsForDebug;
+            if (Data.CacheSerialize)
+                CreateNode = _CreateCacheSerializeNode;
+            else
+                CreateNode = _CreateNode;
             return;
         }
 #else
-        (INode Root, int Len) ISerializable<(INode Root, int Len)>.GetData()
+        (INode Root, int Len, bool CacheSerialize) ISerializable<(INode Root, int Len, bool CacheSerialize)>.GetData()
         {
-            return (this.Root, Length);
+            return (this.Root, Length,CreateNode==_CreateCacheSerializeNode);
         }
 
-        void ISerializable<(INode Root, int Len)>.SetData((INode Root, int Len) Data)
+        void ISerializable<(INode Root, int Len, bool CacheSerialize)>.SetData((INode Root, int Len, bool CacheSerialize) Data)
         {
             Comparer = Comparer<ValueType>.Default;
             this.Root = Data.Root;
             this.Length = Data.Len;
+            if (Data.CacheSerialize)
+                CreateNode = _CreateCacheSerializeNode;
+            else
+                CreateNode = _CreateNode;
         }
 #endif
 
