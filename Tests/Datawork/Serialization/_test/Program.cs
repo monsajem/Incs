@@ -19,6 +19,7 @@ namespace _test
         public q q1;
         public IEnumerable<string> str = new string[] { "a", "b" };
         public string[] str2 = new string[] { "a", "b" };
+        public byte[] Bytes = new byte[] {25,234,22};
         public int q2;
         public int q3;
     }
@@ -27,13 +28,15 @@ namespace _test
     {
         static void Main(string[] args)
         {
+            new byte[1000].Serialize();
+
             q q1 = MakeQ();
 
 
             var Sa = q1.Serialize((c)=>
             {
-                if (c == typeof(string))
-                    throw new Exception();
+                //if (c == typeof(string))
+                //    throw new Exception();
             });
 
             var Da = Sa.Deserialize(q1);

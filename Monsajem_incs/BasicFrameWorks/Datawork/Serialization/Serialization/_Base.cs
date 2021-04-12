@@ -181,14 +181,14 @@ namespace Monsajem_Incs.Serialization
                     AtLast?.Invoke();
                 }
 #if DEBUG
-                catch (Exception ex)
-                {
-                    var Traced = Serialization.Traced;
-                    if (Traced != null)
-                        Traced = "On " + Traced;
-                    Serialization.Traced = null;
-                    throw new Exception($"Deserialize From Point {Serialization.From} Of Type >> {typeof(t).FullName} Is Failed {Traced}\nDatas As B64:\n" + System.Convert.ToBase64String(Data), ex);
-                }
+                //catch (Exception ex)
+                //{
+                //    var Traced = Serialization.Traced;
+                //    if (Traced != null)
+                //        Traced = "On " + Traced;
+                //    Serialization.Traced = null;
+                //    throw new Exception($"Deserialize From Point {Serialization.From} Of Type >> {typeof(t).FullName} Is Failed {Traced}\nDatas As B64:\n" + System.Convert.ToBase64String(Data), ex);
+                //}
 #endif
                 finally
                 {

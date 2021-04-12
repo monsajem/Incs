@@ -65,7 +65,7 @@ namespace Monsajem_Incs.Serialization
                                     return;
                                 }
                             }
-                            Trust(MainType);
+                            Trust?.Invoke(MainType);
                             S_Data.WriteByte(0);
                             SR(obj);
                         };
@@ -75,7 +75,7 @@ namespace Monsajem_Incs.Serialization
                             From += 1;
                             if (Status == 0)
                             {
-                                Trust(MainType);
+                                Trust?.Invoke(MainType);
                                 return DR();
                             }
                             else

@@ -216,6 +216,11 @@ namespace Monsajem_Incs.Serialization
                             Ends[i] = BitConverter.ToInt32(D_Data, From);
                             From += 4;
                         }
+                        var ArrayLen = Ends[0];
+                        for (int i = 1; i < Rank; i++)
+                            ArrayLen = ArrayLen * Ends[i];
+                        if (ArrayLen > D_Data.Length - From)
+                            throw new ArgumentException("Array length is more than bytes length!");
                         return (Ends, (System.Array)Creator(Ends));
                     };
                 }
@@ -243,6 +248,11 @@ namespace Monsajem_Incs.Serialization
                             Ends[i] = BitConverter.ToInt32(D_Data, From);
                             From += 4;
                         }
+                        var ArrayLen = Ends[0];
+                        for (int i = 1; i < Rank; i++)
+                            ArrayLen = ArrayLen * Ends[i];
+                        if (ArrayLen > D_Data.Length - From)
+                            throw new ArgumentException("Array length is more than bytes length!");
                         return (Ends, System.Array.CreateInstance(typeof(string), Ends));
                     };
                 }
