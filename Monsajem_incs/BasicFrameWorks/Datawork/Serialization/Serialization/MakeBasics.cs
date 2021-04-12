@@ -17,29 +17,8 @@ namespace Monsajem_Incs.Serialization
         {
             Serializere = this;
             SerializeInfo<object>.InsertSerializer(
-            (object obj) =>
-            {
-                var Type = obj.GetType();
-                if (Type == typeof(object))
-                {
-                    S_Data.WriteByte(0);
-                    return;
-                }
-                S_Data.WriteByte(1);
-
-                WriteSerializer(Type).Serializer(obj);
-            },
-            () =>
-            {
-                if (D_Data[From] == 0)
-                {
-                    From += 1;
-                    return new object();
-                }
-                From += 1;
-
-                return ReadSerializer().Deserializer();
-            }, true);
+            (object obj) => { },
+            () => new object(), false);
 
             SerializeInfo<bool>.InsertSerializer(
             (object obj) =>

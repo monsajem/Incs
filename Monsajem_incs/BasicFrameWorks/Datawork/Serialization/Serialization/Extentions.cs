@@ -15,24 +15,24 @@ namespace Monsajem_Incs.Serialization
         public static readonly Serialization Serializere = new Serialization(
             (c) => c.GetCustomAttributes(typeof(NonSerializedAttribute)).Count() == 0);
 
-        public static byte[] Serialize<t>(this t obj)
+        public static byte[] Serialize<t>(this t obj, Action<Type> TrustToType = null)
         {
-            return Serializere.Serialize(obj);
+            return Serializere.Serialize(obj,TrustToType);
         }
 
-        public static t Deserialize<t>(this byte[] Data)
+        public static t Deserialize<t>(this byte[] Data, Action<Type> TrustToType = null)
         {
-            return Serializere.Deserialize<t>(Data);
+            return Serializere.Deserialize<t>(Data,TrustToType);
         }
 
-        public static t Deserialize<t>(this byte[] Data, ref int From)
+        public static t Deserialize<t>(this byte[] Data, ref int From, Action<Type> TrustToType = null)
         {
-            return Serializere.Deserialize<t>(Data, ref From);
+            return Serializere.Deserialize<t>(Data, ref From,TrustToType);
         }
 
-        public static t Deserialize<t>(this byte[] Data, t SampleType)
+        public static t Deserialize<t>(this byte[] Data, t SampleType, Action<Type> TrustToType = null)
         {
-            return Serializere.Deserialize<t>(Data);
+            return Serializere.Deserialize<t>(Data,TrustToType);
         }
     }
 }

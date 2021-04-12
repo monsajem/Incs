@@ -40,6 +40,9 @@ namespace Monsajem_Incs.Serialization
             return true;
         }
 
+        [ThreadStaticAttribute]
+        private static Action<Type> Trust;
+
         private HashSet<LoadedFunc> LoadedFuncs_Des = new HashSet<LoadedFunc>();
         private HashSet<LoadedFunc> LoadedFuncs_Ser = new HashSet<LoadedFunc>();
 
@@ -72,18 +75,18 @@ namespace Monsajem_Incs.Serialization
         [ThreadStaticAttribute]
         private static HashSet<ObjectContainer> Visitor_info;
 
-        public byte[] Serialize<t>(t obj)
+        public byte[] Serialize<t>(t obj, Action<Type> TrustToType = null)
         {
 #if DEBUG
-            var Result = _Serialize(obj);
-            var DS = Deserialize<t>(Result);
+            var Result = _Serialize(obj,TrustToType);
+            var DS = Deserialize<t>(Result,TrustToType);
             return Result;
 #else
-            return _Serialize(obj);
+            return _Serialize(obj,TrustToType);
 #endif
         }
 
-        private byte[] _Serialize<t>(t obj)
+        private byte[] _Serialize<t>(t obj,Action<Type> TrustToType)
         {
             lock (this)
             {
@@ -110,6 +113,7 @@ namespace Monsajem_Incs.Serialization
                         throw new Exception("Cant Access to Deletage Target field at serializer, Fields >>" + Fields_str);
                     }
 #endif
+                    Trust = TrustToType;
                     VisitedSerialize(obj, SR);
                     Result = S_Data.ToArray();
                 }
@@ -125,6 +129,7 @@ namespace Monsajem_Incs.Serialization
 #endif
                 finally
                 {
+                    Trust = null;
                     Serialization.S_Data.SetLength(0);
                     Serialization.Visitor.Clear();
                     Serialization.Visitor_info.Clear();
@@ -138,14 +143,14 @@ namespace Monsajem_Incs.Serialization
         private static string Traced;
 #endif
 
-        public t Deserialize<t>(byte[] Data)
+        public t Deserialize<t>(byte[] Data, Action<Type> TrustToType=null)
         {
             var Type = typeof(t);
             var From = 0;
-            return Deserialize<t>(Data, ref From);
+            return Deserialize<t>(Data, ref From,TrustToType);
         }
 
-        public t Deserialize<t>(byte[] Data, ref int From)
+        public t Deserialize<t>(byte[] Data, ref int From,Action<Type> TrustToType)
         {
             lock (this)
             {
@@ -171,6 +176,7 @@ namespace Monsajem_Incs.Serialization
                         throw new Exception("Cant Access to Deletage Target field at serializer, Fields >>" + Fields_str);
                     }
 #endif
+                    Trust = TrustToType;
                     VisitedDeserialize((c) => Result = (t)c, SerializeInfo<t>.GetSerialize());
                     AtLast?.Invoke();
                 }
@@ -186,6 +192,7 @@ namespace Monsajem_Incs.Serialization
 #endif
                 finally
                 {
+                    Trust = null;
                     Serialization.Visitor.Clear();
                     Serialization.Visitor_info.Clear();
                     Serialization.D_Data = null;

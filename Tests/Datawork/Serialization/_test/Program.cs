@@ -14,6 +14,7 @@ namespace _test
 {
     public class q
     {
+        public object sQ ="aaa";
         public Delegate a;
         public q q1;
         public IEnumerable<string> str = new string[] { "a", "b" };
@@ -29,7 +30,11 @@ namespace _test
             q q1 = MakeQ();
 
 
-            var Sa = q1.Serialize();
+            var Sa = q1.Serialize((c)=>
+            {
+                if (c == typeof(string))
+                    throw new Exception();
+            });
 
             var Da = Sa.Deserialize(q1);
 

@@ -1,0 +1,187 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{EAB1180C-1FFF-4304-A95D-5FF3BA4A6903}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Monsajem_ResourcesMaker</RootNamespace>
+    <AssemblyName>Monsajem_ResourcesMaker</AssemblyName>
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>MakeResource\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>
+    </StartupObject>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="AngleSharp, Version=0.13.0.0, Culture=neutral, PublicKeyToken=e83494dcdc6d31ea, processorArchitecture=MSIL">
+      <HintPath>..\packages\AngleSharp.0.13.0-alpha-763\lib\net46\AngleSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Monsajem_LanguageCompiler">
+      <HintPath>C:\Users\xtron\source\repos\Monsajem_LanguageCompiler\Monsajem_LanguageCompiler\bin\Debug\Monsajem_LanguageCompiler.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="MakeResource\Monsajem_ResourcesMaker.dll.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="MakeResource\AngleSharp.dll" />
+    <Content Include="MakeResource\Microsoft.Win32.Primitives.dll" />
+    <Content Include="MakeResource\Monsajem_Incs_ArrayExtentions.pdb" />
+    <Content Include="MakeResource\Monsajem_incs_Calculator.dll" />
+    <Content Include="MakeResource\Monsajem_incs_Calculator.pdb" />
+    <Content Include="MakeResource\Monsajem_Incs_DynamicAssembly.pdb" />
+    <Content Include="MakeResource\Monsajem_incs_HttpService.dll" />
+    <Content Include="MakeResource\Monsajem_incs_HttpService.pdb" />
+    <Content Include="MakeResource\Monsajem_Incs_Serialization.dll" />
+    <Content Include="MakeResource\Monsajem_Incs_Serialization.pdb" />
+    <Content Include="MakeResource\Monsajem_LanguageCompiler.dll" />
+    <Content Include="MakeResource\Monsajem_LanguageCompiler.pdb" />
+    <Content Include="MakeResource\Monsajem_ResourcesMaker.dll" />
+    <Content Include="MakeResource\Monsajem_ResourcesMaker.pdb" />
+    <Content Include="MakeResource\netstandard.dll" />
+    <Content Include="MakeResource\System.AppContext.dll" />
+    <Content Include="MakeResource\System.Collections.Concurrent.dll" />
+    <Content Include="MakeResource\System.Collections.dll" />
+    <Content Include="MakeResource\System.Collections.NonGeneric.dll" />
+    <Content Include="MakeResource\System.Collections.Specialized.dll" />
+    <Content Include="MakeResource\System.ComponentModel.dll" />
+    <Content Include="MakeResource\System.ComponentModel.EventBasedAsync.dll" />
+    <Content Include="MakeResource\System.ComponentModel.Primitives.dll" />
+    <Content Include="MakeResource\System.ComponentModel.TypeConverter.dll" />
+    <Content Include="MakeResource\System.Console.dll" />
+    <Content Include="MakeResource\System.Data.Common.dll" />
+    <Content Include="MakeResource\System.Diagnostics.Contracts.dll" />
+    <Content Include="MakeResource\System.Diagnostics.Debug.dll" />
+    <Content Include="MakeResource\System.Diagnostics.FileVersionInfo.dll" />
+    <Content Include="MakeResource\System.Diagnostics.Process.dll" />
+    <Content Include="MakeResource\System.Diagnostics.StackTrace.dll" />
+    <Content Include="MakeResource\System.Diagnostics.TextWriterTraceListener.dll" />
+    <Content Include="MakeResource\System.Diagnostics.Tools.dll" />
+    <Content Include="MakeResource\System.Diagnostics.TraceSource.dll" />
+    <Content Include="MakeResource\System.Diagnostics.Tracing.dll" />
+    <Content Include="MakeResource\System.Drawing.Primitives.dll" />
+    <Content Include="MakeResource\System.Dynamic.Runtime.dll" />
+    <Content Include="MakeResource\System.Globalization.Calendars.dll" />
+    <Content Include="MakeResource\System.Globalization.dll" />
+    <Content Include="MakeResource\System.Globalization.Extensions.dll" />
+    <Content Include="MakeResource\System.IO.Compression.dll" />
+    <Content Include="MakeResource\System.IO.Compression.ZipFile.dll" />
+    <Content Include="MakeResource\System.IO.dll" />
+    <Content Include="MakeResource\System.IO.FileSystem.dll" />
+    <Content Include="MakeResource\System.IO.FileSystem.DriveInfo.dll" />
+    <Content Include="MakeResource\System.IO.FileSystem.Primitives.dll" />
+    <Content Include="MakeResource\System.IO.FileSystem.Watcher.dll" />
+    <Content Include="MakeResource\System.IO.IsolatedStorage.dll" />
+    <Content Include="MakeResource\System.IO.MemoryMappedFiles.dll" />
+    <Content Include="MakeResource\System.IO.Pipes.dll" />
+    <Content Include="MakeResource\System.IO.UnmanagedMemoryStream.dll" />
+    <Content Include="MakeResource\System.Linq.dll" />
+    <Content Include="MakeResource\System.Linq.Expressions.dll" />
+    <Content Include="MakeResource\System.Linq.Parallel.dll" />
+    <Content Include="MakeResource\System.Linq.Queryable.dll" />
+    <Content Include="MakeResource\System.Net.Http.dll" />
+    <Content Include="MakeResource\System.Net.NameResolution.dll" />
+    <Content Include="MakeResource\System.Net.NetworkInformation.dll" />
+    <Content Include="MakeResource\System.Net.Ping.dll" />
+    <Content Include="MakeResource\System.Net.Primitives.dll" />
+    <Content Include="MakeResource\System.Net.Requests.dll" />
+    <Content Include="MakeResource\System.Net.Security.dll" />
+    <Content Include="MakeResource\System.Net.Sockets.dll" />
+    <Content Include="MakeResource\System.Net.WebHeaderCollection.dll" />
+    <Content Include="MakeResource\System.Net.WebSockets.Client.dll" />
+    <Content Include="MakeResource\System.Net.WebSockets.dll" />
+    <Content Include="MakeResource\System.ObjectModel.dll" />
+    <Content Include="MakeResource\System.Reflection.dll" />
+    <Content Include="MakeResource\System.Reflection.Extensions.dll" />
+    <Content Include="MakeResource\System.Reflection.Primitives.dll" />
+    <Content Include="MakeResource\System.Resources.Reader.dll" />
+    <Content Include="MakeResource\System.Resources.ResourceManager.dll" />
+    <Content Include="MakeResource\System.Resources.Writer.dll" />
+    <Content Include="MakeResource\System.Runtime.CompilerServices.VisualC.dll" />
+    <Content Include="MakeResource\System.Runtime.dll" />
+    <Content Include="MakeResource\System.Runtime.Extensions.dll" />
+    <Content Include="MakeResource\System.Runtime.Handles.dll" />
+    <Content Include="MakeResource\System.Runtime.InteropServices.dll" />
+    <Content Include="MakeResource\System.Runtime.InteropServices.RuntimeInformation.dll" />
+    <Content Include="MakeResource\System.Runtime.Numerics.dll" />
+    <Content Include="MakeResource\System.Runtime.Serialization.Formatters.dll" />
+    <Content Include="MakeResource\System.Runtime.Serialization.Json.dll" />
+    <Content Include="MakeResource\System.Runtime.Serialization.Primitives.dll" />
+    <Content Include="MakeResource\System.Runtime.Serialization.Xml.dll" />
+    <Content Include="MakeResource\System.Security.Claims.dll" />
+    <Content Include="MakeResource\System.Security.Cryptography.Algorithms.dll" />
+    <Content Include="MakeResource\System.Security.Cryptography.Csp.dll" />
+    <Content Include="MakeResource\System.Security.Cryptography.Encoding.dll" />
+    <Content Include="MakeResource\System.Security.Cryptography.Primitives.dll" />
+    <Content Include="MakeResource\System.Security.Cryptography.X509Certificates.dll" />
+    <Content Include="MakeResource\System.Security.Principal.dll" />
+    <Content Include="MakeResource\System.Security.SecureString.dll" />
+    <Content Include="MakeResource\System.Text.Encoding.dll" />
+    <Content Include="MakeResource\System.Text.Encoding.Extensions.dll" />
+    <Content Include="MakeResource\System.Text.RegularExpressions.dll" />
+    <Content Include="MakeResource\System.Threading.dll" />
+    <Content Include="MakeResource\System.Threading.Overlapped.dll" />
+    <Content Include="MakeResource\System.Threading.Tasks.dll" />
+    <Content Include="MakeResource\System.Threading.Tasks.Parallel.dll" />
+    <Content Include="MakeResource\System.Threading.Thread.dll" />
+    <Content Include="MakeResource\System.Threading.ThreadPool.dll" />
+    <Content Include="MakeResource\System.Threading.Timer.dll" />
+    <Content Include="MakeResource\System.ValueTuple.dll" />
+    <Content Include="MakeResource\System.ValueTuple.xml" />
+    <Content Include="MakeResource\System.Xml.ReaderWriter.dll" />
+    <Content Include="MakeResource\System.Xml.XDocument.dll" />
+    <Content Include="MakeResource\System.Xml.XmlDocument.dll" />
+    <Content Include="MakeResource\System.Xml.XmlSerializer.dll" />
+    <Content Include="MakeResource\System.Xml.XPath.dll" />
+    <Content Include="MakeResource\System.Xml.XPath.XDocument.dll" />
+    <Content Include="MakeResource\WebAssembly.Bindings.dll" />
+    <Content Include="MakeResource\WebAssembly.Bindings.pdb" />
+    <Content Include="MakeResource\WebAssembly.Browser.dll" />
+    <Content Include="MakeResource\WebAssembly.Browser.pdb" />
+    <Content Include="Monsajem.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Monsajem.cs</LastGenOutput>
+    </Content>
+    <Content Include="Resorces\b.htm" />
+    <Content Include="Resorces\a.htm" />
+    <Content Include="Resorces\analytics.js" />
+    <Content Include="Resorces\client.js" />
+    <Content Include="Resorces\home.png" />
+    <Content Include="Resorces\w3.css" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

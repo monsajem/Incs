@@ -14,7 +14,7 @@ namespace Monsajem_Incs.Serialization
     {
         private partial class SerializeInfo<t> : SerializeInfo
         {
-            
+
             public static SerializeInfo<t> InsertSerializer(
                 Action<object> Serializer,
                 Func<object> Deserializer, bool IsFixedType = false)
@@ -27,9 +27,10 @@ namespace Monsajem_Incs.Serialization
                 Func<(Action<object> Sr, Func<object> Dr)> Serializer,
                 bool IsFixedType = false)
             {
-                var ThisType = typeof(t);
+                var MainType = typeof(t);
                 var Serialize = GetSerialize();
-                if (ThisType.IsAbstract && Serialize.Serializer == null)
+                var IsSrNull = Serialize.Serializer == null;
+                if (MainType.IsAbstract && IsSrNull)
                 {
                     Serialize.Serializer = (obj) =>
                     {
@@ -38,13 +39,16 @@ namespace Monsajem_Incs.Serialization
                     };
                     Serialize.Deserializer = () =>
                     {
-                        return Serializere.ReadSerializer().Deserializer();
+                        var Inherit_SR = Serializere.ReadSerializer();
+                        // security reason for assign
+                        if (Inherit_SR.Type.IsAssignableTo(MainType) == false)
+                            throw new AccessViolationException($"Type of {Inherit_SR.Type} cant assign to {MainType}");
+                        return Inherit_SR.Deserializer();
                     };
                 }
                 else
                 {
                     var Sr = Serializer();
-
                     if (IsFixedType == false)
                     {
                         var SR = Sr.Sr;
@@ -54,13 +58,14 @@ namespace Monsajem_Incs.Serialization
                             if (obj != null)
                             {
                                 var ObjType = obj.GetType();
-                                if (ObjType != ThisType)
+                                if (ObjType != MainType)
                                 {
                                     S_Data.WriteByte(1);
                                     Serializere.WriteSerializer(ObjType).Serializer(obj);
                                     return;
                                 }
                             }
+                            Trust(MainType);
                             S_Data.WriteByte(0);
                             SR(obj);
                         };
@@ -69,9 +74,18 @@ namespace Monsajem_Incs.Serialization
                             var Status = D_Data[From];
                             From += 1;
                             if (Status == 0)
+                            {
+                                Trust(MainType);
                                 return DR();
+                            }
                             else
-                                return Serializere.ReadSerializer().Deserializer();
+                            {
+                                var Inherit_SR = Serializere.ReadSerializer();
+                                // security reason for assign
+                                if (Inherit_SR.Type.IsAssignableTo(MainType) == false)
+                                    throw new AccessViolationException($"Type of {Inherit_SR.Type} cant assign to {MainType}");
+                                return Inherit_SR.Deserializer();
+                            }
                         };
                     }
 
@@ -172,6 +186,25 @@ namespace Monsajem_Incs.Serialization
                     Serialize.Deserializer = Sr.Dr;
                 }
 #endif
+                if(IsFixedType)
+                {
+                    var Sr = (Sr: Serialize.Serializer, Dr: Serialize.Deserializer);
+                    var SR = Sr.Sr;
+                    var DR = Sr.Dr;
+
+                    SR = (obj) =>
+                    {
+                        Trust?.Invoke(MainType);
+                        SR(obj);
+                    };
+                    Sr.Dr = () =>
+                    {
+                        Trust?.Invoke(MainType);
+                        return DR();
+                    };
+                    Serialize.Serializer = Sr.Sr;
+                    Serialize.Deserializer = Sr.Dr;
+                }
                 return Serialize;
             }
         }

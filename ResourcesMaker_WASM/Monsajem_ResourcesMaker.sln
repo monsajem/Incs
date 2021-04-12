@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29326.143
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monsajem_ResourcesMaker", "Monsajem_ResourcesMaker\Monsajem_ResourcesMaker.csproj", "{EAB1180C-1FFF-4304-A95D-5FF3BA4A6903}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test.csproj", "{9708A6FB-84C9-4540-A44B-6632D93467A6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EAB1180C-1FFF-4304-A95D-5FF3BA4A6903}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EAB1180C-1FFF-4304-A95D-5FF3BA4A6903}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EAB1180C-1FFF-4304-A95D-5FF3BA4A6903}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EAB1180C-1FFF-4304-A95D-5FF3BA4A6903}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9708A6FB-84C9-4540-A44B-6632D93467A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9708A6FB-84C9-4540-A44B-6632D93467A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9708A6FB-84C9-4540-A44B-6632D93467A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9708A6FB-84C9-4540-A44B-6632D93467A6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FF825CD6-5BB8-49A8-B459-AFBEDF6587C2}
+	EndGlobalSection
+EndGlobal
