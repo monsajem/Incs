@@ -194,68 +194,35 @@ namespace Monsajem_Incs.Serialization
                 var Type = typeof(t);
                 Func<System.Array, int[]> Write;
                 Func<(int[] Ends, System.Array ar)> Read;
-                if (Type != typeof(System.Array))
+
+                var Creator = DynamicAssembly.TypeController.CreateArray(Type);
+                var Rank = Type.GetArrayRank();
+                Write = (ar) =>
                 {
-                    var Creator = DynamicAssembly.TypeController.CreateArray(Type);
-                    var Rank = Type.GetArrayRank();
-                    Write = (ar) =>
+                    var Ends = new int[Rank];
+                    for (int i = 0; i < Rank; i++)
                     {
-                        var Ends = new int[Rank];
-                        for (int i = 0; i < Rank; i++)
-                        {
-                            Ends[i] = ar.GetUpperBound(i) + 1;
-                            S_Data.Write(BitConverter.GetBytes(Ends[i]), 0, 4);
-                        }
-                        return Ends;
-                    };
-                    Read = () =>
-                    {
-                        var Ends = new int[Rank];
-                        for (int i = 0; i < Rank; i++)
-                        {
-                            Ends[i] = BitConverter.ToInt32(D_Data, From);
-                            From += 4;
-                        }
-                        var ArrayLen = Ends[0];
-                        for (int i = 1; i < Rank; i++)
-                            ArrayLen = ArrayLen * Ends[i];
-                        if (ArrayLen > D_Data.Length - From)
-                            throw new ArgumentException("Array length is more than bytes length!");
-                        return (Ends, (System.Array)Creator(Ends));
-                    };
-                }
-                else
+                        Ends[i] = ar.GetUpperBound(i) + 1;
+                        S_Data.Write(BitConverter.GetBytes(Ends[i]), 0, 4);
+                    }
+                    return Ends;
+                };
+                Read = () =>
                 {
-                    Write = (ar) =>
+                    var Ends = new int[Rank];
+                    for (int i = 0; i < Rank; i++)
                     {
-                        var Rank = ar.Rank;
-                        S_Data.Write(BitConverter.GetBytes(Rank), 0, 4);
-                        var Ends = new int[Rank];
-                        for (int i = 0; i < Rank; i++)
-                        {
-                            Ends[i] = ar.GetUpperBound(i) + 1;
-                            S_Data.Write(BitConverter.GetBytes(Ends[i]), 0, 4);
-                        }
-                        return Ends;
-                    };
-                    Read = () =>
-                    {
-                        var Rank = BitConverter.ToInt32(D_Data, From);
+                        Ends[i] = BitConverter.ToInt32(D_Data, From);
                         From += 4;
-                        var Ends = new int[Rank];
-                        for (int i = 0; i < Rank; i++)
-                        {
-                            Ends[i] = BitConverter.ToInt32(D_Data, From);
-                            From += 4;
-                        }
-                        var ArrayLen = Ends[0];
-                        for (int i = 1; i < Rank; i++)
-                            ArrayLen = ArrayLen * Ends[i];
-                        if (ArrayLen > D_Data.Length - From)
-                            throw new ArgumentException("Array length is more than bytes length!");
-                        return (Ends, System.Array.CreateInstance(typeof(string), Ends));
-                    };
-                }
+                    }
+                    var ArrayLen = Ends[0];
+                    for (int i = 1; i < Rank; i++)
+                        ArrayLen = ArrayLen * Ends[i];
+                    if (ArrayLen > D_Data.Length - From)
+                        throw new ArgumentException("Array length is more than bytes length!");
+                    return (Ends, (System.Array)Creator(Ends));
+                };
+
                 return (Write, Read);
             }
 
@@ -450,12 +417,12 @@ namespace Monsajem_Incs.Serialization
                         {
 
                             var Key = new LoadedFunc(Delegate.Method);
-                            if (Serializere.LoadedFuncs_Ser.TryGetValue(Key,out LoadedFunc)==false)
+                            if (Serializere.LoadedFuncs_Ser.TryGetValue(Key, out LoadedFunc) == false)
                             {
                                 var TargetType = Delegate.Method.DeclaringType;
 
                                 LoadedFunc = Key;
-                                LoadedFunc.NameAsByte = 
+                                LoadedFunc.NameAsByte =
                                     Serializere.Write(
                                         Delegate.Method.Name,
                                         Delegate.Method.ReflectedType.MidName());
@@ -482,8 +449,8 @@ namespace Monsajem_Incs.Serialization
                             var MethodName = Serializere.Read();
                             var TypeName = Serializere.Read();
 
-                            var Key =new LoadedFunc(MethodName + TypeName);
-                            if (Serializere.LoadedFuncs_Des.TryGetValue(Key,out LoadedFunc)==false)
+                            var Key = new LoadedFunc(MethodName + TypeName);
+                            if (Serializere.LoadedFuncs_Des.TryGetValue(Key, out LoadedFunc) == false)
                             {
                                 var ReflectedType = TypeName.GetTypeByName();
                                 var Method = ReflectedType.GetMethod(MethodName,
