@@ -16,15 +16,15 @@ namespace Monsajem_Incs.Serialization
         {
 
             public static SerializeInfo<t> InsertSerializer(
-                Action<object> Serializer,
-                Func<object> Deserializer, bool IsFixedType = false)
+                Action<SerializeData,object> Serializer,
+                Func<DeserializeData,object> Deserializer, bool IsFixedType = false)
             {
                 _Serializer = Serializer;
                 _Deserializer = Deserializer;
                 return InsertSerializer(() => (Serializer, Deserializer), IsFixedType);
             }
             private static SerializeInfo<t> InsertSerializer(
-                Func<(Action<object> Sr, Func<object> Dr)> Serializer,
+                Func<(Action<SerializeData,object> Sr, Func<DeserializeData,object> Dr)> Serializer,
                 bool IsFixedType = false)
             {
                 var MainType = typeof(t);
@@ -32,18 +32,18 @@ namespace Monsajem_Incs.Serialization
                 var IsSrNull = Serialize.Serializer == null;
                 if (MainType.IsAbstract && IsSrNull)
                 {
-                    Serialize.Serializer = (obj) =>
+                    Serialize.Serializer = (Data,obj) =>
                     {
                         var ObjType = obj.GetType();
-                        Serializere.WriteSerializer(ObjType).Serializer(obj);
+                        Serializere.WriteSerializer(Data,ObjType).Serializer(Data,obj);
                     };
-                    Serialize.Deserializer = () =>
+                    Serialize.Deserializer = (Data) =>
                     {
-                        var Inherit_SR = Serializere.ReadSerializer();
+                        var Inherit_SR = Serializere.ReadSerializer(Data);
                         // security reason for assign
                         if (Inherit_SR.Type.IsAssignableTo(MainType) == false)
                             throw new AccessViolationException($"Type of {Inherit_SR.Type} cant assign to {MainType}");
-                        return Inherit_SR.Deserializer();
+                        return Inherit_SR.Deserializer(Data);
                     };
                 }
                 else
@@ -53,38 +53,38 @@ namespace Monsajem_Incs.Serialization
                     {
                         var SR = Sr.Sr;
                         var DR = Sr.Dr;
-                        Sr.Sr = (obj) =>
+                        Sr.Sr = (Data,obj) =>
                         {
                             if (obj != null)
                             {
                                 var ObjType = obj.GetType();
                                 if (ObjType != MainType)
                                 {
-                                    S_Data.WriteByte(1);
-                                    Serializere.WriteSerializer(ObjType).Serializer(obj);
+                                    Data.S_Data.WriteByte(1);
+                                    Serializere.WriteSerializer(Data,ObjType).Serializer(Data,obj);
                                     return;
                                 }
                             }
-                            Trust?.Invoke(MainType);
-                            S_Data.WriteByte(0);
-                            SR(obj);
+                            Data.Trust?.Invoke(MainType);
+                            Data.S_Data.WriteByte(0);
+                            SR(Data,obj);
                         };
-                        Sr.Dr = () =>
+                        Sr.Dr = (Data) =>
                         {
-                            var Status = D_Data[From];
-                            From += 1;
+                            var Status = Data.D_Data[Data.From];
+                            Data. From += 1;
                             if (Status == 0)
                             {
-                                Trust?.Invoke(MainType);
-                                return DR();
+                                Data.Trust?.Invoke(MainType);
+                                return DR(Data);
                             }
                             else
                             {
-                                var Inherit_SR = Serializere.ReadSerializer();
+                                var Inherit_SR = Serializere.ReadSerializer(Data);
                                 // security reason for assign
                                 if (Inherit_SR.Type.IsAssignableTo(MainType) == false)
                                     throw new AccessViolationException($"Type of {Inherit_SR.Type} cant assign to {MainType}");
-                                return Inherit_SR.Deserializer();
+                                return Inherit_SR.Deserializer(Data);
                             }
                         };
                     }
@@ -93,7 +93,7 @@ namespace Monsajem_Incs.Serialization
                     {
                         var SR = Sr.Sr;
                         var DR = Sr.Dr;
-                        Sr.Sr = (obj) =>
+                        Sr.Sr = (Data,obj) =>
                         {
                             var ICache = (ICacheSerialize)obj;
                             if (ICache.IsReady)
@@ -101,30 +101,30 @@ namespace Monsajem_Incs.Serialization
                                 var Cache = ICache.Cache;
                                 if (Cache == null)
                                 {
-                                    var FromPosition = S_Data.Position;
-                                    SR(obj);
-                                    var len = (int)(S_Data.Length - FromPosition);
+                                    var FromPosition = Data.S_Data.Position;
+                                    SR(Data,obj);
+                                    var len = (int)(Data.S_Data.Length - FromPosition);
                                     Cache = new byte[len];
-                                    S_Data.Seek(FromPosition, SeekOrigin.Begin);
+                                    Data.S_Data.Seek(FromPosition, SeekOrigin.Begin);
                                     var AllLen = len;
                                     while (len > 0)
-                                        len -= S_Data.Read(Cache, AllLen - len, len);
+                                        len -= Data.S_Data.Read(Cache, AllLen - len, len);
                                     ICache.Cache = Cache;
-                                    S_Data.Seek(S_Data.Length, SeekOrigin.Begin);
+                                    Data.S_Data.Seek(Data.S_Data.Length, SeekOrigin.Begin);
                                 }
                                 else
                                 {
 #if DEBUG
                                     var DebugCache = (byte[])ICache.Cache.Clone();
-                                    var FromPosition = S_Data.Position;
-                                    SR(obj);
-                                    var len = (int)(S_Data.Length - FromPosition);
+                                    var FromPosition = Data.S_Data.Position;
+                                    SR(Data,obj);
+                                    var len = (int)(Data.S_Data.Length - FromPosition);
                                     Cache = new byte[len];
-                                    S_Data.Seek(FromPosition, SeekOrigin.Begin);
+                                    Data.S_Data.Seek(FromPosition, SeekOrigin.Begin);
                                     var AllLen = len;
                                     while (len > 0)
-                                        len -= S_Data.Read(Cache, AllLen - len, len);
-                                    S_Data.Seek(S_Data.Length, SeekOrigin.Begin);
+                                        len -= Data.S_Data.Read(Cache, AllLen - len, len);
+                                    Data.S_Data.Seek(Data.S_Data.Length, SeekOrigin.Begin);
 
                                     if (DebugCache.Length != Cache.Length)
                                         throw new Exception("Cache having wrong data!");
@@ -137,19 +137,19 @@ namespace Monsajem_Incs.Serialization
                                 }
                             }
                             else
-                                SR(obj);
+                                SR(Data,obj);
                         };
-                        Sr.Dr = () =>
+                        Sr.Dr = (Data) =>
                         {
 
-                            var FromPosition = From;
-                            var Result = DR();
+                            var FromPosition = Data.From;
+                            var Result = DR(Data);
                             var ICache = (ICacheSerialize)Result;
                             if (ICache.IsReady)
                             {
-                                var len = From - FromPosition;
+                                var len = Data.From - FromPosition;
                                 var Cache = new byte[len];
-                                Array.Copy(D_Data, FromPosition, Cache, 0, len);
+                                Array.Copy(Data.D_Data, FromPosition, Cache, 0, len);
                                 ICache.Cache = Cache;
                             }
                             return Result;
@@ -165,21 +165,21 @@ namespace Monsajem_Incs.Serialization
                     var SR = Sr.Sr;
                     var DR = Sr.Dr;
 
-                    Sr.Sr = (obj) =>
+                    Sr.Sr = (Data,obj) =>
                     {
-                        var Pos = S_Data.Position;
-                        Tracer($"Type: {Serialize.Type} Pos:({Pos})");
-                        Check_SR();
-                        SR(obj);
-                        UnTracer($"Type: {Serialize.Type} Pos:({Pos})");
+                        var Pos = Data.S_Data.Position;
+                        Tracer(Data,$"Type: {Serialize.Type} Pos:({Pos})");
+                        Check_SR(Data);
+                        SR(Data,obj);
+                        UnTracer(Data, $"Type: {Serialize.Type} Pos:({Pos})");
                     };
-                    Sr.Dr = () =>
+                    Sr.Dr = (Data) =>
                     {
-                        var Pos = From;
-                        Tracer($"Type: {Serialize.Type} Pos:({Pos})");
-                        Check_DR();
-                        var Result = DR();
-                        UnTracer($"Type: {Serialize.Type} Pos:({Pos})");
+                        var Pos = Data.From;
+                        Tracer(Data, $"Type: {Serialize.Type} Pos:({Pos})");
+                        Check_DR(Data);
+                        var Result = DR(Data);
+                        UnTracer(Data, $"Type: {Serialize.Type} Pos:({Pos})");
                         return Result;
                     };
                     Serialize.Serializer = Sr.Sr;
@@ -192,15 +192,15 @@ namespace Monsajem_Incs.Serialization
                     var SR = Sr.Sr;
                     var DR = Sr.Dr;
 
-                    SR = (obj) =>
+                    SR = (Data,obj) =>
                     {
-                        Trust?.Invoke(MainType);
-                        SR(obj);
+                        Data.Trust?.Invoke(MainType);
+                        SR(Data,obj);
                     };
-                    Sr.Dr = () =>
+                    Sr.Dr = (Data) =>
                     {
-                        Trust?.Invoke(MainType);
-                        return DR();
+                        Data.Trust?.Invoke(MainType);
+                        return DR(Data);
                     };
                     Serialize.Serializer = Sr.Sr;
                     Serialize.Deserializer = Sr.Dr;

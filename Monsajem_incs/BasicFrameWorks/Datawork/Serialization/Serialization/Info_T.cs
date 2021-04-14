@@ -14,8 +14,8 @@ namespace Monsajem_Incs.Serialization
     {
         private partial class SerializeInfo<t> : SerializeInfo
         {
-            public static Func<object> _Deserializer;
-            public static Action<object> _Serializer;
+            public static Func<DeserializeData,object> _Deserializer;
+            public static Action<SerializeData,object> _Serializer;
 
             public SerializeInfo()
             {

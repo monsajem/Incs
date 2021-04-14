@@ -41,7 +41,6 @@ namespace _test
 
             var Da = Sa.Deserialize(q1);
 
-
             var STime =
             Timing.run(() =>
             {

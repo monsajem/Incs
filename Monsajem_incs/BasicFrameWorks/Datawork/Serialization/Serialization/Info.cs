@@ -17,8 +17,8 @@ namespace Monsajem_Incs.Serialization
         {
             public Type Type;
             public int TypeHashCode;
-            public Func<object> Deserializer;
-            public Action<object> Serializer;
+            public Func<DeserializeData,object> Deserializer;
+            public Action<SerializeData, object> Serializer;
             public byte[] NameAsByte;
             public bool CanStoreInVisit;
             protected bool IsMade;
@@ -64,17 +64,23 @@ namespace Monsajem_Incs.Serialization
 
             public static SerializeInfo GetSerialize(Type Type)
             {
+                Again:
                 SerializeInfo SR;
                 var Key = new ExactSerializerByType()
                                 { HashCode = Type.GetHashCode(), Type = Type };
                 if (SerializersByHashCode.TryGetValue(Key,out var Result)==false)
                 {
-                    SR = (SerializeInfo)
+                    lock(SerializersByHashCode)
+                    {
+                        if (SerializersByHashCode.TryGetValue(Key, out Result))
+                            goto Again;
+                        SR = (SerializeInfo)
                             BaseType.MakeGenericType(Type).GetMethod("GetSerialize").
                         Invoke(null, null);
-                    Key.Serializer = SR;
-                    if (SerializersByHashCode.Contains(Key) ==false)
-                        SerializersByHashCode.Add(Key);
+                        Key.Serializer = SR;
+                        if (SerializersByHashCode.Contains(Key) == false)
+                            SerializersByHashCode.Add(Key);
+                    }
                 }
                 else
                     SR = Result.Serializer;
@@ -87,18 +93,24 @@ namespace Monsajem_Incs.Serialization
 
             public static SerializeInfo GetSerialize(string TypeName)
             {
+                Again:
                 SerializeInfo SR;
                 var HashCode = TypeName.GetHashCode();
                 var Key = new ExactSerializerByTypeName() 
                                 { HashCode = HashCode ,TypeName =TypeName};
                 if (SerializersByNameCode.TryGetValue(Key,out var Result) == false)
                 {
-                    SR = (SerializeInfo)
+                    lock(SerializersByNameCode)
+                    {
+                        if (SerializersByNameCode.TryGetValue(Key, out Result))
+                            goto Again;
+                        SR = (SerializeInfo)
                             BaseType.MakeGenericType(TypeName.GetTypeByName()).GetMethod("GetSerialize").
                         Invoke(null, null);
-                    Key.Serializer = SR;
-                    if (SerializersByNameCode.Contains(Key) == false)
-                        SerializersByNameCode.Add(Key);
+                        Key.Serializer = SR;
+                        if (SerializersByNameCode.Contains(Key) == false)
+                            SerializersByNameCode.Add(Key);
+                    }
                 }
                 else
                     SR = Result.Serializer;

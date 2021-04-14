@@ -6,22 +6,21 @@ namespace Monsajem_Incs.Serialization
 {
     public partial class Serialization
     {
-        private SerializeInfo WriteSerializer(Type Type)
+        private SerializeInfo WriteSerializer(SerializeData Data,Type Type)
         {
             var Sr = SerializeInfo.GetSerialize(Type);
-            VisitedInfoSerialize<object>(Sr.Type, () => (Sr.NameAsByte, null));
+            VisitedInfoSerialize<object>(Data, Sr.Type, () => (Sr.NameAsByte, null));
             return Sr;
         }
 
-        private SerializeInfo ReadSerializer()
+        private SerializeInfo ReadSerializer(DeserializeData Data)
         {
-            var Info = VisitedInfoDeserialize(() =>
+            var Info = VisitedInfoDeserialize(Data,() =>
             {
-                return Read();
+                return Read(Data);
             });
             return SerializeInfo.GetSerialize(Info);
         }
-
 
         private byte[] Write(params string[] str)
         {
@@ -37,12 +36,12 @@ namespace Monsajem_Incs.Serialization
             return Results;
         }
 
-        private string Read()
+        private string Read(DeserializeData Data)
         {
-            var Len = BitConverter.ToInt32(D_Data, From);
-            From += 4;
-            var Result = UTF8.GetString(D_Data, From, Len);
-            From += Result.Length;
+            var Len = BitConverter.ToInt32(Data.D_Data, Data. From);
+            Data.From += 4;
+            var Result = UTF8.GetString(Data.D_Data, Data.From, Len);
+            Data. From += Result.Length;
             return Result;
         }
     }

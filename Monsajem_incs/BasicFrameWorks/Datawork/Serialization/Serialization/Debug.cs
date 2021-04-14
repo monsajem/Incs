@@ -16,35 +16,37 @@ namespace Monsajem_Incs.Serialization
         {
 
 #if DEBUG
-            private static void Check_SR()
+            private static void Check_SR(SerializeData Data)
             {
                 var Type = typeof(t);
-                S_Data.Write(BitConverter.GetBytes(S_Data.Length), 0, 8);
+                Data.S_Data.Write(BitConverter.GetBytes(Data.S_Data.Length), 0, 8);
                 var TypeBytes = Serializere.Write(Type.MidName());
-                S_Data.Write(TypeBytes, 0, TypeBytes.Length);
+                Data.S_Data.Write(TypeBytes, 0, TypeBytes.Length);
             }
-            private static void Check_DR()
+            private static void Check_DR(DeserializeData Data)
             {
                 var Type = typeof(t);
-                var DR_Pos = From;
-                var SR_Pos = BitConverter.ToInt64(D_Data, From);
-                From += 8;
+                var DR_Pos = Data.From;
+                var SR_Pos = BitConverter.ToInt64(Data.D_Data, Data.From);
+                Data.From += 8;
                 if (DR_Pos != SR_Pos ||
                     SR_Pos < 0)
                     throw new Exception($"Position Isn't Valid. SR:{SR_Pos} , DR:{DR_Pos}");
-                var TypeName = Serializere.Read();
+                var TypeName = Serializere.Read(Data);
                 var SR_Type = TypeName.GetTypeByName();
                 if (SR_Type != Type)
                     throw new Exception($"Type isn't match\nSR: {SR_Type.MidName()}\nDR: {Type.MidName()}");
             }
 
-            private static void Tracer(string On)
+            private static void Tracer(Data Data,string On)
             {
-                Traced += "\n >> " + On;
+                Data.Traced += "\n >> " + On;
             }
-            private static void UnTracer(string On)
+            private static void UnTracer(Data Data,string On)
             {
+                var Traced = Data.Traced;
                 Traced = Traced.Substring(0, Traced.Length - (On.Length + "\n >> ".Length));
+                Data.Traced = Traced;
             }
 
 #endif
