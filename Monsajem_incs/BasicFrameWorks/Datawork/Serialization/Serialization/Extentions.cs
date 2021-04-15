@@ -15,24 +15,32 @@ namespace Monsajem_Incs.Serialization
         public static readonly Serialization Serializere = new Serialization(
             (c) => c.GetCustomAttributes(typeof(NonSerializedAttribute)).Count() == 0);
 
-        public static byte[] Serialize<t>(this t obj, Action<Type> TrustToType = null)
+        public static byte[] Serialize<t>(this t obj, 
+            Action<Type> TrustToType = null,
+            Action<MethodInfo> TrustToMethod = null)
         {
-            return Serializere.Serialize(obj,TrustToType);
+            return Serializere.Serialize(obj,TrustToType,TrustToMethod);
         }
 
-        public static t Deserialize<t>(this byte[] Data, Action<Type> TrustToType = null)
+        public static t Deserialize<t>(this byte[] Data, 
+            Action<Type> TrustToType = null,
+            Action<MethodInfo> TrustToMethod = null)
         {
-            return Serializere.Deserialize<t>(Data,TrustToType);
+            return Serializere.Deserialize<t>(Data,TrustToType,TrustToMethod);
         }
 
-        public static t Deserialize<t>(this byte[] Data, ref int From, Action<Type> TrustToType = null)
+        public static t Deserialize<t>(this byte[] Data, ref int From, 
+            Action<Type> TrustToType = null,
+            Action<MethodInfo> TrustToMethod = null)
         {
-            return Serializere.Deserialize<t>(Data, ref From,TrustToType);
+            return Serializere.Deserialize<t>(Data, ref From,TrustToType,TrustToMethod);
         }
 
-        public static t Deserialize<t>(this byte[] Data, t SampleType, Action<Type> TrustToType = null)
+        public static t Deserialize<t>(this byte[] Data, t SampleType, 
+            Action<Type> TrustToType = null,
+            Action<MethodInfo> TrustToMethod = null)
         {
-            return Serializere.Deserialize<t>(Data,TrustToType);
+            return Serializere.Deserialize<t>(Data,TrustToType,TrustToMethod);
         }
     }
 }

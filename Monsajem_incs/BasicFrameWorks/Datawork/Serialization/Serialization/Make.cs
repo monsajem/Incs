@@ -162,18 +162,18 @@ namespace Monsajem_Incs.Serialization
                 {
                     if (obj == null)
                     {
-                        Data.S_Data.WriteByte(0);
+                        Data.Data.WriteByte(0);
                         return;
                     }
 
-                    Data.S_Data.WriteByte(1);
+                    Data.Data.WriteByte(1);
                     Serializere.VisitedSerialize(Data,Getter.Invoke(obj, null), innerSerializer);
                 };
 
                 Func<DeserializeData,object> Deserializer = (Data) =>
                 {
                     var ThisFrom = Data.From;
-                    if (Data.D_Data[Data.From] == 0)
+                    if (Data.Data[Data.From] == 0)
                     {
                         Data.From += 1;
                         return null;
@@ -204,7 +204,7 @@ namespace Monsajem_Incs.Serialization
                     for (int i = 0; i < Rank; i++)
                     {
                         Ends[i] = ar.GetUpperBound(i) + 1;
-                        Data.S_Data.Write(BitConverter.GetBytes(Ends[i]), 0, 4);
+                        Data.Data.Write(BitConverter.GetBytes(Ends[i]), 0, 4);
                     }
                     return Ends;
                 };
@@ -213,13 +213,13 @@ namespace Monsajem_Incs.Serialization
                     var Ends = new int[Rank];
                     for (int i = 0; i < Rank; i++)
                     {
-                        Ends[i] = BitConverter.ToInt32(Data.D_Data, Data.From);
+                        Ends[i] = BitConverter.ToInt32(Data.Data, Data.From);
                         Data.From += 4;
                     }
                     var ArrayLen = Ends[0];
                     for (int i = 1; i < Rank; i++)
                         ArrayLen = ArrayLen * Ends[i];
-                    if (ArrayLen > Data.D_Data.Length - Data.From)
+                    if (ArrayLen > Data.Data.Length - Data.From)
                         throw new ArgumentException("Array length is more than bytes length!");
                     return (Ends, (System.Array)Creator(Ends));
                 };
@@ -326,7 +326,7 @@ namespace Monsajem_Incs.Serialization
                     System.Runtime.InteropServices.Marshal.Copy(ptr, bytes, 0, bytes.Length);
                     h.Free();
 
-                    Data.S_Data.Write(bytes, 0, bytes.Length);
+                    Data.Data.Write(bytes, 0, bytes.Length);
                 };
                 Action<DeserializeData,(System.Array ar, int[] Ends)> 
                     Deserializer = (Data,obj) =>
@@ -347,7 +347,7 @@ namespace Monsajem_Incs.Serialization
                             System.Runtime.InteropServices.GCHandleType.Pinned);
 
                     var ptr = h.AddrOfPinnedObject();
-                    System.Runtime.InteropServices.Marshal.Copy(Data.D_Data, Data.From, ptr, Len);
+                    System.Runtime.InteropServices.Marshal.Copy(Data.Data, Data.From, ptr, Len);
                     h.Free();
                     Data.From += Len;
                 };
@@ -408,26 +408,27 @@ namespace Monsajem_Incs.Serialization
                 {
                     var MD = (MulticastDelegate)obj;
                     var Delegates = MD.GetInvocationList();
-                    Data.S_Data.Write(BitConverter.GetBytes(Delegates.Length), 0, 4);
+                    Data.Data.Write(BitConverter.GetBytes(Delegates.Length), 0, 4);
                     for (int i = 0; i < Delegates.Length; i++)
                     {
                         LoadedFunc LoadedFunc;
                         var Delegate = Delegates[i];
-                        var HashCode = Delegate.Method.GetHashCode();
-                        LoadedFunc = Serializere.VisitedInfoSerialize(Data,Delegate.Method,
+                        var DelegateMethod = Delegate.Method;
+                        Data.TrustToMethod?.Invoke(DelegateMethod);
+                        LoadedFunc = Serializere.VisitedInfoSerialize(Data,DelegateMethod,
                         () =>
                         {
 
-                            var Key = new LoadedFunc(Delegate.Method);
+                            var Key = new LoadedFunc(DelegateMethod);
                             if (Serializere.LoadedFuncs_Ser.TryGetValue(Key, out LoadedFunc) == false)
                             {
-                                var TargetType = Delegate.Method.DeclaringType;
+                                var TargetType = DelegateMethod.DeclaringType;
 
                                 LoadedFunc = Key;
                                 LoadedFunc.NameAsByte =
                                     Serializere.Write(
-                                        Delegate.Method.Name,
-                                        Delegate.Method.ReflectedType.MidName());
+                                        DelegateMethod.Name,
+                                        DelegateMethod.ReflectedType.MidName());
                                 LoadedFunc.SerializerTarget = GetSerialize(TargetType);
                                 Serializere.LoadedFuncs_Ser.Add(LoadedFunc);
                             }
@@ -440,7 +441,7 @@ namespace Monsajem_Incs.Serialization
 
                 Func<DeserializeData,object> Deserializer = (Data) =>
                 {
-                    var Count = BitConverter.ToInt32(Data.D_Data, Data.From);
+                    var Count = BitConverter.ToInt32(Data.Data, Data.From);
                     Data.From += 4;
                     var Results = new Delegate[Count];
                     for (int i = 0; i < Count; i++)
@@ -464,12 +465,15 @@ namespace Monsajem_Incs.Serialization
 
                                 var TargetType = Method.DeclaringType;
                                 LoadedFunc = Key;
+                                LoadedFunc.Method = Method;
                                 LoadedFunc.Delegate = Method.CreateDelegate(Type, null);
                                 LoadedFunc.SerializerTarget = GetSerialize(TargetType);
                                 Serializere.LoadedFuncs_Des.Add(LoadedFunc);
                             }
                             return LoadedFunc;
                         });
+
+                        Data.TrustToMethod?.Invoke(LoadedFunc.Method);
 
                         var ThisDelegate = (Delegate)LoadedFunc.Delegate.Clone();
                         Results[i] = ThisDelegate;
@@ -544,7 +548,7 @@ namespace Monsajem_Incs.Serialization
                     {
                         if (((IWhenCanSerialize)obj).CanSerialize == false)
                         {
-                            Data.S_Data.WriteByte(0);
+                            Data.Data.WriteByte(0);
                         }
                         else
                         {
@@ -592,12 +596,12 @@ namespace Monsajem_Incs.Serialization
                 Action<SerializeData, object> Serializer = (Data,obj) =>
                 {
 #if DEBUG
-                    Data.S_Data.Write(BitConverter.GetBytes(FildsLen), 0, 4);
+                    Data.Data.Write(BitConverter.GetBytes(FildsLen), 0, 4);
                     for (int i = 0; i < FildsLen; i++)
                     {
                         var Field = FildSerializer[i];
                         var FieldName = Serializere.Write(Field.Controller.Info.DeclaringType.ToString() + "." + Field.Controller.Info.Name);
-                        Data.S_Data.Write(FieldName, 0, FieldName.Length);
+                        Data.Data.Write(FieldName, 0, FieldName.Length);
                     }
 #endif
                     for (int i = 0; i < FildsLen; i++)
@@ -611,7 +615,7 @@ namespace Monsajem_Incs.Serialization
                 {
                     object Owner = GetUninitializedObject(Type);
 #if DEBUG
-                    var F_len = BitConverter.ToInt32(Data.D_Data, Data.From);
+                    var F_len = BitConverter.ToInt32(Data.Data, Data.From);
                     Data.From += 4;
                     string[] Fields_Types = new string[F_len];
                     for (int i = 0; i < Fields_Types.Length; i++)

@@ -13,12 +13,12 @@ namespace Monsajem_Incs.Serialization
         {
             if (obj == null)
             {
-                Data.S_Data.Write(Byte_Int_N_2, 0, 4);
+                Data.Data.Write(Byte_Int_N_2, 0, 4);
                 return;
             }
             if (serializer.CanStoreInVisit == false)
             {
-                Data.S_Data.Write(Byte_Int_N_1, 0, 4);
+                Data.Data.Write(Byte_Int_N_1, 0, 4);
                 serializer.Serializer(Data,obj);
                 return;
             }
@@ -33,8 +33,8 @@ namespace Monsajem_Incs.Serialization
 #if DEBUG
                 Key.obj = obj;
 #endif
-                Key.FromPos = (int)Data.S_Data.Position;
-                Data.S_Data.Write(Byte_Int_N_1, 0, 4);
+                Key.FromPos = (int)Data.Data.Position;
+                Data.Data.Write(Byte_Int_N_1, 0, 4);
                 serializer.Serializer(Data,obj);
             }
             else
@@ -45,7 +45,7 @@ namespace Monsajem_Incs.Serialization
                                         "\n\nMain: " + obj.GetType().ToString() +
                                         "\n\nVisited: " + VisitedObj.obj.GetType().ToString());
 #endif
-                Data.S_Data.Write(BitConverter.GetBytes(VisitedObj.FromPos), 0, 4);
+                Data.Data.Write(BitConverter.GetBytes(VisitedObj.FromPos), 0, 4);
             }
         }
         private void VisitedDeserialize(
@@ -54,7 +54,7 @@ namespace Monsajem_Incs.Serialization
             SerializeInfo deserializer)
         {
             var LastFrom = Data.From;
-            var Fr = BitConverter.ToInt32(Data.D_Data, Data.From);
+            var Fr = BitConverter.ToInt32(Data.Data, Data.From);
             Data.From += 4;
             if (deserializer.CanStoreInVisit == false)
             {
@@ -104,17 +104,17 @@ namespace Monsajem_Incs.Serialization
             if (S_Data.Visitor_info.TryGetValue(Key, out var VisitedObj)== false)
             {
                 S_Data.Visitor_info.Add(Key);
-                Key.FromPos = (int)S_Data.S_Data.Position;
+                Key.FromPos = (int)S_Data.Data.Position;
                 var Data = GetData();
                 var DataBytes = Data.Bytes;
                 Key.Data =(DataBytes, Data.Obj);
-                S_Data.S_Data.Write(Byte_Int_N_1, 0, 4);
-                S_Data.S_Data.Write(DataBytes, 0, DataBytes.Length);
+                S_Data.Data.Write(Byte_Int_N_1, 0, 4);
+                S_Data.Data.Write(DataBytes, 0, DataBytes.Length);
                 return Data.Obj;
             }
             else
             {
-                S_Data.S_Data.Write(BitConverter.GetBytes(VisitedObj.FromPos), 0, 4);
+                S_Data.Data.Write(BitConverter.GetBytes(VisitedObj.FromPos), 0, 4);
                 return (t)VisitedObj.Data.Obj;
             }
         }
@@ -123,7 +123,7 @@ namespace Monsajem_Incs.Serialization
             Func<t> Get)
         {
             var LastFrom = Data.From;
-            var Fr = BitConverter.ToInt32(Data.D_Data, Data.From);
+            var Fr = BitConverter.ToInt32(Data.Data, Data.From);
             Data.From += 4;
             ObjectContainer VisitedObj;
             if (Fr == -1)

@@ -23,6 +23,7 @@ namespace Monsajem_Incs.Serialization
             private object Obj;
             private int HashCode;
             public Delegate Delegate;
+            public MethodInfo Method;
             public byte[] NameAsByte;
             public SerializeInfo SerializerTarget;
             public bool Equals(LoadedFunc other)

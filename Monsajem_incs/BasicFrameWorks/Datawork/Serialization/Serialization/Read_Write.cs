@@ -38,9 +38,9 @@ namespace Monsajem_Incs.Serialization
 
         private string Read(DeserializeData Data)
         {
-            var Len = BitConverter.ToInt32(Data.D_Data, Data. From);
+            var Len = BitConverter.ToInt32(Data.Data, Data. From);
             Data.From += 4;
-            var Result = UTF8.GetString(Data.D_Data, Data.From, Len);
+            var Result = UTF8.GetString(Data.Data, Data.From, Len);
             Data. From += Result.Length;
             return Result;
         }

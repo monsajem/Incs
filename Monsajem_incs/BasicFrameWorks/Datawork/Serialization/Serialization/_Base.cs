@@ -48,7 +48,8 @@ namespace Monsajem_Incs.Serialization
         {
             public HashSet<ObjectContainer> Visitor = new HashSet<ObjectContainer>();
             public HashSet<ObjectContainer> Visitor_info = new HashSet<ObjectContainer>();
-            public Action<Type> Trust;
+            public Action<Type> TrustToType;
+            public Action<MethodInfo> TrustToMethod;
             public Action AtLast;
 #if DEBUG
             public string Traced;
@@ -56,7 +57,7 @@ namespace Monsajem_Incs.Serialization
         }
         internal class DeserializeData : Data
         {
-            public byte[] D_Data;
+            public byte[] Data;
 
 #if DEBUG
             private int _From;
@@ -78,13 +79,15 @@ namespace Monsajem_Incs.Serialization
 
         internal class SerializeData : Data
         {
-            public MemoryStream S_Data = new MemoryStream();
+            public MemoryStream Data = new MemoryStream();
         }
 
-        public byte[] Serialize<t>(t obj, Action<Type> TrustToType = null)
+        public byte[] Serialize<t>(t obj,
+            Action<Type> TrustToType = null,
+            Action<MethodInfo> TrustToMethod = null)
         {
 #if DEBUG
-            var Result = _Serialize(obj, TrustToType);
+            var Result = _Serialize(obj, TrustToType,TrustToMethod);
             var DS = Deserialize<t>(Result, TrustToType);
             return Result;
 #else
@@ -92,13 +95,16 @@ namespace Monsajem_Incs.Serialization
 #endif
         }
 
-        private byte[] _Serialize<t>(t obj, Action<Type> TrustToType)
+        private byte[] _Serialize<t>(t obj, 
+            Action<Type> TrustToType,
+            Action<MethodInfo> TrustToMethod)
         {
             byte[] Result;
             var SR = SerializeInfo<t>.GetSerialize();
             var SR_Data = new SerializeData()
             {
-                Trust = TrustToType
+                TrustToType = TrustToType,
+                TrustToMethod =TrustToMethod
             };
             try
             {
@@ -115,7 +121,7 @@ namespace Monsajem_Incs.Serialization
                 }
 #endif
                 VisitedSerialize(SR_Data, obj, SR);
-                Result = SR_Data.S_Data.ToArray();
+                Result = SR_Data.Data.ToArray();
             }
 #if DEBUG
             catch (Exception ex)
@@ -131,17 +137,24 @@ namespace Monsajem_Incs.Serialization
             return Result;
         }
 
-        public t Deserialize<t>(byte[] Data, Action<Type> TrustToType = null)
+        public t Deserialize<t>(byte[] Data,
+            Action<Type> TrustToType = null,
+            Action<MethodInfo> TrustToMethod = null)
         {
             var Type = typeof(t);
             var From = 0;
-            return Deserialize<t>(Data, ref From, TrustToType);
+            return Deserialize<t>(Data, ref From, TrustToType,TrustToMethod);
         }
 
-        public t Deserialize<t>(byte[] Data, ref int From, Action<Type> TrustToType)
+        public t Deserialize<t>(byte[] Data, ref int From, 
+            Action<Type> TrustToType,
+            Action<MethodInfo> TrustToMethod)
         {
             t Result = default;
-            var DR_Data = new DeserializeData() { D_Data = Data, From = From, Trust = TrustToType };
+            var DR_Data = new DeserializeData() { 
+                Data = Data, From = From, 
+                TrustToType = TrustToType,
+                TrustToMethod = TrustToMethod };
             try
             {
 #if DEBUG

@@ -19,15 +19,15 @@ namespace Monsajem_Incs.Serialization
             private static void Check_SR(SerializeData Data)
             {
                 var Type = typeof(t);
-                Data.S_Data.Write(BitConverter.GetBytes(Data.S_Data.Length), 0, 8);
+                Data.Data.Write(BitConverter.GetBytes(Data.Data.Length), 0, 8);
                 var TypeBytes = Serializere.Write(Type.MidName());
-                Data.S_Data.Write(TypeBytes, 0, TypeBytes.Length);
+                Data.Data.Write(TypeBytes, 0, TypeBytes.Length);
             }
             private static void Check_DR(DeserializeData Data)
             {
                 var Type = typeof(t);
                 var DR_Pos = Data.From;
-                var SR_Pos = BitConverter.ToInt64(Data.D_Data, Data.From);
+                var SR_Pos = BitConverter.ToInt64(Data.Data, Data.From);
                 Data.From += 8;
                 if (DR_Pos != SR_Pos ||
                     SR_Pos < 0)

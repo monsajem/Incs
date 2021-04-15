@@ -60,22 +60,22 @@ namespace Monsajem_Incs.Serialization
                                 var ObjType = obj.GetType();
                                 if (ObjType != MainType)
                                 {
-                                    Data.S_Data.WriteByte(1);
+                                    Data.Data.WriteByte(1);
                                     Serializere.WriteSerializer(Data,ObjType).Serializer(Data,obj);
                                     return;
                                 }
                             }
-                            Data.Trust?.Invoke(MainType);
-                            Data.S_Data.WriteByte(0);
+                            Data.TrustToType?.Invoke(MainType);
+                            Data.Data.WriteByte(0);
                             SR(Data,obj);
                         };
                         Sr.Dr = (Data) =>
                         {
-                            var Status = Data.D_Data[Data.From];
+                            var Status = Data.Data[Data.From];
                             Data. From += 1;
                             if (Status == 0)
                             {
-                                Data.Trust?.Invoke(MainType);
+                                Data.TrustToType?.Invoke(MainType);
                                 return DR(Data);
                             }
                             else
@@ -101,30 +101,30 @@ namespace Monsajem_Incs.Serialization
                                 var Cache = ICache.Cache;
                                 if (Cache == null)
                                 {
-                                    var FromPosition = Data.S_Data.Position;
+                                    var FromPosition = Data.Data.Position;
                                     SR(Data,obj);
-                                    var len = (int)(Data.S_Data.Length - FromPosition);
+                                    var len = (int)(Data.Data.Length - FromPosition);
                                     Cache = new byte[len];
-                                    Data.S_Data.Seek(FromPosition, SeekOrigin.Begin);
+                                    Data.Data.Seek(FromPosition, SeekOrigin.Begin);
                                     var AllLen = len;
                                     while (len > 0)
-                                        len -= Data.S_Data.Read(Cache, AllLen - len, len);
+                                        len -= Data.Data.Read(Cache, AllLen - len, len);
                                     ICache.Cache = Cache;
-                                    Data.S_Data.Seek(Data.S_Data.Length, SeekOrigin.Begin);
+                                    Data.Data.Seek(Data.Data.Length, SeekOrigin.Begin);
                                 }
                                 else
                                 {
 #if DEBUG
                                     var DebugCache = (byte[])ICache.Cache.Clone();
-                                    var FromPosition = Data.S_Data.Position;
+                                    var FromPosition = Data.Data.Position;
                                     SR(Data,obj);
-                                    var len = (int)(Data.S_Data.Length - FromPosition);
+                                    var len = (int)(Data.Data.Length - FromPosition);
                                     Cache = new byte[len];
-                                    Data.S_Data.Seek(FromPosition, SeekOrigin.Begin);
+                                    Data.Data.Seek(FromPosition, SeekOrigin.Begin);
                                     var AllLen = len;
                                     while (len > 0)
-                                        len -= Data.S_Data.Read(Cache, AllLen - len, len);
-                                    Data.S_Data.Seek(Data.S_Data.Length, SeekOrigin.Begin);
+                                        len -= Data.Data.Read(Cache, AllLen - len, len);
+                                    Data.Data.Seek(Data.Data.Length, SeekOrigin.Begin);
 
                                     if (DebugCache.Length != Cache.Length)
                                         throw new Exception("Cache having wrong data!");
@@ -149,7 +149,7 @@ namespace Monsajem_Incs.Serialization
                             {
                                 var len = Data.From - FromPosition;
                                 var Cache = new byte[len];
-                                Array.Copy(Data.D_Data, FromPosition, Cache, 0, len);
+                                Array.Copy(Data.Data, FromPosition, Cache, 0, len);
                                 ICache.Cache = Cache;
                             }
                             return Result;
@@ -167,7 +167,7 @@ namespace Monsajem_Incs.Serialization
 
                     Sr.Sr = (Data,obj) =>
                     {
-                        var Pos = Data.S_Data.Position;
+                        var Pos = Data.Data.Position;
                         Tracer(Data,$"Type: {Serialize.Type} Pos:({Pos})");
                         Check_SR(Data);
                         SR(Data,obj);
@@ -194,12 +194,12 @@ namespace Monsajem_Incs.Serialization
 
                     SR = (Data,obj) =>
                     {
-                        Data.Trust?.Invoke(MainType);
+                        Data.TrustToType?.Invoke(MainType);
                         SR(Data,obj);
                     };
                     Sr.Dr = (Data) =>
                     {
-                        Data.Trust?.Invoke(MainType);
+                        Data.TrustToType?.Invoke(MainType);
                         return DR(Data);
                     };
                     Serialize.Serializer = Sr.Sr;
