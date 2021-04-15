@@ -1,5 +1,7 @@
 # <img src="https://github.com/monsajem/Logo_files/blob/master/MonsajemLogo.png" width="50" height="25">Monsajem Soft incs
 
+[![Join the chat at https://gitter.im/monsajemNews/incs](https://badges.gitter.im/monsajemNews/incs.svg)](https://gitter.im/monsajemNews/incs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 ## Donate and help us to make best
 
 ### BTC: 1CzqDth2u5QV4sAGHR2qp8P221FcHuYYTZ
