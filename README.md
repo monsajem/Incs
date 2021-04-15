@@ -1,6 +1,6 @@
 # <img src="https://github.com/monsajem/Logo_files/blob/master/MonsajemLogo.png" width="50" height="25">Monsajem Soft incs
 
-[![Gitter chat](https://badges.gitter.im/Monsajem_incs/community.png)](https://gitter.im/Monsajem_incs/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Gitter chat](https://badges.gitter.im/Monsajem_incs/community.svg)](https://gitter.im/Monsajem_incs/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ## Donate and help us to make best
 
