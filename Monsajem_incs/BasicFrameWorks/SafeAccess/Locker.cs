@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using Monsajem_Incs.DelegateExtentions;
 
-namespace Monsajem_Incs.DynamicAssembly
+namespace Monsajem_Incs.SafeAccess
 {
     public class Locked:IDisposable
     {
@@ -33,7 +33,20 @@ namespace Monsajem_Incs.DynamicAssembly
 
     public class Locker<ResourceType>
     {
-        public event Action Changed;
+        public event Action OnChanged;
+        public bool IgnoreChangeEvents;
+        private Collection.Array.ArrayBased.DynamicSize.Array<Task>
+            ChangedQueue = new Collection.Array.ArrayBased.DynamicSize.Array<Task>(50);
+
+        public Locker()
+        {
+            OnChanged = ()=>
+            {
+                if (ChangedQueue.Length > 0)
+                    ChangedQueue.Pop().Start();
+            };
+        }
+
         private ResourceType _Value;
         public ResourceType Value
         {
@@ -44,7 +57,8 @@ namespace Monsajem_Incs.DynamicAssembly
             set
             {
                 _Value = value;
-                Changed?.Invoke();
+                if(IgnoreChangeEvents==false)
+                    OnChanged?.Invoke();
             }
         }
         public ResourceType LockedValue
@@ -58,13 +72,27 @@ namespace Monsajem_Incs.DynamicAssembly
             {
                 using (this.Lock())
                     _Value = value;
-                Changed?.Invoke();
+                if (IgnoreChangeEvents == false)
+                    OnChanged?.Invoke();
             }
         }
 
         public Task WaitForChange()
         {
-            return Actions.WaitForHandle(() => ref Changed);
+            return Actions.WaitForHandle(() => ref OnChanged);
+        }
+
+        public Task WaitForChangeQuque() => WaitForChangeQuque(() => { });
+        public Task WaitForChangeQuque(Action action)
+        {
+            var task = new Task(()=>
+            {
+                IgnoreChangeEvents = true;
+                action();
+                IgnoreChangeEvents = false;
+            });
+            ChangedQueue.Insert(task, 0);
+            return task;
         }
 
         public Locked Lock()
@@ -75,6 +103,8 @@ namespace Monsajem_Incs.DynamicAssembly
                 Unlock = () => Monitor.Exit(this)
             };
         }
+
+        public void Changed() => OnChanged?.Invoke();
 
         public void Action(Action AC)
         {

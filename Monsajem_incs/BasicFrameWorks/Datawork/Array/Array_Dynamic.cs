@@ -14,9 +14,8 @@ namespace Monsajem_Incs.Collection.Array.Base
 
         public Func<int, ArrayType> _GetItem;
         public Action<int, ArrayType> _SetItem;
-        public Action<int> _DeleteFrom;
-        public Action<int> _AddLength;
         public Action<int> _DeleteByPosition;
+        public Action<ArrayType,int> _insert;
         public DynamicArray()
         {
 
@@ -26,19 +25,14 @@ namespace Monsajem_Incs.Collection.Array.Base
 
         public override ArrayType this[int Pos] { get => _GetItem(Pos); set => _SetItem(Pos, value); }
 
-        public override void DeleteFrom(int from)
-        {
-            _DeleteFrom(from);
-        }
-
         public override void DeleteByPosition(int Position)
         {
-            _DeleteByPosition?.Invoke(Position);
+            _DeleteByPosition(Position);
         }
 
         public override void Insert(ArrayType Value, int Position)
         {
-            throw new NotImplementedException();
+            _insert(Value,Position);
         }
     }
 }

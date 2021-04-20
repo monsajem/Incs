@@ -45,7 +45,6 @@ namespace Monsajem_Incs.Net.Virtual
             await DelegateExtentions.Actions.WaitForHandle(() => ref Getting);
             lock (Data)
                 return Data.Pop();
-
         }
         public async Task<t> Recive<t>() => (t)await Recive();
     }

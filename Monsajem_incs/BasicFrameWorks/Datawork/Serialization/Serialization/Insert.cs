@@ -19,8 +19,8 @@ namespace Monsajem_Incs.Serialization
                 Action<SerializeData,object> Serializer,
                 Func<DeserializeData,object> Deserializer, bool IsFixedType = false)
             {
-                _Serializer = Serializer;
-                _Deserializer = Deserializer;
+                Default_Serializer = Serializer;
+                Default_Deserializer = Deserializer;
                 return InsertSerializer(() => (Serializer, Deserializer), IsFixedType);
             }
             private static SerializeInfo<t> InsertSerializer(

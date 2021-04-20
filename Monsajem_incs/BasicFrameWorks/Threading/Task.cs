@@ -36,6 +36,43 @@ namespace Monsajem_Incs.Threading
             await Result;
             return Result;
         }
+        public static async Task StartTryWaitAsQueue(params Task[] Tasks)
+        {
+            var Len = Tasks.Length;
+            for(int i=0;i<Len;i++)
+            {
+                var Result = Tasks[i];
+                Result.Start();
+                try
+                {
+                    await Result;
+                }catch{}
+            }
+        }
+        public static async Task StartWaitAsQueue(params Task[] Tasks)
+        {
+            var Len = Tasks.Length;
+            for (int i = 0; i < Len; i++)
+            {
+                var Result = Tasks[i];
+                Result.Start();
+                await Result;
+            }
+        }
+        public static async Task StartTryWait(params Task[] Tasks)
+        {
+            var Len = Tasks.Length;
+            for (int i = 0; i < Len; i++)
+                Tasks[i].Start();
+            await Task.WhenAll(Tasks);
+        }
+        public static async Task StartWait(params Task[] Tasks)
+        {
+            var Len = Tasks.Length;
+            for (int i = 0; i < Len; i++)
+                Tasks[i].Start();
+            await CheckAll(Tasks);
+        }
         public static async Task TimeOut(this Task Task,int TimeOut)
         {
             var Timer = Task.Delay(TimeOut);

@@ -22,10 +22,10 @@ namespace Monsajem_Incs.Database.KeyValue.DirBased
         {
             this.Dir = Dir+"\\";
             System.IO.Directory.CreateDirectory(Dir);
-            //var DirInfo = new DirectoryInfo(Dir);
-            //var Files = DirInfo.GetFiles().Select(
-            //    (c) => System.Convert.FromBase64String(c.Name).Deserialize<KeyType>()).ToArray();
-            //this._Keys = new Collection.Array.TreeBased.Array<KeyType>(Files);
+            var DirInfo = new DirectoryInfo(Dir);
+            var Files = DirInfo.GetFiles().Select(
+                (c) => System.Convert.FromBase64String(c.Name).Deserialize<KeyType>()).ToArray();
+            this._Keys = new Collection.Array.TreeBased.Array<KeyType>(Files);
         }
 
         public ValueType this[KeyType Key] 

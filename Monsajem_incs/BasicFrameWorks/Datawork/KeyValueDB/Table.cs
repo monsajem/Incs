@@ -49,18 +49,19 @@ namespace Monsajem_Incs.Database.KeyValue.Base
 
             var Ar = (DynamicArray<ValueType>)this.BasicActions.Items;
             
-            Ar._GetItem = (Pos) =>
-            {
-                return Data[this.KeysInfo.Keys[Pos]];
-            };
+            Ar._GetItem = (Pos) => Data[this.KeysInfo.Keys[Pos]];
 
             Ar._SetItem = (Pos, Value) => Data[this.KeysInfo.Keys[Pos]]=Value;
             Ar._DeleteByPosition = (c) =>
             {
                 Data.Remove(this.KeysInfo.Keys[c]);
-                Ar.Length -= 1;
+                Ar.Length--;
             };
-            Ar._AddLength = (count) => Ar.Length += count;
+            Ar._insert = (Value, pos) =>
+            {
+                Data.Add(this.KeysInfo.Keys[pos], Value);
+                Ar.Length++;
+            };
             Ar.Length = KeysInfo.Keys.Length;
 
             Save = () =>

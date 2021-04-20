@@ -1,0 +1,119 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Threading;
+using Monsajem_Incs.DelegateExtentions;
+
+namespace Monsajem_Incs.SafeAccess
+{
+    public class AsyncLocker<ResourceType>:IDisposable
+    {
+        public ResourceType Value;
+        public event Action OnChanged;
+        private event Action OnCommand;
+
+        private Collection.Array.ArrayBased.DynamicSize.Array<Task>
+            ChangedQueue = new Collection.Array.ArrayBased.DynamicSize.Array<Task>(50);
+
+        private Collection.Array.ArrayBased.DynamicSize.Array<Task>
+            ReadQueue = new Collection.Array.ArrayBased.DynamicSize.Array<Task>(50);
+        private Collection.Array.ArrayBased.DynamicSize.Array<Task>
+            WriteQueue = new Collection.Array.ArrayBased.DynamicSize.Array<Task>(50);
+        private Collection.Array.ArrayBased.DynamicSize.Array<Task>
+            ChangeQueue = new Collection.Array.ArrayBased.DynamicSize.Array<Task>(50);
+
+        private async void Start()
+        {
+            Again:
+            Task Wait;
+            lock(this)
+            {
+                if(ReadQueue.Length>0)
+                {
+                    var Tasks = ReadQueue.ToArray();
+                    ReadQueue.Clear();
+                    Wait = Threading.Task_EX.StartTryWait(Tasks);
+                }
+                else if(WriteQueue.Length>0)
+                {
+                    var Tasks = WriteQueue.ToArray();
+                    WriteQueue.Clear();
+                    Wait = Threading.Task_EX.StartTryWaitAsQueue(Tasks);
+                }
+                else
+                {
+                    if (Disposed)
+                        return;
+                    Wait = Actions.WaitForHandle(() => ref OnCommand);
+                }
+            }
+
+            await Wait;
+
+            goto Again;
+        }
+
+        public AsyncLocker()
+
+        {
+            OnChanged = ()=>
+            {
+                if (ChangedQueue.Length > 0)
+                    ChangedQueue.Pop().Start();
+            };
+            Start();
+        }
+
+        public async Task LockRead(Task Action)
+        {
+            lock(this)
+                ReadQueue.Insert(Action);
+            await Action;
+        }
+
+        public async Task LockWrite(Task Action)
+        {
+            lock (this)
+                WriteQueue.Insert(Action);
+            await Action;
+        }
+
+        public Task WaitForChange()
+        {
+            return Actions.WaitForHandle(() => ref OnChanged);
+        }
+
+        public async Task WaitForChangeQuque(Func<Task> Task)
+        {
+            var Waiter = new Task(() => { });
+            ChangedQueue.Insert(Waiter, 0);
+            await Waiter;
+            await Task();
+        }
+
+        public void Changed() => OnChanged?.Invoke();
+
+        public void Action(Action AC)
+        {
+            lock(this)
+            {
+                AC();
+            }
+        }
+
+        private bool Disposed;
+        public void Dispose()
+        {
+            lock(this)
+            {
+                if (Disposed == false)
+                {
+                    Disposed = true;
+                    OnCommand?.Invoke();
+                }
+            }
+        }
+    }
+}

@@ -14,8 +14,8 @@ namespace Monsajem_Incs.Serialization
     {
         private partial class SerializeInfo<t> : SerializeInfo
         {
-            public static Func<DeserializeData,object> _Deserializer;
-            public static Action<SerializeData,object> _Serializer;
+            public static Func<DeserializeData,object> Default_Deserializer;
+            public static Action<SerializeData,object> Default_Serializer;
 
             public SerializeInfo()
             {
@@ -39,13 +39,20 @@ namespace Monsajem_Incs.Serialization
                 var Sr = SerializerObj;
                 if (Sr.IsMade == false)
                 {
-                    Sr.IsMade = true;
-                    if (_Serializer == null)
-                        Sr.Make();
-                    else
+                    lock(SerializerObj)
                     {
-                        Sr.Serializer = _Serializer;
-                        Sr.Deserializer = _Deserializer;
+                        if(Sr.IsMading==false)
+                        {
+                            Sr.IsMading = true;
+                            if (Default_Serializer == null)
+                                Sr.Make();
+                            else
+                            {
+                                Sr.Serializer = Default_Serializer;
+                                Sr.Deserializer = Default_Deserializer;
+                            }
+                            Sr.IsMade = true;
+                        }
                     }
                 }
                 return Sr;
