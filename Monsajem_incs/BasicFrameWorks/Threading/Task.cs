@@ -36,6 +36,7 @@ namespace Monsajem_Incs.Threading
             await Result;
             return Result;
         }
+
         public static async Task StartTryWaitAsQueue(params Task[] Tasks)
         {
             var Len = Tasks.Length;
@@ -73,6 +74,46 @@ namespace Monsajem_Incs.Threading
                 Tasks[i].Start();
             await CheckAll(Tasks);
         }
+
+        public static async Task StartTryWaitAsQueue(params Func<Task>[] Actions)
+        {
+            var Len = Actions.Length;
+            var Tasks = new Task[Len];
+            for (int i = 0; i < Len; i++)
+            {
+                try
+                {
+                    await Actions[i]();
+                }
+                catch { }
+            }
+        }
+        public static async Task StartWaitAsQueue(params Func<Task>[] Actions)
+        {
+            var Len = Actions.Length;
+            for (int i = 0; i < Len; i++)
+            {
+                var Result = Actions[i];
+                await Result();
+            }
+        }
+        public static async Task StartTryWait(params Func<Task>[] Actions)
+        {
+            var Len = Actions.Length;
+            var Tasks = new Task[Len];
+            for (int i = 0; i < Len; i++)
+                Tasks[i] = Task.Run(Actions[i]);
+            await Task.WhenAll(Tasks);
+        }
+        public static async Task StartWait(params Func<Task>[] Actions)
+        {
+            var Len = Actions.Length;
+            var Tasks = new Task[Len];
+            for (int i = 0; i < Len; i++)
+                Tasks[i] = Task.Run(Actions[i]);
+            await CheckAll(Tasks);
+        }
+
         public static async Task TimeOut(this Task Task,int TimeOut)
         {
             var Timer = Task.Delay(TimeOut);

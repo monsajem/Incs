@@ -49,6 +49,7 @@ namespace Monsajem_Incs.Net.Base.Socket
     {
 #if DEBUG
         public string WhyDisconnect;
+        public Exception UnexpectedException;
 #endif
 
         private Locker<int> Sendings = new Locker<int>();
@@ -355,12 +356,23 @@ namespace Monsajem_Incs.Net.Base.Socket
         private Locker<byte[]> RecivedBuffer = new Locker<byte[]>() { Value = new byte[0] };
         protected void Recived(byte[] Buffer)
         {
-            using (RecivedBuffer.Lock())
+#if DEBUG
+            try
             {
-                var R_Buffer = RecivedBuffer.Value;
-                Insert(ref R_Buffer, Buffer);
-                RecivedBuffer.Value = R_Buffer;
+#endif
+                using (RecivedBuffer.Lock())
+                {
+                    var R_Buffer = RecivedBuffer.Value;
+                    Insert(ref R_Buffer, Buffer);
+                    RecivedBuffer.Value = R_Buffer;
+                }
+#if DEBUG
             }
+            catch(Exception ex)
+            {
+                UnexpectedException = ex;
+            }
+#endif
         }
     }
 }

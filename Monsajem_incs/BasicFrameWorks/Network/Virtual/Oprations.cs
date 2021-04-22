@@ -8,6 +8,7 @@ using Monsajem_Incs.DynamicAssembly;
 using System.Collections.Generic;
 using Monsajem_Incs.Net.Base;
 using Monsajem_Incs.Collection.Array.ArrayBased.DynamicSize;
+using Monsajem_Incs.SafeAccess;
 
 namespace Monsajem_Incs.Net.Virtual
 {
@@ -15,8 +16,8 @@ namespace Monsajem_Incs.Net.Virtual
     public class Socket
     {
         public readonly Socket OtherSide;
-        private Action Getting;
-        private Array<object> Data = new Array<object>(10);
+        private AsyncLocker<Array<object>> Data =
+            new AsyncLocker<Array<object>>() { Value = new Array<object>(10) };
 
         public Socket()
         {
@@ -27,24 +28,36 @@ namespace Monsajem_Incs.Net.Virtual
             this.OtherSide = OtherSide;
         }
 
-        public void Send(object Data)
+        public async Task Send(object Data)
         {
-            lock (Data)
+            await OtherSide.Data.LockWrite(async () =>
             {
-                OtherSide.Data.Insert(Data, 0);
-                OtherSide.Getting?.Invoke();
-            }
+                OtherSide.Data.Value.Insert(Data, 0);
+                OtherSide.Data.Changed();
+            });
         }
-        public void Send<t>(t Data) => Send((object)Data);
+        public Task Send<t>(t Data) => Send((object)Data);
 
         public async Task<object> Recive()
         {
-            lock (Data)
-                if (Data.Length > 0)
-                    return Data.Pop();
-            await DelegateExtentions.Actions.WaitForHandle(() => ref Getting);
-            lock (Data)
-                return Data.Pop();
+            while(true)
+            {
+                object Result = null;
+                Task Wait = null;
+                await Data.LockWrite(async () =>
+                {
+                    if (Data.Value.Length > 0)
+                    {
+                        Result = Data.Value.Pop();
+                    }
+                    else
+                        Wait = Data.WaitForChangeQuque();
+                });
+                if (Wait==null)
+                    return Result;
+                await Wait;
+                Wait = null;
+            }
         }
         public async Task<t> Recive<t>() => (t)await Recive();
     }
@@ -58,13 +71,12 @@ namespace Monsajem_Incs.Net.Virtual
             this.Socket = Socket;
         }
 
-
         public async Task<bool> SendCondition(bool Condition)
         {
 #if DEBUG
             await SendParity(OprationType.SendCondition, OprationType.GetCondition);
 #endif
-            Socket.Send(Condition);
+            await Socket.Send(Condition);
             return Condition;
         }
 
@@ -81,7 +93,7 @@ namespace Monsajem_Incs.Net.Virtual
 #if DEBUG
             await SendParity(OprationType.SendData, OprationType.GetData);
 #endif
-            Socket.Send(Data);
+            await Socket.Send(Data);
         }
 
         public async Task<t> GetData<t>()
@@ -99,10 +111,10 @@ namespace Monsajem_Incs.Net.Virtual
 
         public async Task SendArray<t>(IEnumerable<t> Datas, Action<t> DataSended = null)
         {
-            Socket.Send(Datas.Count());
+            await Socket.Send(Datas.Count());
             foreach (var data in Datas)
             {
-                Socket.Send(data);
+                await Socket.Send(data);
                 DataSended?.Invoke(data);
             }
         }
@@ -341,7 +353,7 @@ namespace Monsajem_Incs.Net.Virtual
         private async Task SendParity(OprationType ThisType, OprationType ThatType)
         {
 
-            Socket.Send(ThisType);
+            await Socket.Send(ThisType);
 
             var Status = await Socket.Recive<OprationType>();
             if (Status != ThatType)
@@ -358,7 +370,7 @@ namespace Monsajem_Incs.Net.Virtual
                       OprationType ThatType)
         {
             var Status = await Socket.Recive<OprationType>();
-            Socket.Send(ThisType);
+            await Socket.Send(ThisType);
             if (Status != ThatType)
             {
                 var EX = "Wrong opration, This side is '" + ThisType.ToString() + "'" +
