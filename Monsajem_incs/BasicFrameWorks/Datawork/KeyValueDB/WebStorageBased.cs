@@ -8,6 +8,7 @@ using static System.Text.Encoding;
 using System.Threading.Tasks;
 using System.Collections;
 using System.Collections.Generic;
+using WebAssembly.Browser.DOM;
 
 namespace Monsajem_Incs.Database.KeyValue.WebStorageBased
 {
@@ -30,32 +31,26 @@ namespace Monsajem_Incs.Database.KeyValue.WebStorageBased
         }
     }
 
-    public static class SharedActions
-    {
-        public static Func<string, bool> ContainKey;
-        public static Func<string, string> GetItem;
-        public static Action<string, string> SetItem;
-        public static Action<string> DeleteItem;
-    }
-
     public class StorageDictionary<KeyType, ValueType> : 
         Collection.IDictionary<KeyType, ValueType>
     {
+        public Storage WebStorage;
         private string StorageKey;
-        public StorageDictionary(string Key)
+        public StorageDictionary(string Key,Storage WebStorage)
         {
             this.StorageKey = Key;
+            this.WebStorage = WebStorage;
         }
 
         public ValueType this[KeyType Key] { 
             get
             {
-                var Str_Key = SharedActions.GetItem(StorageKey + MyUTF.GetString(Key.Serialize()));
+                var Str_Key = WebStorage.GetItem(StorageKey + MyUTF.GetString(Key.Serialize()));
                 return MyUTF.GetBytes(Str_Key).Deserialize<ValueType>();
             }
             set
             {
-                SharedActions.SetItem(
+                WebStorage.SetItem(
                       StorageKey + MyUTF.GetString(Key.Serialize()),
                       MyUTF.GetString(value.Serialize()));
             }
@@ -88,7 +83,7 @@ namespace Monsajem_Incs.Database.KeyValue.WebStorageBased
         {
             if(Keys.BinaryDelete(key).Index>-1)
             {
-                SharedActions.DeleteItem(StorageKey + MyUTF.GetString(key.Serialize()));
+                WebStorage.RemoveItem(StorageKey + MyUTF.GetString(key.Serialize()));
                 return true;
             }
             return false;
@@ -116,23 +111,23 @@ namespace Monsajem_Incs.Database.KeyValue.WebStorageBased
         where KeyType : IComparable<KeyType>
     {
         public Table(string TableName,
-            Func<ValueType, KeyType> GetKey, bool IsUpdatAble) :
+            Func<ValueType, KeyType> GetKey, bool IsUpdatAble,Storage WebStorage) :
             base(
                  (b) =>
                  {
                      var KeyName = "K" + MyUTF.GetString(TableName.Serialize());
-                     SharedActions.SetItem(KeyName, MyUTF.GetString(b));
+                     WebStorage.SetItem(KeyName, MyUTF.GetString(b));
                  },
                  () =>
                  {
                      var KeyName = "K" + MyUTF.GetString(TableName.Serialize());
-                     if (SharedActions.ContainKey(KeyName))
-                         return MyUTF.GetBytes(SharedActions.GetItem(KeyName));
+                     if (WebStorage.GetItem(KeyName)!=null)
+                         return MyUTF.GetBytes(WebStorage.GetItem(KeyName));
                      return null;
                  },
-                 new StorageDictionary<KeyType, ValueType>("V" + TableName), GetKey, IsUpdatAble)
+                 new StorageDictionary<KeyType, ValueType>("V" + TableName, WebStorage), GetKey, IsUpdatAble)
         {
             this.TableName = TableName;
-        }
+        }        
     }
 }

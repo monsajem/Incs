@@ -13,6 +13,9 @@ namespace Monsajem_Incs.Net.Base.Socket
     {
         public class SocketExeption : Exception
         {
+#if DEBUG
+            public (string Trace, object Info)[] DebugInfo;
+#endif
             public SocketExeption() { }
             public SocketExeption(string Message) : base(Message) { }
         }
@@ -48,39 +51,44 @@ namespace Monsajem_Incs.Net.Base.Socket
         IClientSocket
     {
 #if DEBUG
-        public string WhyDisconnect;
-        public Exception UnexpectedException;
+        public (string Trace,object Info)[] DebugInfo = new (string Trace, object Info)[0];
+        public static int SendTimeOut = 3000;
+        public static int ReciveTimeOut = 3000;
+
+        internal void AddDebugInfo(string Trace) => AddDebugInfo((Trace, null));
+        internal void AddDebugInfo(string Trace, object Info)=> AddDebugInfo((Trace, Info));
+        internal void AddDebugInfo((string Trace, object Info) Trace)
+        {
+            lock (DebugInfo)
+                Insert(ref DebugInfo, Trace);
+        }
 #endif
 
         private Locker<int> Sendings = new Locker<int>();
         public event Action<Exception> OnError;
         private AddressType P_Address;
 
-#if DEBUG
-        public static int SendTimeOut = 3000;
-        public static int ReciveTimeOut = 3000;
-#endif
-
         public ClientSocket()
         {
-            IsConnected = false;
+         
         }
         public virtual AddressType Address => P_Address;
 
-        private Locker<bool> P_IsConnected = new Locker<bool>() { Value = true };
+        private Locker<bool> P_IsConnected = new Locker<bool>();
         public virtual bool IsConnected
         {
             get => P_IsConnected.LockedValue;
             internal set
             {
 #if DEBUG
-                if (WhyDisconnect == null)
-                    WhyDisconnect = "Just Changed To "+value+" in " +
+                AddDebugInfo("Connection Changed To " + value+ " in \n"+
+
                         string.Concat(new System.Diagnostics.StackTrace(true).GetFrames().
-                        Select((c) =>"\nMethod> "+c.GetMethod().DeclaringType.ToString()+"."+
-                                                  c.GetMethod().Name+
-                                     "\nFile> " + c.GetFileName()+
-                                     "\nLine> " + c.GetFileLineNumber()));
+                        Select((c) => "\nMethod> " + c.GetMethod().DeclaringType.ToString() + "." +
+                                                  c.GetMethod().Name +
+                                     "\nFile> " + c.GetFileName() +
+                                     "\nLine> " + c.GetFileLineNumber())));
+
 #endif
                 if (value != P_IsConnected.Value)
                 {
@@ -102,10 +110,11 @@ namespace Monsajem_Incs.Net.Base.Socket
                     if (P_IsConnected.Value == false)
                     {
                         var ExMSG = "socket connection Changed in _Send(byte[] Data)";
-#if DEBUG
-                        ExMSG += "\nWhyDisconnect :" + WhyDisconnect;
-#endif
                         var Ex = new SocketClosedExeption(ExMSG);
+#if DEBUG
+                        AddDebugInfo(ExMSG);
+                        Ex.DebugInfo = DebugInfo;
+#endif
                         OnError?.Invoke(Ex);
                         throw Ex;
                     }
@@ -123,10 +132,11 @@ namespace Monsajem_Incs.Net.Base.Socket
                 if (P_IsConnected.LockedValue == false)
                 {
                     var ExMSG = "socket connection Changed in _Send(byte[] Data)";
-#if DEBUG
-                    ExMSG += "\nWhyDisconnect :" + WhyDisconnect;
-#endif
                     var Ex = new SocketClosedExeption(ExMSG);
+#if DEBUG
+                    AddDebugInfo(ExMSG);
+                    Ex.DebugInfo = DebugInfo;
+#endif
                     OnError?.Invoke(Ex);
                     throw Ex;
                 }
@@ -166,11 +176,13 @@ namespace Monsajem_Incs.Net.Base.Socket
                 {
                     if (P_IsConnected.Value == false)
                     {
+      
                         var ExMSG = "socket connection Changed in Recive(byte[] Buffer)";
-#if DEBUG
-                        ExMSG += "\nWhyDisconnect :" + WhyDisconnect;
-#endif
                         var Ex = new SocketClosedExeption(ExMSG);
+#if DEBUG
+                        AddDebugInfo(ExMSG);
+                        Ex.DebugInfo = DebugInfo;
+#endif
                         OnError?.Invoke(Ex);
                         throw Ex;
                     }
@@ -213,6 +225,9 @@ namespace Monsajem_Incs.Net.Base.Socket
             if (P_IsConnected.Value == true)
             {
                 var Ex = new ConnectionFailedExeption("Socket Is Connected");
+#if DEBUG
+                Ex.DebugInfo = DebugInfo;
+#endif
                 OnError?.Invoke(Ex);
                 throw Ex;
             }
@@ -224,8 +239,7 @@ namespace Monsajem_Incs.Net.Base.Socket
         public async Task Close()
         {
 #if DEBUG
-            if (WhyDisconnect == null)
-                WhyDisconnect = "Close Method";
+           AddDebugInfo ("Close Method invoked.");
 #endif
 #if TRACE_NET
             Console.WriteLine($"Net:{Address} Disconnecting Close ...");
@@ -245,8 +259,7 @@ namespace Monsajem_Incs.Net.Base.Socket
         public async Task Disconncet()
         {
 #if DEBUG
-            if (WhyDisconnect == null)
-                WhyDisconnect = "Disconncet Method";
+            AddDebugInfo("Disconncet Method invoked.");
 #endif
 #if TRACE_NET
             Console.WriteLine($"Net:{Address} Disconnceting ");
@@ -370,7 +383,8 @@ namespace Monsajem_Incs.Net.Base.Socket
             }
             catch(Exception ex)
             {
-                UnexpectedException = ex;
+                AddDebugInfo("exception thrown at Recived method.\n"+ex.Message,
+                    new Exception("exception thrown at Recived method.", ex));
             }
 #endif
         }

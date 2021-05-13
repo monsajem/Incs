@@ -30,7 +30,7 @@ namespace Monsajem_Incs.Net.Base.Service
                    {
                        Service(new SyncOprations<AddressType>(Client, true));
 #if DEBUG
-                       Client.WhyDisconnect = "end";
+                       Client.AddDebugInfo("end.");
 #endif
                        Client.Disconncet().Wait();
                    }).Start();

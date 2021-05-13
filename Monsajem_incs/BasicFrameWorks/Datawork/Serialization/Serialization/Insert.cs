@@ -132,7 +132,7 @@ namespace Monsajem_Incs.Serialization
                                         if (DebugCache[i] != Cache[i])
                                             throw new Exception("Cache having wrong data!");
 #else
-                                    S_Data.Write(Cache, 0, Cache.Length);
+                                    Data.Data.Write(Cache, 0, Cache.Length);
 #endif
                                 }
                             }

@@ -408,7 +408,7 @@ namespace Monsajem_Incs.Net.Base.Service
         public async Task Stop()
         {
 #if DEBUG
-            Client.WhyDisconnect = "End";
+            Client.AddDebugInfo("End.");
 #endif
             await Client.Disconncet();
         }
@@ -436,10 +436,11 @@ namespace Monsajem_Incs.Net.Base.Service
             if (Sequnce != CurrentSequnce)
             {
                 var Address = Client.Address.ToString();
-                Client.WhyDisconnect = $"Wrong Sequnce On {Address}, This side is {Sequnce}" +
+                var ex = $"Wrong Sequnce On {Address}, This side is {Sequnce}" +
                                        $" but other side is {CurrentSequnce}";
+                Client.AddDebugInfo(ex);
                 await Client.Disconncet();
-                throw new InvalidOperationException(Client.WhyDisconnect);
+                throw new InvalidOperationException(ex);
             }
 
             Sequnce++;
@@ -447,11 +448,12 @@ namespace Monsajem_Incs.Net.Base.Service
             if (Status != ThatType)
             {
                 var Address = Client.Address.ToString();
-                Client.WhyDisconnect = "Wrong opration On " + Address + ", This side is '" + ThisType.ToString() + "'" +
+                var ex = "Wrong opration On " + Address + ", This side is '" + ThisType.ToString() + "'" +
                                       " And other side must be '" + ThatType.ToString() + "'" +
                                       " But that is '" + Status.ToString() + "'";
+                Client.AddDebugInfo(ex);
                 await Client.Disconncet();
-                throw new InvalidOperationException(Client.WhyDisconnect);
+                throw new InvalidOperationException(ex);
             }
         }
 
@@ -472,10 +474,11 @@ namespace Monsajem_Incs.Net.Base.Service
             if (Sequnce != CurrentSequnce)
             {
                 var Address = Client.Address.ToString();
-                Client.WhyDisconnect = $"Wrong Sequnce On {Address}, This side is {Sequnce}" +
+                var ex = $"Wrong Sequnce On {Address}, This side is {Sequnce}" +
                                        $" but other side is {CurrentSequnce}";
+                Client.AddDebugInfo(ex);
                 await Client.Disconncet();
-                throw new InvalidOperationException(Client.WhyDisconnect);
+                throw new InvalidOperationException(ex);
             }
 
             Sequnce++;
@@ -484,13 +487,13 @@ namespace Monsajem_Incs.Net.Base.Service
             {
                 var Address = Client.Address.ToString();
                 Misstake?.Invoke(Client.Address);
-                Client.WhyDisconnect =
+                var ex =
                       "Wrong opration On " + Address + ", This side is '" + ThisType.ToString() + "'" +
                       " And other side must be '" + ThatType.ToString() + "'" +
                       " But that is '" + Status.ToString() + "'";
+                Client.AddDebugInfo(ex);
                 await Client.Disconncet();
-                throw new InvalidOperationException
-                    (Client.WhyDisconnect);
+                throw new InvalidOperationException(ex);
             }
         }
 #endif

@@ -23,8 +23,7 @@ namespace Monsajem_Incs.Net.Web
             {
                 base.OnError(e);
 #if DEBUG
-                if (Socket.WhyDisconnect == null)
-                    Socket.WhyDisconnect = "Closed By this side Because of error >> "+e.Message;
+                Socket.AddDebugInfo("Closed By this side Because of error >> "+e.Message);
 #endif
                 base.Close();
                 Socket.IsConnected = false;
@@ -33,8 +32,7 @@ namespace Monsajem_Incs.Net.Web
             protected override void OnClose(CloseEventArgs e)
             {
 #if DEBUG
-                if (Socket.WhyDisconnect == null)
-                    Socket.WhyDisconnect = "Closed By Other side";
+                Socket.AddDebugInfo("Closed By Other side. CloseEventArgs:",e);
 #endif
                 base.OnClose(e);
                 Socket.IsConnected = false;
@@ -47,8 +45,7 @@ namespace Monsajem_Incs.Net.Web
 
             public new void Close(){
 #if DEBUG
-                if (Socket.WhyDisconnect == null)
-                    Socket.WhyDisconnect = "Closed By this side";
+                Socket.AddDebugInfo("Closed By this side.");
 #endif
                 base.Close();
                 Socket.IsConnected = false;
@@ -56,7 +53,19 @@ namespace Monsajem_Incs.Net.Web
 
             protected override void OnMessage(MessageEventArgs e)
             {
-                Socket.Recived(e.RawData);
+#if DEBUG
+                try
+                {
+#endif
+                    Socket.Recived(e.RawData);
+#if DEBUG
+                }
+                catch(Exception ex)
+                {
+                    Socket.AddDebugInfo(ex.Message,ex);
+                    throw;
+                }
+#endif
             }
         }
         private class WebSocket :

@@ -108,7 +108,6 @@ namespace WebAssembly.Browser.DOM
 
         object UnWrapObject(Type type, object obj)
         {
-
             if (type.IsSubclassOf(typeof(JSObject)) || type == typeof(JSObject))
             {
 

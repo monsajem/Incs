@@ -227,7 +227,7 @@ namespace Monsajem_Incs.Serialization
             SerializeInfo<Type>.InsertSerializer(
                    (Data, obj) =>
                    {
-                       var Name = Write(((Type)obj).MidName());
+                       var Name = Write((obj as Type).MidName());
                        Data.Data.Write(Name, 0, Name.Length);
                    },
                    (Data) =>

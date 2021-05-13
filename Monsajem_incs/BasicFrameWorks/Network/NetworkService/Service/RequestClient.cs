@@ -23,7 +23,7 @@ namespace Monsajem_Incs.Net.Base.Service
                 await Requestor(rq);
             }
 #if DEBUG
-            ClientSocket.WhyDisconnect = "end";
+            ClientSocket.AddDebugInfo("end.");
 #endif
             await ClientSocket.Disconncet();
         }
@@ -37,7 +37,7 @@ namespace Monsajem_Incs.Net.Base.Service
                 Requestor(rq);
             }
 #if DEBUG
-            ClientSocket.WhyDisconnect = "end";
+            ClientSocket.AddDebugInfo("end.");
 #endif
             ClientSocket.Disconncet().GetAwaiter().GetResult();
         }

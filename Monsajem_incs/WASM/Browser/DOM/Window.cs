@@ -53,6 +53,10 @@ namespace WebAssembly.Browser.DOM
         public Location Location => GetProperty<Location>("location");
         [Export("locationbar")]
         public BarProp Locationbar => GetProperty<BarProp>("locationbar");
+        [Export("localStorage")]
+        public Storage LocalStorage => new Storage(Storage.Type.LocalStorage);
+        [Export("sessionStorage")]
+        public Storage SessionStorage => new Storage(Storage.Type.SessionStorage);
         [Export("menubar")]
         public BarProp Menubar => GetProperty<BarProp>("menubar");
         // [Export("msContentScript")]

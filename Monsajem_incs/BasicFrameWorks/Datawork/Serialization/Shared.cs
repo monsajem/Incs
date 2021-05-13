@@ -66,11 +66,9 @@ namespace Monsajem_Incs
                 return Type;
             var Type_P = new Function<char>((c, p) => c[p] != '[' && c[p] != ']' && c[p] != ',')
             { Info = "Type" };
-            var Next_P = new Function<char>((c, p) =>
-                c[p] == ',')
+            var Next_P = new Function<char>((c, p) => c[p] == ',')
             { Info = "Next" };
-            var Inner_P = new Function<char>((c, p) =>
-                (c[p] == '[' || c[p] == ',', 1))
+            var Inner_P = new Function<char>((c, p) => (c[p] == '[' || c[p] == ',', 1))
             { Info = "SubType" };
 
             Type_P.AddSub(Next_P, Inner_P);

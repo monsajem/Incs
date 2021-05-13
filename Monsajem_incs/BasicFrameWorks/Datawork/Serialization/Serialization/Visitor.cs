@@ -11,14 +11,15 @@ namespace Monsajem_Incs.Serialization
             object obj,
             SerializeInfo serializer)
         {
+            var BytesData = Data.Data;
             if (obj == null)
             {
-                Data.Data.Write(Byte_Int_N_2, 0, 4);
+                BytesData.Write(Byte_Int_N_2, 0, 4);
                 return;
             }
             if (serializer.CanStoreInVisit == false)
             {
-                Data.Data.Write(Byte_Int_N_1, 0, 4);
+                BytesData.Write(Byte_Int_N_1, 0, 4);
                 serializer.Serializer(Data,obj);
                 return;
             }
@@ -27,14 +28,15 @@ namespace Monsajem_Incs.Serialization
                 HashCode = obj.GetHashCode(),
                 obj = obj
             };
-            if(Data.Visitor.TryGetValue(Key, out var VisitedObj)== false)
+            var Visitor = Data.Visitor;
+            if (Visitor.TryGetValue(Key, out var VisitedObj)== false)
             {
-                Data.Visitor.Add(Key);
+                Visitor.Add(Key);
 #if DEBUG
                 Key.obj = obj;
 #endif
-                Key.FromPos = (int)Data.Data.Position;
-                Data.Data.Write(Byte_Int_N_1, 0, 4);
+                Key.FromPos = (int)BytesData.Position;
+                BytesData.Write(Byte_Int_N_1, 0, 4);
                 serializer.Serializer(Data,obj);
             }
             else
@@ -45,7 +47,7 @@ namespace Monsajem_Incs.Serialization
                                         "\n\nMain: " + obj.GetType().ToString() +
                                         "\n\nVisited: " + VisitedObj.obj.GetType().ToString());
 #endif
-                Data.Data.Write(BitConverter.GetBytes(VisitedObj.FromPos), 0, 4);
+                BytesData.Write(BitConverter.GetBytes(VisitedObj.FromPos), 0, 4);
             }
         }
         private void VisitedDeserialize(
@@ -54,7 +56,7 @@ namespace Monsajem_Incs.Serialization
             SerializeInfo deserializer)
         {
             var LastFrom = Data.From;
-            var Fr = BitConverter.ToInt32(Data.Data, Data.From);
+            var Fr = BitConverter.ToInt32(Data.Data, LastFrom);
             Data.From += 4;
             if (deserializer.CanStoreInVisit == false)
             {

@@ -91,7 +91,7 @@ namespace Monsajem_Incs.Serialization
             var DS = Deserialize<t>(Result, TrustToType);
             return Result;
 #else
-            return _Serialize(obj,TrustToType);
+            return _Serialize(obj,TrustToType, TrustToMethod);
 #endif
         }
 
