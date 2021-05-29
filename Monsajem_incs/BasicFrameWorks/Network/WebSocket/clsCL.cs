@@ -30,7 +30,6 @@ namespace Monsajem_Incs.Net.Web.WebSocket.Server
         private Stream ClientStream { get; }
 
         public string Id { get; }
-        public bool IsMasking { get; private set; }
 
         public event Action<byte[], WebSocketOpCode> MessageReceived;
 
@@ -136,7 +135,7 @@ namespace Monsajem_Incs.Net.Web.WebSocket.Server
                     }
 
                     packet.Add((byte)stream.ReadByte());
-                    var masked = IsMasking = (packet[1] & (1 << 7)) != 0;
+                    var masked = (packet[1] & (1 << 7)) != 0;
                     var pseudoLength = packet[1] - (masked ? 128 : 0);
 
                     ulong actualLength = 0;
@@ -200,29 +199,29 @@ namespace Monsajem_Incs.Net.Web.WebSocket.Server
                 }
         }
 
-        public void Close()
+        public void Close(bool Mask=false)
         {
             if (!Client.Connected) return;
 
             var mask = new byte[4];
-            if (IsMasking) Random.NextBytes(mask);
-            Send(new byte[] { }, 0x8, IsMasking, mask);
+            if (Mask) Random.NextBytes(mask);
+            Send(new byte[] { }, WebSocketOpCode.ConnectionClose, Mask, mask);
 
             Client.Close();
         }
 
-        public void Send(byte[] payload, bool isBinary) => Send(Client, payload, isBinary, IsMasking);
+        public void Send(byte[] payload, bool isBinary) => Send(Client, payload, isBinary, false);
 
-        public void Send(byte[] payload, bool isBinary = false, bool masking = false) => Send(Client, payload, isBinary, masking);
-        public void Send(byte[] payload, int opcode, bool masking, byte[] mask) => Send(Client, payload, opcode, masking, mask);
+        public void Send(byte[] payload, bool isBinary = true, bool masking = false) => Send(Client, payload, isBinary, masking);
+        public void Send(byte[] payload, WebSocketOpCode opcode, bool masking, byte[] mask) => Send(Client, payload, opcode, masking, mask);
 
         static void Send(TcpClient client, byte[] payload, bool isBinary = false, bool masking = false)
         {
             var mask = new byte[4];
             if (masking) Random.NextBytes(mask);
-            Send(client, payload, isBinary ? 0x2 : 0x1, masking, mask);
+            Send(client, payload, isBinary ? WebSocketOpCode.Binary : WebSocketOpCode.Text , masking, mask);
         }
-        static void Send(TcpClient client, byte[] payload, int opcode, bool masking, byte[] mask)
+        static void Send(TcpClient client, byte[] payload, WebSocketOpCode opcode, bool masking, byte[] mask)
         {
             if (masking && mask == null) throw new ArgumentException(nameof(mask));
 

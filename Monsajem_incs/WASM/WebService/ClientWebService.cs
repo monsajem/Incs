@@ -27,7 +27,7 @@ namespace Monsajem_Incs.Net.Web
             {
                 Socket = new WebAssembly.Net.WebSockets.ClientWebSocket();
                 await Socket.ConnectAsync(
-                        new Uri("ws://" + Address.IpAddress + ":" + Address.Port.ToString() + "/Client/"), 
+                        new Uri("ws://" + Address.IpAddress + ":" + Address.Port.ToString() + "/"), 
                         CancellationToken.None);
             }
 

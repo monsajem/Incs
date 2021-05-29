@@ -205,7 +205,13 @@ namespace Monsajem_ResourcesMaker
                                             CurrentBlock += "case \"link\":";
                                             CurrentBlock.NewBlock(() =>
                                             {
-                                                CurrentBlock += "if (Element.GetAttribute(\"type\").ToLower() == \"text/css\")";
+                                                CurrentBlock += "var LinkType = Element.GetAttribute(\"type\");";
+                                                CurrentBlock += "if (LinkType!=null)";
+                                                CurrentBlock.NewBlock(() => CurrentBlock += @"LinkType=LinkType.ToLower();");
+                                                CurrentBlock += "var LinkRel = Element.GetAttribute(\"rel\");";
+                                                CurrentBlock += "if (LinkRel!=null)";
+                                                CurrentBlock.NewBlock(() => CurrentBlock += @"LinkRel=LinkRel.ToLower();");
+                                                CurrentBlock += "if (LinkType==\"text/css\" || LinkRel==\"stylesheet\")";
                                                 CurrentBlock += "{";
                                                 CurrentBlock.NewBlock(() =>
                                                 {

@@ -16,7 +16,7 @@ namespace UserControler
 {
     public abstract class Page:IComparable<Page>
     {
-        public static HTMLElement AppMainElement;
+        private static HTMLElement AppMainElement;
         private class _Page : Page
         {
             public string _Address;
@@ -83,9 +83,10 @@ namespace UserControler
             }
         }
 
-        public static void SubmitPage(params Page[] Page)
+        public static void SubmitPage(HTMLElement MainElement,params Page[] Page)
         {
             Pages.BinaryInsert(Page);
+            AppMainElement = MainElement;
         }
 
         public abstract class HaveData:Page
