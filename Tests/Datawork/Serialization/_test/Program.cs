@@ -28,6 +28,8 @@ namespace _test
     {
         static void Main(string[] args)
         {
+            var ISR = 12.Serialize();
+
             new byte[1000].Serialize();
 
             q q1 = MakeQ();

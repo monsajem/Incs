@@ -5,6 +5,8 @@ using System.Reflection.Emit;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using static Monsajem_Incs.Collection.Array.Extentions;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace Monsajem_Incs.DynamicAssembly
 {
@@ -29,7 +31,7 @@ namespace Monsajem_Incs.DynamicAssembly
                     typeof(T), bindingFlags, filter);
 
         public static T CreateInstance() => _CreateInstance();
-        private static Func<T> _CreateInstance=((Func<Func<T>>)(()=>
+        private static Func<T> _CreateInstance = ((Func<Func<T>>)(() =>
         {
             var t = typeof(T);
             var Rt = Type.GetType("System.RuntimeType");
@@ -48,8 +50,8 @@ namespace Monsajem_Incs.DynamicAssembly
 
         private static int _ArRank = ((Func<int>)(() =>
         {
-            try{return typeof(T).GetArrayRank();}
-            catch{return 0;}
+            try { return typeof(T).GetArrayRank(); }
+            catch { return 0; }
         }))();
 
         public static T CreateArray(params int[] Len) =>
@@ -79,18 +81,18 @@ namespace Monsajem_Incs.DynamicAssembly
             });
         }))();
 
-        private static int[] _ArLen=new int[_ArRank];
-        public static T CreateArray()=>
+        private static int[] _ArLen = new int[_ArRank];
+        public static T CreateArray() =>
             CreateArray(_ArLen);
 
-        public static object GetValueFromArray(T Array,params int[] Position) =>
+        public static object GetValueFromArray(T Array, params int[] Position) =>
             _GetValueFromArray(Array, Position);
         private static Func<T, int[], object> _GetValueFromArray =
         ((Func<Func<T, int[], object>>)(() =>
         {
             var Type = typeof(T);
             if (Type.IsArray == false)
-                return (a,b)=>throw new Exception($"Type of {Type} is not array type.");
+                return (a, b) => throw new Exception($"Type of {Type} is not array type.");
             var Rank = Type.GetArrayRank();
             return DynamicMethodBuilder.Delegate<Func<T, int[], object>>("GetValue_", (il) =>
             {
@@ -109,14 +111,14 @@ namespace Monsajem_Incs.DynamicAssembly
             });
         }))();
 
-        public static void SetValueToArray(T Array, object Value,params int[] Position) =>
+        public static void SetValueToArray(T Array, object Value, params int[] Position) =>
             _SetValueToArray(Array, Value, Position);
-        private static Action<T, object, int[]> _SetValueToArray=
-        ((Func<Action<T, object, int[]>>)(()=>
+        private static Action<T, object, int[]> _SetValueToArray =
+        ((Func<Action<T, object, int[]>>)(() =>
         {
             var Type = typeof(T);
             if (Type.IsArray == false)
-                return (a,b,c) => throw new Exception($"Type of {Type} is not array type.");
+                return (a, b, c) => throw new Exception($"Type of {Type} is not array type.");
             var Rank = Type.GetArrayRank();
             return DynamicMethodBuilder.Delegate<Action<T, object, int[]>>("SetValue_",
             (il) =>
@@ -144,8 +146,8 @@ namespace Monsajem_Incs.DynamicAssembly
     {
 
         public static FieldInfo[] GetAllFields(
-            Type typeToReflect, 
-            BindingFlags? bindingFlags = null, 
+            Type typeToReflect,
+            BindingFlags? bindingFlags = null,
             Func<FieldInfo, bool> filter = null)
         {
             return GetAll(
@@ -184,27 +186,27 @@ namespace Monsajem_Incs.DynamicAssembly
             Func<(Type Type, BindingFlags BindingFlags), T[]> GetMembers,
             BindingFlags? bindingFlags,
             Func<T, bool> filter = null)
-            where T:MemberInfo
+            where T : MemberInfo
         {
 #if DEBUG
             if (typeToReflect == null)
                 throw new NullReferenceException("typeToReflect is null!");
 #endif
-            if (bindingFlags==null)
+            if (bindingFlags == null)
                 bindingFlags = BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy;
-            var Memebrs = GetMembers((typeToReflect,bindingFlags.Value));
+            var Memebrs = GetMembers((typeToReflect, bindingFlags.Value));
             if (filter != null)
                 Memebrs = Memebrs.Where(filter).ToArray();
             if (typeToReflect.BaseType != null)
             {
                 var OldFilter = filter;
                 if (filter == null)
-                    filter = info => Memebrs.All((c) => c.MetadataToken!= info.MetadataToken);
+                    filter = info => Memebrs.All((c) => c.MetadataToken != info.MetadataToken);
                 else
                     filter = info => OldFilter(info) && Memebrs.All((c) => c.MetadataToken != info.MetadataToken);
-                Insert(ref Memebrs, 
-                       GetAll(typeToReflect.BaseType,GetMembers,
-                              bindingFlags, 
+                Insert(ref Memebrs,
+                       GetAll(typeToReflect.BaseType, GetMembers,
+                              bindingFlags,
                               filter));
             }
             return Memebrs;
@@ -332,15 +334,7 @@ namespace Monsajem_Incs.DynamicAssembly
             return CreateArray(Type.GetElementType(), Type.GetArrayRank());
         }
 
-        public static Delegate CreateDelagate(
-            Type[] Params,
-            Action<object[]> Body,
-            Type DelegateType)
-        {
-            return CreateDelagate(Params, null, Body, null, DelegateType);
-        }
-
-        //public static Delegate CreateDelagate(
+        //public static Delegate CreateDelegate(
         //    Type[] Params,
         //    Type Result,
         //    Action<object[]> Action,
@@ -393,115 +387,207 @@ namespace Monsajem_Incs.DynamicAssembly
         //        return dynMethod.CreateDelegate(DelegateType, Action);
         //}
 
-        public static Delegate CreateDelagate(
-            Type[] Params,
-            Type Result,
+        public async static Task<T> Convert<T>(Task<object> task) => (T)(await task);
+
+        private static SortedDictionary<Type, (int DGSelector, Func<object, Delegate> Wrapper)> DelegateWrappers =
+            new SortedDictionary<Type, (int DGSelector, Func<object, Delegate> Wrapper)>(
+                            Comparer<Type>.Create((c1,c2)=> c1.FullName.CompareTo(c2.FullName)));
+        public static Delegate CreateDelegateWrapper(
+            Type DelegateType,
             Action<object[]> Action,
             Func<object[], object> Func,
-            Type DelegateType)
+            Func<object[], Task> TaskAction,
+            Func<object[], Task<object>> TaskFunc)
         {
-            var ParamsLength = Params.Length;
-            var HaveResult = false;
-            if (Result != null)
-                if (Result != typeof(void))
-                    HaveResult = true;
+            (int DGSelector, Func<object, Delegate> Wrapper) DelegateWrapper;
 
-            var dynType = new TypeBuilder("Warpper", TypeAttributes.Public | TypeAttributes.Class);
-
-            FieldBuilder Field;
-            if (HaveResult)
+            if (DelegateWrappers.TryGetValue(DelegateType, out DelegateWrapper) == false)
             {
-                Field = dynType.DeclareField(FieldAttributes.Public, "DG", Func.GetType());
-            }
-            else
-            {
-                Field = dynType.DeclareField(FieldAttributes.Public, "DG", Action.GetType());
-            }
+                var Method = DelegateType.GetMethod("Invoke");
+                var Params = Method.GetParameters().Select((c) => c.ParameterType).ToArray();
+                var Result = Method.ReturnType;
+                object DGValue = null;
 
-            var dynMethod = dynType.Method(MethodAttributes.Public, "Warp_Method", Params, Result,
-            (il) =>
-            {
-                var local = il.DeclareLocal(typeof(object[]));
-                il.Emit(OpCodes.Ldc_I4, ParamsLength);
-                il.Emit(OpCodes.Newarr, typeof(object));
+                var HaveResult = false;
 
-                for (int i = 1; i < ParamsLength + 1; i++)
+                if (Result != null)
+                    if (Result != typeof(void))
+                        HaveResult = true;
+                if (HaveResult)
                 {
-                    il.Emit(OpCodes.Dup);
-                    var x = i - 1;
-                    il.Emit(OpCodes.Ldc_I4_S, x);
-                    il.Emit(OpCodes.Ldarg_S, i);
-                    il.Emit(OpCodes.Box, Params[i - 1]);
-                    il.Emit(OpCodes.Stelem_Ref);
+                    if (Result == typeof(Task))
+                        DelegateWrapper.DGSelector = 3;
+                    else if (Result.IsAssignableTo(typeof(Task<string>).BaseType))
+                        DelegateWrapper.DGSelector = 4;
+                    else
+                        DelegateWrapper.DGSelector = 2;
                 }
-                il.Emit(OpCodes.Stloc_0);
-                il.Emit(OpCodes.Ldarg_0);
-                il.Emit(OpCodes.Ldfld, Field);
-                il.Emit(OpCodes.Ldloc_0);
-
-                if (HaveResult)
-                    il.Emit(OpCodes.Call, typeof(Func<object[], object>).GetMethod("Invoke"));
                 else
-                    il.Emit(OpCodes.Call, typeof(Action<object[]>).GetMethod("Invoke"));
+                {
+                    DelegateWrapper.DGSelector = 1;
+                }
 
-                if (HaveResult)
-                    il.Emit(OpCodes.Unbox_Any, Result);
-                il.Emit(OpCodes.Ret);
-            });
+                switch (DelegateWrapper.DGSelector)
+                {
+                    case 1: //Action
+                        DGValue = Action;
+                        break;
+                    case 2: //Func
+                        DGValue = Func;
+                        break;
+                    case 3: //TaskAction
+                        DGValue = TaskAction;
+                        break;
+                    case 4: //TaskFunc
+                        DGValue = TaskFunc;
+                        break;
+                }
 
-            var ResultObj = dynType.Create().GetConstructors().First().Invoke(null);
+                var ParamsLength = Params.Length;
 
-            if (HaveResult)
-                ResultObj.GetType().GetField("DG").SetValue(ResultObj, Func);
-            else
-                ResultObj.GetType().GetField("DG").SetValue(ResultObj, Action);
+                var dynType = new TypeBuilder("Warpper", TypeAttributes.Public | TypeAttributes.Class);
 
-            return ResultObj.GetType().GetMethod("Warp_Method").CreateDelegate(DelegateType, ResultObj);
+                FieldBuilder Field;
+
+                Field = dynType.DeclareField(FieldAttributes.Public, "DG", DGValue.GetType());
+
+                var dynMethod = dynType.Method(MethodAttributes.Public, "Warp_Method", Params, Result,
+                (il) =>
+                {
+                    var local = il.DeclareLocal(typeof(object[]));
+                    il.Emit(OpCodes.Ldc_I4, ParamsLength);
+                    il.Emit(OpCodes.Newarr, typeof(object));
+
+                    for (int i = 1; i < ParamsLength + 1; i++)
+                    {
+                        il.Emit(OpCodes.Dup);
+                        var x = i - 1;
+                        il.Emit(OpCodes.Ldc_I4_S, x);
+                        il.Emit(OpCodes.Ldarg_S, i);
+                        il.Emit(OpCodes.Box, Params[i - 1]);
+                        il.Emit(OpCodes.Stelem_Ref);
+                    }
+                    il.Emit(OpCodes.Stloc_0);
+                    il.Emit(OpCodes.Ldarg_0);
+                    il.Emit(OpCodes.Ldfld, Field);
+                    il.Emit(OpCodes.Ldloc_0);
+
+                    switch (DelegateWrapper.DGSelector)
+                    {
+                        case 1: //Action
+                            il.Emit(OpCodes.Call, typeof(Action<object[]>).GetMethod("Invoke"));
+                            break;
+                        case 2: //Func
+                            il.Emit(OpCodes.Call, typeof(Func<object[], object>).GetMethod("Invoke"));
+                            il.Emit(OpCodes.Unbox_Any, Result);
+                            break;
+                        case 3: //TaskAction
+                            il.Emit(OpCodes.Call, typeof(Func<object[], Task>).GetMethod("Invoke"));
+                            break;
+                        case 4: //TaskFunc
+                            il.Emit(OpCodes.Call, typeof(Func<object[], Task<object>>).GetMethod("Invoke"));
+                            il.Emit(OpCodes.Call, typeof(TypeController).GetMethod("Convert").MakeGenericMethod(
+                                Result.GetGenericArguments()[0]));
+                            break;
+                    }
+
+                    il.Emit(OpCodes.Ret);
+                });
+
+                var Wrapper_Type = dynType.Create();
+                var Wrapper_Ctor = Wrapper_Type.GetConstructors().First();
+                var Wrapper_DG = Wrapper_Type.GetField("DG");
+                var Wrapper_Method = Wrapper_Type.GetMethod("Warp_Method");
+
+                DelegateWrapper.Wrapper = (DGValue) =>
+                {
+                    var ResultObj = Wrapper_Ctor.Invoke(null);
+                    Wrapper_DG.SetValue(ResultObj, DGValue);
+                    return Wrapper_Method.CreateDelegate(DelegateType, ResultObj);
+                };
+
+                DelegateWrappers.Add(DelegateType, DelegateWrapper);
+            }
+
+            {
+                object DGValue = null;
+                switch (DelegateWrapper.DGSelector)
+                {
+                    case 1: //Action
+                        DGValue = Action;
+                        break;
+                    case 2: //Func
+                        DGValue = Func;
+                        break;
+                    case 3: //TaskAction
+                        DGValue = TaskAction;
+                        break;
+                    case 4: //TaskFunc
+                        DGValue = TaskFunc;
+                        break;
+                }
+                return DelegateWrapper.Wrapper(DGValue);
+            }
         }
 
-        public static Delegate CreateDelagate(
-            MethodInfo Method,
-            Action<object[]> Action,
-            Func<object[], object> Func,
-            Type DelegateType)
+        public static Delegate CreateDelegateWrapper(
+            Type DelegateType,
+            Func<object[], object> Body)
         {
-            return CreateDelagate(
-                 Method.GetParameters().Select((c) => c.ParameterType).ToArray(),
-                 Method.ReturnType, Action, Func, DelegateType);
+            return CreateDelegateWrapper(DelegateType, null, Body, null, null);
         }
 
-        public static Delegate CreateDelagate(
-            MethodInfo Method,
-            Func<object[], object> Body,
-            Type DelegateType)
+        public static Delegate CreateDelegateWrapper(
+            Type DelegateType,
+            Action<object[]> Body)
         {
-            return CreateDelagate(Method, null, Body, DelegateType);
+            return CreateDelegateWrapper(DelegateType, Body, null, null, null);
         }
 
-        public static Delegate CreateDelagate(
-            MethodInfo Method,
-            Action<object[]> Body,
-            Type DelegateType)
-        {
-            return CreateDelagate(Method, Body, null, DelegateType);
-        }
-
-        public static Delegate CreateDelagate(
+        public static Delegate CreateDelegateWrapper(
             Delegate Delegate,
             Action<object[]> Action,
-            Func<object[], object> Func)
+            Func<object[], object> Func,
+            Func<object[], Task> TaskAction,
+            Func<object[], Task<object>> TaskFunc)
         {
-            return CreateDelagate(Delegate.GetMethodInfo(), Action, Func, Delegate.GetType());
+            return CreateDelegateWrapper(Delegate.GetType(), Action, Func, TaskAction, TaskFunc);
         }
 
-        public static Delegate CreateDelagate(
-            FieldInfo Field,
+        public static t CreateDelegateWrapper<t>(
             Action<object[]> Action,
-            Func<object[], object> Func)
+            Func<object[], object> Func,
+            Func<object[], Task> TaskAction,
+            Func<object[], Task<object>> TaskFunc)
+            where t : MulticastDelegate
         {
-            return CreateDelagate(Field.FieldType.GetMethod("Invoke"), Action, Func, Field.FieldType);
+            return (t)CreateDelegateWrapper(typeof(t), Action, Func, TaskAction, TaskFunc);
         }
 
+        public static t CreateDelegateWrapper<t>(
+            t SampleDelegate,
+            Action<object[]> Action,
+            Func<object[], object> Func,
+            Func<object[], Task> TaskAction,
+            Func<object[], Task<object>> TaskFunc)
+            where t : MulticastDelegate => CreateDelegateWrapper<t>(Action, Func, TaskAction, TaskFunc);
+
+        public static t CreateDelegateWrapper<t>(Action<object[]> Action)
+            where t : MulticastDelegate => CreateDelegateWrapper<t>(Action, null, null, null);
+        public static t CreateDelegateWrapper<t>(Func<object[], object> Func)
+            where t : MulticastDelegate => CreateDelegateWrapper<t>(null, Func, null, null);
+        public static t CreateDelegateWrapper<t>(Func<object[], Task> TaskAction)
+            where t : MulticastDelegate => CreateDelegateWrapper<t>(null, null, TaskAction, null);
+        public static t CreateDelegateWrapper<t>(Func<object[], Task<object>> TaskFunc)
+            where t : MulticastDelegate => CreateDelegateWrapper<t>(null, null, null, TaskFunc);
+        public static t CreateDelegateWrapper<t>(t SampleDelegate, Action<object[]> Action)
+            where t : MulticastDelegate => CreateDelegateWrapper<t>(Action, null, null, null);
+        public static t CreateDelegateWrapper<t>(t SampleDelegate, Func<object[], object> Func)
+            where t : MulticastDelegate => CreateDelegateWrapper<t>(null, Func, null, null);
+        public static t CreateDelegateWrapper<t>(t SampleDelegate, Func<object[], Task> TaskAction)
+            where t : MulticastDelegate => CreateDelegateWrapper<t>(null, null, TaskAction, null);
+        public static t CreateDelegateWrapper<t>(t SampleDelegate, Func<object[], Task<object>> TaskFunc)
+            where t : MulticastDelegate => CreateDelegateWrapper<t>(null, null, null, TaskFunc);
 
         public static Func<object> CreateInstance(Type Type)
         {
@@ -593,7 +679,7 @@ namespace Monsajem_Incs.DynamicAssembly
         public TypeFields(Type Type)
         {
             this.Type = Type;
-            var Fields = TypeController.GetAllFields(Type,filter:(c)=>c.IsStatic==false);
+            var Fields = TypeController.GetAllFields(Type, filter: (c) => c.IsStatic == false);
             this.Fields = new FieldControler[Fields.Length];
             for (int i = 0; i < Fields.Length; i++)
                 this.Fields[i] = new FieldControler(Fields[i]);

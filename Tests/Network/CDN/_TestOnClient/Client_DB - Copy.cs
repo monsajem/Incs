@@ -24,26 +24,6 @@ namespace _TestOnClient
         public string ShortDescribe;
 
         public PartOfTable<ProductGroup, string> GroupParents;
-        public PartOfTable<GameData, string> Game;
-        public PartOfTable<GamePic, string> Image;
-    }
-
-    public class GameData
-    {
-        public byte[] Game;
-        public PartOfTable<Product, string>.RelationItem Product;
-    }
-
-    public class GamePic
-    {
-        public byte[] Pic;
-        public PartOfTable<Product, string>.RelationItem Product;
-    }
-
-    public class FileData
-    {
-        public string Name;
-        public byte[] Data;
     }
 
     public class SimpleData
@@ -81,20 +61,10 @@ namespace _TestOnClient
                 (Products.Relation((c) => c.GroupParents, (c) => c.IsUpdateAble = ISUpdateAble),
                  Groups.Relation((c) => c.ProductChilds, (c) => c.IsUpdateAble = ISUpdateAble)).Join();
 
-                MakeDB(ref GameDatas, "GameDatas", (c) => (string)c.Product.Key);
-                (GameDatas.Relation((c) => c.Product, (c) => c.IsChild = true),
-                 Products.Relation((c) => c.Game, (c) => c.IsUpdateAble = ISUpdateAble)).Join();
-
-                MakeDB(ref GameImages, "GameImages", (c) => (string)c.Product.Key);
-                (GameImages.Relation((c) => c.Product, (c) => c.IsChild = true),
-                 Products.Relation((c) => c.Image, (c) => c.IsUpdateAble = ISUpdateAble)).Join();
-
                 return this;
             }
             public Table<ProductGroup, string> Groups;
             public Table<Product, string> Products;
-            public Table<GameData, string> GameDatas;
-            public Table<GamePic, string> GameImages;
             public Table<SimpleData, string> SimpleDatas;
         }
 
@@ -119,15 +89,8 @@ namespace _TestOnClient
 
                 ServerDB.Products.Insert((c) => c.ProductName = "Product");
                 var Product = ServerDB.Products["Product"].Value;
-                Product.Image.Insert((c) => { });
-                Product.Game.Insert((c) => { });
                 ServerDB.Groups["Root"].Value.ProductChilds.Accept("Product");
 
-                System.Threading.Thread.Sleep(2000);
-
-                Link.GetUpdate(ClientDB.Groups, "Root", (c) => c.ProductChilds).Wait();
-
-                ServerDB.Products.Delete("Product");
                 System.Threading.Thread.Sleep(2000);
 
                 Link.GetUpdate(ClientDB.Groups, "Root", (c) => c.ProductChilds).Wait();
@@ -135,7 +98,7 @@ namespace _TestOnClient
                 System.Threading.Thread.Sleep(2000);
                 Link.GetUpdate(ClientDB.Products).Wait();
                 Link.GetUpdate(ClientDB.Groups).Wait();
-
+                Link.GetUpdate(ClientDB.Groups, "Root", (c) => c.ProductChilds).Wait();
                 //Products.Insert((c) => c.ProductName = "Product2");
                 //Products["Product2"].Value.Game.Insert((c) => c.Game = new byte[10]);
                 //Groups["Root"].Value.ProductChilds.Accept("Product2");

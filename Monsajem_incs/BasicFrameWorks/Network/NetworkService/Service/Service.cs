@@ -13,8 +13,8 @@ namespace Monsajem_Incs.Net.Base.Service
     internal class Service<AddressType>
         where AddressType:IComparable<AddressType>
     {
-        private AddressType[] ServicesAddress = new AddressType[0];
-        private Func<Task>[] Services = new Func<Task>[0];
+        private SortedDictionary<AddressType, Func<Task>> Services =
+                new SortedDictionary<AddressType, Func<Task>>();
         private IAsyncOprations Link;
 
         public Service(IAsyncOprations link)
@@ -26,29 +26,27 @@ namespace Monsajem_Incs.Net.Base.Service
             AddressType ServiceAddress,
             Func<Task> Service)
         {
-            var Pos = BinaryInsert(ref ServicesAddress, ServiceAddress);
-            Insert(ref Services, Service, Pos);
+            Services.Add(ServiceAddress,Service);
         }
 
         public async Task Response()
         {
-            while (await Link.GetCondition())
+            while (await Link.GetData<bool>())
             {
                 var ServiceName = await Link.GetData<AddressType>();
-                var Pos = System.Array.BinarySearch(ServicesAddress, ServiceName);
-                await Services[Pos]();
+                await Services[ServiceName]();
             }
         }
 
         public async Task Request(AddressType ServiceAddress)
         {
-            await Link.SendCondition(true);
+            await Link.SendData(true);
             await Link.SendData(ServiceAddress);
         }
 
-        public async Task CloseRequest()
+        public async Task EndService()
         {
-            await Link.SendCondition(false);
+            await Link.SendData(false);
         }
     }
 }

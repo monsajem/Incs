@@ -18,7 +18,7 @@ namespace Monsajem_Incs.Net.Base.Service
 
         public void StartServicing(
             AddressType Address,
-            Action<SyncOprations<AddressType>> Service)
+            Action<ISyncOprations> Service)
         {
            new Thread(() =>
            {

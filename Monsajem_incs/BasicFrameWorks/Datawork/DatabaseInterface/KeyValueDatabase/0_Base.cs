@@ -41,7 +41,7 @@ namespace Monsajem_Incs.Database.Base
         where KeyType : IComparable<KeyType>
     {
 
-        [RemoteExactDelegate]
+        [Remotable]
         [Serialization.NonSerialized]
         public Func<ValueType, KeyType> GetKey;
         public KeyInfo KeysInfo = new KeyInfo();

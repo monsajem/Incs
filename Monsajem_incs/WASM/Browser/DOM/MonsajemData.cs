@@ -15,7 +15,7 @@ namespace WebAssembly.Browser.DOM
 
         public static void SetJsVar(string VarName,object Data)
         {
-            JsObj.SetObjectProperty("VarName",VarName);
+            JsObj.SetObjectProperty(VarName, Data);
         }
         public static object GetJsVar(string VarName)
         {

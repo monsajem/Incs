@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Monsajem_Incs.Database.Base;
-using Monsajem_Incs.Database.ArrayDb;
 using Monsajem_Incs.Net.Tcp;
 using Monsajem_Incs.Net.Base.Service;
 
@@ -14,7 +13,9 @@ namespace TestOnServer
     {
         public class RemoteObj
         {
+            [Remotable]
             public Action Ac= () => Console.WriteLine("aaa");
+            [Remotable]
             public Func<string> Func= () => "alireza";
         }
 
@@ -26,11 +27,11 @@ namespace TestOnServer
             (Link) =>
             {
                 var obj = new RemoteObj();
-                Link.Remote(obj,(c)=>
+                Link.Remote(obj,async (c)=>
                 {
                     c.Ac();
                     var q = c.Func();
-                });
+                }).Wait();
             });
 
             Console.ReadKey();

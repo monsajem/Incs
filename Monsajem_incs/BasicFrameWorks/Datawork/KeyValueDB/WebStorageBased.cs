@@ -14,21 +14,11 @@ namespace Monsajem_Incs.Database.KeyValue.WebStorageBased
 {
     internal class MyUTF
     {
-        public static byte[] GetBytes(string str)
-        {
-            return System.Convert.FromBase64String(ASCII.GetString(Unicode.GetBytes(str)));
-            //byte[] bytes = new byte[str.Length * 2];
-            //System.Buffer.BlockCopy(str.ToCharArray(), 0, bytes, 0, bytes.Length);
-            //return bytes;
-        }
+        public static byte[] GetBytes(string str)=>
+            System.Convert.FromBase64String(ASCII.GetString(Unicode.GetBytes(str)));
 
-        public static string GetString(byte[] bytes)
-        {
-            return Unicode.GetString(ASCII.GetBytes(System.Convert.ToBase64String(bytes)));
-            //char[] chars = new char[(bytes.Length / 2) + bytes.Length % 2];
-            //System.Buffer.BlockCopy(bytes, 0, chars, 0, bytes.Length);
-            //return new string(chars);
-        }
+        public static string GetString(byte[] bytes)=>
+            Unicode.GetString(ASCII.GetBytes(System.Convert.ToBase64String(bytes)));
     }
 
     public class StorageDictionary<KeyType, ValueType> : 
@@ -42,19 +32,20 @@ namespace Monsajem_Incs.Database.KeyValue.WebStorageBased
             this.WebStorage = WebStorage;
         }
 
+        private string GetKey(KeyType Key) => StorageKey + MyUTF.GetString(Key.Serialize());
+
         public ValueType this[KeyType Key] { 
             get
             {
-                var Str_Key = WebStorage.GetItem(StorageKey + MyUTF.GetString(Key.Serialize()));
+                var Str_Key = WebStorage.GetItem(GetKey(Key));
                 return MyUTF.GetBytes(Str_Key).Deserialize<ValueType>();
             }
             set
             {
-                WebStorage.SetItem(
-                      StorageKey + MyUTF.GetString(Key.Serialize()),
-                      MyUTF.GetString(value.Serialize()));
+                WebStorage.SetItem(GetKey(Key),MyUTF.GetString(value.Serialize()));
             }
         }
+
         public ValueType this[int Position] { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public IArray<KeyType> Keys { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
@@ -63,15 +54,14 @@ namespace Monsajem_Incs.Database.KeyValue.WebStorageBased
 
         public void Add(KeyType key, ValueType value)
         {
-            if (Keys.BinarySearch(key).Index > -1)
+            if (ContainKey(key))
                 throw new Exception("Value Is Exist");
-            Keys.BinaryInsert(key);
             this[key] = value;
         }
 
         public bool ContainKey(KeyType Key)
         {
-            return Keys.BinarySearch(Key).Index>-1;
+            return WebStorage.Contains(GetKey(Key));
         }
 
         public IEnumerator<KeyValuePair<KeyType, ValueType>> GetEnumerator()
@@ -81,9 +71,10 @@ namespace Monsajem_Incs.Database.KeyValue.WebStorageBased
 
         public bool Remove(KeyType key)
         {
-            if(Keys.BinaryDelete(key).Index>-1)
+            var StrKey = GetKey(key);
+            if (WebStorage.Contains(StrKey))
             {
-                WebStorage.RemoveItem(StorageKey + MyUTF.GetString(key.Serialize()));
+                WebStorage.RemoveItem(StrKey);
                 return true;
             }
             return false;
@@ -91,9 +82,10 @@ namespace Monsajem_Incs.Database.KeyValue.WebStorageBased
 
         public bool TryGetValue(KeyType key, out ValueType value)
         {
-            if (Keys.BinarySearch(key).Index > -1)
+            var StrKey = GetKey(key);
+            if (WebStorage.Contains(StrKey))
             {
-                value = this[key];
+                value = MyUTF.GetBytes(StrKey).Deserialize<ValueType>();
                 return true;
             }
             value = default;
