@@ -77,12 +77,6 @@ namespace Monsajem_Incs.Net.Base.Service
         public new Result RunOnOtherSide<Result, Data>(Func<Data, Result> Func) =>
             (this as IAsyncOprations).RunOnOtherSide(Func).GetAwaiter().GetResult();
 
-        public new void RemoteServices(params Func<object, Task<object>>[] Services)=>
-             (this as IAsyncOprations).RemoteServices(Services).GetAwaiter().GetResult();
-
-        public new void RunServices(Func<Func<(int Position, object Data), Task<object>>, Task> Service) =>
-             (this as IAsyncOprations).RunServices(Service).GetAwaiter().GetResult();
-
         new void Stop();
     }
     public class SyncOprations<AddressType> :

@@ -27,6 +27,39 @@ namespace Monsajem_Incs.Serialization
                 NameAsByte = BitConverter.GetBytes(Name.Length);
                 Insert(ref NameAsByte, Name);
 
+                if (Type == typeof(bool))
+                    ConstantSize = 1;
+                else if (Type.IsValueType)
+                {
+                    try
+                    {
+                        ConstantSize = System.Runtime.InteropServices.Marshal.SizeOf(Type);
+                    }
+                    catch
+                    {
+
+                        ConstantSize = -1;
+                    }
+                }
+                else
+                    ConstantSize = -1;
+
+                if(ConstantSize>-1)
+                {
+                    Default_Serializer = (Data, Obj) =>
+                    {
+                        Data.Data.Write(StructToBytes((t)Obj, ConstantSize));
+                    };
+                    Default_Deserializer = (Data) =>
+                    {
+                        var From = Data.From;
+                        var Result = BytesToStruct<t>(Data.Data, From);
+                        Data.From = From + ConstantSize;
+                        return Result;
+                    };
+                }
+
+
                 CanStoreInVisit =
                     !(Type == typeof(Delegate) |
                       Type.BaseType == typeof(MulticastDelegate) |

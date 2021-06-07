@@ -82,6 +82,8 @@ namespace Monsajem_Incs.Serialization
             public MemoryStream Data = new MemoryStream();
         }
 
+        public int SizeOf<t>()=> SerializeInfo<t>.GetSerialize().ConstantSize;
+
         public byte[] Serialize<t>(t obj,
             Action<Type> TrustToType = null,
             Action<MethodInfo> TrustToMethod = null)

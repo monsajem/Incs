@@ -21,7 +21,7 @@ namespace Monsajem_Incs.Serialization
             (Data) => new object(), false);
 
             SerializeInfo<bool>.InsertSerializer(
-            (Data,obj) =>
+            (Data, obj) =>
             {
                 if ((bool)obj == true)
                     Data.Data.WriteByte(1);
@@ -33,127 +33,6 @@ namespace Monsajem_Incs.Serialization
                 int Position = Data.From; Data.From += 1;
                 var Result = (Data.Data)[Position];
                 return Result > 0;
-            }, true);
-
-            SerializeInfo<char>.InsertSerializer(
-            (Data, Obj) =>
-            {
-                Data.Data.Write(BitConverter.GetBytes((char)Obj), 0, 2);
-            },
-            (Data) =>
-            {
-                int Position = Data.From; Data.From += 2;
-                return BitConverter.ToChar(Data.Data, Position);
-            }, true);
-
-            SerializeInfo<byte>.InsertSerializer(
-            (Data, Obj) =>
-            {
-                Data.Data.WriteByte((byte)Obj);
-            },
-            (Data) =>
-            {
-                int Position = Data.From; Data.From += 1;
-                return Data.Data[Position];
-            }, true);
-
-            SerializeInfo<sbyte>.InsertSerializer(
-            (Data, Obj) =>
-            {
-                Data.Data.WriteByte((byte)((sbyte)Obj));
-            },
-            (Data) =>
-            {
-                int Position = Data.From; Data.From += 1;
-                return (sbyte)Data.Data[Position];
-            }, true);
-
-            SerializeInfo<short>.InsertSerializer(
-            (Data, obj) =>
-            {
-                Data.Data.Write(BitConverter.GetBytes((short)obj), 0, 2);
-            },
-            (Data) =>
-            {
-                int Position = Data.From; Data.From += 2;
-                return BitConverter.ToInt16(Data.Data, Position);
-            }, true);
-
-            SerializeInfo<ushort>.InsertSerializer(
-            (Data, Obj) =>
-            {
-                Data.Data.Write(BitConverter.GetBytes((ushort)Obj), 0, 2);
-            },
-            (Data) =>
-            {                 /// as UInt16
-                int Position = Data.From; Data.From += 2;
-                return BitConverter.ToUInt16(Data.Data, Position);
-            }, true);
-
-            SerializeInfo<int>.InsertSerializer(
-            (Data, obj) =>
-            {                 /// as Int32
-                Data.Data.Write(BitConverter.GetBytes((int)obj), 0, 4);
-            },
-            (Data) =>
-            {                 /// as Int32
-                int Position = Data.From; Data.From += 4;
-                return BitConverter.ToInt32(Data.Data, Position);
-            }, true);
-
-            SerializeInfo<uint>.InsertSerializer(
-            (Data, obj) =>
-            {                 /// as UInt32
-                Data.Data.Write(BitConverter.GetBytes((uint)obj), 0, 4);
-            },
-            (Data) =>
-            {                 /// as UInt32
-                int Position = Data.From; Data.From += 4;
-                return BitConverter.ToUInt32(Data.Data, Position);
-            }, true);
-
-            SerializeInfo<long>.InsertSerializer(
-            (Data, obj) =>
-            {                 /// as Int64
-                Data.Data.Write(BitConverter.GetBytes((long)obj), 0, 8);
-            },
-            (Data) =>
-            {                 /// as Int64
-                int Position = Data.From; Data.From += 8;
-                return BitConverter.ToInt64(Data.Data, Position);
-            }, true);
-
-            SerializeInfo<ulong>.InsertSerializer(
-            (Data, obj) =>
-            {
-                Data.Data.Write(BitConverter.GetBytes((ulong)obj), 0, 8);
-            },
-            (Data) =>
-            {
-                int Position = Data.From; Data.From += 8;
-                return BitConverter.ToUInt64(Data.Data, Position);
-            }, true);
-
-            SerializeInfo<float>.InsertSerializer(
-            (Data, obj) =>
-            {    /// as float
-                Data.Data.Write(BitConverter.GetBytes((float)obj), 0, 4);
-            },
-            (Data) =>
-            {    /// as float
-                int Position = Data.From; Data.From += 4;
-                return BitConverter.ToSingle(Data.Data, Position);
-            }, true);
-
-            SerializeInfo<double>.InsertSerializer(
-            (Data, obj) =>
-            {                 /// as double
-                Data.Data.Write(BitConverter.GetBytes((double)obj), 0, 8);
-            },
-            (Data) =>
-            {                 /// as double
-                int Position = Data.From; Data.From += 8;
-                return BitConverter.ToDouble(Data.Data, Position);
             }, true);
 
             SerializeInfo<DateTime>.InsertSerializer(

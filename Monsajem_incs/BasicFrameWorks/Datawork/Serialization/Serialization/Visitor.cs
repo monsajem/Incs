@@ -11,6 +11,11 @@ namespace Monsajem_Incs.Serialization
             object obj,
             SerializeInfo serializer)
         {
+            if (serializer.ConstantSize>-1)
+            {
+                serializer.Serializer(Data, obj);
+                return;
+            }
             var BytesData = Data.Data;
             if (obj == null)
             {
@@ -55,6 +60,11 @@ namespace Monsajem_Incs.Serialization
             Action<object> Set,
             SerializeInfo deserializer)
         {
+            if (deserializer.ConstantSize>-1)
+            {
+                Set(deserializer.Deserializer(Data));
+                return;
+            }
             var LastFrom = Data.From;
             var Fr = BitConverter.ToInt32(Data.Data, LastFrom);
             Data.From += 4;

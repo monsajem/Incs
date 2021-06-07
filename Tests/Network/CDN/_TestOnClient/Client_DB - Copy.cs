@@ -84,8 +84,8 @@ namespace _TestOnClient
                 //ClientDB.Groups.Insert((c) => c.Name = "Root");
                 System.Threading.Thread.Sleep(2000);
 
-                Link.GetUpdate(ClientDB.Products).Wait();
                 Link.GetUpdate(ClientDB.Groups).Wait();
+                Link.GetUpdate(ClientDB.Products).Wait();
 
                 ServerDB.Products.Insert((c) => c.ProductName = "Product");
                 var Product = ServerDB.Products["Product"].Value;

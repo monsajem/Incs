@@ -22,14 +22,14 @@ namespace Monsajem_Incs.Database.Base
         {
             static async Task<int> FindLastTrue(
             Table<DataType, KeyType> Table,
-            Func<(int Position, object Data), Task<object>> service,
+            IRemoteUpdateSender<DataType, KeyType> service,
             int StartPos, int EndPos)
             {
                 var Update = Table.UpdateAble;
                 while (StartPos < EndPos)
                 {
-                    if (Update.UpdateCodes[EndPos].UpdateCode != 
-                        (ulong) await service(((int)UpdateCMD.GetUpdateCodeAtPos,EndPos)))
+                    if (Update.UpdateCodes[EndPos].UpdateCode !=
+                        await service.GetUpdateCodeAtPos(EndPos))
                         EndPos = (EndPos + StartPos) / 2;
                     else
                     {
@@ -41,65 +41,10 @@ namespace Monsajem_Incs.Database.Base
                 return EndPos;
             }
 
-            static async Task DeleteFrom(
-                Table<DataType, KeyType> Table,
-                Func<KeyType, Task> Delete,
-                ulong UpdateCode)
-            {
-                var UpdateCodes = Table.UpdateAble.UpdateCodes;
-                var Place = System.Array.BinarySearch(UpdateCodes,
-                            new UpdateAble<KeyType>() { UpdateCode = UpdateCode },
-                            UpdateAble<KeyType>.CompareCode);
-                if (Place < 0)
-                    Place = (Place * -1) - 1;
-                else
-                    Place += 1;
-                foreach (var Update in UpdateCodes.Skip(Place))
-                {
-                    await Delete(Update.Key);
-                }
-            }
-
-
             Table<DataType, KeyType> ParentTable = Table;
             PartOfTable<DataType, KeyType> PartTable = null;
-            Func<KeyType, Task> Delete;
             if (Table._UpdateAble == null)
                 Table._UpdateAble = new UpdateAbles<KeyType>(0);
-
-            if (IsPartOfTable)
-            {
-                PartTable = (PartOfTable<DataType, KeyType>)Table;
-                ParentTable = PartTable.Parent;
-                if (ParentTable._UpdateAble == null)
-                    ParentTable._UpdateAble = new UpdateAbles<KeyType>(0);
-                var Part_UpdateAble = PartTable.UpdateAble;
-                var Parent_UpdateAble = ParentTable.UpdateAble;
-                Delete = async (key) =>
-                {
-                    await Client.SendData(-2);
-                    await Client.SendData(key);
-                    Part_UpdateAble.DeleteDontUpdate(key);
-                    if (await Client.GetData<bool>())
-                        PartTable.Ignore(key);
-                    else
-                    {
-                        Parent_UpdateAble.DeleteDontUpdate(key);
-                        PartTable.Delete(key);
-                        Deleted?.Invoke(key);
-                    }
-                };
-            }
-            else
-            {
-                var UpdateAble = Table.UpdateAble;
-                Delete = async (key) =>
-                {
-                    UpdateAble.DeleteDontUpdate(key);
-                    Table.Delete(key);
-                    Deleted?.Invoke(key);
-                };
-            }
 
             var Result = false;
 
@@ -119,96 +64,52 @@ namespace Monsajem_Incs.Database.Base
             }
             if (Table.UpdateAble.UpdateCode != LastUpdateCode)
             {
-                await Client.RunServices(async (c) =>
+                var Remote = new IRemoteUpdateSender<DataType, KeyType>(Table,IsPartOfTable);
+                var ServerItemsCount = await Client.GetData<int>();
+                var StartPos = 0;
+                var EndPos = Math.Min(Table.UpdateAble.UpdateCodes.Length, ServerItemsCount) - 1;
+                while (StartPos <= EndPos)
                 {
-                    var ServerItemsCount = await Client.GetData<int>();
-
-                    var StartPos = 0;
-                    var EndPos = Math.Min(Table.UpdateAble.UpdateCodes.Length, ServerItemsCount) - 1;
-
-                    while (EndPos != ServerItemsCount - 1)
+                    var Break = await Client.Remote(Remote,
+                    async (Remote) =>
                     {
-                        var ServerValues = new ulong?[ServerItemsCount];
-                        var LastTruePos = await FindLastTrue(Table,c, StartPos, EndPos);
+                        var LastTruePos = await FindLastTrue(Table, Remote, StartPos, EndPos);
 
                         if (LastTruePos == ServerItemsCount - 1)
-                            break;
-
-                    }
-                });
-
-               
-
-                await DeleteFrom(Table, Delete, await Client.GetData<ulong>());//3
-                if (IsPartOfTable)
-                    await Client.SendData(-1);
-
-                bool[] NeedUpdate;
-                var UpdateCodes = await Client.GetData<ulong[]>();//4
-                ulong[] PartUpdateCodes = null;
-                if (IsPartOfTable)
-                    PartUpdateCodes = await Client.GetData<ulong[]>();//5
-
-                NeedUpdate = new bool[UpdateCodes.Length];
-
-                if (IsPartOfTable)
-                    for (int i = 0; i < UpdateCodes.Length; i++)
-                        NeedUpdate[i] = ParentTable.UpdateAble.IsExist(UpdateCodes[i]) == false;
-                else
-                    for (int i = 0; i < UpdateCodes.Length; i++)
-                        NeedUpdate[i] = Table.UpdateAble.IsExist(UpdateCodes[i]) == false;
-
-                await Client.SendData(NeedUpdate);//5
-
-                for (int i = 0; i < NeedUpdate.Length; i++)
-                {
-                    if (NeedUpdate[i] == true)
-                    {
-                        var Data = await Client.GetData<DataType>();//6
-                        MakeingUpdate?.Invoke(Data);
-                        var Key = Table.GetKey(Data);
-                        if (ParentTable.PositionOf(Key) > -1)
-                        {
-                            ParentTable.Update(Key, (c) =>
-                            {
-                                ParentTable.MoveRelations(c, Data);
-                                return Data;
-                            });
-                            ParentTable.UpdateAble.Changed(Key, Key, UpdateCodes[i]);
-                        }
+                            return true;
                         else
                         {
-                            ParentTable.Insert(Data);
-                            ParentTable.UpdateAble.Insert(Key, UpdateCodes[i]);
-                        }
-                        if (IsPartOfTable)
-                        {
-                            if (PartTable.PositionOf(Key) > -1)
+                            LastTruePos++;
+                            var NextTrue = await Remote.GetUpdateCodeAtPos(LastTruePos);
+                            UpdateAble<KeyType> MyUpCode = null;
+                            while (Table.UpdateAble.UpdateCodes.Length > LastTruePos)
                             {
-                                PartTable.UpdateAble.Changed(Key, Key, PartUpdateCodes[i]);
+                                MyUpCode = Table.UpdateAble.UpdateCodes[LastTruePos];
+                                if (MyUpCode.UpdateCode < NextTrue)
+                                    await Remote.Delete(MyUpCode.Key);
+                                else
+                                    break;
                             }
+                            if (Table.UpdateAble.UpdateCodes.Length > LastTruePos &&
+                               Table.UpdateAble.UpdateCodes[LastTruePos].UpdateCode == MyUpCode.UpdateCode)
+                                StartPos = LastTruePos + 1;
                             else
-                            {
-                                PartTable.UpdateAble.Insert(Key, PartUpdateCodes[i]);
-                                PartTable.Accept(Key);
-                            }
+                                StartPos = LastTruePos;
                         }
-                    }
-                    else if (IsPartOfTable)
+                        return false;
+                    });
+
+                    if (Break || StartPos <= EndPos)
+                        break;
+
+                    await Client.SendData((StartPos, Table.UpdateAble.UpdateCodes[StartPos].UpdateCode));
+                    var Len = await Client.GetData<int>();
+                    for(int i=0;i<Len; i++)
                     {
-                        var Data = ParentTable[ParentTable.UpdateAble[UpdateCodes[i]].Key];//6
-                        MakeingUpdate?.Invoke(Data);
-                        var Key = Table.GetKey(Data);
-                        if (PartTable.PositionOf(Key) > -1)
-                            PartTable.UpdateAble.Changed(Key, Key, PartUpdateCodes[i]);
-                        else
-                        {
-                            PartTable.UpdateAble.Insert(Key, PartUpdateCodes[i]);
-                            PartTable.Accept(Key);
-                        }
+                        var Data = await Client.GetData<(ulong, DataType)>();
+
                     }
-                    Table.UpdateAble.UpdateCode = UpdateCodes[i];
-                    Result = true;
+
                 }
             }
 

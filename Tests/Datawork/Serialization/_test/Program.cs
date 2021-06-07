@@ -26,11 +26,28 @@ namespace _test
 
     class Program
     {
+
+        public struct str1
+        {
+            public int Value;
+        }
+
+        public static byte[] StructToBytes<t>(t value,int Size)
+        {
+            byte[] bytes = new byte[Size];
+            System.Runtime.CompilerServices.Unsafe.As<byte, t>(ref bytes[0]) = value;
+            return bytes;
+        }
+        public static t BytesToStruct<t>(byte[] value, int startIndex)
+        {
+            return System.Runtime.CompilerServices.Unsafe.ReadUnaligned<t>(ref value[startIndex]);
+        }
+
         static void Main(string[] args)
         {
-            var ISR = 12.Serialize();
 
-            new byte[1000].Serialize();
+            object obj = 12;
+            var D = obj.Serialize();
 
             q q1 = MakeQ();
 
@@ -43,10 +60,12 @@ namespace _test
 
             var Da = Sa.Deserialize(q1);
 
+            var Len = 100;
+
             var STime =
             Timing.run(() =>
             {
-                for (int i = 0; i < 1000000; i++)
+                for (int i = 0; i < Len; i++)
                 {
                     Sa = q1.Serialize();
                 }
@@ -55,7 +74,7 @@ namespace _test
             var DTime =
             Timing.run(() =>
             {
-                for (int i = 0; i < 1000000; i++)
+                for (int i = 0; i < Len; i++)
                 {
                     Da = Sa.Deserialize<q>();
                 }

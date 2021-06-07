@@ -22,6 +22,9 @@ namespace Monsajem_Incs.Serialization
             return Serializere.Serialize(obj,TrustToType,TrustToMethod);
         }
 
+        public static int SizeOf<t>(this t obj)=>Serializere.SizeOf<t>();
+        public static int SizeOf<t>()=>Serializere.SizeOf<t>();
+
         public static t Deserialize<t>(this byte[] Data, 
             Action<Type> TrustToType = null,
             Action<MethodInfo> TrustToMethod = null)

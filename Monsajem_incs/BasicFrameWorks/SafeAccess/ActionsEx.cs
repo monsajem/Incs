@@ -5,11 +5,11 @@ using System.Text;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
-namespace Monsajem_Incs.DelegateExtentions
+namespace Monsajem_Incs.Async
 {
     public delegate ref t GetRef<t>();
 
-    public static class Actions
+    public static class DelegateActions
     {
         public static void ex<t>(this t dg)
             where t : System.MulticastDelegate
@@ -19,24 +19,22 @@ namespace Monsajem_Incs.DelegateExtentions
 
         public static Task WaitForHandle(GetRef<Action> Action)
         {
-            var a = new object();
-            var Locker = new object();
             var Runned = false;
-            var Waiter = AsyncTaskMethodBuilder.Create();
+            var Waiter = new Task(()=> { });
             Action MyAction = null;
             MyAction = () => {
-                lock(Locker)
+                lock(Waiter)
                 {
                     if(Runned==false)
                     {
                         Action() -= MyAction;
                         Runned = true;
-                        Waiter.SetResult();
+                        Waiter.Start();
                     }
                 }
             };
             Action() += MyAction;
-            return Waiter.Task;
+            return Waiter;
         }
 
         public static void WaitForHandle(GetRef<Action> Action,Action Handle)
@@ -75,12 +73,12 @@ namespace Monsajem_Incs.DelegateExtentions
     public static class Extentions
     {
         public static Task WaitForHandle(this GetRef<Action> Action)=>
-           Actions.WaitForHandle(Action);
+           DelegateActions.WaitForHandle(Action);
 
         public static void RunOnNewThreade<t>(this Action Action)=>
-            Actions.RunOnNewThreade(Action);
+            DelegateActions.RunOnNewThreade(Action);
 
         public static void RunOnNewThreade(this IEnumerable<Action> actions)=>
-            Actions.RunOnNewThreade(actions);
+            DelegateActions.RunOnNewThreade(actions);
     }
 }

@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
-using Monsajem_Incs.DelegateExtentions;
+using Monsajem_Incs.Async;
 
-namespace Monsajem_Incs.SafeAccess
+namespace Monsajem_Incs.Async
 {
     public class Locked:IDisposable
     {
@@ -79,7 +79,7 @@ namespace Monsajem_Incs.SafeAccess
 
         public Task WaitForChange()
         {
-            return Actions.WaitForHandle(() => ref OnChanged);
+            return DelegateActions.WaitForHandle(() => ref OnChanged);
         }
 
         public Task WaitForChangeQuque() => WaitForChangeQuque(() => { });

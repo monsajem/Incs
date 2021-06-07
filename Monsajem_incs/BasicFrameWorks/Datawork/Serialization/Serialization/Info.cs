@@ -21,6 +21,7 @@ namespace Monsajem_Incs.Serialization
             public Action<SerializeData, object> Serializer;
             public byte[] NameAsByte;
             public bool CanStoreInVisit;
+            public int ConstantSize;
             protected bool IsMade;
             protected bool IsMading;
             private static Type BaseType = typeof(SerializeInfo<object>).GetGenericTypeDefinition();

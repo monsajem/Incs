@@ -10,16 +10,16 @@ using static System.Runtime.Serialization.FormatterServices;
 
 namespace Monsajem_Incs.Net.Base.Service
 {
-    
-    [AttributeUsage(AttributeTargets.Field,AllowMultiple = false)]
-    public class Remotable:Attribute
-    {}
+
+    [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
+    public class Remotable : Attribute
+    { }
 
     public interface IAsyncOprations
     {
         Task<t> SendData<t>(t Data);
         Task<t> GetData<t>();
-        public async Task<t> GetData<t>(t SampleType)=> await GetData<t>();
+        public async Task<t> GetData<t>(t SampleType) => await GetData<t>();
         public async Task SendArray<t>(IEnumerable<t> Datas, Action<t> DataSended = null)
         {
             await SendData(Datas.Count());
@@ -40,26 +40,6 @@ namespace Monsajem_Incs.Net.Base.Service
             for (int i = 0; i < Datas.Length; i++)
                 Datas[i] = await GetData<t>();
             return Datas;
-        }
-        public async Task RemoteServices(params Func<object, Task<object>>[] Services)
-        {
-            while (true)
-            {
-                var Data = await GetData<(int Pos, object Inputs)>();
-                if (Data.Pos == -1)
-                    return;
-                await SendData(await Services[Data.Pos](Data.Inputs));
-            }
-        }
-
-        public async Task RunServices(Func<Func<(int Position, object Data), Task<object>>, Task> Service)
-        {
-            await Service(async (obj) =>
-            {
-                await SendData(obj);
-                return await GetData<object>();
-            });
-            await SendData<(int, object)>((-1, null));
         }
         //0
         public async Task RunOnOtherSide(Action<ISyncOprations> Action)
@@ -233,8 +213,8 @@ namespace Monsajem_Incs.Net.Base.Service
             BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy, Func<FieldInfo, bool> filter = null)
         {
             var Remotes = typeToReflect.GetFields(bindingFlags);
-            Remotes = Remotes.Where((c) => 
-            c.FieldType.BaseType == typeof(MulticastDelegate)&&
+            Remotes = Remotes.Where((c) =>
+            c.FieldType.BaseType == typeof(MulticastDelegate) &&
             c.GetCustomAttributes(typeof(Remotable)).Count() > 0).ToArray();
             if (filter != null)
                 Remotes = Remotes.Where((c) => filter(c)).ToArray();
@@ -247,104 +227,174 @@ namespace Monsajem_Incs.Net.Base.Service
             return Remotes;
         }
 
-        public async Task Remote<t>(t obj, Func<t,Task> Talk)
+        public Task Remote<t>(t obj, Func<t, Task> Talk) =>
+            Remote<t, object>(obj, async (c) => { await Talk(c); return null; });
+        public async Task<r> Remote<t, r>(t obj, Func<t, Task<r>> Talk)
         {
+
             var Fields = GetRemotableFields(typeof(t));
 
-            var Service = new Service<UInt16>(this);
+            var Service = new Service<byte>(this);
+            var SendQueue = new Async.AsyncTaskQueue();
+            var ReciveQueue = new Async.AsyncTaskQueue();
             var Len = Fields.Length;
+
+            Func<byte, object[], bool, Task<object>> Request =
+            async (byte Address,
+                   object[] inputs,
+                   bool HaveResult) =>
+            {
+                Task SendTask;
+                Task<object> ReciveTask;
+                lock (Service)
+                {
+                    SendTask = SendQueue.AddToQueue(async () =>
+                    {
+                        Console.WriteLine("Q");
+                        await Service.Request(Address);
+                        await SendData(inputs);
+                        Console.WriteLine("N");
+                    });
+                    ReciveTask = ReciveQueue.AddToQueue(async () =>
+                    {
+                        await Sync();
+                        if (HaveResult)
+                            return await GetData<object>();
+                        else
+                            return null;
+                    });
+                }
+                await SendTask;
+                return await ReciveTask;
+            };
+
             for (int i = 0; i < Len; i++)
             {
                 var Field = Fields[i];
-                var Address = (UInt16)i;
+                var Address = (byte)i;
                 Field.SetValue(obj,
                     DynamicAssembly.TypeController.CreateDelegateWrapper(Field.FieldType,
                          (inputs) =>
                          {
-                             Service.Request(Address).GetAwaiter().GetResult();
-                             SendData(inputs).Wait();
-                             Sync().Wait();
+                             Request(Address, inputs,false).Wait();
                          },
                          (inputs) =>
                          {
-                             Service.Request(Address).GetAwaiter().GetResult();
-                             SendData(inputs).Wait();
-                             Sync().Wait();
-                             return GetData<object>().GetAwaiter().GetResult();
+                             return Request(Address, inputs,true).GetAwaiter().GetResult();
                          },
                          async (inputs) =>
                          {
-                             await Service.Request(Address);
-                             await SendData(inputs);
-                             await Sync();
+                             await Request(Address, inputs,false);
                          },
                          async (inputs) =>
                          {
-                             await Service.Request(Address);
-                             await SendData(inputs);
-                             await Sync();
-                             return await GetData<object>();
+                             return await Request(Address, inputs,true);
                          }));
             }
-            await Talk(obj);
-            await Service.EndService();
+            var Result = await Talk(obj);
+            await Service.EndService(255);
+            return Result;
         }
 
         public async Task Remote<t>(t obj)
         {
+            var TaskQueue = new Async.AsyncTaskQueue();
             var Fields = GetRemotableFields(typeof(t));
-            var Service = new Service<UInt16>(this);
+            var Service = new Service<byte>(this);
             var Len = Fields.Length;
-            for (int i=0;i<Len;i++)
+
+            Func<Func<object[],Task<object>>,bool,Task> CheckException=
+            async (ac,HaveResult)=>
+            {
+                var Params = await GetData<object[]>();
+                object Result=null;
+                Exception Ex=null;
+
+                var Q = TaskQueue.AddToQueue(async () =>
+                {
+                    try
+                    {
+                        Result = await ac(Params);
+                    }
+                    catch (Exception ex)
+                    {
+                        Ex = ex;
+                    }
+                    await Sync(Ex);
+                    if(HaveResult)
+                        await SendData(Result);
+                });
+            };
+
+            for (int i = 0; i < Len; i++)
             {
                 var Field = Fields[i];
-                var Address =(UInt16) i;
-                if (Field.FieldType.GetMethod("Invoke").ReturnType != typeof(void))
+                var Address = (byte)i;
+                var Method = Field.FieldType.GetMethod("Invoke");
+                if (Method.ReturnType != typeof(void))
                 {
-                    if (Field.FieldType == typeof(Task))
+                    if (Method.ReturnType == typeof(Task))
                         Service.AddService(Address, async () =>
                         {
-                            var Params = await GetData<object[]>();
-                            await Sync(async () => { await (Task)((Delegate)Field.GetValue(obj)).DynamicInvoke(Params); });
+                            await CheckException(async (Params) => 
+                            { 
+                                await (Task)((Delegate)Field.GetValue(obj)).DynamicInvoke(Params);
+                                return null;
+                            },false);
                         });
-                    else if (Field.FieldType.IsAssignableTo(typeof(Task<string>).BaseType))
+                    else if (Method.ReturnType.IsAssignableTo(typeof(Task<string>).BaseType))
                         Service.AddService(Address, async () =>
                         {
-                            var Params = await GetData<object[]>();
-                            Task Rs = null;
-                            await Sync(() => { Rs = (Task)((Delegate)Field.GetValue(obj)).DynamicInvoke(Params); });
-                            await Rs;
-                            await SendData(((dynamic)Rs).Result);
+                            await CheckException(async (Params) =>
+                            {
+                                var Rs = (Task)((Delegate)Field.GetValue(obj)).DynamicInvoke(Params);
+                                await Rs;
+                                return ((dynamic)Rs).Result;
+                            }, true);
                         });
                     else
                         Service.AddService(Address, async () =>
                         {
-                            var Params = await GetData<object[]>();
-                            object Rs = null;
-                            await Sync(() => { Rs = ((Delegate)Field.GetValue(obj)).DynamicInvoke(Params); });
-                            await SendData(Rs);
+                            await CheckException(async (Params) =>
+                            {
+                                return ((Delegate)Field.GetValue(obj)).DynamicInvoke(Params);
+                            }, true);
                         });
                 }
                 else
                 {
                     Service.AddService(Address, async () =>
                     {
-                        var Params = await GetData<object[]>();
-                        await Sync(() => ((Delegate)Field.GetValue(obj)).DynamicInvoke(Params));
+                        await CheckException(async (Params) =>
+                        {
+                            ((Delegate)Field.GetValue(obj)).DynamicInvoke(Params);
+                            return null;
+                        }, false);
                     });
                 }
             }
-            await Service.Response();
+            await Service.Response(255);
         }
 
-        public async Task Sync(Action Action)
+        public Task Sync(Action Action)
         {
+            Exception AcEx = null;
             try
             {
                 Action();
-                await SendData(false);
             }
             catch (Exception ex)
+            {
+                AcEx = ex;
+            }
+            return Sync(AcEx);
+        }
+
+        public async Task Sync(Exception ex)
+        {
+            if(ex == null)
+                await SendData(false);
+            else
             {
                 await SendData(true);
 #if DEBUG
@@ -373,18 +423,18 @@ namespace Monsajem_Incs.Net.Base.Service
 
         Task Stop();
     }
-    public class AsyncOprations<AddressType>:
-        IDisposable,IAsyncOprations
+    public class AsyncOprations<AddressType> :
+        IDisposable, IAsyncOprations
     {
         internal ClientSocket<AddressType> Client;
         public event Action<AddressType> Misstake;
 #if DEBUG
-        private Func<OprationType, OprationType,Task> Parity;
+        private Func<OprationType, OprationType, Task> Parity;
         private int Sequnce = 0;
 #endif
         private bool IsServer;
         public AsyncOprations(
-            ClientSocket<AddressType> Client,bool IsServer)
+            ClientSocket<AddressType> Client, bool IsServer)
         {
             this.Client = Client;
             this.IsServer = IsServer;
@@ -398,7 +448,7 @@ namespace Monsajem_Incs.Net.Base.Service
 
         private t Deserialize<t>(byte[] arrBytes)
         {
-            if(IsServer)
+            if (IsServer)
             {
                 bool IsSafe = false;
                 try
@@ -426,7 +476,11 @@ namespace Monsajem_Incs.Net.Base.Service
 #if DEBUG
             await Parity(OprationType.SendData, OprationType.GetData);
 #endif
-            await Client.SendPacket(Data.Serialize());
+            var DataSize = Data.SizeOf();
+            if (DataSize < 0)
+                await Client.SendPacket(Data.Serialize());
+            else
+                await Client.Send(Data.Serialize());
             return Data;
         }
 
@@ -435,7 +489,12 @@ namespace Monsajem_Incs.Net.Base.Service
 #if DEBUG
             await Parity(OprationType.GetData, OprationType.SendData);
 #endif
-            t Data = Deserialize<t>(await Client.RecivePacket());
+            t Data = default;
+            var DataSize = Data.SizeOf();
+            if (DataSize < 0)
+                Data = Deserialize<t>(await Client.RecivePacket());
+            else
+                Data = Deserialize<t>(await Client.Recive(DataSize));
             return Data;
         }
 
@@ -448,7 +507,7 @@ namespace Monsajem_Incs.Net.Base.Service
         }
 
         public void Dispose()
-        {}
+        { }
 
 #if DEBUG
 
@@ -463,7 +522,7 @@ namespace Monsajem_Incs.Net.Base.Service
             await Client.Send(BitConverter.GetBytes(Sequnce));
 
             OprationType Status = (OprationType)(await Client.Recive(1))[0];
-            int CurrentSequnce = BitConverter.ToInt32(await Client.Recive(4),0);
+            int CurrentSequnce = BitConverter.ToInt32(await Client.Recive(4), 0);
 
             if (Status == OprationType.Exeption)
                 throw (await Client.RecivePacket()).Deserialize<Exception>();
@@ -532,5 +591,5 @@ namespace Monsajem_Incs.Net.Base.Service
         }
 #endif
 
-        }
+    }
 }

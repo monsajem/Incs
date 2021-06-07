@@ -47,7 +47,7 @@ namespace Monsajem_Incs.Database.Base
             var ClientTask = Client.I_GetUpdate(Table, MakeingUpdate,
                 (key) =>Deleted?.Invoke("V/"+Convert.ToBase64String(key.Serialize())), false);
 
-             await Threading.Task_EX.CheckAll(ServerTask, ClientTask);
+             await Async.Task_EX.CheckAll(ServerTask, ClientTask);
 
             return await ClientTask;
         }
@@ -120,7 +120,7 @@ namespace Monsajem_Incs.Database.Base
             var ClientTask = Client.I_GetUpdate(ClientTable, MakeingUpdate,
                 (key)=>Deleted?.Invoke("/V/" +Convert.ToBase64String(key.Serialize())), true);
 
-            await Threading.Task_EX.CheckAll(ServerTask, ClientTask);
+            await Async.Task_EX.CheckAll(ServerTask, ClientTask);
 
             return await ClientTask;
 

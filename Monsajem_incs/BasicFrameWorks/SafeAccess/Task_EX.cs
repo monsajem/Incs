@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using static Monsajem_Incs.Collection.Array.Extentions;
-namespace Monsajem_Incs.Threading
+namespace Monsajem_Incs.Async
 {
     public static class Task_EX
     {

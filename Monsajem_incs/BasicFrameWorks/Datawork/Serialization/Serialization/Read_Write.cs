@@ -6,6 +6,17 @@ namespace Monsajem_Incs.Serialization
 {
     public partial class Serialization
     {
+        private static byte[] StructToBytes<t>(t value, int Size)
+        {
+            byte[] bytes = new byte[Size];
+            System.Runtime.CompilerServices.Unsafe.As<byte, t>(ref bytes[0]) = value;
+            return bytes;
+        }
+        private static t BytesToStruct<t>(byte[] value, int startIndex)
+        {
+            return System.Runtime.CompilerServices.Unsafe.ReadUnaligned<t>(ref value[startIndex]);
+        }
+
         private SerializeInfo WriteSerializer(SerializeData Data,Type Type)
         {
             var Sr = SerializeInfo.GetSerialize(Type);

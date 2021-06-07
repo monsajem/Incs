@@ -29,24 +29,25 @@ namespace Monsajem_Incs.Net.Base.Service
             Services.Add(ServiceAddress,Service);
         }
 
-        public async Task Response()
+        public async Task Response(AddressType EndResponse)
         {
-            while (await Link.GetData<bool>())
+            while (true)
             {
-                var ServiceName = await Link.GetData<AddressType>();
-                await Services[ServiceName]();
+                var ServiceAddress = await Link.GetData<AddressType>();
+                if (ServiceAddress.Equals(EndResponse))
+                    return;
+                await Services[ServiceAddress]();
             }
         }
 
         public async Task Request(AddressType ServiceAddress)
         {
-            await Link.SendData(true);
             await Link.SendData(ServiceAddress);
         }
 
-        public async Task EndService()
+        public async Task EndService(AddressType EndResponse)
         {
-            await Link.SendData(false);
+            await Link.SendData(EndResponse);
         }
     }
 }

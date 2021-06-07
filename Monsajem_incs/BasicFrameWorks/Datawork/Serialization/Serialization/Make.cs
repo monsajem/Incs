@@ -124,11 +124,14 @@ namespace Monsajem_Incs.Serialization
                 }
                 else if (Type.IsValueType)
                 {
-                    InsertSerializer(() =>
-                    {
-                        var sr = MakeSerializer_ValueType();
-                        return (sr.Serializer, sr.Deserializer);
-                    });
+                    if(ConstantSize==-1)
+                        InsertSerializer(() =>
+                        {
+                            var sr = MakeSerializer_ValueType();
+                            return (sr.Serializer, sr.Deserializer);
+                        });
+                    else
+                        InsertSerializer(() =>(Default_Serializer,Default_Deserializer));
                 }
                 else
                 {

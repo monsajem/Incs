@@ -8,7 +8,7 @@ using Monsajem_Incs.DynamicAssembly;
 using System.Collections.Generic;
 using Monsajem_Incs.Net.Base;
 using Monsajem_Incs.Collection.Array.ArrayBased.DynamicSize;
-using Monsajem_Incs.SafeAccess;
+using Monsajem_Incs.Async;
 
 namespace Monsajem_Incs.Net.Virtual
 {

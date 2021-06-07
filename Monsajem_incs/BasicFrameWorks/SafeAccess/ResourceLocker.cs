@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Runtime.CompilerServices;
-using Monsajem_Incs.DelegateExtentions;
+using Monsajem_Incs.Async;
 
-namespace Monsajem_Incs.SafeAccess
+namespace Monsajem_Incs.Async
 {
     public class AsyncLocker<ResourceType>:IDisposable
     {
@@ -34,19 +34,19 @@ namespace Monsajem_Incs.SafeAccess
                     {
                         var Tasks = ReadQueue.ToArray();
                         ReadQueue.Clear();
-                        Wait = Threading.Task_EX.StartTryWait(Tasks);
+                        Wait = Async.Task_EX.StartTryWait(Tasks);
                     }
                     else if (WriteQueue.Length > 0)
                     {
                         var Tasks = WriteQueue.ToArray();
                         WriteQueue.Clear();
-                        Wait = Threading.Task_EX.StartTryWaitAsQueue(Tasks);
+                        Wait = Async.Task_EX.StartTryWaitAsQueue(Tasks);
                     }
                     else
                     {
                         if (Disposed)
                             return;
-                        Wait = Actions.WaitForHandle(() => ref OnCommand);
+                        Wait = DelegateActions.WaitForHandle(() => ref OnCommand);
                     }
                 }
 
@@ -114,7 +114,7 @@ namespace Monsajem_Incs.SafeAccess
 
         public Task WaitForChange()
         {
-            return Actions.WaitForHandle(() => ref OnChanged);
+            return DelegateActions.WaitForHandle(() => ref OnChanged);
         }
 
         public async Task WaitForChangeQuque()
@@ -148,4 +148,5 @@ namespace Monsajem_Incs.SafeAccess
             }
         }
     }
+
 }

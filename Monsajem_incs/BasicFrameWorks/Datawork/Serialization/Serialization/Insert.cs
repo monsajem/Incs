@@ -160,6 +160,7 @@ namespace Monsajem_Incs.Serialization
                 }
 
 #if DEBUG
+                if(Serialize.ConstantSize<0)
                 {
                     var Sr = (Sr:Serialize.Serializer,Dr: Serialize.Deserializer);
                     var SR = Sr.Sr;
