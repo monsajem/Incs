@@ -24,7 +24,7 @@ namespace TestOnServer
             public Func<int,Task<int>> TaskFunc =
                 async (x) => {
                     //Console.WriteLine("S"+ ++i);
-                    await Task.Delay(RND.Next(1800, 2000));
+                    await Task.Delay(RND.Next(100, 2000));
                     //Console.WriteLine("E"+i);
                     return x;
                 };
@@ -63,13 +63,19 @@ namespace TestOnServer
                         var task = new Thread[10];
                         for (int i = 0; i < 10; i++)
                         {
-                            task[i] = new Thread(() => c.TaskFunc(i).Wait());
+                            task[i] = new Thread(() => c.Obj.TaskFunc(i).Wait());
                             task[i].Start();
                         }
 
                         for (int i = 0; i < 10; i++)
                             task[i].Join();
                     }
+
+                    await c.OutOfRemote(0, async () =>
+                    {
+                        Link.SendData("String");
+                        var Q = Link.GetData<string>();
+                    });
 
                 }).Wait();
             });

@@ -73,20 +73,20 @@ namespace Monsajem_Incs.Database.Base
                     var Break = await Client.Remote(Remote,
                     async (Remote) =>
                     {
-                        var LastTruePos = await FindLastTrue(Table, Remote, StartPos, EndPos);
+                        var LastTruePos = await FindLastTrue(Table, Remote.Obj, StartPos, EndPos);
 
                         if (LastTruePos == ServerItemsCount - 1)
                             return true;
                         else
                         {
                             LastTruePos++;
-                            var NextTrue = await Remote.GetUpdateCodeAtPos(LastTruePos);
+                            var NextTrue = await Remote.Obj.GetUpdateCodeAtPos(LastTruePos);
                             UpdateAble<KeyType> MyUpCode = null;
                             while (Table.UpdateAble.UpdateCodes.Length > LastTruePos)
                             {
                                 MyUpCode = Table.UpdateAble.UpdateCodes[LastTruePos];
                                 if (MyUpCode.UpdateCode < NextTrue)
-                                    await Remote.Delete(MyUpCode.Key);
+                                    await Remote.Obj.Delete(MyUpCode.Key);
                                 else
                                     break;
                             }
@@ -107,9 +107,7 @@ namespace Monsajem_Incs.Database.Base
                     for(int i=0;i<Len; i++)
                     {
                         var Data = await Client.GetData<(ulong, DataType)>();
-
                     }
-
                 }
             }
 

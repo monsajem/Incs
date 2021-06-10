@@ -227,9 +227,9 @@ namespace Monsajem_Incs.Net.Base.Service
             return Remotes;
         }
 
-        public Task Remote<t>(t obj, Func<t, Task> Talk) =>
+        public Task Remote<t>(t obj, Func<(t Obj, Func<byte, Func<Task>,Task> OutOfRemote), Task> Talk) =>
             Remote<t, object>(obj, async (c) => { await Talk(c); return null; });
-        public async Task<r> Remote<t, r>(t obj, Func<t, Task<r>> Talk)
+        public async Task<r> Remote<t, r>(t obj, Func<(t Obj,Func<byte,Func<Task>,Task> OutOfRemote), Task<r>> Talk)
         {
 
             var Fields = GetRemotableFields(typeof(t));
@@ -250,10 +250,8 @@ namespace Monsajem_Incs.Net.Base.Service
                 {
                     SendTask = SendQueue.AddToQueue(async () =>
                     {
-                        Console.WriteLine("Q");
                         await Service.Request(Address);
                         await SendData(inputs);
-                        Console.WriteLine("N");
                     });
                     ReciveTask = ReciveQueue.AddToQueue(async () =>
                     {
@@ -276,39 +274,43 @@ namespace Monsajem_Incs.Net.Base.Service
                     DynamicAssembly.TypeController.CreateDelegateWrapper(Field.FieldType,
                          (inputs) =>
                          {
-                             Request(Address, inputs,false).Wait();
+                             Request(Address, inputs, false).Wait();
                          },
                          (inputs) =>
                          {
-                             return Request(Address, inputs,true).GetAwaiter().GetResult();
+                             return Request(Address, inputs, true).GetAwaiter().GetResult();
                          },
                          async (inputs) =>
                          {
-                             await Request(Address, inputs,false);
+                             await Request(Address, inputs, false);
                          },
                          async (inputs) =>
                          {
-                             return await Request(Address, inputs,true);
+                             return await Request(Address, inputs, true);
                          }));
             }
-            var Result = await Talk(obj);
+            var Result = await Talk((obj,async(c,Func)=>
+            {
+                await Service.Request((byte)(c + Len));
+                await Func();
+            }
+            ));
             await Service.EndService(255);
             return Result;
         }
-
-        public async Task Remote<t>(t obj)
+        public async Task Remote<t>(t obj, params Func<Task>[] OutOfRemote)
         {
             var TaskQueue = new Async.AsyncTaskQueue();
             var Fields = GetRemotableFields(typeof(t));
             var Service = new Service<byte>(this);
             var Len = Fields.Length;
 
-            Func<Func<object[],Task<object>>,bool,Task> CheckException=
-            async (ac,HaveResult)=>
+            Func<Func<object[], Task<object>>, bool, Task> CheckException =
+            async (ac, HaveResult) =>
             {
                 var Params = await GetData<object[]>();
-                object Result=null;
-                Exception Ex=null;
+                object Result = null;
+                Exception Ex = null;
 
                 var Q = TaskQueue.AddToQueue(async () =>
                 {
@@ -321,12 +323,13 @@ namespace Monsajem_Incs.Net.Base.Service
                         Ex = ex;
                     }
                     await Sync(Ex);
-                    if(HaveResult)
+                    if (HaveResult)
                         await SendData(Result);
                 });
             };
 
-            for (int i = 0; i < Len; i++)
+            int i = 0;
+            for (; i < Len; i++)
             {
                 var Field = Fields[i];
                 var Address = (byte)i;
@@ -336,11 +339,11 @@ namespace Monsajem_Incs.Net.Base.Service
                     if (Method.ReturnType == typeof(Task))
                         Service.AddService(Address, async () =>
                         {
-                            await CheckException(async (Params) => 
-                            { 
+                            await CheckException(async (Params) =>
+                            {
                                 await (Task)((Delegate)Field.GetValue(obj)).DynamicInvoke(Params);
                                 return null;
-                            },false);
+                            }, false);
                         });
                     else if (Method.ReturnType.IsAssignableTo(typeof(Task<string>).BaseType))
                         Service.AddService(Address, async () =>
@@ -373,6 +376,16 @@ namespace Monsajem_Incs.Net.Base.Service
                     });
                 }
             }
+
+            var OutOfAddress = Len;
+            Len = OutOfRemote.Length;
+            i = 0;
+            for (; i < Len; i++)
+            {
+                var Address = (byte)(i+OutOfAddress);
+                Service.AddService(Address, OutOfRemote[i]);
+            }
+
             await Service.Response(255);
         }
 
@@ -392,7 +405,7 @@ namespace Monsajem_Incs.Net.Base.Service
 
         public async Task Sync(Exception ex)
         {
-            if(ex == null)
+            if (ex == null)
                 await SendData(false);
             else
             {

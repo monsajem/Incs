@@ -6,6 +6,10 @@
     <StartupObject>TestOnClient.Program</StartupObject>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <Optimize>false</Optimize>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\Monsajem_incs\Monsajem_incs.csproj" />
     <ProjectReference Include="..\_TestOnServer\_TestOnServer.csproj" />
