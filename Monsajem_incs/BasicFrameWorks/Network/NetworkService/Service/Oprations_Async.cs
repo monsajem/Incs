@@ -14,6 +14,9 @@ namespace Monsajem_Incs.Net.Base.Service
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
     public class Remotable : Attribute
     { }
+    [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
+    public class Syncable : Attribute
+    { }
 
     public interface IAsyncOprations
     {
@@ -208,31 +211,14 @@ namespace Monsajem_Incs.Net.Base.Service
             }
         }
 
-        internal static FieldInfo[] GetRemotableFields(
-            Type typeToReflect,
-            BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy, Func<FieldInfo, bool> filter = null)
-        {
-            var Remotes = typeToReflect.GetFields(bindingFlags);
-            Remotes = Remotes.Where((c) =>
-            c.FieldType.BaseType == typeof(MulticastDelegate) &&
-            c.GetCustomAttributes(typeof(Remotable)).Count() > 0).ToArray();
-            if (filter != null)
-                Remotes = Remotes.Where((c) => filter(c)).ToArray();
-
-            if (typeToReflect.BaseType != null)
-            {
-                var BaseFields = GetRemotableFields(typeToReflect.BaseType, BindingFlags.Instance | BindingFlags.NonPublic, info => info.IsPrivate);
-                Insert(ref Remotes, BaseFields);
-            }
-            return Remotes;
-        }
-
         public Task Remote<t>(t obj, Func<(t Obj, Func<byte, Func<Task>,Task> OutOfRemote), Task> Talk) =>
             Remote<t, object>(obj, async (c) => { await Talk(c); return null; });
         public async Task<r> Remote<t, r>(t obj, Func<(t Obj,Func<byte,Func<Task>,Task> OutOfRemote), Task<r>> Talk)
         {
 
-            var Fields = GetRemotableFields(typeof(t));
+            var Fields = DynamicAssembly.TypeController.GetAllFields(typeof(t), null, (c) =>
+                            c.FieldType.BaseType == typeof(MulticastDelegate) &&
+                            c.GetCustomAttributes(typeof(Remotable)).Count() > 0);
 
             var Service = new Service<byte>(this);
             var SendQueue = new Async.AsyncTaskQueue();
@@ -301,9 +287,22 @@ namespace Monsajem_Incs.Net.Base.Service
         public async Task Remote<t>(t obj, params Func<Task>[] OutOfRemote)
         {
             var TaskQueue = new Async.AsyncTaskQueue();
-            var Fields = GetRemotableFields(typeof(t));
+
+            var RemoteFields = DynamicAssembly.TypeController.GetAllFields(typeof(t),null,(c)=>
+                c.GetCustomAttributes(typeof(Remotable)).Count()>0);
+            foreach(var RemoteField in RemoteFields)
+                if (RemoteField.FieldType.BaseType != typeof(MulticastDelegate))
+                    throw new Exception(RemoteField.Name + " Should be strong type delegate.");
+
+            var SyncFields = DynamicAssembly.TypeController.GetAllFields(typeof(t), null, (c) =>
+                c.FieldType.BaseType == typeof(MulticastDelegate) &&
+                c.GetCustomAttributes(typeof(Syncable)).Count() > 0);
+            foreach (var SyncField in SyncFields)
+                if (SyncField.FieldType != typeof(Func<IAsyncOprations,Task>))
+                    throw new Exception("Type of " + SyncField.Name + " Should be Func<IAsyncOprations,Task>.");
+            
             var Service = new Service<byte>(this);
-            var Len = Fields.Length;
+            var Len = RemoteFields.Length;
 
             Func<Func<object[], Task<object>>, bool, Task> CheckException =
             async (ac, HaveResult) =>
@@ -331,7 +330,7 @@ namespace Monsajem_Incs.Net.Base.Service
             int i = 0;
             for (; i < Len; i++)
             {
-                var Field = Fields[i];
+                var Field = RemoteFields[i];
                 var Address = (byte)i;
                 var Method = Field.FieldType.GetMethod("Invoke");
                 if (Method.ReturnType != typeof(void))

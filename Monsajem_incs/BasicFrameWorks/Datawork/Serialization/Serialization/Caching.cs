@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using static Monsajem_Incs.Collection.Array.Extentions;
 using static System.Runtime.Serialization.FormatterServices;
 using static System.Text.Encoding;
@@ -19,7 +20,11 @@ namespace Monsajem_Incs.Serialization
     {
         [NonSerialized]
         private byte[] _Cache;
-        public byte[] Cache { get => _Cache; set => _Cache = value; }
+        public byte[] Cache {
+            [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+            get => _Cache;
+            [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+            set => _Cache = value; }
         public bool IsReady => true;
     }
 
@@ -45,6 +50,7 @@ namespace Monsajem_Incs.Serialization
         /// </summary>
         public byte[] Cache
         {
+            [MethodImpl(MethodImplOptions.AggressiveOptimization)]
             get
             {
                 if (Data == null)
@@ -60,6 +66,7 @@ namespace Monsajem_Incs.Serialization
                     return null;
                 }
             }
+            [MethodImpl(MethodImplOptions.AggressiveOptimization)]
             set
             {
                 if (Data == null)
@@ -90,6 +97,7 @@ namespace Monsajem_Incs.Serialization
 
         public bool IsReady
         {
+            [MethodImpl(MethodImplOptions.AggressiveOptimization)]
             get
             {
                 if (Data != null)
@@ -103,6 +111,7 @@ namespace Monsajem_Incs.Serialization
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         void IDisposable.Dispose()
         {
             var Position = GUID.BinarySearch(MyGUID).Index;

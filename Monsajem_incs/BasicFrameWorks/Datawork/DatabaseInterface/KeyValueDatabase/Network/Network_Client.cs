@@ -25,8 +25,10 @@ namespace Monsajem_Incs.Database.Base
             IRemoteUpdateSender<DataType, KeyType> service,
             int StartPos, int EndPos)
             {
+                var EndPosParameter = EndPos;
                 var Update = Table.UpdateAble;
-                while (StartPos < EndPos)
+                while (StartPos < EndPos&&
+                       EndPos <= EndPosParameter)
                 {
                     if (Update.UpdateCodes[EndPos].UpdateCode !=
                         await service.GetUpdateCodeAtPos(EndPos))
@@ -38,7 +40,10 @@ namespace Monsajem_Incs.Database.Base
                         StartPos = OldEnd;
                     }
                 }
-                return EndPos;
+                if (EndPos > EndPosParameter)
+                    return EndPosParameter;
+                else
+                    return EndPos;
             }
 
             Table<DataType, KeyType> ParentTable = Table;
@@ -64,19 +69,56 @@ namespace Monsajem_Incs.Database.Base
             }
             if (Table.UpdateAble.UpdateCode != LastUpdateCode)
             {
-                var Remote = new IRemoteUpdateSender<DataType, KeyType>(Table,IsPartOfTable);
+                var ShouldDelete = new Collection.Array.TreeBased.Array<KeyType>();
+                var Remote = new IRemoteUpdateSender<DataType, KeyType>();
                 var ServerItemsCount = await Client.GetData<int>();
                 var StartPos = 0;
                 var EndPos = Math.Min(Table.UpdateAble.UpdateCodes.Length, ServerItemsCount) - 1;
-                while (StartPos <= EndPos)
+
+                Func<Task> GetNextItems = async () =>
                 {
-                    var Break = await Client.Remote(Remote,
-                    async (Remote) =>
+                    for (; StartPos < ServerItemsCount; StartPos++)
+                    {
+                        var UpCode = await Client.GetData<ulong>();
+                        if (UpCode == 0)
+                            return;
+                        var Value = await Client.GetData<DataType>();
+                        var Key = Table.GetKey(Value);
+                        var Update = new UpdateAble<KeyType>()
+                        { Key = Key, UpdateCode = UpCode };
+                        if (ShouldDelete.BinarySearch(Update.Key).Index > -1)
+                        {
+                            ShouldDelete.BinaryDelete(Update.Key);
+                            Table.Update(Update.Key, (c) =>
+                            {
+                                Table.MoveRelations(c, Value);
+                                return Value;
+                            });
+                            Table.UpdateAble.Changed(Key, Key, Update.UpdateCode);
+                        }
+                        else
+                        {
+                            Table.Insert(Value);
+                            Table.UpdateAble.Insert(Key, Update.UpdateCode);
+                        }
+                        if (IsPartOfTable)
+                        {
+                            var ParentUpCode = await Client.GetData<ulong>();
+                            ParentTable.UpdateAble.Changed(Key, Key, Update.UpdateCode);
+                        }
+                    }
+                };
+
+
+                await Client.Remote(Remote,
+                async (Remote) =>
+                {
+                    while (StartPos <= EndPos)
                     {
                         var LastTruePos = await FindLastTrue(Table, Remote.Obj, StartPos, EndPos);
 
                         if (LastTruePos == ServerItemsCount - 1)
-                            return true;
+                            break;
                         else
                         {
                             LastTruePos++;
@@ -86,48 +128,38 @@ namespace Monsajem_Incs.Database.Base
                             {
                                 MyUpCode = Table.UpdateAble.UpdateCodes[LastTruePos];
                                 if (MyUpCode.UpdateCode < NextTrue)
-                                    await Remote.Obj.Delete(MyUpCode.Key);
+                                {
+                                    Table.UpdateAble.DeleteDontUpdate(MyUpCode.Key);
+                                    ShouldDelete.Insert(MyUpCode.Key);
+                                }
                                 else
                                     break;
                             }
-                            if (Table.UpdateAble.UpdateCodes.Length > LastTruePos &&
-                               Table.UpdateAble.UpdateCodes[LastTruePos].UpdateCode == MyUpCode.UpdateCode)
-                                StartPos = LastTruePos + 1;
-                            else
-                                StartPos = LastTruePos;
+                            StartPos = LastTruePos;
+                            if (LastTruePos >= Table.UpdateAble.UpdateCodes.Length)
+                                break;
+                            MyUpCode = Table.UpdateAble.UpdateCodes[LastTruePos];
+                            if (MyUpCode.UpdateCode>NextTrue)
+                                await Remote.OutOfRemote(1,// Get From pos to update code
+                            async () =>
+                            {
+                                await Client.SendData((StartPos, MyUpCode.UpdateCode));
+                                await GetNextItems();
+                            });
                         }
-                        return false;
+                    }
+                    await Remote.OutOfRemote(1,// Get From pos to end
+                    async () =>
+                    {
+                        await Client.SendData(StartPos);
+                        await GetNextItems();
                     });
 
-                    if (Break || StartPos <= EndPos)
-                        break;
 
-                    await Client.SendData((StartPos, Table.UpdateAble.UpdateCodes[StartPos].UpdateCode));
-                    var Len = await Client.GetData<int>();
-                    for(int i=0;i<Len; i++)
-                    {
-                        var Data = await Client.GetData<(ulong, DataType)>();
-                    }
-                }
+                    foreach (var Delete in ShouldDelete)
+                        Table.Delete(Delete);
+                });
             }
-
-            //var TrueLen = await Client.GetData<int>();//6
-            //if (Table.UpdateAble.UpdateCodes.Length != TrueLen)
-            //{
-            //    var ServerValues = new ulong?[TrueLen];
-            //    await CompareToOther(async (pos) =>
-            //    {
-            //        var Value = ServerValues[pos];
-            //        if (Value == null)
-            //        {
-            //            await Client.SendData(pos);//7
-            //            Value = await Client.GetData<ulong>();//8
-            //            ServerValues[pos] = Value;
-            //        }
-            //        return Value.Value;
-            //    }, Table, Delete, TrueLen);
-            //}
-            await Client.SendData(-1);//7+
 
 
             Table.UpdateAble.UpdateCode = LastUpdateCode;

@@ -174,7 +174,7 @@ namespace Monsajem_Incs.Database.Base
                 else
                 {
                     Insert(Value);
-                    Result = Value;
+                    Result = this[Value].Value;
                 }
 
                 return Result;

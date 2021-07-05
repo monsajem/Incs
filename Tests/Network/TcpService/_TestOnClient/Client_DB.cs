@@ -24,6 +24,7 @@ namespace TestOnClient
                Environment.CurrentDirectory + "/DB", (c) => c.name, false, true);
             Person_Table.Relation((c) => c.frinds,(c)=>c.IsUpdateAble =false).Join();
 
+            System.Threading.Thread.Sleep(1000);
            new Client().Connect(new System.Net.IPEndPoint(System.Net.IPAddress.Loopback, 8989),
             (Link) =>
             {

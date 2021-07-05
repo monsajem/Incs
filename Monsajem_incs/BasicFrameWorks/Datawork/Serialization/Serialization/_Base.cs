@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using static Monsajem_Incs.Collection.Array.Extentions;
 using static System.Runtime.Serialization.FormatterServices;
 using static System.Text.Encoding;
@@ -82,8 +83,10 @@ namespace Monsajem_Incs.Serialization
             public MemoryStream Data = new MemoryStream();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public int SizeOf<t>()=> SerializeInfo<t>.GetSerialize().ConstantSize;
 
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public byte[] Serialize<t>(t obj,
             Action<Type> TrustToType = null,
             Action<MethodInfo> TrustToMethod = null)
@@ -97,6 +100,7 @@ namespace Monsajem_Incs.Serialization
 #endif
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private byte[] _Serialize<t>(t obj, 
             Action<Type> TrustToType,
             Action<MethodInfo> TrustToMethod)
@@ -139,6 +143,7 @@ namespace Monsajem_Incs.Serialization
             return Result;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public t Deserialize<t>(byte[] Data,
             Action<Type> TrustToType = null,
             Action<MethodInfo> TrustToMethod = null)
@@ -148,6 +153,7 @@ namespace Monsajem_Incs.Serialization
             return Deserialize<t>(Data, ref From, TrustToType,TrustToMethod);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public t Deserialize<t>(byte[] Data, ref int From, 
             Action<Type> TrustToType,
             Action<MethodInfo> TrustToMethod)

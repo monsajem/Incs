@@ -1,19 +1,21 @@
 ﻿using Monsajem_Incs.Serialization;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
 
 namespace Monsajem_Incs.Collection.Array.TreeBased
 {
-    public partial class Array<ValueType> : 
+    public partial class Array<ValueType> :
         Base.IArray<ValueType, Array<ValueType>>,
 #if DEBUG
         Serialization.ISerializable<(Array<ValueType>.INode Root,int Len,bool CacheSerialize, 
             ArrayBased.DynamicSize.Array<ValueType> ItemsForDebug)>
 #else
-        Serialization.ISerializable<(Array<ValueType>.INode Root,int Len,bool CacheSerialize)>
+        Serialization.ISerializable<(Array<ValueType>.INode Root, int Len, bool CacheSerialize)>
 #endif
     {
 
@@ -33,7 +35,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             else
                 CreateNode = _CreateNode;
         }
-        public Array(ValueType[] Values,bool CacheSerialize)
+        public Array(ValueType[] Values, bool CacheSerialize)
         {
             if (CacheSerialize)
                 CreateNode = _CreateCacheSerializeNode;
@@ -42,7 +44,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             this.Insert(Values);
         }
 
-        private static Func<ValueType,INode> _CreateCacheSerializeNode = (Value) => new CacheSerializeNode(Value);
+        private static Func<ValueType, INode> _CreateCacheSerializeNode = (Value) => new CacheSerializeNode(Value);
         private static Func<ValueType, INode> _CreateNode = (Value) => new Node(Value);
 
 #if DEBUG
@@ -138,21 +140,74 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
         public INode Root;
         public interface INode
         {
-            int Balance { get=> NextDeep - BeforeDeep; }
-            int NextDeep{get;set;}
-            int BeforeDeep{get;set;}
-            int NextLen{get;set; }
-            int BeforeLen{get;set;}
-            ValueType Value{ get; set; }
-            INode Holder{get;set;}
-            bool IsNext{get;set;}
-            INode Next{get;set;}
-            public INode Before{get;set;}
+            int Balance { get => NextDeep - BeforeDeep; }
+            int NextDeep { get; set; }
+            int BeforeDeep { get; set; }
+            int NextLen { get; set; }
+            int BeforeLen { get; set; }
+            ValueType Value { get; set; }
+            INode Holder { get; set; }
+            bool IsNext { get; set; }
+            INode Next { get; set; }
+            public INode Before { get; set; }
             int Hash { get; }
-        }
-        public Func<ValueType,INode> CreateNode;
 
-        public class Node:INode
+            [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+            public INode FineNextSequnce()
+            {
+                INode holder = default;
+                var next = Next;
+                if (next != null)
+                {
+                    while (next != null)
+                    {
+                        holder = next;
+                        next = next.Before;
+                    }
+                }
+                else
+                {
+                    holder = Holder;
+                    if (IsNext == true)
+                    {
+                        while (holder != null && holder.IsNext == true)
+                            holder = holder.Holder;
+                        if (holder != null)
+                            holder = holder.Holder;
+                    }
+                }
+                return holder;
+            }
+
+            public INode FineBeforeSequnce()
+            {
+                INode holder = default;
+                var before = Before;
+                if (before != null)
+                {
+                    while (before != null)
+                    {
+                        holder = before;
+                        before = before.Next;
+                    }
+                }
+                else
+                {
+                    holder = Holder;
+                    if (IsNext == false)
+                    {
+                        while (holder != null && holder.IsNext == false)
+                            holder = holder.Holder;
+                        if (holder != null)
+                            holder = holder.Holder;
+                    }
+                }
+                return holder;
+            }
+        }
+        public Func<ValueType, INode> CreateNode;
+
+        public class Node : INode
         {
             public Node(ValueType Value)
             {
@@ -161,7 +216,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             }
 
             public int NextDeep { get; set; }
-            public int BeforeDeep { get ; set; }
+            public int BeforeDeep { get; set; }
             public int NextLen { get; set; }
             public int BeforeLen { get; set; }
             public ValueType Value { get; set; }
@@ -309,9 +364,9 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
         public override ValueType this[int Position]
         {
             get => GetItem(Position, out var x, out var y).Value;
-            set 
+            set
             {
-                 GetItem(Position, out var x, out var y).Value = value;
+                GetItem(Position, out var x, out var y).Value = value;
 #if DEBUG
                 ItemsForDebug[Position] = value;
                 CheckBugs();
@@ -385,14 +440,14 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             {
                 Next = Current;
                 Before = Next.Before;
-                if(Before!=null)
+                if (Before != null)
                 {
-                        while (Before.Next != null)
-                            Before = Before.Next;
-                        Next = null;
+                    while (Before.Next != null)
+                        Before = Before.Next;
+                    Next = null;
                 }
             }
-            else if(Before!=null&&Next!=null)
+            else if (Before != null && Next != null)
             {
                 if (Before.NextDeep > Next.BeforeDeep)
                     Before = null;
@@ -408,9 +463,9 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
                 if (Next != null)
                 {
                     Current.Next = Next;
-                    Current.NextLen = Next.NextLen + Next.BeforeLen+1;
+                    Current.NextLen = Next.NextLen + Next.BeforeLen + 1;
                     Next.Holder = Current;
-                    Current.NextDeep = Math.Max(Next.BeforeDeep, Next.NextDeep)+1;
+                    Current.NextDeep = Math.Max(Next.BeforeDeep, Next.NextDeep) + 1;
                     Before.NextLen = Current.NextLen;
                     Before.NextDeep = Current.NextDeep;
                     Current = Next;
@@ -425,9 +480,9 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
                 if (Before != null)
                 {
                     Current.Before = Before;
-                    Current.BeforeLen = Before.NextLen + Before.BeforeLen+1;
+                    Current.BeforeLen = Before.NextLen + Before.BeforeLen + 1;
                     Before.Holder = Current;
-                    Current.BeforeDeep =Math.Max(Before.BeforeDeep,Before.NextDeep)+1;
+                    Current.BeforeDeep = Math.Max(Before.BeforeDeep, Before.NextDeep) + 1;
                     Next.BeforeLen = Current.BeforeLen;
                     Next.BeforeDeep = Current.BeforeDeep;
                     Current = Before;
@@ -526,12 +581,12 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
                 Holder.IsNext = true;
                 Node.NextDeep = Math.Max(Holder.NextDeep, Holder.BeforeDeep) + 1;
             }
-            
+
             Holder.Holder = Node;
             if (Root != null)
             {
                 Node.Holder = Root;
-                if(Node.IsNext)
+                if (Node.IsNext)
                     Root.NextDeep = Math.Max(Node.NextDeep, Node.BeforeDeep) + 1;
                 else
                     Root.BeforeDeep = Math.Max(Node.NextDeep, Node.BeforeDeep) + 1;
@@ -600,7 +655,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             if (Before != null)
             {
                 Node.BeforeLen = Before.BeforeLen + Before.NextLen + 1;
-                Node.BeforeDeep = Math.Max(Before.BeforeDeep,Before.NextDeep) + 1;
+                Node.BeforeDeep = Math.Max(Before.BeforeDeep, Before.NextDeep) + 1;
                 Before.Holder = Node;
             }
             else
@@ -668,14 +723,14 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             {
                 var Next = Holder.Next;
                 var Before = Holder.Before;
-                if(Next!=null)
+                if (Next != null)
                 {
                     Holder.NextDeep = Math.Max(Next.NextDeep, Next.BeforeDeep) + 1;
                     Holder.NextLen = Next.NextLen + Next.BeforeLen + 1;
                 }
                 else
                 {
-                    Holder.NextDeep =0;
+                    Holder.NextDeep = 0;
                     Holder.NextLen = 0;
                 }
                 if (Before != null)
@@ -728,7 +783,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
 
         public INode Find(ValueType Value)
         {
-            return Find(Value,out var Before,out var Next,out var Pos);
+            return Find(Value, out var Before, out var Next, out var Pos);
         }
 
         public override object MyOptions { get => null; set { } }
@@ -736,7 +791,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
         public INode Find(
             ValueType Value,
             out INode Before,
-            out INode Next, 
+            out INode Next,
             out int Position)
         {
             Before = default;
@@ -770,26 +825,26 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
 
         private void FixBalance(INode node)
         {
-            while (node!=null && node.Holder != null)
+            while (node != null && node.Holder != null)
             {
                 var Holder = node.Holder;
                 var HolderDeep = Math.Max(node.NextDeep, node.BeforeDeep) + 1;
-                var HolderLen = node.NextLen+ node.BeforeLen+1;
+                var HolderLen = node.NextLen + node.BeforeLen + 1;
                 if (node.IsNext == true)
                 {
-                    Holder.NextLen= HolderLen;
+                    Holder.NextLen = HolderLen;
                     Holder.NextDeep = HolderDeep;
                 }
                 else
                 {
-                    Holder.BeforeLen= HolderLen;
+                    Holder.BeforeLen = HolderLen;
                     Holder.BeforeDeep = HolderDeep;
                 }
 
                 var HolderBalance = Holder.Balance;
                 if (HolderBalance > 1)
                 {
-                    if(node.Balance>=0)
+                    if (node.Balance >= 0)
                         MoveToHolder(node);
                     else
                     {
@@ -798,7 +853,8 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
                         MoveToHolder(Before);
                         node = Before;
                     }
-                }else if (HolderBalance < -1)
+                }
+                else if (HolderBalance < -1)
                 {
                     if (node.Balance <= 0)
                         MoveToHolder(node);
@@ -818,6 +874,17 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
         protected override Array<ValueType> MakeSameNew()
         {
             return new Array<ValueType>();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        public override IEnumerator<ValueType> GetEnumerator()
+        {
+            INode Node = this.GetItem(0, out var b, out var n);
+            while (Node != null)
+            {
+                yield return Node.Value;
+                Node = Node.FineNextSequnce();
+            }
         }
 
 #if DEBUG
@@ -844,7 +911,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
 #else
         (INode Root, int Len, bool CacheSerialize) ISerializable<(INode Root, int Len, bool CacheSerialize)>.GetData()
         {
-            return (this.Root, Length,CreateNode==_CreateCacheSerializeNode);
+            return (this.Root, Length, CreateNode == _CreateCacheSerializeNode);
         }
 
         void ISerializable<(INode Root, int Len, bool CacheSerialize)>.SetData((INode Root, int Len, bool CacheSerialize) Data)

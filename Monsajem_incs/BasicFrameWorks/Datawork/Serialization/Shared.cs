@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using static Monsajem_Incs.Collection.Array.Extentions;
 using Monsajem_Incs.Collection.Array.ArrayBased.DynamicSize;
+using System.Runtime.CompilerServices;
 
 namespace Monsajem_Incs
 {
@@ -53,12 +54,14 @@ namespace Monsajem_Incs
     }
     internal static class Shared
     {
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         internal static string MidName(this Type Type)
         {
             return Type.ToString();
         }
 
         private static Array<TypeHolder> Types = new Array<TypeHolder>();
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         internal static Type GetTypeByName(this string TypeName)
         {
             var Type = Types.BinarySearch(new TypeHolder(TypeName)).Value?.Type;

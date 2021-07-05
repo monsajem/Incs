@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using static Monsajem_Incs.Collection.Array.Extentions;
 using static System.Text.Encoding;
 
@@ -6,17 +7,21 @@ namespace Monsajem_Incs.Serialization
 {
     public partial class Serialization
     {
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static byte[] StructToBytes<t>(t value, int Size)
         {
             byte[] bytes = new byte[Size];
             System.Runtime.CompilerServices.Unsafe.As<byte, t>(ref bytes[0]) = value;
             return bytes;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static t BytesToStruct<t>(byte[] value, int startIndex)
         {
             return System.Runtime.CompilerServices.Unsafe.ReadUnaligned<t>(ref value[startIndex]);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private SerializeInfo WriteSerializer(SerializeData Data,Type Type)
         {
             var Sr = SerializeInfo.GetSerialize(Type);
@@ -24,6 +29,7 @@ namespace Monsajem_Incs.Serialization
             return Sr;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private SerializeInfo ReadSerializer(DeserializeData Data)
         {
             var Info = VisitedInfoDeserialize(Data,() =>
@@ -33,6 +39,7 @@ namespace Monsajem_Incs.Serialization
             return SerializeInfo.GetSerialize(Info);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private byte[] Write(params string[] str)
         {
             byte[] Results = new byte[0];
@@ -47,6 +54,7 @@ namespace Monsajem_Incs.Serialization
             return Results;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private string Read(DeserializeData Data)
         {
             var Len = BitConverter.ToInt32(Data.Data, Data. From);

@@ -60,7 +60,7 @@ namespace _test
 
             var Da = Sa.Deserialize(q1);
 
-            var Len = 100;
+            var Len = 1000000;
 
             var STime =
             Timing.run(() =>

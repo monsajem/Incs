@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using static Monsajem_Incs.Collection.Array.Extentions;
 using static System.Runtime.Serialization.FormatterServices;
 using static System.Text.Encoding;
@@ -33,6 +34,7 @@ namespace Monsajem_Incs.Serialization
             {
                 public int HashCode;
                 public SerializeInfo Serializer;
+                [MethodImpl(MethodImplOptions.AggressiveOptimization)]
                 public override int GetHashCode()
                 {
                     return HashCode;
@@ -43,6 +45,7 @@ namespace Monsajem_Incs.Serialization
                 ExactSerializer,IEquatable<ExactSerializerByType>
             {
                 public Type Type;
+                [MethodImpl(MethodImplOptions.AggressiveOptimization)]
                 public bool Equals(ExactSerializerByType other)
                 {
                     return Type.IsEquivalentTo(other.Type);
@@ -53,6 +56,7 @@ namespace Monsajem_Incs.Serialization
                 ExactSerializer,IEquatable<ExactSerializerByTypeName>
             {
                 public string TypeName;
+                [MethodImpl(MethodImplOptions.AggressiveOptimization)]
                 public bool Equals(ExactSerializerByTypeName other)
                 {
                     return TypeName == other.TypeName;
@@ -64,6 +68,7 @@ namespace Monsajem_Incs.Serialization
             private static HashSet<ExactSerializerByTypeName>
                 SerializersByNameCode = new HashSet<ExactSerializerByTypeName>();
 
+            [MethodImpl(MethodImplOptions.AggressiveOptimization)]
             public static SerializeInfo GetSerialize(Type Type)
             {
                 Again:
@@ -93,6 +98,7 @@ namespace Monsajem_Incs.Serialization
                 return SR;
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveOptimization)]
             public static SerializeInfo GetSerialize(string TypeName)
             {
                 Again:
@@ -123,11 +129,13 @@ namespace Monsajem_Incs.Serialization
                 return SR;
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveOptimization)]
             public bool Equals(SerializeInfo other)
             {
                 return Type.IsEquivalentTo(other.Type);
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveOptimization)]
             public override int GetHashCode()
             {
                 return Type.GetHashCode();

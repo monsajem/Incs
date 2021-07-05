@@ -7,6 +7,7 @@ using System.Reflection;
 using static Monsajem_Incs.Collection.Array.Extentions;
 using static System.Runtime.Serialization.FormatterServices;
 using static System.Text.Encoding;
+using System.Runtime.CompilerServices;
 
 namespace Monsajem_Incs.Serialization
 {
@@ -17,7 +18,7 @@ namespace Monsajem_Incs.Serialization
         {
             Serializere = this;
             SerializeInfo<object>.InsertSerializer(
-            (Data,obj) => { },
+            (Data, obj) => { },
             (Data) => new object(), false);
 
             SerializeInfo<bool>.InsertSerializer(
@@ -104,15 +105,15 @@ namespace Monsajem_Incs.Serialization
             }, true);
 
             SerializeInfo<Type>.InsertSerializer(
-                   (Data, obj) =>
-                   {
-                       var Name = Write((obj as Type).MidName());
-                       Data.Data.Write(Name, 0, Name.Length);
-                   },
-                   (Data) =>
-                   {
-                       return Read(Data).GetTypeByName();
-                   }, true);
+            (Data, obj) =>
+            {
+                var Name = Write((obj as Type).MidName());
+                Data.Data.Write(Name, 0, Name.Length);
+            },
+            (Data) =>
+            {
+                return Read(Data).GetTypeByName();
+            }, true);
 
             {
                 var SR = SerializeInfo<object>.GetSerialize();
@@ -120,7 +121,7 @@ namespace Monsajem_Incs.Serialization
                     (Data, obj) =>
                     {
                         var GC = (System.Runtime.InteropServices.GCHandle)obj;
-                        SR.Serializer(Data,GC.Target);
+                        SR.Serializer(Data, GC.Target);
                     },
                     (Data) =>
                     {

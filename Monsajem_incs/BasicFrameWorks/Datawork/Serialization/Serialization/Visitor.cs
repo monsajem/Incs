@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using static Monsajem_Incs.Collection.Array.Extentions;
 using static System.Text.Encoding;
 
@@ -6,6 +7,7 @@ namespace Monsajem_Incs.Serialization
 {
     public partial class Serialization
     {
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private void VisitedSerialize(
             SerializeData Data,
             object obj,
@@ -55,6 +57,8 @@ namespace Monsajem_Incs.Serialization
                 BytesData.Write(BitConverter.GetBytes(VisitedObj.FromPos), 0, 4);
             }
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private void VisitedDeserialize(
             DeserializeData Data,
             Action<object> Set,
@@ -103,6 +107,7 @@ namespace Monsajem_Incs.Serialization
                 Set(VisitedObj.obj);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private t VisitedInfoSerialize<t>(
             SerializeData S_Data,
             object obj,
@@ -130,6 +135,8 @@ namespace Monsajem_Incs.Serialization
                 return (t)VisitedObj.Data.Obj;
             }
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private t VisitedInfoDeserialize<t>(
             DeserializeData Data,
             Func<t> Get)

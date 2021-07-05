@@ -24,17 +24,75 @@ namespace Test
             Monsajem_Incs.Serialization.StreamCacheSerialize.Stream =
                 new System.IO.FileStream(Address, System.IO.FileMode.CreateNew);
 
+            ReadPerformaceTest();
             ////PerformaceTest();
             //try
             //{
             //SafeTest();
-            SafeTestBinary();
+            //SafeTestBinary();
             //}
             //catch
             //{
 
             //}
             //BugTest();
+        }
+
+        static void ReadPerformaceTest()
+        {
+            var Count = 1000000;
+            var ar1 = new Monsajem_Incs.Collection.Array.TreeBased.Array<int>();
+            for (int i =0; i < Count; i++)
+                ar1.Insert(i, i);
+
+            for (int i = 0; i < Count; i++)
+                if (ar1[i] != i)
+                    throw new Exception();
+
+            Console.WriteLine(ar1.AsEnumerable().ToArray().Length);
+            var ar2 = new SortedSet<int>();
+            for (int i = 0; i < Count; i++)
+                ar2.Add(i);
+            var ar3 = new LinkedList<int>();
+            for (int i = 0; i < Count; i++)
+                ar3.AddLast(i);
+
+            var Res = 0;
+            
+            var t1 = Timing.run(() =>
+            {
+                var _Res = 0;
+                var ar = ar1;
+                foreach (var item in ar)
+                    _Res += item;
+                Res = _Res;
+            });
+
+            var t2 = Timing.run(() =>
+            {
+                var _Res = 0;
+                var ar = ar2;
+                foreach (var item in ar)
+                    _Res += item;
+                Res = _Res;
+            });
+
+            var t3 = Timing.run(() =>
+            {
+                var _Res = 0;
+                var ar = ar3;
+                var Item = ar3.First;
+                while(Item!=null)
+                {
+                    _Res += Item.Value;
+                    Item = Item.Next;
+                }
+                Res = _Res;
+            });
+            Console.WriteLine(t1.ToString());
+            Console.WriteLine(t2.ToString());
+            Console.WriteLine(t3.ToString());
+            Console.ReadKey();
         }
 
         static void PerformaceTest()

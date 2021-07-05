@@ -9,7 +9,6 @@ namespace TestOn_ArrayDB
 {
     class Program
     {
-
         public class Person
         {
             public string Name;
@@ -91,7 +90,7 @@ namespace TestOn_ArrayDB
         {
             var Persons = new ArrayTable<Person, string>(
                 (person) => person.Name, false);
-            var Count = 10000;
+            var Count = 1000000;
             var InsertTime = Monsajem_Incs.TimeingTester.Timing.run(() =>
             {
                 for (int i = 0; i < Count; i++)
