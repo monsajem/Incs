@@ -396,7 +396,7 @@ namespace UserControler.Partial
             MainElement.InnerHtml="";
             foreach (var Permition in Permitions)
             {
-                var View = new Monsajem_Incs.Resources.Permitions_html();
+                var View = new Monsajem_Incs.Resources.Base.Permitions_html();
                 View.Accept.Checked = Permition.Accept;
                 View.Delete.Checked = Permition.Delete;
                 View.Edit.Checked = Permition.Update;

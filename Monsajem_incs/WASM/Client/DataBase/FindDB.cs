@@ -49,7 +49,8 @@ namespace MonsajemData
             }
         }
 
-        public static Func<(string TableName, string RelationName), DataBaseInfo> FindDB;
+        public static Func<(string TableName, string RelationName), DataBaseInfo> FindDB=
+            (c)=>throw new Exception("FindDB Not Declared!");
         public static Func<int, string> FindDB_Hash;
         public static Func<Task> UpdatePermitions;
         public static Func<string,Permition[]> GetPermitions;

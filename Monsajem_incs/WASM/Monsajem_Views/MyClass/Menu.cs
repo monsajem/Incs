@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using static Monsajem_Incs.Collection.Array.Extentions;
-using Monsajem_Incs.Resources.Html;
+using Monsajem_Incs.Resources.Base.Html;
 using WebAssembly.Browser.DOM;
 using Monsajem_Incs.DynamicAssembly;
 using Monsajem_Incs.Collection.Array;
@@ -20,7 +20,7 @@ namespace Monsajem_Incs.Views
 
         public static void Show(HTMLElement Element, Action OnBack = null)
         {
-            var Modal = new Resources.Partials.Modal_html();
+            var Modal = new Resources.Base.Partials.Modal_html();
             Modal.body.AppendChild(Element);
             Document.document.Body.AppendChild(Modal.myModal);
             var Win = new Window();

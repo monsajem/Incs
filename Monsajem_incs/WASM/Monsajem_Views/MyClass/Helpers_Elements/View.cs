@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using static Monsajem_Incs.Collection.Array.Extentions;
-using Monsajem_Incs.Resources.Partials.Edit;
+using Monsajem_Incs.Resources.Base.Partials.Edit;
 using WebAssembly.Browser.DOM;
 using Monsajem_Incs.DynamicAssembly;
 using Monsajem_Incs.Collection.Array;

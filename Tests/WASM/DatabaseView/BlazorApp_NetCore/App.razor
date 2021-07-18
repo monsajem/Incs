@@ -1,0 +1,42 @@
+@using Microsoft.AspNetCore.Components.Routing
+@using WASM_Global;
+@using Microsoft.JSInterop;
+@using WebAssembly.Browser.DOM;
+
+@inject Microsoft.JSInterop.IJSRuntime jSRuntime
+@inject NavigationManager NavigationManager
+@using System.Reflection; 
+@code
+{
+    protected override void OnInitialized()
+    {
+        Publisher.jSRuntime = jSRuntime;
+        Publisher.jSInProcessRuntime = jSRuntime as IJSInProcessRuntime;
+        Publisher.NavigationManager = NavigationManager;
+
+        NavigationManager.LocationChanged += async (s, e) =>
+        {
+            //await Monsajem_Client.SafeRun.Safe(async () =>
+            //await UserControler.Page.Route(e.Location));
+        };
+        UserControler.Publish.HideAction();
+    }
+
+    protected async override Task OnInitializedAsync()
+    {
+        await Task.Delay(1);
+        //System.Net.Http.HttpClient request = new System.Net.Http.HttpClient();
+        //   await request.GetAsync("https://ipapi.co/8.8.8.8/country/");
+        //var response = await request.GetAsync("https://ipapi.co/8.8.8.8/country/");
+        //Console.WriteLine(await response.Content.ReadAsStringAsync());
+        await Monsajem_Client.SafeRun.Safe(() => Monsajem_Client.App.Main_Run());
+    }
+}
+
+<Router AppAssembly="@typeof(Program).Assembly">
+    <Found Context="routeData">
+        <RouteView RouteData="@routeData" />
+    </Found>
+    <NotFound>
+    </NotFound>
+</Router>

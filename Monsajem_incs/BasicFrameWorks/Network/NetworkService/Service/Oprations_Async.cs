@@ -17,7 +17,6 @@ namespace Monsajem_Incs.Net.Base.Service
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
     public class Syncable : Attribute
     { }
-
     public interface IAsyncOprations
     {
         Task<t> SendData<t>(t Data);
@@ -211,143 +210,160 @@ namespace Monsajem_Incs.Net.Base.Service
             }
         }
 
-        public Task Remote<t>(t obj, Func<(t Obj, Func<byte, Func<Task>,Task> OutOfRemote), Task> Talk) =>
-            Remote<t, object>(obj, async (c) => { await Talk(c); return null; });
-        public async Task<r> Remote<t, r>(t obj, Func<(t Obj,Func<byte,Func<Task>,Task> OutOfRemote), Task<r>> Talk)
+        private static
+            (FieldInfo[] RemoteFields,
+             FieldInfo[] SyncFields) GetRemoteFields<t>()
         {
+            static FieldInfo[] GetFields<AttributeType>()
+            {
+                var Fields = DynamicAssembly.TypeController.GetAllFields(typeof(t), null, (c) =>
+                c.GetCustomAttributes(typeof(AttributeType)).Count() > 0);
+                foreach (var Field in Fields)
+                    if (Field.FieldType.BaseType != typeof(MulticastDelegate))
+                        throw new Exception(Field.Name + " Should be strong type delegate.");
+                return Fields;
+            }
 
-            var Fields = DynamicAssembly.TypeController.GetAllFields(typeof(t), null, (c) =>
-                            c.FieldType.BaseType == typeof(MulticastDelegate) &&
-                            c.GetCustomAttributes(typeof(Remotable)).Count() > 0);
+            var RemoteFields = GetFields<Remotable>();
+            var SyncFields = DynamicAssembly.TypeController.GetAllFields(typeof(t), null, (c) =>
+                c.GetCustomAttributes(typeof(Syncable)).Count() > 0);
+            foreach (var SyncField in SyncFields)
+            {
+                var FieldType = SyncField.FieldType;
+                if (FieldType.BaseType != typeof(MulticastDelegate))
+                    throw new Exception(SyncField.Name + " Should be strong type delegate.");
+                var Method = FieldType.GetMethod("Invoke");
+                if (Method.ReturnType != typeof(void) &&
+                   Method.ReturnType != typeof(Task))
+                    throw new Exception(SyncField.Name + " Should haven't result, you can use SyncableServerResult or SyncableClientResult.");
+            }
 
+            return (RemoteFields, SyncFields);
+        }
+
+        public Task Remote<t>(t obj, Func<t, Task> Talk) =>
+            Remote<t, object>(obj, async (c) => { await Talk(c); return null; });
+        public async Task<r> Remote<t, r>(t obj, Func<t, Task<r>> Talk)
+        {
+            var Fields = GetRemoteFields<t>();
             var Service = new Service<byte>(this);
             var SendQueue = new Async.AsyncTaskQueue();
             var ReciveQueue = new Async.AsyncTaskQueue();
-            var Len = Fields.Length;
 
-            Func<byte, object[], bool, Task<object>> Request =
-            async (byte Address,
+            Func<byte, object[], bool, Task<object>> Request = null;
+            byte Address = 0;
+            Func<FieldInfo, Delegate> MakeDelegate = (Field) =>
+             {
+                 var LocAddress = Address++;
+                 var LocRequest = Request;
+                 var DG = DynamicAssembly.TypeController.CreateDelegateWrapper(Field.FieldType,
+                          (inputs) =>
+                          {
+                              LocRequest(LocAddress, inputs, false).Wait();
+                          },
+                          (inputs) =>
+                          {
+                              return LocRequest(LocAddress, inputs, true).GetAwaiter().GetResult();
+                          },
+                          async (inputs) =>
+                          {
+                              await LocRequest(LocAddress, inputs, false);
+                          },
+                          async (inputs) =>
+                          {
+                              return await LocRequest(LocAddress, inputs, true);
+                          });
+                 return DG;
+             };
+
+            {// Remote
+                Request =
+                async (byte Address,
+                       object[] inputs,
+                       bool HaveResult) =>
+                {
+                    Task SendTask;
+                    Task<object> ReciveTask;
+                    lock (Service)
+                    {
+                        SendTask = SendQueue.AddToQueue(async () =>
+                        {
+                            await Service.Request(Address);
+                            await SendData(inputs);
+                        });
+                        ReciveTask = ReciveQueue.AddToQueue(async () =>
+                        {
+                            await Sync();
+                            if (HaveResult)
+                                return await GetData<object>();
+                            else
+                                return null;
+                        });
+                    }
+                    await SendTask;
+                    return await ReciveTask;
+                }; ;
+                for (int i = 0; i < Fields.RemoteFields.Length; i++)
+                {
+                    var Field = Fields.RemoteFields[i];
+                    Field.SetValue(obj, MakeDelegate(Field));
+                }
+            }
+
+            {// Sync
+                Request =
+                async (byte Address,
                    object[] inputs,
                    bool HaveResult) =>
-            {
-                Task SendTask;
-                Task<object> ReciveTask;
-                lock (Service)
                 {
-                    SendTask = SendQueue.AddToQueue(async () =>
-                    {
-                        await Service.Request(Address);
-                        await SendData(inputs);
-                    });
-                    ReciveTask = ReciveQueue.AddToQueue(async () =>
-                    {
-                        await Sync();
-                        if (HaveResult)
-                            return await GetData<object>();
-                        else
-                            return null;
-                    });
+                    await Service.Request(Address);
+                    await SendData(inputs);
+                    return default;
+                };
+                for (int i = 0; i < Fields.SyncFields.Length; i++)
+                {
+                    var Field = Fields.SyncFields[i];
+                    var DG = MakeDelegate(Field);
+                    var OldDG = (Delegate)Field.GetValue(obj);
+                    DG = Delegate.Combine(DG, OldDG);
+                    Field.SetValue(obj, DG);
                 }
-                await SendTask;
-                return await ReciveTask;
-            };
+            }
 
-            for (int i = 0; i < Len; i++)
-            {
-                var Field = Fields[i];
-                var Address = (byte)i;
-                Field.SetValue(obj,
-                    DynamicAssembly.TypeController.CreateDelegateWrapper(Field.FieldType,
-                         (inputs) =>
-                         {
-                             Request(Address, inputs, false).Wait();
-                         },
-                         (inputs) =>
-                         {
-                             return Request(Address, inputs, true).GetAwaiter().GetResult();
-                         },
-                         async (inputs) =>
-                         {
-                             await Request(Address, inputs, false);
-                         },
-                         async (inputs) =>
-                         {
-                             return await Request(Address, inputs, true);
-                         }));
-            }
-            var Result = await Talk((obj,async(c,Func)=>
-            {
-                await Service.Request((byte)(c + Len));
-                await Func();
-            }
-            ));
+            var Result = await Talk(obj);
             await Service.EndService(255);
             return Result;
         }
-        public async Task Remote<t>(t obj, params Func<Task>[] OutOfRemote)
+        public async Task Remote<t>(t obj)
         {
             var TaskQueue = new Async.AsyncTaskQueue();
 
-            var RemoteFields = DynamicAssembly.TypeController.GetAllFields(typeof(t),null,(c)=>
-                c.GetCustomAttributes(typeof(Remotable)).Count()>0);
-            foreach(var RemoteField in RemoteFields)
-                if (RemoteField.FieldType.BaseType != typeof(MulticastDelegate))
-                    throw new Exception(RemoteField.Name + " Should be strong type delegate.");
+            var Fields = GetRemoteFields<t>();
 
-            var SyncFields = DynamicAssembly.TypeController.GetAllFields(typeof(t), null, (c) =>
-                c.FieldType.BaseType == typeof(MulticastDelegate) &&
-                c.GetCustomAttributes(typeof(Syncable)).Count() > 0);
-            foreach (var SyncField in SyncFields)
-                if (SyncField.FieldType != typeof(Func<IAsyncOprations,Task>))
-                    throw new Exception("Type of " + SyncField.Name + " Should be Func<IAsyncOprations,Task>.");
-            
+            Func<Func<object[], Task<object>>, bool, Task> Handle=null;
+            byte Address=0;
             var Service = new Service<byte>(this);
-            var Len = RemoteFields.Length;
 
-            Func<Func<object[], Task<object>>, bool, Task> CheckException =
-            async (ac, HaveResult) =>
+            Action<FieldInfo> AddService = (Field) =>
             {
-                var Params = await GetData<object[]>();
-                object Result = null;
-                Exception Ex = null;
-
-                var Q = TaskQueue.AddToQueue(async () =>
-                {
-                    try
-                    {
-                        Result = await ac(Params);
-                    }
-                    catch (Exception ex)
-                    {
-                        Ex = ex;
-                    }
-                    await Sync(Ex);
-                    if (HaveResult)
-                        await SendData(Result);
-                });
-            };
-
-            int i = 0;
-            for (; i < Len; i++)
-            {
-                var Field = RemoteFields[i];
-                var Address = (byte)i;
+                var LocAddress = Address++;
+                var LocHandle = Handle;
                 var Method = Field.FieldType.GetMethod("Invoke");
                 if (Method.ReturnType != typeof(void))
                 {
                     if (Method.ReturnType == typeof(Task))
-                        Service.AddService(Address, async () =>
+                        Service.AddService(LocAddress, async () =>
                         {
-                            await CheckException(async (Params) =>
+                            await LocHandle(async (Params) =>
                             {
                                 await (Task)((Delegate)Field.GetValue(obj)).DynamicInvoke(Params);
                                 return null;
                             }, false);
                         });
                     else if (Method.ReturnType.IsAssignableTo(typeof(Task<string>).BaseType))
-                        Service.AddService(Address, async () =>
+                        Service.AddService(LocAddress, async () =>
                         {
-                            await CheckException(async (Params) =>
+                            await LocHandle(async (Params) =>
                             {
                                 var Rs = (Task)((Delegate)Field.GetValue(obj)).DynamicInvoke(Params);
                                 await Rs;
@@ -355,9 +371,9 @@ namespace Monsajem_Incs.Net.Base.Service
                             }, true);
                         });
                     else
-                        Service.AddService(Address, async () =>
+                        Service.AddService(LocAddress, async () =>
                         {
-                            await CheckException(async (Params) =>
+                            await LocHandle(async (Params) =>
                             {
                                 return ((Delegate)Field.GetValue(obj)).DynamicInvoke(Params);
                             }, true);
@@ -365,24 +381,51 @@ namespace Monsajem_Incs.Net.Base.Service
                 }
                 else
                 {
-                    Service.AddService(Address, async () =>
+                    Service.AddService(LocAddress, async () =>
                     {
-                        await CheckException(async (Params) =>
+                        await LocHandle(async (Params) =>
                         {
                             ((Delegate)Field.GetValue(obj)).DynamicInvoke(Params);
                             return null;
                         }, false);
                     });
                 }
+            };
+
+            {// Remote
+                Handle = async (ac, HaveResult) =>
+                {
+                    var Params = await GetData<object[]>();
+                    object Result = null;
+                    Exception Ex = null;
+
+                    var Q = TaskQueue.AddToQueue(async () =>
+                    {
+                        try
+                        {
+                            Result = await ac(Params);
+                        }
+                        catch (Exception ex)
+                        {
+                            Ex = ex;
+                        }
+                        await Sync(Ex);
+                        if (HaveResult)
+                            await SendData(Result);
+                    });
+                };
+                for (int i = 0; i < Fields.RemoteFields.Length; i++)
+                    AddService(Fields.RemoteFields[i]);
             }
 
-            var OutOfAddress = Len;
-            Len = OutOfRemote.Length;
-            i = 0;
-            for (; i < Len; i++)
-            {
-                var Address = (byte)(i+OutOfAddress);
-                Service.AddService(Address, OutOfRemote[i]);
+            {// Sync
+                Handle = async (ac, HaveResult) =>
+                {
+                    var Params = await GetData<object[]>();
+                    await ac(Params);
+                };
+                for (int i = 0; i < Fields.SyncFields.Length; i++)
+                    AddService(Fields.SyncFields[i]);
             }
 
             await Service.Response(255);
@@ -426,7 +469,7 @@ namespace Monsajem_Incs.Net.Base.Service
                 Exception ex = new Exception("Other side net sync Error >> " +
                     await GetData<string>() + "\n At >> " + await GetData<string>());
 #else
-                Exception ex =new Exception("Other side net sync Error >> "+
+                Exception ex = new Exception("Other side net sync Error >> " +
                     await GetData<string>());
 #endif
                 throw ex;

@@ -8,8 +8,8 @@ namespace TestOnClient
         static void Main()
         {
             Console.Title = "Client";
-            DB_Test.Test();
-            //RemoteObjectTest.Test();
+            //DB_Test.Test();
+            RemoteObjectTest.Test();
             //RemoteServiceTest.Test();
         }
     }

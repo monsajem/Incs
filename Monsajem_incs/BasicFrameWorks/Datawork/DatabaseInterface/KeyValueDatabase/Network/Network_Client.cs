@@ -115,14 +115,14 @@ namespace Monsajem_Incs.Database.Base
                 {
                     while (StartPos <= EndPos)
                     {
-                        var LastTruePos = await FindLastTrue(Table, Remote.Obj, StartPos, EndPos);
+                        var LastTruePos = await FindLastTrue(Table, Remote, StartPos, EndPos);
 
                         if (LastTruePos == ServerItemsCount - 1)
                             break;
                         else
                         {
                             LastTruePos++;
-                            var NextTrue = await Remote.Obj.GetUpdateCodeAtPos(LastTruePos);
+                            var NextTrue = await Remote.GetUpdateCodeAtPos(LastTruePos);
                             UpdateAble<KeyType> MyUpCode = null;
                             while (Table.UpdateAble.UpdateCodes.Length > LastTruePos)
                             {
@@ -139,21 +139,21 @@ namespace Monsajem_Incs.Database.Base
                             if (LastTruePos >= Table.UpdateAble.UpdateCodes.Length)
                                 break;
                             MyUpCode = Table.UpdateAble.UpdateCodes[LastTruePos];
-                            if (MyUpCode.UpdateCode>NextTrue)
-                                await Remote.OutOfRemote(1,// Get From pos to update code
-                            async () =>
-                            {
-                                await Client.SendData((StartPos, MyUpCode.UpdateCode));
-                                await GetNextItems();
-                            });
+                            //if (MyUpCode.UpdateCode>NextTrue)
+                            //    await Remote.OutOfRemote(1,// Get From pos to update code
+                            //async () =>
+                            //{
+                            //    await Client.SendData((StartPos, MyUpCode.UpdateCode));
+                            //    await GetNextItems();
+                            //});
                         }
                     }
-                    await Remote.OutOfRemote(1,// Get From pos to end
-                    async () =>
-                    {
-                        await Client.SendData(StartPos);
-                        await GetNextItems();
-                    });
+                    //await Remote.OutOfRemote(1,// Get From pos to end
+                    //async () =>
+                    //{
+                    //    await Client.SendData(StartPos);
+                    //    await GetNextItems();
+                    //});
 
 
                     foreach (var Delete in ShouldDelete)

@@ -311,6 +311,11 @@ namespace Monsajem_Incs.Net.Base.Socket
 
         public async Task<byte[]> Recive(int Size)
         {
+
+#if DEBUG
+            if (Size < 0)
+                throw new Exception("Recive size is wrong!");
+#endif
 #if TRACE_NET
             var OldSize = Size;
             Console.WriteLine($"Net:{Address} Reciving For Size 0/{OldSize}");

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using WebAssembly.Browser.MonsajemDomHelpers;
 using Monsajem_Incs.Resources;
-using Monsajem_Incs.Resources.Partials;
+using Monsajem_Incs.Resources.Base.Partials;
 using WebAssembly.Browser.DOM;
 using static Monsajem_Incs.Collection.Array.Extentions;
 using Monsajem_Client;

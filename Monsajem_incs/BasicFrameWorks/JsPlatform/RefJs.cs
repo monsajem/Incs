@@ -6,7 +6,7 @@ using WebAssembly.Browser.DOM;
 using System.Runtime.InteropServices.JavaScript;
 using Microsoft.JSInterop;
 
-namespace Monsajem_incs.JsPlatform
+namespace Monsajem_Incs.JsPlatform
 {
     public static class JsRumtime
     {

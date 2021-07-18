@@ -9,8 +9,8 @@ namespace TestOnServer
         static void Main()
         {
             Console.Title = "Server";
-            DB_Test.Test();
-            //RemoteObjTest.Test();
+            //DB_Test.Test();
+            RemoteObjTest.Test();
             //RemoteServiceTest.Test();
 
         }

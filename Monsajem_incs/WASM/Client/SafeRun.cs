@@ -10,7 +10,7 @@ using WebAssembly.Browser.DOM;
 using System.Reflection;
 using System.Threading.Tasks;
 using static WASM_Global.Publisher;
-using Monsajem_Incs.Resources.Partials;
+using Monsajem_Incs.Resources.Base.Partials;
 
 namespace Monsajem_Client
 {

@@ -23,17 +23,20 @@ namespace TestOnServer
             [Remotable]
             public Func<int,Task<int>> TaskFunc =
                 async (x) => {
-                    //Console.WriteLine("S"+ ++i);
-                    await Task.Delay(RND.Next(100, 2000));
-                    //Console.WriteLine("E"+i);
+                    Console.WriteLine("S" + ++i);
+                    await Task.Delay(RND.Next(100, 500));
+                    Console.WriteLine("E" + i);
                     return x;
                 };
             [Remotable]
             public Func<Task> TaskAc = async () =>
             {
-                 await Task.Delay(RND.Next(100, 1000));
+                 await Task.Delay(RND.Next(100, 500));
                  Console.WriteLine(i++);
             };
+
+            [Syncable]
+            public Func<Task> TaskSync;
         }
 
         public static void Test()
@@ -44,6 +47,15 @@ namespace TestOnServer
             (Link) =>
             {
                 var obj = new RemoteObj();
+                obj.TaskSync = async () =>
+                {
+                    Link.GetData<string>();
+                    Link.SendData("data");
+                    Link.GetData<string>();
+                    Link.SendData("data");
+                    Link.GetData<string>();
+                    Link.SendData("data");
+                };
                 Link.Remote(obj,async (c)=>
                 {
                     //c.Ac();
@@ -59,24 +71,19 @@ namespace TestOnServer
                     //        await task[i];
                     //}
 
-                    {
-                        var task = new Thread[10];
-                        for (int i = 0; i < 10; i++)
-                        {
-                            task[i] = new Thread(() => c.Obj.TaskFunc(i).Wait());
-                            task[i].Start();
-                        }
+                    //{
+                    //    var task = new Thread[10];
+                    //    for (int i = 0; i < 10; i++)
+                    //    {
+                    //        task[i] = new Thread(() =>Console.WriteLine(c.TaskFunc(i).GetAwaiter().GetResult()));
+                    //        task[i].Start();
+                    //    }
 
-                        for (int i = 0; i < 10; i++)
-                            task[i].Join();
-                    }
+                    //    for (int i = 0; i < 10; i++)
+                    //        task[i].Join();
+                    //}
 
-                    await c.OutOfRemote(0, async () =>
-                    {
-                        Link.SendData("String");
-                        var Q = Link.GetData<string>();
-                    });
-
+                    await c.TaskSync();
                 }).Wait();
             });
 

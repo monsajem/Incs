@@ -71,36 +71,36 @@ namespace Monsajem_Incs.Database.Base
             if (Table.UpdateAble.UpdateCode != LastUpdateCode)
             {
                 await Client.SendData(Table.UpdateAble.UpdateCodes.Length);//3
-                await Client.Remote(new IRemoteUpdateSender<ValueType, KeyType>(
-                                     Client, Table, UpdateCodes, GetItem, IsPartOfTable),
-                async () =>// Get From pos to update code
-                {
-                    var Data = await Client.GetData<(int, ulong)>();
-                    var len = UpdateCodes.Length;
-                    var Pos = Data.Item1;
-                    var ClientUpCode = Data.Item2;
-                    while (Pos < len)
-                    {
-                        var MyUpCode = UpdateCodes[Pos];
-                        if(ClientUpCode>=MyUpCode.UpdateCode)
-                        {
-                            await Client.SendData(ulong.MinValue);
-                            return;
-                        }
-                        await Client.SendData(MyUpCode.UpdateCode);
-                        await Client.SendData( await GetItem(MyUpCode.Key));
-                    }
-                },
-                async () =>// Get From pos to end
-                {
-                    var Pos = await Client.GetData<int>();
-                    var len = UpdateCodes.Length;
-                    for (int i = Pos; i < len; i++)
-                    {
-                        var MyUpCode = UpdateCodes[i];
-                        await Client.SendData((MyUpCode.UpdateCode, await GetItem(MyUpCode.Key)));
-                    }
-                });
+                //await Client.Remote(new IRemoteUpdateSender<ValueType, KeyType>(
+                //                     Client, Table, UpdateCodes, GetItem, IsPartOfTable),
+                //async () =>// Get From pos to update code
+                //{
+                //    var Data = await Client.GetData<(int, ulong)>();
+                //    var len = UpdateCodes.Length;
+                //    var Pos = Data.Item1;
+                //    var ClientUpCode = Data.Item2;
+                //    while (Pos < len)
+                //    {
+                //        var MyUpCode = UpdateCodes[Pos];
+                //        if(ClientUpCode>=MyUpCode.UpdateCode)
+                //        {
+                //            await Client.SendData(ulong.MinValue);
+                //            return;
+                //        }
+                //        await Client.SendData(MyUpCode.UpdateCode);
+                //        await Client.SendData( await GetItem(MyUpCode.Key));
+                //    }
+                //},
+                //async () =>// Get From pos to end
+                //{
+                //    var Pos = await Client.GetData<int>();
+                //    var len = UpdateCodes.Length;
+                //    for (int i = Pos; i < len; i++)
+                //    {
+                //        var MyUpCode = UpdateCodes[i];
+                //        await Client.SendData((MyUpCode.UpdateCode, await GetItem(MyUpCode.Key)));
+                //    }
+                //});
             }
         }
     }

@@ -83,8 +83,19 @@ namespace UserControler
             }
         }
 
+        private static bool DB_PagesLoaded;
         public static void SubmitPage(HTMLElement MainElement,params Page[] Page)
         {
+            if(DB_PagesLoaded==false)
+            {
+                Pages.BinaryInsert(
+                    new UserControler.Partial.ShowPage(),
+                    new UserControler.Partial.insertPage(),
+                    new UserControler.Partial.UpdatePage(),
+                    new UserControler.Partial.SelectForAccept(),
+                    new UserControler.Partial.SelectForIgnore());
+                DB_PagesLoaded = true;
+            }
             Pages.BinaryInsert(Page);
             AppMainElement = MainElement;
         }

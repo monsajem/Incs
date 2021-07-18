@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using Monsajem_Incs.Collection.Array.Base;
-using Monsajem_Incs.Resources.Partials;
+using Monsajem_Incs.Resources.Base.Partials;
 using WebAssembly.Browser.DOM;
 
 namespace WASM_Global

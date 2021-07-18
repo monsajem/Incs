@@ -17,12 +17,17 @@ namespace TestOnClient
             new Client().Connect(
                 new System.Net.IPEndPoint(System.Net.IPAddress.Loopback, 8989), (Link) =>
                 {
-                     Link.Remote(new TestOnServer.RemoteObjTest.RemoteObj(),
-                         async()=>
-                         {
-                             var Q = Link.GetData<string>();
-                             Link.SendData("String");
-                         }).Wait();
+                    var RemoteObj = new TestOnServer.RemoteObjTest.RemoteObj();
+                    RemoteObj.TaskSync = async () =>
+                    {
+                        Link.SendData("data");
+                        Link.GetData<string>();
+                        Link.SendData("data");
+                        Link.GetData<string>();
+                        Link.SendData("data");
+                        Link.GetData<string>();
+                    };
+                    Link.Remote(RemoteObj).Wait();
                 });
             
         }
