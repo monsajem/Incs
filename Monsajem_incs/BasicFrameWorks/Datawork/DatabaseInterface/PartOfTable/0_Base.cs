@@ -91,6 +91,18 @@ namespace Monsajem_Incs.Database.Base
                 if (_UpdateAble != null)
                     ReadyForUpdateAble();
             };
+
+            IUpdateOrInsert = (OldKey, NewCreator) =>
+            {
+                if (PositionOf(OldKey) < 0)
+                {
+                    var Result = Parent.IUpdateOrInsert(OldKey, NewCreator);
+                    Accept(Result);
+                    return Result;
+                }
+                else
+                   return Parent.IUpdateOrInsert(OldKey, NewCreator);
+            };
         }
 
         internal new void ReadyForUpdateAble()

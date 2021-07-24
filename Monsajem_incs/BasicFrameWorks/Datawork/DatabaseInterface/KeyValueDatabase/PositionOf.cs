@@ -85,6 +85,9 @@ namespace Monsajem_Incs.Database.Base
             }
         }
 
+        public bool IsExist(ValueType Value) => PositionOf(Value) > -1;
+        public bool IsExist(KeyType Key) => PositionOf(Key) > -1;
+
         public int Length { get => KeysInfo.Keys.Length; }
     }
 }

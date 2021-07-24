@@ -313,6 +313,13 @@ namespace Monsajem_Incs.Database.Base
             IgnoreUpdateAble_pos = UpdateAbles<KeyType>.IgnoreUpdateAble_Len;
             UpdateAbles<KeyType>.IgnoreUpdateAble_Len++;
 
+            IUpdateOrInsert = (OldKey, NewCreator) =>
+            {
+                if (PositionOf(OldKey) > -1)
+                    return Update(OldKey,NewCreator);
+                else
+                    return Insert(NewCreator).value;
+            };
         }
 
         internal Table() { }

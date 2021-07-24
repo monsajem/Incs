@@ -12,18 +12,16 @@ namespace Monsajem_Incs.Database.Base
 {
     public static partial class Extentions
     {
-
         private class IRemoteUpdateSender<ValueType, KeyType>
             where KeyType : IComparable<KeyType>
         {
-            private IAsyncOprations Client;
-            private Table<ValueType, KeyType> Table;
-            private Table<ValueType, KeyType> ParentTable;
-            private UpdateAble<KeyType>[] UpdateCodes;
-            private Func<KeyType, Task<ValueType>> GetItem;
-            private bool IsPartOfTable;
-            private PartOfTable<ValueType, KeyType> PartTable;
-            public IRemoteUpdateSender() { }
+            protected IAsyncOprations Client;
+            protected Table<ValueType, KeyType> Table;
+            protected Table<ValueType, KeyType> ParentTable;
+            protected UpdateAble<KeyType>[] UpdateCodes;
+            protected Func<KeyType, Task<ValueType>> GetItem;
+            protected bool IsPartOfTable;
+            protected PartOfTable<ValueType, KeyType> PartTable;
             public IRemoteUpdateSender(
                 IAsyncOprations Client,
                 Table<ValueType, KeyType> Table,
@@ -36,16 +34,72 @@ namespace Monsajem_Incs.Database.Base
                 this.UpdateCodes = UpdateCodes;
                 this.GetItem = GetItem;
                 this.IsPartOfTable = IsPartOfTable;
-
+                if (IsPartOfTable)
+                {
+                    PartTable = (PartOfTable<ValueType, KeyType>)Table;
+                    ParentTable = PartTable.Parent;
+                    Table.MoveRelations = ParentTable.MoveRelations;
+                }
 
                 GetUpdateCodeAtPos = async (c) => UpdateCodes[c].UpdateCode;
+                IsExistAtParent = async (c) => ParentTable.IsExist(c);
 
+                Func<UpdateAble<KeyType>[], Task> SendUpdate = async (MyUpCodes) =>
+                {
+                    var IsPartOfTable = this.IsPartOfTable;
+                    var len = MyUpCodes.Length;
+                    await Client.SendData(len);
+                    for (int i = 0; i < len; i++)
+                    {
+                        var MyUpCode = MyUpCodes[i];
+                        await Client.SendData(MyUpCode.UpdateCode);
+                        if(IsPartOfTable)
+                            await Client.SendData(ParentTable.UpdateAble[MyUpCode.Key].UpdateCode);
+                    }
+                    for (int i = 0; i < len; i++)
+                    {
+                        if(await Client.GetData<bool>())
+                            await Client.SendData(await GetItem(MyUpCodes[i].Key));
+                    }
+                };
+
+                UpdateFromPosToUpCode = async (Pos, ClientUpCode) =>
+                {
+                    var MyUpCodes = UpdateCodes.
+                                    Skip(Pos).
+                                    TakeWhile((c) => ClientUpCode >= c.UpdateCode).ToArray();
+                    await SendUpdate(MyUpCodes);
+                };
+                UpdateFromPosToEnd = async (Pos) =>
+                {
+                    var MyUpCodes = UpdateCodes.Skip(Pos).ToArray();
+                    await SendUpdate(MyUpCodes);
+                };
+
+#if DEBUG_UpdateAble
+                Debuger = async () =>
+                {
+                    await Client.SendData(Table.UpdateAble.UpdateCodes);//1
+                    await Client.SendData(Table.KeysInfo.Keys.ToArray());//2
+                };
+#endif
             }
 
             [Remotable]
-            public Func<int, Task<ulong>> GetUpdateCodeAtPos;
+            protected Func<int, Task<ulong>> GetUpdateCodeAtPos;
+            [Remotable]
+            protected Func<KeyType, Task<bool>> IsExistAtParent;
 
-            public Func<KeyType, Task> Delete;
+            [Syncable]
+            protected Func<int,ulong, Task> UpdateFromPosToUpCode;
+            [Syncable]
+            protected Func<int, Task> UpdateFromPosToEnd;
+
+#if DEBUG_UpdateAble
+            [Syncable]
+            protected Func<Task> Debuger;
+#endif
+
         }
 
         private static async Task I_SendUpdate<ValueType, KeyType>
@@ -56,14 +110,6 @@ namespace Monsajem_Incs.Database.Base
                     bool IsPartOfTable)
                    where KeyType : IComparable<KeyType>
         {
-            Table<ValueType, KeyType> ParentTable = Table;
-            PartOfTable<ValueType, KeyType> PartTable = null;
-            if (IsPartOfTable)
-            {
-                PartTable = (PartOfTable<ValueType, KeyType>)Table;
-                ParentTable = PartTable.Parent;
-            }
-
             var LastUpdateCode = await Client.GetData<ulong>();//1
             await Client.SendData(Table.UpdateAble.UpdateCode);//2
             if (Table.UpdateAble.UpdateCode < LastUpdateCode)
@@ -71,36 +117,9 @@ namespace Monsajem_Incs.Database.Base
             if (Table.UpdateAble.UpdateCode != LastUpdateCode)
             {
                 await Client.SendData(Table.UpdateAble.UpdateCodes.Length);//3
-                //await Client.Remote(new IRemoteUpdateSender<ValueType, KeyType>(
-                //                     Client, Table, UpdateCodes, GetItem, IsPartOfTable),
-                //async () =>// Get From pos to update code
-                //{
-                //    var Data = await Client.GetData<(int, ulong)>();
-                //    var len = UpdateCodes.Length;
-                //    var Pos = Data.Item1;
-                //    var ClientUpCode = Data.Item2;
-                //    while (Pos < len)
-                //    {
-                //        var MyUpCode = UpdateCodes[Pos];
-                //        if(ClientUpCode>=MyUpCode.UpdateCode)
-                //        {
-                //            await Client.SendData(ulong.MinValue);
-                //            return;
-                //        }
-                //        await Client.SendData(MyUpCode.UpdateCode);
-                //        await Client.SendData( await GetItem(MyUpCode.Key));
-                //    }
-                //},
-                //async () =>// Get From pos to end
-                //{
-                //    var Pos = await Client.GetData<int>();
-                //    var len = UpdateCodes.Length;
-                //    for (int i = Pos; i < len; i++)
-                //    {
-                //        var MyUpCode = UpdateCodes[i];
-                //        await Client.SendData((MyUpCode.UpdateCode, await GetItem(MyUpCode.Key)));
-                //    }
-                //});
+                var Remote = new IRemoteUpdateSender<ValueType, KeyType>(
+                                    Client, Table, UpdateCodes, GetItem, IsPartOfTable);
+                await Client.Remote(Remote);
             }
         }
     }

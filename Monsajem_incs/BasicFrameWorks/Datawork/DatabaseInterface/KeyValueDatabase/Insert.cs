@@ -55,6 +55,13 @@ namespace Monsajem_Incs.Database.Base
             return Insert(Value);
         }
 
+        public (int Pos,ValueType value) Insert(Func<ValueType,ValueType> ValueAction)
+        {
+            var Value = (ValueType)GetUninitializedObject(typeof(ValueType));
+            Value = ValueAction(Value);
+            return (Insert(Value),Value);
+        }
+
         public void Insert(IEnumerable<ValueType> Values)
         {
             foreach (var Value in Values)

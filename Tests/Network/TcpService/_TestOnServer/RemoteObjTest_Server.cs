@@ -41,7 +41,6 @@ namespace TestOnServer
 
         public static void Test()
         {
-
             var Server = new Server();
             Server.StartServicing(new System.Net.IPEndPoint(System.Net.IPAddress.Loopback, 8989),
             (Link) =>
