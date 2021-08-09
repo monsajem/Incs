@@ -259,8 +259,9 @@ namespace Monsajem_Incs.Database.Base
                 Table.UpdateAble.UpdateCode = ServerLastUpCode;
                 if (IsPartOfTable)
                     PartTable.SaveToParent();
-
+#if DEBUG_UpdateAble
                 await Debuger();
+#endif
             }
         }
 

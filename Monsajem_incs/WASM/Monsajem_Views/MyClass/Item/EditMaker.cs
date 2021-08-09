@@ -12,14 +12,17 @@ using WebAssembly.Browser.DOM;
 using Monsajem_Incs.DynamicAssembly;
 using Monsajem_Incs.Collection.Array;
 using System.Runtime.Serialization;
+using Monsajem_Incs.Serialization;
+using Monsajem_incs;
 
-namespace Monsajem_Incs.Views
+namespace Monsajem_Incs.Views.Maker
 {
-    public static class EditMaker<ValueType,ViewType>
-     where ViewType : new()
+    internal static class EditItemMaker<ValueType, ViewType>
+        where ViewType : new()
     {
-        public static event Action<(ViewType View, ValueType Value, object Data)> OnMakeView;
-        public static event Action<(ViewType View, ValueType Value, object Data)> OnEdited;
+        private static Action<(ViewType View, ValueType Value, object ExtraData)> FillViewByValue;
+        private static Action<ViewType,Action> RegisterOnEditedToView;
+        private static Func<(ViewType View, ValueType OldValue, object ExtraData),ValueType> MakeValueFromView;
         private static MyOptions Option;
         private class MyOptions
         {
@@ -30,7 +33,7 @@ namespace Monsajem_Incs.Views
             public Func<string, object>[] ConvertFromStr;
         }
 
-        static EditMaker()
+        static EditItemMaker()
         {
             Option = new MyOptions();
             var FieldsNames = FieldControler.GetFields(typeof(ValueType));
@@ -61,21 +64,21 @@ namespace Monsajem_Incs.Views
             }
             FieldsNames = FieldsNames.Where((c) =>
                 ShowNames.Where((q) => q.Name == c.Name).FirstOrDefault() != null).
-                          OrderBy((c)=> c.Name).ToArray();
+                          OrderBy((c) => c.Name).ToArray();
             ShowNames = ShowNames.Where((c) =>
                 FieldsNames.Where((q) => q.Name == c.Name).FirstOrDefault() != null).
                             OrderBy((c) => c.Name).ToArray();
             Option.Fields = FieldControler.Make(FieldsNames);
             Option.ViewFields = FieldControler.Make(ShowNames);
             Option.ConvertFromStr = new Func<string, object>[Option.Fields.Length];
-            
+
             for (int i = 0; i < Option.Fields.Length; i++)
             {
                 try
                 {
                     Option.ConvertFromStr[i] = ConvertStringToNodeValue.GetConvertor(Option.Fields[i].Info.FieldType);
                 }
-                catch 
+                catch
                 {
                     DeleteByPosition(ref Option.ConvertFromStr, i);
                     DeleteByPosition(ref Option.Fields, i);
@@ -85,83 +88,41 @@ namespace Monsajem_Incs.Views
             }
         }
 
-        private static ViewType MakeView(
-            ValueType obj,
-            bool HaveObj, 
-            Action<ValueType> Done,
+        public static ViewType MakeView<KeyType>(
+            ValueHolder<ValueType> OldValue,
+            Func<ValueType,KeyType> GetKey,
+            Action<(KeyType OldKey, ValueType NewValue)> Edited,
             object Data)
         {
+            var OldKey = default(KeyType);
             var View = new ViewType();
-            if(HaveObj)
+            if (OldValue.HaveValue)
             {
+                OldKey = GetKey(OldValue);
                 for (int i = 0; i < Option.Fields.Length; i++)
                 {
-                    var NodeValue = Option.Fields[i].GetValue(obj);
+                    var NodeValue = Option.Fields[i].GetValue(OldValue);
                     if (NodeValue != null)
                         ((HTMLElement)Option.ViewFields[i].GetValue(View)).Value = NodeValue.ToString();
                 }
+                FillViewByValue?.Invoke((View, OldValue.Value, Data));
             }
-            ((HTMLElement)Option.ViewBtnDone.GetValue(View)).OnClick+=(c1,c2) =>
+            ((HTMLElement)Option.ViewBtnDone.GetValue(View)).OnClick += (c1, c2) =>
             {
-                var NewNodeValue =(ValueType) FormatterServices.GetUninitializedObject(typeof(ValueType));
-                    for (int i = 0; i < Option.Fields.Length; i++)
+                var NewValue = (ValueType)FormatterServices.GetUninitializedObject(typeof(ValueType));
+                for (int i = 0; i < Option.Fields.Length; i++)
+                {
+                    string Val = ((HTMLInputElement)Option.ViewFields[i].GetValue(View)).Value;
+                    try
                     {
-                        string Val = ((HTMLInputElement)Option.ViewFields[i].GetValue(View)).Value;
-                        try
-                        {
-                            Option.Fields[i].SetValue(NewNodeValue, Option.ConvertFromStr[i](Val));
-                        }
-                        catch { }
+                        Option.Fields[i].SetValue(OldValue, Option.ConvertFromStr[i](Val));
                     }
-                    OnEdited?.Invoke((View, NewNodeValue, Data));
-                    Done.Invoke((ValueType)NewNodeValue);
+                    catch { }
+                }
+                NewValue = OnEdited.Invoke((View,OldValue, NewValue, Data));
+                Edited.Invoke((OldKey, OldValue));
             };
-            if(HaveObj)
-                OnMakeView?.Invoke((View, obj, Data));
             return View;
-        }
-
-        public static ViewType MakeView<KeyType>(
-            ValueType obj,
-            Func<ValueType, KeyType> GetKey,
-            Action<ValueType> Done, 
-            object Data = null)
-        {
-            return MakeView(obj, GetKey, Done, Data);
-        }
-
-        public static ViewType MakeView<KeyType>(
-            Action<ValueType> Done,
-            Func<ValueType,KeyType> GetKey, 
-            object Data = null)
-        {
-            return MakeView(default, GetKey, Done, Data);
-        }
-
-        public static HTMLElement MakeHtml(
-            ValueType obj,
-            bool HaveObj,
-            Action<ValueType> Done, 
-            object Data = null)
-        {
-            return (HTMLElement)Option.ViewMain.GetValue(MakeView(obj,HaveObj, Done, Data));
-        }
-        public static HTMLElement MakeHtml(Action<ValueType> Done, object Data = null)
-        {
-            return MakeHtml(default,false, Done, Data);
-        }
-
-        public static void MakeDefault()
-        {
-            EditMaker<ValueType>.MakeView = MakeHtml;
-        }
-        public static void MakeDefault(
-            Action<(ViewType View, ValueType Value, object Data)> OnMakeView,
-            Action<(ViewType View, ValueType Value, object Data)> OnEdited)
-        {
-            EditMaker<ValueType, ViewType>.OnMakeView = OnMakeView;
-            EditMaker<ValueType, ViewType>.OnEdited = OnEdited;
-            EditMaker<ValueType>.MakeView = MakeHtml;
         }
     }
 }

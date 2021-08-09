@@ -25,7 +25,7 @@ namespace Monsajem_Incs.Views.Extentions.Table
         {
             var OldValue = obj.Value;
             var OldKey = obj.Parent.GetKey(OldValue);
-            return EditMaker<ValueType>.MakeView(OldValue, true,(c)=> Done((c,OldKey)), Data);
+            return EditItemMaker<ValueType>.MakeView(OldValue, true,(c)=> Done((c,OldKey)), Data);
         }
         public static HTMLElement MakeInsertView<ValueType,KeyType>(
             this Table<ValueType,KeyType> Table,
@@ -33,7 +33,7 @@ namespace Monsajem_Incs.Views.Extentions.Table
             object Data = null)
             where KeyType:IComparable<KeyType>
         {
-            return EditMaker<ValueType>.MakeView(default,false,Done, Data);
+            return EditItemMaker<ValueType>.MakeView(default,false,Done, Data);
         }
     }
 }

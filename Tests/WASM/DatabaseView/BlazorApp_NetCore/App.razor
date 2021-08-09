@@ -16,8 +16,8 @@
 
         NavigationManager.LocationChanged += async (s, e) =>
         {
-            //await Monsajem_Client.SafeRun.Safe(async () =>
-            //await UserControler.Page.Route(e.Location));
+            await Monsajem_Client.SafeRun.Safe(async () =>
+            await UserControler.Page.Route(e.Location));
         };
         UserControler.Publish.HideAction();
     }

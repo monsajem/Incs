@@ -672,6 +672,11 @@ namespace Monsajem_Incs.DynamicAssembly
         {
             TypeController.Inject(Target.Method, Inject.Method);
         }
+        public static void Inject<t>(t Target, t Inject)
+            where t:MulticastDelegate
+        {
+            TypeController.Inject(Target.Method, Inject.Method);
+        }
     }
 
     public class TypeFields

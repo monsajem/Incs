@@ -13,12 +13,12 @@ using Monsajem_Incs.DynamicAssembly;
 using Monsajem_Incs.Collection.Array;
 using Monsajem_Incs.Database.Base;
 
-namespace Monsajem_Incs.Views
+namespace Monsajem_Incs.Views.Maker
 {
-    public static class ViewMaker<ValueType, ViewType>
+    internal static class ViewItemMaker<ValueType, ViewType>
         where ViewType : new()
     {
-        public static event Action<(ViewType View, ValueType Value,object Data)> OnMakeView;
+        public static Action<(ViewType View, ValueType Value,object Data)> OnMakeView;
         private static Options MyOptions;
         private class Options
         {
@@ -27,7 +27,7 @@ namespace Monsajem_Incs.Views
             public FieldControler ViewMain;
         }
 
-        static ViewMaker()
+        static ViewItemMaker()
         {
             MyOptions = new Options();
             var FieldsNames = FieldControler.GetFields(typeof(ValueType));
@@ -35,9 +35,9 @@ namespace Monsajem_Incs.Views
             try
             {
                 MyOptions.ViewMain = FieldControler.Make(
-                    ShowNames.Where((c) => c.Name == "Main").First());
+                    ShowNames.Where((c) => c.Name.ToLower() == "main").First());
             }
-            catch 
+            catch
             {
                 var ViewType = typeof(ViewType);
                 throw new MissingMemberException("Main Element not found at " +ViewType.Name +
@@ -67,39 +67,12 @@ namespace Monsajem_Incs.Views
             return View;
         }
 
-        public static HTMLElement MakeHtml(
-            ValueType obj,
-            object Data)
+        internal static HTMLElement MakeHtml(
+            (ValueType obj,
+            object ExtraData) Inputs)
         {
             
-            return (HTMLElement) MyOptions.ViewMain.GetValue(MakeView(obj,Data));
-        }
-        public static HTMLElement MakeHtml(
-            ValueType obj,
-            Action<ValueType> OnClick,
-            object Data)
-        {
-            var View = MakeHtml(obj,Data);
-            View.OnClick+=(c1,c2) =>
-            {
-                OnClick(obj);
-            };
-            return (HTMLElement)MyOptions.ViewMain.GetValue(View);
-        }
-
-        public static HTMLElement MakeHtml<keyType>(
-            ValueType obj,
-            Func<ValueType, keyType> GetKey,
-            Action<keyType> OnClick,
-            object Data)
-        {
-            var Key = GetKey(obj);
-            var View = MakeHtml(obj,Data);
-            View.OnClick+=(c1,c2) =>
-            {
-                OnClick(Key);
-            };
-            return (HTMLElement)MyOptions.ViewMain.GetValue(View);
+            return (HTMLElement) MyOptions.ViewMain.GetValue(MakeView(Inputs.obj,Inputs.ExtraData));
         }
 
 
@@ -115,7 +88,7 @@ namespace Monsajem_Incs.Views
                 var Views = new Div_html();
                 foreach (var NodeValue in NodeValues)
                 {
-                    var View = ViewMaker<ValueType, ViewType>.MakeView(NodeValue,null);
+                    var View = ViewItemMaker<ValueType, ViewType>.MakeView(NodeValue,null);
                     var Main = (HTMLElement)MyOptions.ViewMain.GetValue(View);
                     Main.OnClick+=(c1,c2)=>GetOnSelect(GetKey(NodeValue), View, SelectedNodeValue);
                     Views.Main.AppendChild(Main);
@@ -137,19 +110,6 @@ namespace Monsajem_Incs.Views
                 GetKey = (v) => v,
                 NodeValues = obj
             };
-        }
-
-
-        public static void MakeDefault()
-        {
-            ViewMaker<ValueType>.MakeView = MakeHtml;
-        }
-
-        public static void MakeDefault(
-            Action<(ViewType View, ValueType Value, object Data)> OnMakeView)
-        {
-            ViewMaker<ValueType, ViewType>.OnMakeView = OnMakeView;
-            ViewMaker<ValueType>.MakeView = MakeHtml;
         }
     }
 }

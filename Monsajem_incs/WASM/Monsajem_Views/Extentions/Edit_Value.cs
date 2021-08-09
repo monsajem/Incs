@@ -25,14 +25,14 @@ namespace Monsajem_Incs.Views.Extentions.Value
             where KeyType : IComparable<KeyType>
         {
             var OldKey = GetKey(obj);
-            return EditMaker<ValueType>.MakeView(obj,true,(c)=> Done((c,OldKey)), Data);
+            return EditItemMaker<ValueType>.MakeView(obj,true,(c)=> Done((c,OldKey)), Data);
         }
         public static HTMLElement MakeEditView<ValueType>(
             this ValueType obj,
             Action<ValueType> Done,
             object Data = null)
         {
-            return EditMaker<ValueType>.MakeView(obj, true, Done, Data);
+            return EditItemMaker<ValueType>.MakeView(obj, true, Done, Data);
         }
     }
 }

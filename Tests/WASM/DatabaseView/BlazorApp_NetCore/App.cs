@@ -8,7 +8,8 @@ using Monsajem_Incs.Serialization;
 using Monsajem_Incs.TimeingTester;
 using System.Runtime.InteropServices.JavaScript;
 using Microsoft.JSInterop;
-using Monsajem_Incs.Views;
+using static Monsajem_Incs.Views.Maker.ViewItemMaker;
+using static Monsajem_Incs.Views.Maker.EditItemMaker;
 
 namespace Monsajem_Client
 {
@@ -30,11 +31,11 @@ namespace Monsajem_Client
             UserControler.Page.SubmitPage(MainElement);
 
             {
-                ViewMaker<ProductGroup, GroupView_html>.MakeDefault((i) =>
+                SetView<ProductGroup, GroupView_html>((i) =>
                 {
                     i.View.Name.TextContent = i.Value.Name;
                 });
-                EditMaker<ProductGroup, GroupEdit_html>.MakeDefault(
+                EditItemMaker<ProductGroup, GroupEdit_html>.MakeDefault(
                 OnMakeView: (i) =>
                 {
                     i.View.Name.Value = i.Value.Name;

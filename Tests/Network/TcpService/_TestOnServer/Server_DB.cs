@@ -68,10 +68,12 @@ namespace TestOnServer
 
                 Link.SendUpdate(Table_Person);//5
 
-                Table_Person["ali"].Value.frinds.Accept("ahmad");
-                Table_Person["ali"].Value.frinds.Accept("akbar");
                 var Ali = Table_Person.GetItem("ali").Value;
                 var ahmad = Table_Person.GetItem("ahmad").Value;
+                Ali.frinds.Accept("ahmad");
+                Ali.frinds.Accept("akbar");
+                Ali = Table_Person.GetItem("ali").Value;
+                ahmad = Table_Person.GetItem("ahmad").Value;
                 Link.SendUpdate(Ali.frinds);//6
                 Link.SendUpdate(ahmad.frinds);//7
                 Link.SendUpdate(Ali.frinds);//8

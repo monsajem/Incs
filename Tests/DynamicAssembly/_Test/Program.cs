@@ -16,10 +16,7 @@ namespace _Test
 
         static void Main(string[] args)
         {
-            Action<string, string, string> d1 = (c1, c2, c3) =>
-            {
 
-            };
         }
     }
 }

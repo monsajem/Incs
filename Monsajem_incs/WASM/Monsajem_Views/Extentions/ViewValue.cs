@@ -21,9 +21,9 @@ namespace Monsajem_Incs.Views.Extentions.Value
             this ValueType value,
             object Data =null)
         {
-            if (ViewMaker<ValueType>.MakeView == null)
+            if (ViewItemMaker<ValueType>.MakeView_AC == null)
                 throw new NotImplementedException("Make View not declared For " + typeof(ValueType).FullName);
-            return ViewMaker<ValueType>.MakeView(value,Data);
+            return ViewItemMaker<ValueType>.MakeView_AC(value,Data);
         }
         public static HTMLElement MakeView<ValueType, KeyType>(
             this ValueType value,

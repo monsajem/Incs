@@ -412,16 +412,17 @@ namespace UserControler.Partial
     {
         public override string Address => "ShowItems";
 
-        public void Show(object DB)
+        public void Show<KeyType,ValueType>(Table<ValueType,KeyType> DB)
+            where KeyType:IComparable<KeyType>
         {
             base.Show(FindDB_Hash(DB.GetHashCode()));
         }
-        public void Show(string TableName, string RelationName, object ItemKey)
+        internal void Show(string TableName, string RelationName, object ItemKey)
         {
             base.Show(TableName + "?" + RelationName + "?" + (string)ItemKey);
         }
 
-        public static (string TableName, string RelationName, string ItemKey)
+        internal static (string TableName, string RelationName, string ItemKey)
             GetDataFrom(string Info)
         {
             string TableName = "";
@@ -452,12 +453,13 @@ namespace UserControler.Partial
 
     public class insertPage : Page.HaveData
     {
-        public void Show(object DB)
+        public void Show<KeyType, ValueType>(Table<ValueType, KeyType> DB)
+            where KeyType : IComparable<KeyType>
         {
             base.Show(FindDB_Hash(DB.GetHashCode()));
         }
 
-        public void Show(DataBaseInfo DB)
+        internal void Show(DataBaseInfo DB)
         {
             if (DB.RelationName == "")
                 base.Show(DB.TableName);
@@ -478,12 +480,12 @@ namespace UserControler.Partial
 
     public class UpdatePage : Page.HaveData
     {
-
-        public void Show(object DB, string Key)
+        public void Show<KeyType, ValueType>(Table<ValueType, KeyType> DB, string Key)
+            where KeyType : IComparable<KeyType>
         {
             base.Show(FindDB_Hash(DB.GetHashCode()) + "," + Key);
         }
-        public void Show(string TableName, string Key)
+        internal void Show(string TableName, string Key)
         {
             base.Show(TableName + "," + Key);
         }
@@ -504,11 +506,12 @@ namespace UserControler.Partial
     {
         public override string Address => "SelectForAccept";
 
-        public void Show(object DB)
+        public void Show<KeyType, ValueType>(Table<ValueType, KeyType> DB)
+            where KeyType : IComparable<KeyType>
         {
             base.Show(FindDB_Hash(DB.GetHashCode()));
         }
-        public void Show(string TableName, string RelationName, object ItemKey)
+        internal void Show(string TableName, string RelationName, object ItemKey)
         {
             base.Show(TableName + "?" + RelationName + "?" + (string)ItemKey);
         }
@@ -526,11 +529,12 @@ namespace UserControler.Partial
     {
         public override string Address => "SelectForIgnore";
 
-        public void Show(object DB)
+        public void Show<KeyType, ValueType>(Table<ValueType, KeyType> DB)
+            where KeyType : IComparable<KeyType>
         {
             base.Show(FindDB_Hash(DB.GetHashCode()));
         }
-        public void Show(string TableName, string RelationName, object ItemKey)
+        internal void Show(string TableName, string RelationName, object ItemKey)
         {
             base.Show(TableName + "?" + RelationName + "?" + (string)ItemKey);
         }

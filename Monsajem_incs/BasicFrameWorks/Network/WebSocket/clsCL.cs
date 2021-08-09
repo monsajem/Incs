@@ -203,11 +203,19 @@ namespace Monsajem_Incs.Net.Web.WebSocket.Server
         {
             if (!Client.Connected) return;
 
-            var mask = new byte[4];
-            if (Mask) Random.NextBytes(mask);
-            Send(new byte[] { }, WebSocketOpCode.ConnectionClose, Mask, mask);
+            try
+            {
+                var mask = new byte[4];
+                if (Mask) Random.NextBytes(mask);
+                Send(new byte[] { }, WebSocketOpCode.ConnectionClose, Mask, mask);
 
-            Client.Close();
+                Client.Close();
+            }
+            catch
+            {
+                if (Client.Connected)
+                    throw;
+            }
         }
 
         public void Send(byte[] payload, bool isBinary) => Send(Client, payload, isBinary, false);
