@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WebAssembly.Browser.DOM;
-using Monsajem_Incs.Views.Extentions.Table;
 using static MonsajemData.DataBase;
 using static WASM_Global.Publisher;
 using Monsajem_Incs.Database.Base;
@@ -88,12 +87,12 @@ namespace UserControler
         {
             if(DB_PagesLoaded==false)
             {
-                Pages.BinaryInsert(
-                    new UserControler.Partial.ShowPage(),
-                    new UserControler.Partial.insertPage(),
-                    new UserControler.Partial.UpdatePage(),
-                    new UserControler.Partial.SelectForAccept(),
-                    new UserControler.Partial.SelectForIgnore());
+                //Pages.BinaryInsert(
+                //    new UserControler.Partial.ShowPage(),
+                //    new UserControler.Partial.insertPage(),
+                //    new UserControler.Partial.UpdatePage(),
+                //    new UserControler.Partial.SelectForAccept(),
+                //    new UserControler.Partial.SelectForIgnore());
                 DB_PagesLoaded = true;
             }
             Pages.BinaryInsert(Page);

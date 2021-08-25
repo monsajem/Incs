@@ -40,7 +40,7 @@ namespace Monsajem_Incs.DynamicAssembly
             return DynamicMethodBuilder.Delegate<Func<T>>("CreateInstance_",
             (il) =>
             {
-                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Ldc_I4_S,12);
                 il.Emit(OpCodes.Call, nativeGetUninitializedObject);
                 il.Emit(OpCodes.Castclass, t);
                 il.Emit(OpCodes.Ret);

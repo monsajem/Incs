@@ -54,8 +54,29 @@ namespace Monsajem_Incs.Database.Base
         public Action<ValueType> AutoFillRelations;
         [Serialization.NonSerialized]
         public SecurityEvents<ValueType> SecurityEvents;
+
         [Serialization.NonSerialized]
-        internal string TableName;
+        private string _TableName;
+        internal string TableName
+        {
+            get => TableName; 
+            set 
+            {
+                var Done = false;
+                var OldName = _TableName;
+                try
+                {
+                    _TableName = value;
+                    TableFinder.AddTable(this);
+                    Done = true;
+                }
+                finally
+                {
+                    if(Done==false)
+                        _TableName = OldName;
+                }
+            }
+        }
 
         protected int KeyPos;
 

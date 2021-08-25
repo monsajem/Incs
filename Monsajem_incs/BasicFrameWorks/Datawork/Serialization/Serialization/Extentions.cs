@@ -16,7 +16,7 @@ namespace Monsajem_Incs.Serialization
         public static readonly Serialization Serializere = new Serialization(
             (c) => c.GetCustomAttributes(typeof(NonSerializedAttribute)).Count() == 0);
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
         public static byte[] Serialize<t>(this t obj, 
             Action<Type> TrustToType = null,
             Action<MethodInfo> TrustToMethod = null)
@@ -24,12 +24,12 @@ namespace Monsajem_Incs.Serialization
             return Serializere.Serialize(obj,TrustToType,TrustToMethod);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
         public static int SizeOf<t>(this t obj)=>Serializere.SizeOf<t>();
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
         public static int SizeOf<t>()=>Serializere.SizeOf<t>();
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
         public static t Deserialize<t>(this byte[] Data, 
             Action<Type> TrustToType = null,
             Action<MethodInfo> TrustToMethod = null)
@@ -37,7 +37,7 @@ namespace Monsajem_Incs.Serialization
             return Serializere.Deserialize<t>(Data,TrustToType,TrustToMethod);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
         public static t Deserialize<t>(this byte[] Data, ref int From, 
             Action<Type> TrustToType = null,
             Action<MethodInfo> TrustToMethod = null)
@@ -45,7 +45,7 @@ namespace Monsajem_Incs.Serialization
             return Serializere.Deserialize<t>(Data, ref From,TrustToType,TrustToMethod);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
         public static t Deserialize<t>(this byte[] Data, t SampleType, 
             Action<Type> TrustToType = null,
             Action<MethodInfo> TrustToMethod = null)

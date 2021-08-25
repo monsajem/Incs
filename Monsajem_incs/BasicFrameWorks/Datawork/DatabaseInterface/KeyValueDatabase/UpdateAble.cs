@@ -173,7 +173,6 @@ namespace Monsajem_Incs.Database.Base
         [Serialization.NonSerialized]
         internal int IgnoreUpdateAble_pos;
 
-        [Serialization.NonSerialized]
         public DynamicAssembly.RunOnceInBlock IgnoreUpdateAble
         {
             get

@@ -152,7 +152,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             public INode Before { get; set; }
             int Hash { get; }
 
-            [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+            [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
             public INode FineNextSequnce()
             {
                 INode holder = default;
@@ -876,7 +876,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             return new Array<ValueType>();
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
         public override IEnumerator<ValueType> GetEnumerator()
         {
             INode Node = this.GetItem(0, out var b, out var n);

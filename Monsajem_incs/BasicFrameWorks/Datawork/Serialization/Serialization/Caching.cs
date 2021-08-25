@@ -21,9 +21,9 @@ namespace Monsajem_Incs.Serialization
         [NonSerialized]
         private byte[] _Cache;
         public byte[] Cache {
-            [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+            [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
             get => _Cache;
-            [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+            [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
             set => _Cache = value; }
         public bool IsReady => true;
     }
@@ -50,7 +50,7 @@ namespace Monsajem_Incs.Serialization
         /// </summary>
         public byte[] Cache
         {
-            [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+            [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
             get
             {
                 if (Data == null)
@@ -66,7 +66,7 @@ namespace Monsajem_Incs.Serialization
                     return null;
                 }
             }
-            [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+            [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
             set
             {
                 if (Data == null)
@@ -97,7 +97,7 @@ namespace Monsajem_Incs.Serialization
 
         public bool IsReady
         {
-            [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+            [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
             get
             {
                 if (Data != null)
@@ -111,7 +111,7 @@ namespace Monsajem_Incs.Serialization
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
         void IDisposable.Dispose()
         {
             var Position = GUID.BinarySearch(MyGUID).Index;

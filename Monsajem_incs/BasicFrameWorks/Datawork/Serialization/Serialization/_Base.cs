@@ -47,8 +47,21 @@ namespace Monsajem_Incs.Serialization
 
         internal class Data
         {
-            public HashSet<ObjectContainer> Visitor = new HashSet<ObjectContainer>();
-            public HashSet<ObjectContainer> Visitor_info = new HashSet<ObjectContainer>();
+            [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+            public Data(bool NeedVisitors, 
+                        Action<Type> TrustToType,
+                        Action<MethodInfo> TrustToMethod)
+            {
+                if(NeedVisitors==true)
+                {
+                    Visitor = new HashSet<ObjectContainer>();
+                    Visitor_info = new HashSet<ObjectContainer>();
+                }
+                this.TrustToType = TrustToType;
+                this.TrustToMethod = TrustToMethod;
+            }
+            public HashSet<ObjectContainer> Visitor;
+            public HashSet<ObjectContainer> Visitor_info;
             public Action<Type> TrustToType;
             public Action<MethodInfo> TrustToMethod;
             public Action AtLast;
@@ -58,6 +71,17 @@ namespace Monsajem_Incs.Serialization
         }
         internal class DeserializeData : Data
         {
+            [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+            public DeserializeData(bool NeedVisitors,
+                                   Action<Type> TrustToType,
+                                   Action<MethodInfo> TrustToMethod,
+                                   byte[] Data) : 
+                              base(NeedVisitors,
+                                   TrustToType,
+                                   TrustToMethod)
+            {
+                this.Data = Data;
+            }
             public byte[] Data;
 
 #if DEBUG
@@ -80,13 +104,20 @@ namespace Monsajem_Incs.Serialization
 
         internal class SerializeData : Data
         {
+            [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+            public SerializeData(bool NeedVisitors,
+                                 Action<Type> TrustToType,
+                                 Action<MethodInfo> TrustToMethod) :
+                            base(NeedVisitors,
+                                 TrustToType,
+                                 TrustToMethod){}
             public MemoryStream Data = new MemoryStream();
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
         public int SizeOf<t>()=> SerializeInfo<t>.GetSerialize().ConstantSize;
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
         public byte[] Serialize<t>(t obj,
             Action<Type> TrustToType = null,
             Action<MethodInfo> TrustToMethod = null)
@@ -100,18 +131,18 @@ namespace Monsajem_Incs.Serialization
 #endif
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
         private byte[] _Serialize<t>(t obj, 
             Action<Type> TrustToType,
             Action<MethodInfo> TrustToMethod)
         {
             byte[] Result;
             var SR = SerializeInfo<t>.GetSerialize();
-            var SR_Data = new SerializeData()
-            {
-                TrustToType = TrustToType,
-                TrustToMethod =TrustToMethod
-            };
+            SerializeData SR_Data;
+            if (SR.ConstantSize == -1)
+                SR_Data = new SerializeData(true,TrustToType,TrustToMethod);
+            else
+                SR_Data = new SerializeData(false, TrustToType, TrustToMethod);
             try
             {
 #if DEBUG
@@ -143,7 +174,7 @@ namespace Monsajem_Incs.Serialization
             return Result;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
         public t Deserialize<t>(byte[] Data,
             Action<Type> TrustToType = null,
             Action<MethodInfo> TrustToMethod = null)
@@ -153,16 +184,18 @@ namespace Monsajem_Incs.Serialization
             return Deserialize<t>(Data, ref From, TrustToType,TrustToMethod);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
         public t Deserialize<t>(byte[] Data, ref int From, 
             Action<Type> TrustToType,
             Action<MethodInfo> TrustToMethod)
         {
             t Result = default;
-            var DR_Data = new DeserializeData() { 
-                Data = Data, From = From, 
-                TrustToType = TrustToType,
-                TrustToMethod = TrustToMethod };
+            var SR = SerializeInfo<t>.GetSerialize();
+            DeserializeData DR_Data;
+            if (SR.ConstantSize == -1)
+                DR_Data = new DeserializeData(true, TrustToType, TrustToMethod,Data);
+            else
+                DR_Data = new DeserializeData(false, TrustToType, TrustToMethod,Data);
             try
             {
 #if DEBUG
@@ -178,7 +211,7 @@ namespace Monsajem_Incs.Serialization
                 }
 #endif
                 VisitedDeserialize(DR_Data,
-                    (c) => Result = (t)c, SerializeInfo<t>.GetSerialize());
+                    (c) => Result = (t)c,SR);
                 DR_Data.AtLast?.Invoke();
             }
 #if DEBUG

@@ -7,7 +7,7 @@ namespace Monsajem_Incs.Serialization
 {
     public partial class Serialization
     {
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
         private void VisitedSerialize(
             SerializeData Data,
             object obj,
@@ -58,7 +58,7 @@ namespace Monsajem_Incs.Serialization
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
         private void VisitedDeserialize(
             DeserializeData Data,
             Action<object> Set,
@@ -107,7 +107,7 @@ namespace Monsajem_Incs.Serialization
                 Set(VisitedObj.obj);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
         private t VisitedInfoSerialize<t>(
             SerializeData S_Data,
             object obj,
@@ -136,7 +136,7 @@ namespace Monsajem_Incs.Serialization
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
         private t VisitedInfoDeserialize<t>(
             DeserializeData Data,
             Func<t> Get)

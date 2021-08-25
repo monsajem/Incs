@@ -54,14 +54,14 @@ namespace Monsajem_Incs
     }
     internal static class Shared
     {
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
         internal static string MidName(this Type Type)
         {
             return Type.ToString();
         }
 
         private static Array<TypeHolder> Types = new Array<TypeHolder>();
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
         internal static Type GetTypeByName(this string TypeName)
         {
             var Type = Types.BinarySearch(new TypeHolder(TypeName)).Value?.Type;

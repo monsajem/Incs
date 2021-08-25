@@ -6,6 +6,7 @@ using System.Linq;
 using System.Security.Policy;
 using System.Security;
 using static Monsajem_Incs.Collection.Array.Extentions;
+using System.Runtime.CompilerServices;
 
 namespace Monsajem_Incs.DynamicAssembly
 {
@@ -30,6 +31,9 @@ namespace Monsajem_Incs.DynamicAssembly
         public readonly FieldInfo Info;
         public readonly Action<object, object> SetValue;
         public readonly Func<object, object> GetValue;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public ValueType GetValueAs<ValueType>(object Parent)=>(ValueType)GetValue(Parent);
 
         public object this[object obj]
         {

@@ -24,9 +24,7 @@ namespace MonsajemData
         public Func<Task<HTMLDivElement>> ReadyIgnore;
         public Func<Task<HTMLDivElement>> Readyinsert;
         public Func<object, Task<HTMLDivElement>> ReadyUpdate;
-        public Func<(string RelationName, object Key), DataBaseInfo> GetRelation;
-        public Caption RelationCaption;
-        public Caption Caption;
+
         public class DataBaseInfo_name :
         IComparable<DataBaseInfo_name>
         {

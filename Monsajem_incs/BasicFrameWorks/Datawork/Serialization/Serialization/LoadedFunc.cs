@@ -28,13 +28,13 @@ namespace Monsajem_Incs.Serialization
             public byte[] NameAsByte;
             public SerializeInfo SerializerTarget;
 
-            [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+            [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
             public bool Equals(LoadedFunc other)
             {
                 return object.Equals(Obj,other.Obj);
             }
 
-            [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+            [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
             public override int GetHashCode()
             {
                 return HashCode;

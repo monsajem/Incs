@@ -11,11 +11,11 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.Base
     public abstract partial class IArray<ArrayType> :
         Array.Base.IArray<ArrayType>
     {
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
         internal abstract void AddLength(int Count);
 
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
         public override void DeleteByPosition(int Position)
         {
             if (Position == Length - 1)
@@ -28,7 +28,7 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.Base
             DeleteFrom(Length - 1);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
         public static void Copy(
             IArray<ArrayType> sourceArray,
             int sourceIndex,
@@ -60,7 +60,7 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.Base
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
         public static void Copy(
             IArray<ArrayType> sourceArray,
             int sourceIndex,
@@ -174,7 +174,7 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.Base
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
         internal virtual ((int From, int Len, System.Array Ar)[] Ar, int MaxLen)
             GetAllArrays()
         {
@@ -194,12 +194,12 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.Base
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
         public override void Insert(int From, Array.Base.IArray<ArrayType> sourceArray, int sourceIndex, int length)
         { 
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
         public void Insert(int From,IArray<ArrayType> sourceArray, int sourceIndex, int length)
         {
             int Source_From; int Source_Len;
@@ -226,14 +226,14 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.Base
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
         public override void Insert(int From,ArrayType[] Values,int Values_From,int ValuesLen)
         {
             var ArLen = Length;
             AddFromTo(From,Values,Values_From, ValuesLen);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
         public override void Insert(int From ,IEnumerable<ArrayType> Values)
         {
             var ArLen = Length;
@@ -252,7 +252,7 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.Base
             Reader.Dispose();
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
         public override void Insert(ArrayType Value, int Position)
         {
             AddLength(1);
@@ -307,30 +307,30 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.Base
     IArray<ArrayType>
     where OwnerType : IArray<ArrayType, OwnerType>
     {
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
         protected abstract new OwnerType MakeSameNew();
 
         protected override IArray<ArrayType> _MakeSameNew() => MakeSameNew();
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
         public new OwnerType Copy() => (OwnerType)base.Copy();
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
         public new OwnerType From(int from) => (OwnerType)base.From(from);
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
         public new OwnerType To(int to) => (OwnerType)base.To(to);
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
         public new OwnerType FromTo(int from, int to) => (OwnerType)base.FromTo(from, to);
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
         public new OwnerType PopFrom(int From) => (OwnerType)base.PopFrom(From);
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
         public new OwnerType PopTo(int to) => (OwnerType)base.PopTo(to);
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
         public new OwnerType PopFromTo(int From, int To) => (OwnerType)base.PopFromTo(From, To);
     }
 }

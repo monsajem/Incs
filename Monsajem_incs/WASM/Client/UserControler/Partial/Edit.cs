@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WebAssembly.Browser.DOM;
-using Monsajem_Incs.Views.Extentions.Table;
 using static MonsajemData.DataBase;
 using static MonsajemData.DataBaseInfo;
 using static WASM_Global.Publisher;
@@ -18,8 +17,6 @@ namespace UserControler.Partial
     public static class Page<ValueType, KeyType>
         where KeyType : IComparable<KeyType>
     {
-        public static Array<(string RelationName, Caption Caption)>
-            Relations = new Array<(string RelationName, Caption Caption)>(4);
         public class Actions
         {
             public static Table<ValueType, KeyType> GetTable(
@@ -183,67 +180,67 @@ namespace UserControler.Partial
                         };
                         Options.AppendChild(Btn);
                     }
-                    foreach (var RLN in Relations)
-                    {
-                        {
-                            var Btn = Document.document.CreateElement<HTMLButtonElement>();
-                            Btn.InnerText = "مشاهده " + RLN.Caption.Name_Multy;
-                            Btn.OnClick += (c1, c2) =>
-                            {
-                                new Window().History.Back();
-                                new Partial.ShowPage().Show(DBInfo.ParentTableName, RLN.RelationName, c.Key);
-                            };
-                            Options.AppendChild(Btn);
-                        }
-                    }
+                    //foreach (var RLN in Relations)
+                    //{
+                    //    {
+                    //        var Btn = Document.document.CreateElement<HTMLButtonElement>();
+                    //        Btn.InnerText = "مشاهده " + RLN.Caption.Name_Multy;
+                    //        Btn.OnClick += (c1, c2) =>
+                    //        {
+                    //            new Window().History.Back();
+                    //            new Partial.ShowPage().Show(DBInfo.ParentTableName, RLN.RelationName, c.Key);
+                    //        };
+                    //        Options.AppendChild(Btn);
+                    //    }
+                    //}
                     Monsajem_Incs.Views.Menu.Show(Options);
                 };
             }
 
             protected virtual void OnLoad(HTMLDivElement ReadyElement)
             {
-                {
-                    var TitleView = Document.document.CreateElement<HTMLDivElement>();
-                    TitleView.Dir = "rtl";
-                    if(DBInfo.RelationCaption!=null)
-                        TitleView.InnerText = 
-                            DBInfo.Caption.Name_Multy_Of + " " +
-                            DBInfo.RelationCaption.Name_Single + " " + DBInfo.Key;
-                    else
-                        TitleView.InnerText = DBInfo.Caption.Name_Multy;
-                    ReadyElement.AppendChild(TitleView);
-                    {
-                        var Btn = Document.document.CreateElement<HTMLButtonElement>();
-                        Btn.InnerText = "ایجاد "+ DBInfo.Caption.Name_Single + " جدید";
-                        Btn.OnClick += (c1, c2) =>
-                        {
-                            new Partial.insertPage().Show(DBInfo);
-                        };
-                        ReadyElement.AppendChild(Btn);
-                    }
-                    if(DBInfo.RelationName!="")
-                    {
+                //{
+                //    var TitleView = Document.document.CreateElement<HTMLDivElement>();
+                //    TitleView.Dir = "rtl";
+                //    if(DBInfo.RelationCaption!=null)
+                //        TitleView.InnerText = 
+                //            DBInfo.Caption.Name_Multy_Of + " " +
+                //            DBInfo.RelationCaption.Name_Single + " " + DBInfo.Key;
+                //    else
+                //        TitleView.InnerText = DBInfo.Caption.Name_Multy;
+                //    ReadyElement.AppendChild(TitleView);
+                //    {
+                //        var Btn = Document.document.CreateElement<HTMLButtonElement>();
+                //        Btn.InnerText = "ایجاد "+ DBInfo.Caption.Name_Single + " جدید";
+                //        Btn.OnClick += (c1, c2) =>
+                //        {
+                //            new Partial.insertPage().Show(DBInfo);
+                //        };
+                //        ReadyElement.AppendChild(Btn);
+                //    }
+                //    if(DBInfo.RelationName!="")
+                //    {
 
-                        {
-                            var Btn = Document.document.CreateElement<HTMLButtonElement>();
-                            Btn.InnerText = "افزودن تعدادی از "+ DBInfo.Caption.Name_Multy;
-                            Btn.OnClick += (c1, c2) =>
-                            {
-                                new Partial.SelectForAccept().Show(DBInfo.TableName, DBInfo.RelationName, DBInfo.Key);
-                            };
-                            ReadyElement.AppendChild(Btn);
-                        }
-                        {
-                            var Btn = Document.document.CreateElement<HTMLButtonElement>();
-                            Btn.InnerText = "برداشتن تعدادی از  " + DBInfo.Caption.Name_Multy;
-                            Btn.OnClick += (c1, c2) =>
-                            {
-                                new Partial.SelectForIgnore().Show(DBInfo.TableName, DBInfo.RelationName, DBInfo.Key);
-                            };
-                            ReadyElement.AppendChild(Btn);
-                        }
-                    }
-                }
+                //        {
+                //            var Btn = Document.document.CreateElement<HTMLButtonElement>();
+                //            Btn.InnerText = "افزودن تعدادی از "+ DBInfo.Caption.Name_Multy;
+                //            Btn.OnClick += (c1, c2) =>
+                //            {
+                //                new Partial.SelectForAccept().Show(DBInfo.TableName, DBInfo.RelationName, DBInfo.Key);
+                //            };
+                //            ReadyElement.AppendChild(Btn);
+                //        }
+                //        {
+                //            var Btn = Document.document.CreateElement<HTMLButtonElement>();
+                //            Btn.InnerText = "برداشتن تعدادی از  " + DBInfo.Caption.Name_Multy;
+                //            Btn.OnClick += (c1, c2) =>
+                //            {
+                //                new Partial.SelectForIgnore().Show(DBInfo.TableName, DBInfo.RelationName, DBInfo.Key);
+                //            };
+                //            ReadyElement.AppendChild(Btn);
+                //        }
+                //    }
+                //}
             }
 
             protected virtual IEnumerable<Table<ValueType, KeyType>.ValueInfo> GetValues()
@@ -261,7 +258,7 @@ namespace UserControler.Partial
                 await SyncData();
                 var ReadyElement = Document.document.CreateElement<HTMLDivElement>();
                 OnLoad(ReadyElement);
-                ReadyElement.AppendChild(GetValues().MakeView((c) =>OnViewMade(c)));
+                //ReadyElement.AppendChild(GetValues().MakeView((c) =>OnViewMade(c)));
                 return ReadyElement;
             }
         }
@@ -272,14 +269,14 @@ namespace UserControler.Partial
             public async Task<HTMLDivElement> Ready()
             {
                 var ReadyElement = Document.document.CreateElement<HTMLDivElement>();
-                ReadyElement.ReplaceChilds(Actions.GetTable(DBInfo).MakeInsertView(async (c) =>
-                await Safe(async () =>
-                {
-                    await Actions.Insert(DBInfo, c);
-                    Publish.ShowSuccessMessage("ثبت شد");
-                    Publish.HideAction();
-                    new Window().History.Back();
-                })));
+                //ReadyElement.ReplaceChilds(Actions.GetTable(DBInfo).MakeInsertView(async (c) =>
+                //await Safe(async () =>
+                //{
+                //    await Actions.Insert(DBInfo, c);
+                //    Publish.ShowSuccessMessage("ثبت شد");
+                //    Publish.HideAction();
+                //    new Window().History.Back();
+                //})));
                 return ReadyElement;
             }
         }
@@ -290,14 +287,14 @@ namespace UserControler.Partial
             public async Task<HTMLDivElement> Ready(object Key)
             {
                 var ReadyElement = Document.document.CreateElement<HTMLDivElement>();
-                ReadyElement.ReplaceChilds(Actions.GetTable(DBInfo).GetItem((KeyType)Key).MakeEditView(async (c) =>
-                await Safe(async () =>
-                {
-                    await Actions.Update(DBInfo.TableName, c.OldKey, c.NewValue);
-                    Publish.ShowSuccessMessage("تغییرات ثبت شد");
-                    Publish.HideAction();
-                    new Window().History.Back();
-                })));
+                //ReadyElement.ReplaceChilds(Actions.GetTable(DBInfo).GetItem((KeyType)Key).MakeEditView(async (c) =>
+                //await Safe(async () =>
+                //{
+                //    await Actions.Update(DBInfo.TableName, c.OldKey, c.NewValue);
+                //    Publish.ShowSuccessMessage("تغییرات ثبت شد");
+                //    Publish.HideAction();
+                //    new Window().History.Back();
+                //})));
                 return ReadyElement;
             }
         }

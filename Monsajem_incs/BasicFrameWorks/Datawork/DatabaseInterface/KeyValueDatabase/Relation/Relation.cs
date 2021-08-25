@@ -215,6 +215,8 @@ namespace Monsajem_Incs.Database.Base
                    ThisRelation.SaveToParent = () =>
                         this.Update(Key, (c) => Relation.Field.Value(c, (f) => ThisRelation));
 
+                   ThisRelation.HolderTable = (this, this.GetKey(Value));
+
                    ThisRelation.Extras.Accepted += (PartOfTable<To, ToKeyType>.TableExtras.KeyInfo Info) =>
                    {
                        if (Run.Use(RelationName))
@@ -237,6 +239,12 @@ namespace Monsajem_Incs.Database.Base
                    return ThisRelation;
                });
             };
+
+            if(TableName!=null)
+            {
+                TableFinder.FindTable(TableName).AddRelation(
+                    Relation.Field.Field.Name,(c)=>Relation.Field.Value((ValueType)c));
+            }
         }
 
         public void _AddRelationForLoading<To, ToKeyType>(

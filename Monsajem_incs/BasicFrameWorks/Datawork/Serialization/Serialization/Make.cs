@@ -313,7 +313,7 @@ namespace Monsajem_Incs.Serialization
                     size = 1;
 
                 Action<SerializeData, System.Array> Serializer = (Data, ar) =>
-                 {
+                {
                      byte[] bytes = new byte[ar.Length * size];
 
                      System.Runtime.InteropServices.GCHandle h =
@@ -325,7 +325,7 @@ namespace Monsajem_Incs.Serialization
                      h.Free();
 
                      Data.Data.Write(bytes, 0, bytes.Length);
-                 };
+                };
                 Action<DeserializeData, (System.Array ar, int[] Ends)>
                     Deserializer = (Data, obj) =>
                 {

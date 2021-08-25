@@ -13,7 +13,6 @@ using static WASM_Global.Publisher;
 namespace MonsajemData
 {
 
-    [Caption(Name_Single = "فرد", Name_Multy = "افراد", Name_Single_Unknown = "فردی", Name_Multy_Unknown = "افرادی")]
     public class User<UserType>
         where UserType : User<UserType>
     {

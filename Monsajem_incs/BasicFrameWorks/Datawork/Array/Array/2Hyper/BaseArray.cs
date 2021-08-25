@@ -39,7 +39,7 @@
 
 //        public override ArrayType this[int Pos]
 //        {
-//            [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+//            [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
 //            get
 //            {
 //                if (Length == 1)
@@ -57,7 +57,7 @@
 //                Myar = arInfo.Value;
 //                return Myar[Pos - Myar.FromPos];
 //            }
-//            [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+//            [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
 //            set
 //            {
 //                if (Length == 1)
@@ -79,7 +79,7 @@
 //            }
 //        }
 
-//        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+//        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
 //        private void Optimization(DynamicSize.Array<ArrayInstance> ar)
 //        {
 //            for (int i = 0; i < ar.Length; i++)
@@ -88,7 +88,7 @@
 //            }
 //        }
 
-//        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+//        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
 //        private int Optimization(DynamicSize.Array<ArrayInstance> ar, int Pos)
 //        {
 //            var OldAr = ar[Pos];
@@ -163,7 +163,7 @@
 //            return 0;
 //        }
 
-//        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+//        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
 //        public override void Insert(ArrayType Value, int Position)
 //        {
 

@@ -31,6 +31,7 @@ namespace Monsajem_Incs.Serialization
         void SetData(DataType Data);
     }
 
+    [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
     public class NonSerializedAttribute : Attribute
     { }
 }

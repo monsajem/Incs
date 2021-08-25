@@ -23,6 +23,9 @@ namespace Monsajem_Incs.Database.Base
         [Serialization.NonSerialized]
         internal Action SaveToParent;
 
+        [Serialization.NonSerialized]
+        internal (object Table, object Key) HolderTable;
+
         public PartOfTable(KeyType[] NewKEys, Table<ValueType, KeyType> Parent)
         {
             this.Parent = Parent;
