@@ -8,8 +8,8 @@ using Monsajem_Incs.Serialization;
 using Monsajem_Incs.TimeingTester;
 using System.Runtime.InteropServices.JavaScript;
 using Microsoft.JSInterop;
-using static Monsajem_Incs.Views.Maker.ViewItemMaker;
-using static Monsajem_Incs.Views.Maker.EditItemMaker;
+using Monsajem_Incs.Views.Maker.Database;
+using static Monsajem_Client.Network;
 
 namespace Monsajem_Client
 {
@@ -30,26 +30,38 @@ namespace Monsajem_Client
             BasePage_html = new BasePage_html(true);
             UserControler.Page.SubmitPage(MainElement);
 
-            {
-                SetView<ProductGroup, GroupView_html>((i) =>
-                {
-                    i.View.Name.TextContent = i.Value.Name;
-                });
-                EditItemMaker<ProductGroup, GroupEdit_html>.MakeDefault(
-                OnMakeView: (i) =>
-                {
-                    i.View.Name.Value = i.Value.Name;
-                },
-                OnEdited:(i)=>
-                {
-                    i.Value.Name = i.View.Name.Value;
-                });
-            }
-
             Window.window.LocalStorage.Clear();
             Data = new ClientDataBase(Window.window.LocalStorage);
 
-            new UserControler.Partial.ShowPage().Show(Data.Groups);
+            {
+                Data.Groups.RegisterEdit().SetDefault<GroupEdit_html>(
+                    FillView: (c) =>
+                     {
+                         c.View.Name.Value = c.Value.Name;
+                     },
+                    FillValue: (c) =>
+                     {
+                         return new ProductGroup()
+                         {
+                             Name = c.View.Name.Value
+                         };
+                     },
+                    SetEdited: (c) => c.View.Done.OnClick += (c1, c2) => c.Edited(),
+                    GetMain: (c) => c.Main);
+                Data.Groups.RegisterView().SetDefault<GroupView_html>(
+                    FillView: (c) =>
+                    {
+                        c.View.Name.Value = c.Value.Name;
+                    },
+                    GetMain: (c) => c.Main);
+            }
+
+            await Remote(() =>
+            {
+                Data.Groups.Insert((c) => c.Name = "Group1");
+            });
+            await Data.Groups.SyncUpdate();
+            MainElement.ReplaceChilds(Data.Groups.MakeShowView("Group1"));
         }
     }
 }

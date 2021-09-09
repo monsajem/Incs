@@ -59,7 +59,7 @@ namespace Monsajem_Incs.Database.Base
         private string _TableName;
         internal string TableName
         {
-            get => TableName; 
+            get => _TableName; 
             set 
             {
                 var Done = false;

@@ -79,7 +79,7 @@ namespace Monsajem_Incs
 
             var Browsed = Type_P.Browse(TypeName.ToCharArray());
             if (Browsed.SubFunctions.Length > 1 &&
-               Browsed.SubFunctions[1].SubFunctions.Length > 1)
+                Browsed.SubFunctions[1].SubFunctions.Length > 1)
                 TypeName = new string(Browsed.SubFunctions[0].Values);
             for (int i = 0; i < Assembly.Assembly._AllAppAssemblies.Length; i++)
             {

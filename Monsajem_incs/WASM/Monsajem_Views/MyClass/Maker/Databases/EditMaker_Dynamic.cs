@@ -1,49 +1,97 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
-using static Monsajem_Incs.Collection.Array.Extentions;
-using Monsajem_Incs.Resources.Base.Html;
 using WebAssembly.Browser.DOM;
-using Monsajem_Incs.DynamicAssembly;
 using Monsajem_Incs.Collection.Array;
-using Monsajem_incs;
 using Monsajem_Incs.Database.Base;
 using Monsajem_Incs.Views.Maker.ValueTypes;
+using static Monsajem_Client.SafeRun;
+using static Monsajem_Client.Network;
 
 namespace Monsajem_Incs.Views.Maker.Database
 {
     public static class EditItemMaker
     {
-        public static ViewType MakeEditView<ViewType, ValueType>(
-            this ValueType OldValue,
-            Action<(ValueType OldValue, ValueType NewValue)> Edited,
-            object ExtraData = null)
-            where ViewType : new() =>
-            EditItemMaker<ValueType,ViewType>.MakeView(OldValue, Edited, ExtraData);
-
-        public static HTMLElement MakeEditView<ValueType>(
-            this ValueType obj,
-            Action<(ValueType OldValue, ValueType NewValue)> Done,
-            object ExtraData = null)
+        public static async Task SyncUpdate<ValueType, KeyType>(
+            this Table<ValueType, KeyType> Table)
+            where KeyType:IComparable<KeyType>
         {
-            return EditItemMaker<ValueType>.MakeView((obj,Done, ExtraData));
+            await Remote(
+            async (c) =>
+            {
+                var TableName = await c.GetData<string>();
+                var Table = TableFinder.FindTable(TableName).Table as Table<ValueType, KeyType>;
+                await c.SendUpdate(Table);
+            },
+            async (c) =>
+            {
+                await c.SendData(Table.TableName);
+                await c.GetUpdate(Table);
+            });
         }
 
-        public static void GetRegisterEdit<ValueType, KeyType>(this Table<ValueType, KeyType> Table)
-            where KeyType :IComparable<KeyType>
-            => new RegisterEdit<ValueType, KeyType>() { Table = Table };
+        public static HTMLElement MakeEditView<ValueType, KeyType>(
+            this Table<ValueType, KeyType> Table, KeyType Key)
+            where KeyType : IComparable<KeyType>
+        {
+            static async Task RemoteTable(
+                string TableName,
+                KeyType Key,
+                ValueType Value)
+            {
+               await Remote(() => 
+               {
+                   var Table = TableFinder.FindTable(TableName).Table as Table<ValueType, KeyType>;
+                   if (Table == null)
+                       return;
+                   Table.Update(Key,(c)=>
+                   {
+                       Table.MoveRelations(c, Value);
+                       return Value;
+                   });
+               });
+            }
 
-        public class RegisterEdit<ValueType, KeyType>
+            return null;
+        }
+
+        public static HTMLElement MakeShowView<ValueType, KeyType>(
+            this Table<ValueType, KeyType> Table, KeyType Key)
+            where KeyType : IComparable<KeyType>
+        {
+            static async Task RemoteTable(
+                string TableName,
+                KeyType Key,
+                ValueType Value)
+            {
+                await Remote(() =>
+                {
+                    var Table = TableFinder.FindTable(TableName).Table as Table<ValueType, KeyType>;
+                    if (Table == null)
+                        return;
+                    Table.Update(Key, (c) =>
+                    {
+                        Table.MoveRelations(c, Value);
+                        return Value;
+                    });
+                });
+            }
+
+            var Value = Table[Key].Value;
+            return (Table,Value).MakeView();
+        }
+
+        public static RegisterEditor<ValueType, KeyType> RegisterEdit<ValueType, KeyType>(this Table<ValueType, KeyType> Table)
+            where KeyType :IComparable<KeyType>
+            => new RegisterEditor<ValueType, KeyType>() { Table = Table };
+
+        public class RegisterEditor<ValueType, KeyType>
             where KeyType:IComparable<KeyType>
         {
             internal Table<ValueType, KeyType> Table;
 
-            public static void SetDefault<ViewType>(
+            public void SetDefault<ViewType>(
                 Action<(ViewType View,ValueType Value)> FillView = null,
                 Func<ViewType, HTMLElement> GetMain = null,
                 Func<(ViewType View,ValueType OldValue), ValueType> FillValue = null,
@@ -72,9 +120,9 @@ namespace Monsajem_Incs.Views.Maker.Database
                         return (c.OldValue.Table, result);
                     };
 
-                var _FillValue = default(Func<(ViewType View, (Table<ValueType, KeyType> Table, KeyType Key) OldValue), (Table<ValueType, KeyType> Table, KeyType Key)>);
+                var _FillValue = default(Func<(ViewType View, (Table<ValueType, KeyType> Table, ValueType Value) OldValue), (Table<ValueType, KeyType> Table, ValueType Value)>);
                 if (FillValue != null)
-                    _FillValue = (c) => FillValue((c.View, c.Value.Table, c.Value.Key));
+                    _FillValue = (c) =>(c.OldValue.Table, FillValue((c.View, c.OldValue.Value)));
 
 
                 ValueTypes.EditItemMaker.MakeDefault
@@ -82,15 +130,44 @@ namespace Monsajem_Incs.Views.Maker.Database
                         (_FillView, GetMain, _FillValue, SetEdited);
             }
         }
-    }
 
-    internal static class EditItemMaker<ValueType>
-    {
-        public static Func<
-            (ValueHolder<ValueType> OldValue,
-            Action<(ValueType OldValue, ValueType NewValue)> OnEdited,
-            object ExtraData), 
-            HTMLElement> MakeView=(c)=> 
-                throw new Exception("Edit View Missing in " + typeof(ValueType).FullName);
+        public static RegisterViewer<ValueType, KeyType> RegisterView<ValueType, KeyType>(this Table<ValueType, KeyType> Table)
+            where KeyType : IComparable<KeyType>
+            => new RegisterViewer<ValueType, KeyType>() { Table = Table };
+
+        public class RegisterViewer<ValueType, KeyType>
+            where KeyType : IComparable<KeyType>
+        {
+            internal Table<ValueType, KeyType> Table;
+
+            public void SetDefault<ViewType>(
+                Action<(ViewType View, ValueType Value)> FillView = null,
+                Func<ViewType, HTMLElement> GetMain = null,
+                Action<(ViewType View, Action Edited)> SetEdited = null,
+                Action<(ViewType View, Action Edit)> RegisterEdit = null,
+                Action<(ViewType View, Action Delete)> RegisterDelete = null)
+                where ViewType : new()
+            {
+                var ValueViewMaker = ValueTypes.ViewItemMaker<ValueType, ViewType>.Default;
+                var TableViewMaker = ValueTypes.ViewItemMaker<(Table<ValueType, KeyType> Table, ValueType Value), ViewType>.Default;
+
+                TableViewMaker.Default_FillView =
+                    (c) =>
+                    {
+                        ValueViewMaker.Default_FillView((c.View, c.Value.Value));
+                    };
+
+                var _FillView = default(Action<(ViewType View, (Table<ValueType, KeyType> Table, ValueType Value) Value)>);
+                if (FillView != null)
+                    _FillView = (c) => FillView((c.View, c.Value.Value));
+
+                ValueTypes.ViewItemMaker.SetView
+                    <(Table<ValueType, KeyType> Table, ValueType Key), ViewType>
+                    (FillView:_FillView,
+                     GetMain:GetMain,
+                     RegisterEdit:RegisterEdit,
+                     RegisterDelete:RegisterDelete);
+            }
+        }
     }
 }

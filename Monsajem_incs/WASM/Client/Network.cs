@@ -119,6 +119,24 @@ namespace Monsajem_Client
                 UserControler.Publish.HideAction();
         }
 
+        public static async Task Remote(
+            Func<IAsyncOprations, Task> ServerSide,
+            Func<IAsyncOprations, Task> ClientSide)
+        {
+            await Connect(async (rq) =>
+            {
+                await BaseLogin?.Invoke(rq);
+                if (ShowMessages)
+                    UserControler.Publish.ShowAction("در حال ارسال درخواست");
+                await rq.RunOnOtherSide(ServerSide);
+                if (ShowMessages)
+                    UserControler.Publish.ShowAction("در حال انجام عملیات");
+                await ClientSide(rq);
+            });
+            if (ShowMessages)
+                UserControler.Publish.HideAction();
+        }
+
         public static async Task Remote<UserType>(
             Action<ISyncOprations, UserType> ServerSide,
             Func<IAsyncOprations, Task> ClientSide)

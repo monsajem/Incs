@@ -242,8 +242,9 @@ namespace Monsajem_Incs.Database.Base
 
             if(TableName!=null)
             {
-                TableFinder.FindTable(TableName).AddRelation(
-                    Relation.Field.Field.Name,(c)=>Relation.Field.Value((ValueType)c));
+                var RelationInfo = TableFinder.FindTable(TableName).
+                                               AddRelation<KeyType,ToKeyType,To>(Relation.Field.Field.Name);
+                RelationInfo.GetterRealtionByKey = (c)=>Relation.Field.Value(this[c]);
             }
         }
 

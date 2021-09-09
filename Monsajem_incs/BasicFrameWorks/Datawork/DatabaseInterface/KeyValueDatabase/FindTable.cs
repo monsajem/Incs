@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Monsajem_Incs.Net.Base.Service;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,7 +14,7 @@ namespace Monsajem_Incs.Database.Base
         public static void AddTable<ValueType,KeyType>(Table<ValueType,KeyType> Table)
             where KeyType:IComparable<KeyType>
         {
-            var TableInfo = new TableInfo() {TableName = Table.TableName,Table = Table};
+            var TableInfo = new TableInfo<KeyType,ValueType>() {TableName = Table.TableName,Table = Table};
             if (Tables.Contains(TableInfo) == true)
                 throw new Exception($"Table with name '{Table.TableName}' is exist at TableFinder.");
             else
@@ -33,18 +34,30 @@ namespace Monsajem_Incs.Database.Base
             public string TableName;
             public object Table;
 
-            private static HashSet<RelationInfo> Relations = new HashSet<RelationInfo>();
+            private HashSet<RelationInfo> Relations = new HashSet<RelationInfo>();
 
-            public void AddRelation(
-                string RelationName,
-                Func<object, object> GetRelationByKey)
+            public virtual Task SendUpdate(IAsyncOprations Client)
             {
-                var RelationInfo = new RelationInfo() { RelationName = RelationName,
-                                                        GetRelationByKey = GetRelationByKey};
+                throw new Exception("Not impelemented.");
+            }
+            public virtual Task GetUpdate(IAsyncOprations Client)
+            {
+                throw new Exception("Not impelemented.");
+            }
+
+            public RelationInfo<HolderKeyType, RelationKeyType, RelationValueType>
+                AddRelation<HolderKeyType, RelationKeyType, RelationValueType>(
+                string RelationName)
+                where HolderKeyType:IComparable<HolderKeyType>
+                where RelationKeyType : IComparable<RelationKeyType>
+            {
+                var RelationInfo = new RelationInfo<HolderKeyType, RelationKeyType, RelationValueType>() 
+                                        { RelationName = RelationName };
                 if (Relations.Contains(RelationInfo) == true)
                     throw new Exception($"Relation with name '{RelationName}' is exist at '{TableName}' of TableFinder.");
                 else
                     Relations.Add(RelationInfo);
+                return RelationInfo;
             }
             public RelationInfo FindRelation(string RelationName)
             {
@@ -66,10 +79,37 @@ namespace Monsajem_Incs.Database.Base
             }
         }
 
+        public class TableInfo<KeyType,ValueType>:TableInfo
+            where KeyType:IComparable<KeyType>
+        {
+            public override async Task SendUpdate(IAsyncOprations Client)
+            {
+                var Table = this.Table as Table<ValueType, KeyType>;
+                await Client.SendUpdate(Table);
+            }
+            public override async Task GetUpdate(IAsyncOprations Client)
+            {
+                var Table = this.Table as Table<ValueType, KeyType>;
+                await Client.GetUpdate(Table);
+            }
+        }
+
         public class RelationInfo : IEquatable<RelationInfo>
         {
             public string RelationName;
-            public Func<object,object> GetRelationByKey;
+
+            public virtual object GetRelationTableByKey(object HolderKey)
+            {
+                throw new Exception("Not impelemented.");
+            }
+            public virtual Task SendUpdate(object HolderKey, IAsyncOprations Client) 
+            {
+                throw new Exception("Not impelemented.");
+            }
+            public virtual Task GetUpdate(object HolderKey, IAsyncOprations Client) 
+            {
+                throw new Exception("Not impelemented.");
+            }
 
             public bool Equals(RelationInfo other)
             {
@@ -80,6 +120,32 @@ namespace Monsajem_Incs.Database.Base
             {
                 return RelationName.GetHashCode();
             }
+        }
+
+        public class RelationInfo<HolderKeyType,RelationKeyType,RelationValueType> : RelationInfo
+            where HolderKeyType : IComparable<HolderKeyType>
+            where RelationKeyType : IComparable<RelationKeyType>
+        {
+
+            public override async Task SendUpdate(object HolderKey, IAsyncOprations Client)
+            {
+                var Table = GetterRealtionByKey((HolderKeyType)HolderKey);
+                await Client.SendUpdate(Table);
+            }
+
+            public override async Task GetUpdate(object HolderKey, IAsyncOprations Client)
+            {
+                var Table = GetterRealtionByKey((HolderKeyType)HolderKey);
+                await Client.GetUpdate(Table);
+            }
+
+            public override object GetRelationTableByKey(object HolderKey)
+            {
+                return GetterRealtionByKey((HolderKeyType)HolderKey);
+            }
+
+            public Func<HolderKeyType, PartOfTable<RelationValueType,RelationKeyType>> 
+                GetterRealtionByKey = (c)=> throw new Exception("Not impelemented.");
         }
     }
 }

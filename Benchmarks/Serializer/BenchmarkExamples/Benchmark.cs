@@ -6,6 +6,10 @@ using System.Text;
 using BenchmarkDotNet.Attributes;
 using Monsajem_Incs.Serialization;
 using MessagePack;
+using StructPacker;
+using BinaryPack;
+using BinaryPack.Attributes;
+using BinaryPack.Enums;
 
 namespace BenchmarkExample
 {
@@ -18,6 +22,7 @@ namespace BenchmarkExample
         public string StringValue;
     }
 
+    [Pack]
     [MessagePackObject]
     public struct Str_Unmanaged
     {
@@ -87,6 +92,9 @@ namespace BenchmarkExample
         public static T SrDr<T>(T Value) => Value.Serialize().Deserialize<T>();
         public static T SrDrMP<T>(T Value) => MessagePackSerializer.Deserialize<T>(
                                                 MessagePackSerializer.Serialize(Value));
+        public static T SrDrBP<T>(T Value)
+            where T:new()
+            => BinaryConverter.Deserialize<T>(BinaryConverter.Serialize(Value));
 
         [Benchmark]
         public object Integer()=>SrDr(Int_Value);
@@ -110,10 +118,10 @@ namespace BenchmarkExample
 
 
         [Benchmark]
-        public object Integer_MP() => SrDrMP(Int_Value);
+        public object Integer_MP() => SrDrMP(Int_Value.Serialize());
 
         [Benchmark]
-        public object ArInteger_MP() => SrDr(Int_Ar);
+        public object ArInteger_MP() => SrDrMP(Int_Ar);
 
         [Benchmark]
         public object String_MP() => SrDrMP(String_Value);
@@ -126,5 +134,28 @@ namespace BenchmarkExample
 
         [Benchmark]
         public object Struct_Managed_MP() => SrDrMP(StrMN_Value);
+
+
+        [Benchmark]
+        public object Integer_BP() => 
+            BinaryConverter.Deserialize<int>(BinaryConverter.Serialize(Int_Value));
+
+        [Benchmark]
+        public object Class_BP() => SrDrBP(Cls_Value);
+
+        [Benchmark]
+        public object Struct_UnManaged_BP() => SrDrBP(StrUN_Value);
+
+        [Benchmark]
+        public object Struct_Managed_BP() => SrDrBP(StrMN_Value);
+
+        [Benchmark]
+        public object Struct_UnManaged_SP()
+        {
+            var y = StrUN_Value.Pack();
+            var x = new Str_Unmanaged();
+            x.Unpack(y);
+            return x;
+        }
     }
 }

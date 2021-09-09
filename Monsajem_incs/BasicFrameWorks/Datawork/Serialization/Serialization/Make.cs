@@ -67,7 +67,7 @@ namespace Monsajem_Incs.Serialization
                 {
                     try
                     {
-                        var size = System.Runtime.InteropServices.Marshal.SizeOf(Type.GetElementType());
+                        var size = SerializeInfo.GetSerialize(Type.GetElementType()).ConstantSize;
                         InsertSerializer(() =>
                         {
                             var sr = MakeSerializer_Array_Struct(size);
@@ -306,24 +306,15 @@ namespace Monsajem_Incs.Serialization
             }
             private unsafe (Action<SerializeData, System.Array> Serializer,
              Action<DeserializeData, (System.Array ar, int[] Ends)> Deserializer)
-                ArrayMakeSerializer_Struct(Type Type, int size)
+                ArrayMakeSerializer_Struct(int size)
             {
 
-                if (Type.GetElementType() == typeof(bool))
-                    size = 1;
+                var ArrayReader = Serialization.ReadBytesOfArray(typeof(t).GetElementType());
+                var ArrayWriter = Serialization.WriteBytesOfArray(typeof(t).GetElementType());
 
                 Action<SerializeData, System.Array> Serializer = (Data, ar) =>
                 {
-                     byte[] bytes = new byte[ar.Length * size];
-
-                     System.Runtime.InteropServices.GCHandle h =
-                         System.Runtime.InteropServices.GCHandle.Alloc(ar,
-                             System.Runtime.InteropServices.GCHandleType.Pinned);
-
-                     var ptr = h.AddrOfPinnedObject();
-                     System.Runtime.InteropServices.Marshal.Copy(ptr, bytes, 0, bytes.Length);
-                     h.Free();
-
+                     byte[] bytes = ArrayReader((ar,size));
                      Data.Data.Write(bytes, 0, bytes.Length);
                 };
                 Action<DeserializeData, (System.Array ar, int[] Ends)>
@@ -340,13 +331,8 @@ namespace Monsajem_Incs.Serialization
                     }
                     Len = Len * size;
 
-                    System.Runtime.InteropServices.GCHandle h =
-                        System.Runtime.InteropServices.GCHandle.Alloc(ar,
-                            System.Runtime.InteropServices.GCHandleType.Pinned);
+                    ArrayWriter((ar, Data.Data, Data.From, Len, size));
 
-                    var ptr = h.AddrOfPinnedObject();
-                    System.Runtime.InteropServices.Marshal.Copy(Data.Data, Data.From, ptr, Len);
-                    h.Free();
                     Data.From += Len;
                 };
                 return (Serializer, Deserializer);
@@ -354,8 +340,7 @@ namespace Monsajem_Incs.Serialization
             private (Action<SerializeData, object> Serializer, Func<DeserializeData, object> Deserializer)
                 MakeSerializer_Array_Struct(int size)
             {
-                var Type = typeof(t);
-                var Sr = ArrayMakeSerializer_Struct(Type, size);
+                var Sr = ArrayMakeSerializer_Struct(size);
                 var Creator = ArrayGetCreator();
 
                 Action<SerializeData, object> Serializer = (Data, obj) =>

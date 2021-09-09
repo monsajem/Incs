@@ -46,6 +46,8 @@ namespace _test
         static void Main(string[] args)
         {
 
+            var x = new int[2000,200].Serialize().Deserialize<int[,]>();
+
             object obj = 12;
             var D = obj.Serialize();
 

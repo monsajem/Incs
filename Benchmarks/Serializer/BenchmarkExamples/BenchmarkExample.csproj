@@ -13,10 +13,12 @@
 
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.13.1" />
+    <PackageReference Include="BinaryPack" Version="1.0.2" />
     <PackageReference Include="FastHashSet" Version="0.1.0-alpha.2" />
     <PackageReference Include="MessagePack" Version="2.3.75" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="protobuf-net" Version="3.0.101" />
+    <PackageReference Include="StructPacker" Version="1.0.8" />
   </ItemGroup>
 
   <ItemGroup>

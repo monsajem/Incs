@@ -13,8 +13,8 @@ namespace Monsajem_Incs.Calculator
         public DirectCalculator(Result[] Results)
         {
             this.Results = Results;
-            InputSize_inMemory = System.Runtime.InteropServices.Marshal.SizeOf<Input>();
-            ResultSize_inMemory = System.Runtime.InteropServices.Marshal.SizeOf<Result>();
+            InputSize_inMemory = System.Runtime.CompilerServices.Unsafe.SizeOf<Input>();
+            ResultSize_inMemory = System.Runtime.CompilerServices.Unsafe.SizeOf<Result>();
             BufferX = Results.Length / (ResultSize_inMemory * 256);
             ResultSize_inMemory = BufferX * ResultSize_inMemory;
         }

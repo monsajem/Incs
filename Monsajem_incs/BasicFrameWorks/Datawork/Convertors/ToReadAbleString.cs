@@ -23,6 +23,9 @@ namespace Monsajem_Incs.Convertors
             {
                 return Type == other.Type;
             }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+            public override int GetHashCode() => HashCode;
         }
 
         internal static HashSet<ExactConvertor> ExactConvertors = new HashSet<ExactConvertor>();

@@ -86,7 +86,7 @@ namespace _test
             });
             var Update2_Per_Second = (int)(Count / UpdateTime2.TotalSeconds);
 
-            var GetTime = Timing.run(() =>
+            var GetTimeByPosition = Timing.run(() =>
             {
                 for (int i = 0; i < Count; i++)
                 {
@@ -95,7 +95,25 @@ namespace _test
                         throw new Exception();
                 }
             });
-            var GetT_Per_Second = (int)(Count / GetTime.TotalSeconds);
+            var Get_Position_Per_Second = (int)(Count / GetTimeByPosition.TotalSeconds);
+
+            var GetTimeByIndex = Timing.run(() =>
+            {
+                for (int i = 0; i < Count; i++)
+                {
+                    Stream.GetItem(i.ToString());
+                }
+            });
+            var Get_Index_Per_Second = (int)(Count / GetTimeByIndex.TotalSeconds);
+
+            //var GetTimeByBrowse = Timing.run(() =>
+            //{
+            //    for (int i = 0; i < Count; i++)
+            //    {
+            //        Stream.First((c) => c.Value.Name == i.ToString());
+            //    }
+            //});
+            //var Get_Browse_Per_Second = (int)(Count / GetTimeByBrowse.TotalSeconds);
 
             var DeleteTime = Timing.run(() =>
             {

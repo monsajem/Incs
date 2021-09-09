@@ -11,7 +11,7 @@ using Monsajem_Incs.Resources.Base.Html;
 using WebAssembly.Browser.DOM;
 using Monsajem_Incs.DynamicAssembly;
 using Monsajem_Incs.Collection.Array;
-
+using Q = System.Math;
 namespace Monsajem_Incs.Views.Maker.ValueTypes
 {
     public static class ViewItemMaker
@@ -21,7 +21,7 @@ namespace Monsajem_Incs.Views.Maker.ValueTypes
             Action OnEdit=null,
             Action OnDelete=null)
             where ViewType : new()
-            => ViewItemMaker<ValueType, ViewType>.MakeView(obj,OnEdit,OnDelete);
+            => ViewItemMaker<ValueType, ViewType>.Default.MakeView(obj,OnEdit,OnDelete);
 
         public static HTMLElement MakeView<ValueType>(
             this ValueType obj,
@@ -34,6 +34,7 @@ namespace Monsajem_Incs.Views.Maker.ValueTypes
             Action<ValueType> OnClick,
             object ExtraData = null)
         {
+
             var View = MakeView(obj);
             View.OnClick += (c1, c2) =>
             {
@@ -45,16 +46,20 @@ namespace Monsajem_Incs.Views.Maker.ValueTypes
         public static void SetView<ValueType, ViewType>(
             Action<(ViewType View, ValueType Value)> FillView=null,
             Action<(ViewType View, Action Edit)> RegisterEdit=null,
-            Action<(ViewType View, Action Delete)> RegisterDelete = null)
+            Action<(ViewType View, Action Delete)> RegisterDelete = null,
+            Func<ViewType, HTMLElement> GetMain = null)
             where ViewType : new()
         {
-            if(FillView!=null)
-                ViewItemMaker<ValueType, ViewType>.FillView = FillView;
+            var ViewMaker = ViewItemMaker<ValueType, ViewType>.Default;
+            if (FillView!=null)
+                ViewMaker.FillView = FillView;
             if (RegisterEdit != null)
-                ViewItemMaker<ValueType, ViewType>.RegisterEdit = RegisterEdit;
+                ViewMaker.RegisterEdit = RegisterEdit;
             if (RegisterDelete != null)
-                ViewItemMaker<ValueType, ViewType>.RegisterDelete = RegisterDelete;
-            ViewItemMaker<ValueType>.OnMakeView = ViewItemMaker<ValueType, ViewType>.MakeHtml;
+                ViewMaker.RegisterDelete = RegisterDelete;
+            if(GetMain!=null)
+                ViewMaker.GetMain = GetMain;
+            ViewItemMaker<ValueType>.OnMakeView = ViewMaker.MakeHtml;
         }
     }
     internal class ViewItemMaker<ValueType>

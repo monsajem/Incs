@@ -15,16 +15,18 @@ using Monsajem_Incs.Convertors;
 
 namespace Monsajem_Incs.Views.Maker.ValueTypes
 {
-    internal static class ViewItemMaker<ValueType, ViewType>
+    internal class ViewItemMaker<ValueType, ViewType>
         where ViewType : new()
     {
-        public static Action<(ViewType View, ValueType Value)> Default_FillView;
-        public static Action<(ViewType View, ValueType Value)> FillView;
-        public static Action<(ViewType View, Action Edit)> RegisterEdit;
-        public static Action<(ViewType View, Action Delete)> RegisterDelete;
-        public static Func<ViewType, HTMLElement> GetMain;
+        public static ViewItemMaker<ValueType, ViewType> Default = new ViewItemMaker<ValueType, ViewType>();
 
-        static ViewItemMaker()
+        public Action<(ViewType View, ValueType Value)> Default_FillView;
+        public Action<(ViewType View, ValueType Value)> FillView;
+        public Action<(ViewType View, Action Edit)> RegisterEdit;
+        public Action<(ViewType View, Action Delete)> RegisterDelete;
+        public Func<ViewType, HTMLElement> GetMain;
+
+        public ViewItemMaker()
         {
             var FieldsNames = FieldControler.GetFields(typeof(ValueType));
             var ShowNames = FieldControler.GetFields(typeof(ViewType));
@@ -92,14 +94,14 @@ namespace Monsajem_Incs.Views.Maker.ValueTypes
                     {
                         var NodeValue = ValueField.GetValue(c.Value);
                         if (NodeValue != null)
-                            ((HTMLElement)ViewField.GetValue(c.View)).TextContent = 
+                            ((HTMLElement)ViewField.GetValue(c.View)).TextContent =
                                 StringConvertor.ConvertorToString(ValueField.GetValue(c.Value));
                     };
             }
 
         }
 
-        public static ViewType MakeView(
+        public ViewType MakeView(
             ValueType obj,
             Action Edit,
             Action Delete)
@@ -114,7 +116,7 @@ namespace Monsajem_Incs.Views.Maker.ValueTypes
             return View;
         }
 
-        internal static HTMLElement MakeHtml(
+        public HTMLElement MakeHtml(
             (ValueType obj,
             Action Edit,
             Action Delete) Inputs)

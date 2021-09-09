@@ -27,17 +27,14 @@ namespace Monsajem_Incs.Serialization
                 NameAsByte = BitConverter.GetBytes(Name.Length);
                 Insert(ref NameAsByte, Name);
 
-                if (Type == typeof(bool))
-                    ConstantSize = 1;
-                else if (Type.IsValueType)
+                if (Type.IsValueType)
                 {
                     try
                     {
-                        ConstantSize = System.Runtime.InteropServices.Marshal.SizeOf(Type);
+                        ConstantSize = System.Runtime.CompilerServices.Unsafe.SizeOf<t>();
                     }
                     catch
                     {
-
                         ConstantSize = -1;
                     }
                 }

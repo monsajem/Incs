@@ -2,11 +2,57 @@
 using System.Runtime.CompilerServices;
 using static Monsajem_Incs.Collection.Array.Extentions;
 using static System.Text.Encoding;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace Monsajem_Incs.Serialization
 {
     public partial class Serialization
     {
+
+        public static unsafe byte[] ReadBytesOfArray_T<t>((Array ar_Obj, int ElementSize) Info)
+            where t : unmanaged
+        {
+            var ar = Unsafe.As<t[]>(Info.ar_Obj);
+            byte[] bytes = new byte[ar.Length * Info.ElementSize];
+
+            fixed (t* ptr = ar)
+            {
+                Marshal.Copy((IntPtr)ptr, bytes, 0, bytes.Length);
+            }
+
+            return bytes;
+        }
+        static Func<(Array ar_Obj, int ElementSize), byte[]> 
+            ReadBytesOfArray(Type ElementType)
+        {
+            var method = typeof(Serialization).GetMethod("ReadBytesOfArray_T").
+                MakeGenericMethod(ElementType).
+                CreateDelegate<Func<(Array ar_Obj, int ElementSize), byte[]>>();
+            return method;
+        }
+
+        public static unsafe void WriteBytesOfArray_T<t>(
+            (Array ar_Obj ,byte[] BytesToWrite ,int From ,int Len ,int ElementSize) Info)
+            where t : unmanaged
+        {
+            var ar = Unsafe.As<t[]>(Info.ar_Obj);
+            byte[] bytes = new byte[ar.Length * Info.ElementSize];
+
+            fixed (t* ptr = ar)
+            {
+                Marshal.Copy(Info.BytesToWrite, Info.From,(IntPtr) ptr, Info.Len);
+            }
+        }
+        static Action<(Array ar_Obj, byte[] BytesToWrite, int From, int Len, int ElementSize)> 
+            WriteBytesOfArray(Type ElementType)
+        {
+            var method = typeof(Serialization).GetMethod("WriteBytesOfArray_T").
+                MakeGenericMethod(ElementType).
+                CreateDelegate<Action<(Array ar_Obj, byte[] BytesToWrite, int From, int Len, int ElementSize)>>();
+            return method;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
         private static byte[] StructToBytes<t>(t value, int Size)
         {
