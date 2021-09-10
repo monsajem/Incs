@@ -31,6 +31,7 @@ namespace Monsajem_Incs.Serialization
                 {
                     try
                     {
+                        ConstantSize = System.Runtime.InteropServices.Marshal.SizeOf(Type);
                         ConstantSize = System.Runtime.CompilerServices.Unsafe.SizeOf<t>();
                     }
                     catch

@@ -65,16 +65,16 @@ namespace Monsajem_Incs.Serialization
                 }
                 else if (Type.IsArray)
                 {
-                    try
+                    var size = SerializeInfo.GetSerialize(Type.GetElementType()).ConstantSize;
+                    if (size != -1)
                     {
-                        var size = SerializeInfo.GetSerialize(Type.GetElementType()).ConstantSize;
                         InsertSerializer(() =>
                         {
                             var sr = MakeSerializer_Array_Struct(size);
                             return (sr.Serializer, sr.Deserializer);
                         });
                     }
-                    catch
+                    else
                     {
                         InsertSerializer(() =>
                         {
