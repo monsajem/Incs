@@ -60,8 +60,7 @@ namespace Monsajem_Client
             {
                 Data.Groups.Insert((c) => c.Name = "Group1");
             });
-            await Data.Groups.SyncUpdate();
-            MainElement.ReplaceChilds(Data.Groups.MakeShowView("Group1"));
+            MainElement.ReplaceChilds(await Data.Groups.MakeShowView());
         }
     }
 }

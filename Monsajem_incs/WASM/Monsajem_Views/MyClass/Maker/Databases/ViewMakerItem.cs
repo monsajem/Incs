@@ -11,7 +11,7 @@ using static Monsajem_Client.Network;
 
 namespace Monsajem_Incs.Views.Maker.Database
 {
-    public static class EditItemMaker
+    public static partial class EditItemMaker
     {
         public static async Task SyncUpdate<ValueType, KeyType>(
             this Table<ValueType, KeyType> Table)

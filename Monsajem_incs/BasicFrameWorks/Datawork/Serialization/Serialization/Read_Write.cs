@@ -26,10 +26,13 @@ namespace Monsajem_Incs.Serialization
         static Func<(Array ar_Obj, int ElementSize), byte[]> 
             ReadBytesOfArray(Type ElementType)
         {
-            var method = typeof(Serialization).GetMethod("ReadBytesOfArray_T").
-                MakeGenericMethod(ElementType).
+            var method = typeof(Serialization).GetMethod("ReadBytesOfArray_T");
+
+            if (method == null)
+                throw new Exception("ReadBytesOfArray_T method not found!");
+
+            return method.MakeGenericMethod(ElementType).
                 CreateDelegate<Func<(Array ar_Obj, int ElementSize), byte[]>>();
-            return method;
         }
 
         public static unsafe void WriteBytesOfArray_T<t>(
@@ -47,10 +50,13 @@ namespace Monsajem_Incs.Serialization
         static Action<(Array ar_Obj, byte[] BytesToWrite, int From, int Len, int ElementSize)> 
             WriteBytesOfArray(Type ElementType)
         {
-            var method = typeof(Serialization).GetMethod("WriteBytesOfArray_T").
-                MakeGenericMethod(ElementType).
-                CreateDelegate<Action<(Array ar_Obj, byte[] BytesToWrite, int From, int Len, int ElementSize)>>();
-            return method;
+            var method = typeof(Serialization).GetMethod("WriteBytesOfArray_T");
+
+            if (method == null)
+                throw new Exception("WriteBytesOfArray_T method not found!");
+
+            return method.MakeGenericMethod(ElementType).
+                CreateDelegate<Action<(Array ar_Obj, byte[] BytesToWrite, int From, int Len, int ElementSize)>>(); ;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
