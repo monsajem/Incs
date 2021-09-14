@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WebAssembly.Browser.DOM;
+using Monsajem_Incs.Views.Maker.Database;
+using static Monsajem_Client.Network;
 
 namespace Monsajem_Incs.Database.Base
 {
@@ -36,15 +39,6 @@ namespace Monsajem_Incs.Database.Base
 
             private HashSet<RelationInfo> Relations = new HashSet<RelationInfo>();
 
-            public virtual Task SendUpdate(IAsyncOprations Client)
-            {
-                throw new Exception("Not impelemented.");
-            }
-            public virtual Task GetUpdate(IAsyncOprations Client)
-            {
-                throw new Exception("Not impelemented.");
-            }
-
             public RelationInfo<HolderKeyType, RelationKeyType, RelationValueType>
                 AddRelation<HolderKeyType, RelationKeyType, RelationValueType>(
                 string RelationName)
@@ -68,6 +62,31 @@ namespace Monsajem_Incs.Database.Base
                     return RelationInfo;
             }
 
+            public virtual Task Insert(object Data)=>
+                throw new Exception("SyncInsert not implemented in table finder!");
+            public virtual Task Update(object Key, object Data)=>
+                throw new Exception("SyncUpdate not implemented in table finder!");
+            public virtual Task Delete(object Key)=>
+                throw new Exception("SyncDelete not implemented in table finder!");
+
+
+            public virtual Task SendUpdate(IAsyncOprations Client)=>
+                throw new Exception("SendUpdate not implemented in table finder!");
+            public virtual Task GetUpdate(IAsyncOprations Client)=>
+                throw new Exception("GetUpdate not implemented in table finder!");
+            public virtual Task SyncUpdate()=>
+                throw new Exception("SyncUpdate not implemented in table finder!");
+
+            public virtual HTMLElement MakeShowView(
+                   object Key,
+                   Action OnUpdate = null,
+                   Action OnDelete = null)=>
+                throw new Exception("MakeShowView for item not implemented in table finder!");
+            public virtual Task<HTMLElement> MakeShowView(
+                    Action<object> OnUpdate = null,
+                    Action<object> OnDelete = null)=>
+                throw new Exception("MakeShowView for table not implemented in table finder!");
+
             public bool Equals(TableInfo other)
             {
                 return TableName == other.TableName;
@@ -82,15 +101,54 @@ namespace Monsajem_Incs.Database.Base
         public class TableInfo<KeyType,ValueType>:TableInfo
             where KeyType:IComparable<KeyType>
         {
+            private new Table<ValueType, KeyType> Table 
+                        { get => base.Table as Table<ValueType, KeyType>; }
+
+            public override async Task Insert(object Data)
+            {
+                await Remote(
+                async (Client) =>
+                {
+                    await Client.GetData<(string TableName, ValueType Data)>();
+
+                },
+                async (Client)=>
+                { 
+                });
+            }
+
             public override async Task SendUpdate(IAsyncOprations Client)
             {
-                var Table = this.Table as Table<ValueType, KeyType>;
                 await Client.SendUpdate(Table);
             }
             public override async Task GetUpdate(IAsyncOprations Client)
             {
-                var Table = this.Table as Table<ValueType, KeyType>;
                 await Client.GetUpdate(Table);
+            }
+
+            public async override Task SyncUpdate()
+            {
+                await Table.SyncUpdate();
+            }
+
+            public async override Task<HTMLElement> MakeShowView(
+                Action<object> OnUpdate = null, 
+                Action<object> OnDelete = null)
+            {
+                return await Table.MakeShowView(
+                                    OnUpdate:(c)=>OnUpdate?.Invoke(c),
+                                    OnDelete:(c)=> OnDelete?.Invoke(c));
+            }
+
+            public override HTMLElement MakeShowView(
+                object Key, 
+                Action OnUpdate = null, 
+                Action OnDelete = null)
+            {
+                return Table.MakeShowView(
+                                Key:(KeyType)Key,
+                                OnUpdate:OnUpdate,
+                                OnDelete:OnDelete);
             }
         }
 
@@ -98,18 +156,40 @@ namespace Monsajem_Incs.Database.Base
         {
             public string RelationName;
 
-            public virtual object GetRelationTableByKey(object HolderKey)
-            {
+            public virtual object GetRelationTableByKey(object HolderKey)=>
                 throw new Exception("Not impelemented.");
-            }
-            public virtual Task SendUpdate(object HolderKey, IAsyncOprations Client) 
-            {
+
+
+            public virtual Task Insert(object Data) =>
+                throw new Exception("SyncInsert not implemented in table finder!");
+            public virtual Task Update(object Key, object Data) =>
+                throw new Exception("SyncUpdate not implemented in table finder!");
+            public virtual Task Delete(object Key) =>
+                throw new Exception("SyncDelete not implemented in table finder!");
+            public virtual Task Accept(object Key) =>
+                throw new Exception("SyncDelete not implemented in table finder!");
+            public virtual Task Ignore(object Key) =>
+                throw new Exception("SyncDelete not implemented in table finder!");
+
+            public virtual Task SendUpdate(object HolderKey, IAsyncOprations Client) =>
                 throw new Exception("Not impelemented.");
-            }
-            public virtual Task GetUpdate(object HolderKey, IAsyncOprations Client) 
-            {
+            public virtual Task GetUpdate(object HolderKey, IAsyncOprations Client) =>
                 throw new Exception("Not impelemented.");
-            }
+            public virtual Task SyncUpdate(object HolderKey)=>
+                throw new Exception("SyncUpdate not implemented in table finder!");
+
+            public virtual HTMLElement MakeShowView(
+                   object HolderKey,
+                   object Key,
+                   Action OnUpdate = null,
+                   Action OnDelete = null) =>
+                throw new Exception("MakeShowView for item not implemented in table finder!");
+
+            public virtual Task<HTMLElement> MakeShowView(
+                object HolderKey,
+                Action<object> OnUpdate = null,
+                Action<object> OnDelete = null) =>
+                throw new Exception("MakeShowView for table not implemented in table finder!");
 
             public bool Equals(RelationInfo other)
             {
@@ -126,6 +206,8 @@ namespace Monsajem_Incs.Database.Base
             where HolderKeyType : IComparable<HolderKeyType>
             where RelationKeyType : IComparable<RelationKeyType>
         {
+            public Func<HolderKeyType, PartOfTable<RelationValueType, RelationKeyType>>
+                    GetterRealtionByKey = (c) => throw new Exception("Not impelemented.");
 
             public override async Task SendUpdate(object HolderKey, IAsyncOprations Client)
             {
@@ -139,13 +221,40 @@ namespace Monsajem_Incs.Database.Base
                 await Client.GetUpdate(Table);
             }
 
+            public override async Task SyncUpdate(object HolderKey)
+            {
+                var Table = GetterRealtionByKey((HolderKeyType)HolderKey);
+                await Table.SyncUpdate();
+            }
+
+            public override async Task<HTMLElement> MakeShowView(
+                object HolderKey,
+                Action<object> OnUpdate = null, 
+                Action<object> OnDelete = null)
+            {
+                var Table = GetterRealtionByKey((HolderKeyType)HolderKey);
+                return await Table.MakeShowView(
+                               OnUpdate:(c)=>OnUpdate?.Invoke(c),
+                               OnDelete:(c)=>OnDelete?.Invoke(c));
+            }
+
+            public override HTMLElement MakeShowView(
+                object HolderKey,
+                object Key, 
+                Action OnUpdate = null,
+                Action OnDelete = null)
+            {
+                var Table = GetterRealtionByKey((HolderKeyType)HolderKey);
+                return Table.MakeShowView(
+                                Key:(RelationKeyType)Key,
+                                OnUpdate:OnUpdate,
+                                OnDelete:OnDelete);
+            }
+
             public override object GetRelationTableByKey(object HolderKey)
             {
                 return GetterRealtionByKey((HolderKeyType)HolderKey);
             }
-
-            public Func<HolderKeyType, PartOfTable<RelationValueType,RelationKeyType>> 
-                GetterRealtionByKey = (c)=> throw new Exception("Not impelemented.");
         }
     }
 }

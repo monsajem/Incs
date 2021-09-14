@@ -15,48 +15,50 @@ namespace Monsajem_Incs.Views.Maker.Database
     {
         public static async Task SyncUpdate<ValueType, KeyType>(
             this Table<ValueType, KeyType> Table)
-            where KeyType:IComparable<KeyType>
+            where KeyType : IComparable<KeyType>
         {
-            await Remote(
-            async (c) =>
+            if (Table == null)
+                throw new Exception("Table is null!");
+
+            switch (Table)
             {
-                var TableName = await c.GetData<string>();
-                var Table = TableFinder.FindTable(TableName).Table as Table<ValueType, KeyType>;
-                await c.SendUpdate(Table);
-            },
-            async (c) =>
-            {
-                await c.SendData(Table.TableName);
-                await c.GetUpdate(Table);
-            });
+                case PartOfTable<ValueType, KeyType>:
+                    var PartTable = Table as PartOfTable<ValueType, KeyType>;
+                    await Remote(
+                            async (c) =>
+                            {
+                                var Info = await c.GetData<(string TableName,object Key,string RealtionName)>();
+                                await TableFinder.FindTable(Info.TableName)
+                                                 .FindRelation(Info.RealtionName)
+                                                 .SendUpdate(Info.Key,c);
+                            },
+                            async (c) =>
+                            {
+                                await c.SendData((
+                                            (string)PartTable.HolderTable.Table.TableName,
+                                            PartTable.HolderTable.Key,
+                                            PartTable.TableName));
+                                await c.GetUpdate(Table);
+                            });
+                    break;
+
+                case Table<ValueType, KeyType>:
+                    await Remote(
+                            async (c) =>
+                            {
+                                var TableName = await c.GetData<string>();
+                                await TableFinder.FindTable(TableName).SendUpdate(c);
+                            },
+                            async (c) =>
+                            {
+                                await c.SendData(Table.TableName);
+                                await c.GetUpdate(Table);
+                            });
+                    break;
+            }
         }
 
         public static HTMLElement MakeEditView<ValueType, KeyType>(
-            this Table<ValueType, KeyType> Table, KeyType Key)
-            where KeyType : IComparable<KeyType>
-        {
-            static async Task RemoteTable(
-                string TableName,
-                KeyType Key,
-                ValueType Value)
-            {
-               await Remote(() => 
-               {
-                   var Table = TableFinder.FindTable(TableName).Table as Table<ValueType, KeyType>;
-                   if (Table == null)
-                       return;
-                   Table.Update(Key,(c)=>
-                   {
-                       Table.MoveRelations(c, Value);
-                       return Value;
-                   });
-               });
-            }
-
-            return null;
-        }
-
-        public static HTMLElement MakeShowView<ValueType, KeyType>(
             this Table<ValueType, KeyType> Table, KeyType Key)
             where KeyType : IComparable<KeyType>
         {
@@ -78,23 +80,50 @@ namespace Monsajem_Incs.Views.Maker.Database
                 });
             }
 
+            return null;
+        }
+
+        public static HTMLElement MakeShowView<ValueType, KeyType>(
+            this Table<ValueType, KeyType> Table, KeyType Key,
+            Action OnUpdate = null,
+            Action OnDelete = null)
+            where KeyType : IComparable<KeyType>
+        {
+            static async Task RemoteTable(
+                string TableName,
+                KeyType Key,
+                ValueType Value)
+            {
+                await Remote(() =>
+                {
+                    var Table = TableFinder.FindTable(TableName).Table as Table<ValueType, KeyType>;
+                    if (Table == null)
+                        return;
+                    Table.Update(Key, (c) =>
+                    {
+                        Table.MoveRelations(c, Value);
+                        return Value;
+                    });
+                });
+            }
+
             var Value = Table[Key].Value;
-            return (Table,Value).MakeView();
+            return (Table, Value).MakeView(OnUpdate, OnDelete);
         }
 
         public static RegisterEditor<ValueType, KeyType> RegisterEdit<ValueType, KeyType>(this Table<ValueType, KeyType> Table)
-            where KeyType :IComparable<KeyType>
+            where KeyType : IComparable<KeyType>
             => new RegisterEditor<ValueType, KeyType>() { Table = Table };
 
         public class RegisterEditor<ValueType, KeyType>
-            where KeyType:IComparable<KeyType>
+            where KeyType : IComparable<KeyType>
         {
             internal Table<ValueType, KeyType> Table;
 
             public void SetDefault<ViewType>(
-                Action<(ViewType View,ValueType Value)> FillView = null,
+                Action<(ViewType View, ValueType Value)> FillView = null,
                 Func<ViewType, HTMLElement> GetMain = null,
-                Func<(ViewType View,ValueType OldValue), ValueType> FillValue = null,
+                Func<(ViewType View, ValueType OldValue), ValueType> FillValue = null,
                 Action<(ViewType View, Action Edited)> SetEdited = null)
                 where ViewType : new()
             {
@@ -116,13 +145,13 @@ namespace Monsajem_Incs.Views.Maker.Database
                     (c) =>
                     {
                         var result = ValueTypes.EditItemMaker<ValueType, ViewType>.Default_MakeValueFromView
-                            ((c.View,c.OldValue.Value));
+                            ((c.View, c.OldValue.Value));
                         return (c.OldValue.Table, result);
                     };
 
                 var _FillValue = default(Func<(ViewType View, (Table<ValueType, KeyType> Table, ValueType Value) OldValue), (Table<ValueType, KeyType> Table, ValueType Value)>);
                 if (FillValue != null)
-                    _FillValue = (c) =>(c.OldValue.Table, FillValue((c.View, c.OldValue.Value)));
+                    _FillValue = (c) => (c.OldValue.Table, FillValue((c.View, c.OldValue.Value)));
 
 
                 ValueTypes.EditItemMaker.MakeDefault
@@ -143,7 +172,6 @@ namespace Monsajem_Incs.Views.Maker.Database
             public void SetDefault<ViewType>(
                 Action<(ViewType View, ValueType Value)> FillView = null,
                 Func<ViewType, HTMLElement> GetMain = null,
-                Action<(ViewType View, Action Edited)> SetEdited = null,
                 Action<(ViewType View, Action Edit)> RegisterEdit = null,
                 Action<(ViewType View, Action Delete)> RegisterDelete = null)
                 where ViewType : new()
@@ -163,10 +191,10 @@ namespace Monsajem_Incs.Views.Maker.Database
 
                 ValueTypes.ViewItemMaker.SetView
                     <(Table<ValueType, KeyType> Table, ValueType Key), ViewType>
-                    (FillView:_FillView,
-                     GetMain:GetMain,
-                     RegisterEdit:RegisterEdit,
-                     RegisterDelete:RegisterDelete);
+                    (FillView: _FillView,
+                     GetMain: GetMain,
+                     RegisterEdit: RegisterEdit,
+                     RegisterDelete: RegisterDelete);
             }
         }
     }

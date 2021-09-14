@@ -84,6 +84,8 @@ namespace WebAssembly.Browser.DOM
         [Export("appendChild")]
         public T AppendChild<T>(T newChild) where T : Node
         {
+            if (newChild == null)
+                throw new Exception("newChild is null!");
             return InvokeMethod<T>("appendChild", newChild);
         }
         [Export("cloneNode")]

@@ -53,14 +53,28 @@ namespace Monsajem_Client
                     {
                         c.View.Name.Value = c.Value.Name;
                     },
-                    GetMain: (c) => c.Main);
+                    GetMain: (c) => c.Main,
+                    RegisterEdit:(c)=>
+                    {
+                        c.View.Edit.OnClick += (c1, c2) => c.Edit();
+                    },
+                    RegisterDelete:(c)=>
+                    {
+                        c.View.Delete.OnClick += (c1, c2) => c.Delete();
+                    });
             }
 
             await Remote(() =>
             {
                 Data.Groups.Insert((c) => c.Name = "Group1");
             });
-            MainElement.ReplaceChilds(await Data.Groups.MakeShowView());
+
+            MainElement.ReplaceChilds(await Data.Groups.MakeShowView(
+                (c)=>Console.WriteLine("Edit" + c.ToString()),
+                (c)=>Console.WriteLine("Delete" + c.ToString())));
+
+            //await Data.Groups.SyncUpdate();
+            //MainElement.ReplaceChilds(Data.Groups.MakeShowView("Group1"));
         }
     }
 }
