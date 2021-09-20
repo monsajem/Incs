@@ -22,8 +22,6 @@ namespace MonsajemData
             where KeyType : IComparable<KeyType>
         {
             var Result = tableMaker.MakeDB(Name, GetKey);
-            var TblInfo = _MakeFinder<ValueType, KeyType>(Name, Result.GetHashCode(), "");
-            TblInfo.Tbl= Result;
             TBL = Result;
         }
     }

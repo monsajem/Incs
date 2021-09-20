@@ -9,6 +9,8 @@ using Monsajem_Incs.TimeingTester;
 using System.Runtime.InteropServices.JavaScript;
 using Microsoft.JSInterop;
 using Monsajem_Incs.Views.Maker.Database;
+using Monsajem_Incs.Views.Shower.Database;
+
 using static Monsajem_Client.Network;
 
 namespace Monsajem_Client
@@ -28,7 +30,7 @@ namespace Monsajem_Client
             js.IJSUnmarshalledRuntime = (IJSUnmarshalledRuntime)WASM_Global.Publisher.jSRuntime;
             js.Document.Body.AppendChild(BasePage_html.HtmlText);
             BasePage_html = new BasePage_html(true);
-            UserControler.Page.SubmitPage(MainElement);
+            Monsajem_Incs.Views.Page.SubmitPage(MainElement);
 
             Window.window.LocalStorage.Clear();
             Data = new ClientDataBase(Window.window.LocalStorage);
@@ -36,9 +38,10 @@ namespace Monsajem_Client
             {
                 Data.Groups.RegisterEdit().SetDefault<GroupEdit_html>(
                     FillView: (c) =>
-                     {
-                         c.View.Name.Value = c.Value.Name;
-                     },
+                    {
+                        if(c.Value!=null)
+                            c.View.Name.Value = c.Value.Name;
+                    },
                     FillValue: (c) =>
                      {
                          return new ProductGroup()
@@ -64,17 +67,23 @@ namespace Monsajem_Client
                     });
             }
 
-            await Remote(() =>
-            {
-                Data.Groups.Insert((c) => c.Name = "Group1");
-            });
+            await Data.Groups.SyncUpdate();
+
+            Data.Groups.ShowItems();
+
+            return;
 
             MainElement.ReplaceChilds(await Data.Groups.MakeShowView(
-                (c)=>Console.WriteLine("Edit" + c.ToString()),
-                (c)=>Console.WriteLine("Delete" + c.ToString())));
-
-            //await Data.Groups.SyncUpdate();
-            //MainElement.ReplaceChilds(Data.Groups.MakeShowView("Group1"));
+                async (c)=>
+                {
+                    MainElement.ReplaceChilds(Data.Groups.MakeEditView(c.Key));
+                    Console.WriteLine("Edit" + c.ToString());
+                },
+                async (c)=>
+                {
+                    await c.TableInfo.Delete(c.Key);
+                    Console.WriteLine("Delete" + c.ToString());
+                }));
         }
     }
 }

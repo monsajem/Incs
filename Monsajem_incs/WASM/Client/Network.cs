@@ -10,6 +10,7 @@ using WebAssembly.Browser.DOM;
 using System.Reflection;
 using System.Threading.Tasks;
 using static WASM_Global.Publisher;
+using Monsajem_Incs.UserControler;
 
 namespace Monsajem_Client
 {
@@ -30,7 +31,7 @@ namespace Monsajem_Client
               if(Service_Port == 0)
                   throw new Exception("server Port address is empty");
               if (ShowMessages)
-                UserControler.Publish.ShowAction("در حال اتصال");
+                Publish.ShowAction("در حال اتصال");
               await Server.Connect(new EndPoint()
               {
                   IpAddress = Service_IpAddress,
@@ -56,11 +57,11 @@ namespace Monsajem_Client
             {
                  await BaseLogin?.Invoke(rq);
                  if(ShowMessages)
-                 UserControler.Publish.ShowAction("در حال انجام عملیات");
+                 Publish.ShowAction("در حال انجام عملیات");
                  await rq.RunOnOtherSide(Ac);
             });
             if(ShowMessages)
-            UserControler.Publish.HideAction();
+            Publish.HideAction();
         }
         public static async Task Remote<UserType>(Action<UserType> Ac)
             where UserType : User<UserType>
@@ -69,11 +70,11 @@ namespace Monsajem_Client
             {
                 await BaseLogin?.Invoke(rq);
                 if (ShowMessages)
-                UserControler.Publish.ShowAction("در حال انجام عملیات");
+                Publish.ShowAction("در حال انجام عملیات");
                 await rq.RunOnOtherSide(Ac);
             });
             if (ShowMessages)
-                UserControler.Publish.HideAction();
+                Publish.HideAction();
         }
         public static async Task<t> Remote<t>(Func<t> Ac)
         {
@@ -82,7 +83,7 @@ namespace Monsajem_Client
             {
                 await BaseLogin?.Invoke(rq);
                 if (ShowMessages)
-                    UserControler.Publish.ShowAction("در حال انجام عملیات");
+                    Publish.ShowAction("در حال انجام عملیات");
                 Result = await rq.RunOnOtherSide(Ac);
             });
             return Result;
@@ -95,7 +96,7 @@ namespace Monsajem_Client
             {
                 await BaseLogin?.Invoke(rq);
                 if (ShowMessages)
-                    UserControler.Publish.ShowAction("در حال انجام عملیات");
+                    Publish.ShowAction("در حال انجام عملیات");
                 Result = await rq.RunOnOtherSide(Ac);
             });
             return Result;
@@ -109,14 +110,14 @@ namespace Monsajem_Client
             {
                 await BaseLogin?.Invoke(rq);
                 if (ShowMessages)
-                    UserControler.Publish.ShowAction("در حال ارسال درخواست");
+                    Publish.ShowAction("در حال ارسال درخواست");
                 await rq.RunOnOtherSide(ServerSide);
                 if (ShowMessages)
-                    UserControler.Publish.ShowAction("در حال انجام عملیات");
+                    Publish.ShowAction("در حال انجام عملیات");
                 await ClientSide(rq);
             });
             if(ShowMessages)
-                UserControler.Publish.HideAction();
+                Publish.HideAction();
         }
 
         public static async Task Remote(
@@ -127,14 +128,14 @@ namespace Monsajem_Client
             {
                 await BaseLogin?.Invoke(rq);
                 if (ShowMessages)
-                    UserControler.Publish.ShowAction("در حال ارسال درخواست");
+                    Publish.ShowAction("در حال ارسال درخواست");
                 await rq.RunOnOtherSide(ServerSide);
                 if (ShowMessages)
-                    UserControler.Publish.ShowAction("در حال انجام عملیات");
+                    Publish.ShowAction("در حال انجام عملیات");
                 await ClientSide(rq);
             });
             if (ShowMessages)
-                UserControler.Publish.HideAction();
+                Publish.HideAction();
         }
 
         public static async Task Remote<UserType>(
@@ -146,14 +147,14 @@ namespace Monsajem_Client
             {
                 await BaseLogin?.Invoke(rq);
                 if (ShowMessages)
-                    UserControler.Publish.ShowAction("در حال ارسال درخواست");
+                    Publish.ShowAction("در حال ارسال درخواست");
                 await rq.RunOnOtherSide(ServerSide);
                 if (ShowMessages)
-                    UserControler.Publish.ShowAction("در حال انجام عملیات");
+                    Publish.ShowAction("در حال انجام عملیات");
                 await ClientSide(rq);
             });
             if (ShowMessages)
-                UserControler.Publish.HideAction();
+                Publish.HideAction();
         }
     }
 }

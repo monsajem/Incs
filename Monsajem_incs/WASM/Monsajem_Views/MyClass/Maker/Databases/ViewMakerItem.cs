@@ -59,56 +59,60 @@ namespace Monsajem_Incs.Views.Maker.Database
         }
 
         public static HTMLElement MakeEditView<ValueType, KeyType>(
-            this Table<ValueType, KeyType> Table, KeyType Key)
+            this Table<ValueType, KeyType> Table, KeyType Key,
+            Action Done=null)
             where KeyType : IComparable<KeyType>
         {
-            static async Task RemoteTable(
-                string TableName,
-                KeyType Key,
-                ValueType Value)
-            {
-                await Remote(() =>
-                {
-                    var Table = TableFinder.FindTable(TableName).Table as Table<ValueType, KeyType>;
-                    if (Table == null)
-                        return;
-                    Table.Update(Key, (c) =>
-                    {
-                        Table.MoveRelations(c, Value);
-                        return Value;
-                    });
-                });
-            }
+            var Value = Table[Key].Value;
+            var TableInfo = TableFinder.FindTable(Table.TableName);
+            return (Table, Value).MakeEditView(
+                   async (c) =>
+                   {
+                       await TableInfo.Update(Key, c.NewValue.Value);
+                       Done?.Invoke();
+                   });
+        }
 
-            return null;
+        public static HTMLElement MakeInsertView<ValueType, KeyType>(
+                this Table<ValueType, KeyType> Table,
+                Action Done = null)
+            where KeyType : IComparable<KeyType>
+        {
+            var TableInfo = TableFinder.FindTable(Table.TableName);
+            return (Table, Value: default(ValueType)).MakeEditView(
+                   async (c) =>
+                   {
+                       await TableInfo.Insert(c.NewValue.Value);
+                       Done?.Invoke();
+                   });
+        }
+
+        public static HTMLElement MakeInsertView<ValueType, KeyType>(
+                this PartOfTable<ValueType, KeyType> Table,
+                Action Done = null)
+            where KeyType : IComparable<KeyType>
+        {
+            var TableInfo = TableFinder.FindTable((string)Table.HolderTable.Table.TableName);
+            var RelationInfo = TableInfo.FindRelation(Table.TableName);
+            return (Table, Value: default(ValueType)).MakeEditView(
+                   async (c) =>
+                   {
+                       await RelationInfo.Insert(Table.HolderTable.Key, c.NewValue.Value);
+                       Done?.Invoke();
+                   });
         }
 
         public static HTMLElement MakeShowView<ValueType, KeyType>(
             this Table<ValueType, KeyType> Table, KeyType Key,
-            Action OnUpdate = null,
-            Action OnDelete = null)
+            Action<(TableFinder.TableInfo TableInfo, KeyType Key)> OnUpdate = null,
+            Action<(TableFinder.TableInfo TableInfo, KeyType Key)> OnDelete = null)
             where KeyType : IComparable<KeyType>
         {
-            static async Task RemoteTable(
-                string TableName,
-                KeyType Key,
-                ValueType Value)
-            {
-                await Remote(() =>
-                {
-                    var Table = TableFinder.FindTable(TableName).Table as Table<ValueType, KeyType>;
-                    if (Table == null)
-                        return;
-                    Table.Update(Key, (c) =>
-                    {
-                        Table.MoveRelations(c, Value);
-                        return Value;
-                    });
-                });
-            }
-
             var Value = Table[Key].Value;
-            return (Table, Value).MakeView(OnUpdate, OnDelete);
+            var TableInfo = TableFinder.FindTable(Table.TableName);
+            return (Table, Value).MakeView(
+                                    OnEdit:()=>OnUpdate?.Invoke((TableInfo,Key)),
+                                    OnDelete:()=>OnDelete?.Invoke((TableInfo, Key)));
         }
 
         public static RegisterEditor<ValueType, KeyType> RegisterEdit<ValueType, KeyType>(this Table<ValueType, KeyType> Table)

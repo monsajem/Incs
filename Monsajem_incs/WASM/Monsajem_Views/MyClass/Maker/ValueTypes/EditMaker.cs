@@ -15,6 +15,7 @@ using System.Runtime.Serialization;
 using Monsajem_Incs.Serialization;
 using Monsajem_incs;
 using Monsajem_Incs.Convertors;
+using static System.Runtime.Serialization.FormatterServices;
 
 namespace Monsajem_Incs.Views.Maker.ValueTypes
 {
@@ -94,7 +95,8 @@ namespace Monsajem_Incs.Views.Maker.ValueTypes
                 {
                     var ValueField = ValueFields[i];
                     var ViewField = ViewFields[i];
-                    if(ValueField.Convertor.IsReadableConvertor)
+                    if(ValueField.Convertor.IsReadableConvertor &&
+                       c.Value != null)
                     {
                         var NodeValue = ValueField.Field.GetValue(c.Value);
                         if (NodeValue != null)
@@ -107,6 +109,8 @@ namespace Monsajem_Incs.Views.Maker.ValueTypes
             Default_MakeValueFromView = (c) =>
             {
                 var NewValue = c.OldValue.Serialize().Deserialize(c.OldValue);
+                if (c.OldValue == null)
+                    NewValue = (ValueType) GetUninitializedObject(typeof(ValueType));
                 for (int i = 0; i < FieldsNames.Length; i++)
                 {
                     var ValueField = ValueFields[i];

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using static Monsajem_Incs.Collection.Array.Extentions;
 using static System.Runtime.Serialization.FormatterServices;
 using static System.Text.Encoding;
@@ -66,6 +67,8 @@ namespace Monsajem_Incs.Serialization
             }
 
             private static readonly SerializeInfo<t> SerializerObj = new SerializeInfo<t>();
+
+            [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
             public static SerializeInfo<t> GetSerialize()
             {
                 var Sr = SerializerObj;

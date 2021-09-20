@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Monsajem_Incs.Serialization;
 using Monsajem_Incs.TimeingTester;
 using static System.Runtime.Serialization.FormatterServices;
+using System.Buffers;
 
 namespace _test
 {
@@ -26,28 +27,8 @@ namespace _test
 
     class Program
     {
-
-        public struct str1
-        {
-            public int Value;
-        }
-
-        public static byte[] StructToBytes<t>(t value,int Size)
-        {
-            byte[] bytes = new byte[Size];
-            System.Runtime.CompilerServices.Unsafe.As<byte, t>(ref bytes[0]) = value;
-            return bytes;
-        }
-        public static t BytesToStruct<t>(byte[] value, int startIndex)
-        {
-            return System.Runtime.CompilerServices.Unsafe.ReadUnaligned<t>(ref value[startIndex]);
-        }
-
         static void Main(string[] args)
         {
-
-            var x = new int[2000,200].Serialize().Deserialize<int[,]>();
-
             object obj = 12;
             var D = obj.Serialize();
 

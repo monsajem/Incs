@@ -13,7 +13,6 @@ namespace Monsajem_Server
     internal class MyDataBase : Monsajem_Client.DataBase
     {
         public MyDataBase() : base(new Maker(), DB_Dir + "\\Files\\") {}
-        public override bool MakeView => true;
         public override bool ISUpdateAble => true;
         public override uint Ver => 1;
         public override uint LastVer

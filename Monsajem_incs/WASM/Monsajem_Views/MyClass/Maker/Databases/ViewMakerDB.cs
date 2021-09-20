@@ -15,19 +15,20 @@ namespace Monsajem_Incs.Views.Maker.Database
     {
         public static async Task<HTMLElement> MakeShowView<ValueType, KeyType>(
             this Table<ValueType, KeyType> Table,
-            Action<KeyType> OnUpdate = null,
-            Action<KeyType> OnDelete = null)
+            Action<(TableFinder.TableInfo TableInfo,KeyType Key)> OnUpdate = null,
+            Action<(TableFinder.TableInfo TableInfo, KeyType Key)> OnDelete = null)
             where KeyType : IComparable<KeyType>
         {
             await Table.SyncUpdate();
             var Views = new HTMLElement[Table.Length];
             var i = 0;
-
-            foreach(var Key in Table.KeysInfo.Keys)
+            var TableInfo = TableFinder.FindTable(Table.TableName);
+            foreach (var Key in Table.KeysInfo.Keys)
             {
-                Views[i++] = Table.MakeShowView(Key,
-                                    ()=>OnUpdate?.Invoke(Key),
-                                    ()=>OnDelete?.Invoke(Key));
+                var Value = Table[Key].Value;
+                Views[i++] = (Table, Value).MakeView(
+                () => OnUpdate?.Invoke((TableInfo,Key)),
+                () => OnDelete?.Invoke((TableInfo, Key)));
             }
 
             var Holder = new Monsajem_Incs.Resources.Base.Html.Div_html();

@@ -10,8 +10,9 @@ using Monsajem_Incs.Database.Base;
 using Monsajem_Incs.Serialization;
 using Monsajem_Incs.Collection.Array.ArrayBased.DynamicSize;
 using static Monsajem_Client.SafeRun;
+using Monsajem_Incs.UserControler;
 
-namespace UserControler
+namespace Monsajem_Incs.Views
 {
     public abstract class Page:IComparable<Page>
     {
@@ -87,12 +88,10 @@ namespace UserControler
         {
             if(DB_PagesLoaded==false)
             {
-                //Pages.BinaryInsert(
-                //    new UserControler.Partial.ShowPage(),
-                //    new UserControler.Partial.insertPage(),
-                //    new UserControler.Partial.UpdatePage(),
-                //    new UserControler.Partial.SelectForAccept(),
-                //    new UserControler.Partial.SelectForIgnore());
+                Pages.BinaryInsert(
+                    new Shower.Database.ShowPage(),
+                    new Shower.Database.insertPage(),
+                    new Shower.Database.UpdatePage());
                 DB_PagesLoaded = true;
             }
             Pages.BinaryInsert(Page);

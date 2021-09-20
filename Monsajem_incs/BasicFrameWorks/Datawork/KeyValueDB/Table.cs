@@ -51,7 +51,18 @@ namespace Monsajem_Incs.Database.KeyValue.Base
             
             Ar._GetItem = (Pos) => Data[this.KeysInfo.Keys[Pos]];
 
-            Ar._SetItem = (Pos, Value) => Data[this.KeysInfo.Keys[Pos]]=Value;
+            Ar._SetItem = (Pos, Value) =>
+            {
+                var OldKey = this.KeysInfo.Keys[Pos];
+                var NewKey = GetKey(Value);
+                if (OldKey.CompareTo(NewKey) !=0)
+                {
+                    Data.Remove(OldKey);
+                    Data.Add(NewKey,Value);
+                }   
+                else
+                    Data[OldKey] = Value;
+            };
             Ar._DeleteByPosition = (c) =>
             {
                 Data.Remove(this.KeysInfo.Keys[c]);

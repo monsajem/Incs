@@ -75,7 +75,6 @@ namespace Monsajem_Client
         {}
 
         private static Storage WebStorage;
-        public override bool MakeView => true;
         public override bool ISUpdateAble => false;
         public override uint Ver => 2;
         public override uint LastVer

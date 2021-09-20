@@ -10,7 +10,7 @@ using WebAssembly.Browser.DOM;
 using static Monsajem_Incs.Collection.Array.Extentions;
 using Monsajem_Client;
 
-namespace UserControler
+namespace Monsajem_Incs.UserControler
 {
     public static class Publish
     {

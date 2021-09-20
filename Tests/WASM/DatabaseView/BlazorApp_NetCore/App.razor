@@ -17,9 +17,9 @@
         NavigationManager.LocationChanged += async (s, e) =>
         {
             await Monsajem_Client.SafeRun.Safe(async () =>
-            await UserControler.Page.Route(e.Location));
+            await Monsajem_Incs.Views.Page.Route(e.Location));
         };
-        UserControler.Publish.HideAction();
+        Monsajem_Incs.UserControler.Publish.HideAction();
     }
 
     protected async override Task OnInitializedAsync()
@@ -30,6 +30,9 @@
         //var response = await request.GetAsync("https://ipapi.co/8.8.8.8/country/");
         //Console.WriteLine(await response.Content.ReadAsStringAsync());
         await Monsajem_Client.SafeRun.Safe(() => Monsajem_Client.App.Main_Run());
+
+        await Monsajem_Client.SafeRun.Safe(async () =>
+            await Monsajem_Incs.Views.Page.Route(NavigationManager.Uri));
     }
 }
 

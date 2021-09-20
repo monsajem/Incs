@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using static WASM_Global.Publisher;
 using Monsajem_Incs.Resources.Base.Partials;
+using Monsajem_Incs.UserControler;
 
 namespace Monsajem_Client
 {
@@ -30,7 +31,7 @@ namespace Monsajem_Client
                 var Message = ex.Message;
                 try
                 {
-                    UserControler.Publish.HideAction();
+                    Publish.HideAction();
                     {
                         var ex2 = ex;
                         ex = ex.InnerException;
@@ -42,12 +43,11 @@ namespace Monsajem_Client
                         ex = ex2;
                     }
                     if (ex is ThisException)
-                        UserControler.Publish.ShowDangerMessage(Message);
+                        Publish.ShowDangerMessage(Message);
                     else if (ex.StackTrace.IndexOf("Monsajem_Incs.Database") > -1 &&
                              ex.StackTrace.IndexOf("Monsajem_Incs.Database.Base.Extentions.<GetUpdate>") < 0)
                     {
-                        DataBaseInfo.ClearDatabase();
-                        Console.WriteLine("Database Error!");
+                        Console.WriteLine("Database Error! need to cleare!");
                         ShowCrashOnDataBase?.Invoke();
                         //await Task.Delay(2000);
                         //NavigationManager.NavigateTo(NavigationManager.Uri, true);

@@ -62,7 +62,6 @@ namespace MonsajemData
             Load();
         }
 
-        public abstract bool MakeView { get; }
         public abstract uint Ver { get; }
         public abstract uint LastVer { get; set; }
         public abstract void ClearData();
@@ -85,16 +84,6 @@ namespace MonsajemData
                 LastVer = Ver;
             }
 
-            if(MakeView)
-            {
-                DataBaseInfo.FindDB = FindDB;
-                DataBaseInfo.FindDB_Hash = FindDB;
-                RelationJoined.Make = () => new OnJoined();
-                DataBaseInfo.UpdatePermitions = GetPermitionsUpdate;
-            }
-            DataBaseInfo.ClearDatabase = ClearData;
-
-
             DefaultRelationConfigs.DefaultTableInfo = (c) => c.IsUpdateAble = ISUpdateAble;
 
             MakeDB(ref Users, "T_Users", (c) => c.ID);
@@ -104,20 +93,6 @@ namespace MonsajemData
 
             Users.Events.Inserted += ((UserType Value, Events<UserType>.ValueInfo[]) c) =>
             {
-                Permitions.Insert((p) =>
-                {
-                    p.User.Key = c.Value.ID;
-                    p.Accept = new Permition[DBS_N.Length];
-                    for (int i = 0; i < DBS_N.Length; i++)
-                    {
-                        var DB = DBS_N[i];
-                        p.Accept[i] = new Permition
-                        {
-                            TableName = DB.Info.TableName,
-                            RelationName = DB.Info.RelationName
-                        };
-                    }
-                });
             };
         }
 

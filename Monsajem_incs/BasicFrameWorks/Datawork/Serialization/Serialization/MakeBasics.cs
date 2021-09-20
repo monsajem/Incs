@@ -21,21 +21,6 @@ namespace Monsajem_Incs.Serialization
             (Data, obj) => { },
             (Data) => new object(), false);
 
-            SerializeInfo<bool>.InsertSerializer(
-            (Data, obj) =>
-            {
-                if ((bool)obj == true)
-                    Data.Data.WriteByte(1);
-                else
-                    Data.Data.WriteByte(0);
-            },
-            (Data) =>
-            {
-                int Position = Data.From; Data.From += 1;
-                var Result = (Data.Data)[Position];
-                return Result > 0;
-            }, true);
-
             SerializeInfo<DateTime>.InsertSerializer(
             (Data, obj) =>
             {
@@ -69,39 +54,6 @@ namespace Monsajem_Incs.Serialization
                 var Position = Data.From;
                 Data.From += StrSize;
                 return UTF8.GetString(Data.Data, Position, StrSize);
-            }, true);
-
-            SerializeInfo<IntPtr>.InsertSerializer(
-            (Data, obj) =>
-            {                 /// as IntPtr
-                Data.Data.Write(BitConverter.GetBytes(((IntPtr)obj).ToInt64()), 0, 8);
-            },
-            (Data) =>
-            {                 /// as IntPtr
-                int Position = Data.From; Data.From += 8;
-                return new IntPtr(BitConverter.ToInt64(Data.Data, Position));
-            }, true);
-
-            SerializeInfo<UIntPtr>.InsertSerializer(
-            (Data, obj) =>
-            {                 /// as UIntPtr
-                Data.Data.Write(BitConverter.GetBytes(((UIntPtr)obj).ToUInt64()), 0, 8);
-            },
-            (Data) =>
-            {                 /// as UIntPtr
-                int Position = Data.From; Data.From += 8;
-                return new UIntPtr(BitConverter.ToUInt64(Data.Data, Position));
-            }, true);
-
-            SerializeInfo<decimal>.InsertSerializer(
-            (Data, obj) =>
-            {                 /// as Decimal
-                Data.Data.Write(BitConverter.GetBytes(Decimal.ToDouble((decimal)obj)), 0, 8);
-            },
-            (Data) =>
-            {                 /// as Decimal
-                int Position = Data.From; Data.From += 8;
-                return System.Convert.ToDecimal(BitConverter.ToDouble(Data.Data, Position));
             }, true);
 
             SerializeInfo<Type>.InsertSerializer(

@@ -8,6 +8,9 @@ namespace BenchmarkExample
     {
         static void Main(string[] args)
         {
+            var x = new Benchmark();
+            x.GlobalS();
+            x.Class();
            BenchmarkRunner.Run<Benchmark>();
            Console.ReadLine();
         }

@@ -13,6 +13,7 @@ namespace Monsajem_Incs.Serialization
 {
     public partial class Serialization
     {
+
         private abstract class SerializeInfo:
             IEquatable<SerializeInfo>
         {

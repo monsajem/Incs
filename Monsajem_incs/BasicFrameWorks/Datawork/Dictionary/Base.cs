@@ -21,6 +21,12 @@ namespace Monsajem_Incs.Collection
         Array.Base.IArray<KeyType> Keys { get; set; }
         void Add(KeyType key, ValueType value);
         bool Remove(KeyType key);
+        public void ChangeKey(KeyType OldKey, KeyType NewKey)
+        {
+            var OldValue = this[OldKey];
+            Remove(OldKey);
+            Add(NewKey, OldValue);
+        }
         int Count { get; }
         bool ContainsKey(KeyType key) => Keys.BinarySearch(key).Index > 0;
         ValueType this[int Position]{get;set;}

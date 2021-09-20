@@ -107,11 +107,18 @@ namespace Monsajem_Incs.Serialization
             [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
             public SerializeData(bool NeedVisitors,
                                  Action<Type> TrustToType,
-                                 Action<MethodInfo> TrustToMethod) :
+                                 Action<MethodInfo> TrustToMethod,
+                                 MemoryStream Stream=null) :
                             base(NeedVisitors,
                                  TrustToType,
-                                 TrustToMethod){}
-            public MemoryStream Data = new MemoryStream();
+                                 TrustToMethod)
+            {
+                if (Stream == null)
+                    Data = new MemoryStream();
+                else
+                    Data = Stream;
+            }
+            public MemoryStream Data;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
@@ -139,10 +146,6 @@ namespace Monsajem_Incs.Serialization
             byte[] Result;
             var SR = SerializeInfo<t>.GetSerialize();
             SerializeData SR_Data;
-            if (SR.ConstantSize == -1)
-                SR_Data = new SerializeData(true,TrustToType,TrustToMethod);
-            else
-                SR_Data = new SerializeData(false, TrustToType, TrustToMethod);
             try
             {
 #if DEBUG
@@ -157,8 +160,21 @@ namespace Monsajem_Incs.Serialization
                     throw new Exception("Cant Access to Deletage Target field at serializer, Fields >>" + Fields_str);
                 }
 #endif
-                VisitedSerialize(SR_Data, obj, SR);
-                Result = SR_Data.Data.ToArray();
+                var ConstantSize = SR.ConstantSize;
+                if (ConstantSize == -1)
+                {
+                    SR_Data = new SerializeData(true, TrustToType, TrustToMethod);
+                    VisitedSerialize(SR_Data, obj, SR);
+                    Result = SR_Data.Data.ToArray();
+                }
+                else
+                {
+                    //return StructToBytes(obj, ConstantSize);
+                    SR_Data = new SerializeData(false, TrustToType, TrustToMethod,
+                                                new MemoryStream(ConstantSize));
+                    SR.Serializer(SR_Data,obj);
+                    Result = SR_Data.Data.ToArray();
+                }
             }
 #if DEBUG
             catch (Exception ex)
@@ -192,10 +208,6 @@ namespace Monsajem_Incs.Serialization
             t Result = default;
             var SR = SerializeInfo<t>.GetSerialize();
             DeserializeData DR_Data;
-            if (SR.ConstantSize == -1)
-                DR_Data = new DeserializeData(true, TrustToType, TrustToMethod,Data);
-            else
-                DR_Data = new DeserializeData(false, TrustToType, TrustToMethod,Data);
             try
             {
 #if DEBUG
@@ -210,9 +222,18 @@ namespace Monsajem_Incs.Serialization
                     throw new Exception("Cant Access to Deletage Target field at serializer, Fields >>" + Fields_str);
                 }
 #endif
-                VisitedDeserialize(DR_Data,
-                    (c) => Result = (t)c,SR);
-                DR_Data.AtLast?.Invoke();
+                if (SR.ConstantSize == -1)
+                {
+                    DR_Data = new DeserializeData(true, TrustToType, TrustToMethod, Data);
+                    VisitedDeserialize(DR_Data,(c) => Result = (t)c, SR);
+                    DR_Data.AtLast?.Invoke();
+                }
+                else
+                {
+                    //return BytesToStruct<t>(Data, 0);
+                    DR_Data = new DeserializeData(false, TrustToType, TrustToMethod, Data);
+                    Result = (t) SR.Deserializer(DR_Data);
+                }
             }
 #if DEBUG
             catch (Exception ex)
