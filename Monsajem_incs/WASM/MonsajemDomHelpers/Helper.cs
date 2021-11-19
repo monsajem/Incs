@@ -195,7 +195,7 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
     {
         private readonly static string WebWorkerJs = ((Func<string>)(() => {
             var assembly = typeof(WebWorker).Assembly;
-            var resourceName = "Monsajem_incs_WASM.MonsajemDomHelpers.WebWorker.js";
+            var resourceName = "Monsajem_Incs_WASM.MonsajemDomHelpers.WebWorker.js";
             using (Stream stream = assembly.GetManifestResourceStream(resourceName))
             using (StreamReader reader = new StreamReader(stream))
             {

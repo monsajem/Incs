@@ -11,7 +11,7 @@ using Monsajem_Incs.Resources.Base.Html;
 using WebAssembly.Browser.DOM;
 using Monsajem_Incs.DynamicAssembly;
 using Monsajem_Incs.Collection.Array;
-using Q = System.Math;
+
 namespace Monsajem_Incs.Views.Maker.ValueTypes
 {
     public static class ViewItemMaker
@@ -28,20 +28,6 @@ namespace Monsajem_Incs.Views.Maker.ValueTypes
             Action OnEdit = null,
             Action OnDelete = null) =>
             ViewItemMaker<ValueType>.OnMakeView((obj,OnEdit,OnDelete));
-
-        public static HTMLElement MakeView<ValueType>(
-            this ValueType obj,
-            Action<ValueType> OnClick,
-            object ExtraData = null)
-        {
-
-            var View = MakeView(obj);
-            View.OnClick += (c1, c2) =>
-            {
-                OnClick(obj);
-            };
-            return View;
-        }
         
         public static void SetView<ValueType, ViewType>(
             Action<(ViewType View, ValueType Value)> FillView=null,
@@ -61,12 +47,39 @@ namespace Monsajem_Incs.Views.Maker.ValueTypes
                 ViewMaker.GetMain = GetMain;
             ViewItemMaker<ValueType>.OnMakeView = ViewMaker.MakeHtml;
         }
+
+        public static void SetHolderView<HolderType>(
+            Func<(HolderType Holder, HTMLElement[] Views), HTMLElement> FillHolder = null,
+            Func<HolderType,HTMLElement> MakeHolder = null)
+        {
+            if (FillHolder != null)
+                HolderViewMaker<HolderType>.FillHolder = FillHolder;
+            if (MakeHolder != null)
+                HolderViewMaker<HolderType>.MakeHolder = MakeHolder;
+        }
     }
     internal class ViewItemMaker<ValueType>
     {
         public static Func<
             (ValueType Value,Action Edit,Action Delete), 
-            HTMLElement> OnMakeView;
+            HTMLElement> OnMakeView=(c)=> 
+                throw new Exception("Show View Missing in " + typeof(ValueType).FullName);
     }
 
+    internal class HolderViewMaker<HolderType>
+    {
+        public static Func<HolderType,HTMLElement> MakeHolder = 
+            (c) => new Monsajem_Incs.Resources.Base.Html.Div_html().Main;
+
+        public static Func<(HolderType Holder, HTMLElement[] Views), HTMLElement> 
+            FillHolder = (Info) =>
+            {
+                var Holder = MakeHolder(Info.Holder);
+
+                foreach (var View in Info.Views)
+                    Holder.AppendChild(View);
+
+                return Holder;
+            };
+    }
 }

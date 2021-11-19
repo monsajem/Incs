@@ -22,6 +22,8 @@ namespace Monsajem_Client
         internal static Client Server = new Client();
 
         public static async Task Connect(
+             int Port,
+             string Ip,
              Func<IAsyncOprations, Task> Ac)
           {
               //try
@@ -44,7 +46,29 @@ namespace Monsajem_Client
             //}
         }
 
+        public static async Task Connect(
+            int Port,
+            Func<IAsyncOprations, Task> Ac) =>
+            await Connect(Port, Service_IpAddress, Ac);
+
+        public static async Task Connect(
+            Func<IAsyncOprations, Task> Ac) =>
+            await Connect(Service_Port, Service_IpAddress, Ac);
+
         public static Func<IAsyncOprations, Task> BaseLogin=async (c)=> { };
+
+        public static async Task LoginCheck()
+        {
+            await Connect(async (rq) =>
+            {
+                await BaseLogin?.Invoke(rq);
+                if (ShowMessages)
+                    Publish.ShowAction("در حال انجام عملیات");
+                await rq.RunOnOtherSide(()=> { });
+            });
+            if (ShowMessages)
+                Publish.HideAction();
+        }
 
         public static async Task RemoteAndRun(Action Ac)
         {

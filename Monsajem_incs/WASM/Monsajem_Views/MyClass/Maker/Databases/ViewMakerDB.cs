@@ -30,13 +30,7 @@ namespace Monsajem_Incs.Views.Maker.Database
                 () => OnUpdate?.Invoke((TableInfo,Key)),
                 () => OnDelete?.Invoke((TableInfo, Key)));
             }
-
-            var Holder = new Monsajem_Incs.Resources.Base.Html.Div_html();
-
-            foreach (var View in Views)
-                Holder.Main.AppendChild(View);
-
-            return Holder.Main;
+            return HolderViewMaker<Table<ValueType,KeyType>>.FillHolder((Table,Views));
         }
     }
 }

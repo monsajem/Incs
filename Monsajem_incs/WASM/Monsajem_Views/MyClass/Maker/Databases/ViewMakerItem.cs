@@ -124,13 +124,23 @@ namespace Monsajem_Incs.Views.Maker.Database
         {
             internal Table<ValueType, KeyType> Table;
 
-            public void SetDefault<ViewType>(
-                Action<(ViewType View, ValueType Value)> FillView = null,
-                Func<ViewType, HTMLElement> GetMain = null,
-                Func<(ViewType View, ValueType OldValue), ValueType> FillValue = null,
-                Action<(ViewType View, Action Edited)> SetEdited = null)
+
+            public class Inputs<ViewType>
                 where ViewType : new()
             {
+                public Action<(ViewType View, ValueType Value)> FillView;
+                public Func<ViewType, HTMLElement> GetMain;
+                public Func<(ViewType View, ValueType OldValue), ValueType> FillValue;
+                public Action<(ViewType View, Action Edited)> SetEdited;
+            }
+
+
+            public void SetDefault<ViewType>(Action<Inputs<ViewType>> FillInputs=null)
+                where ViewType : new()
+            {
+                var Inputs = new Inputs<ViewType>();
+                FillInputs?.Invoke(Inputs);
+
                 ValueTypes.EditItemMaker<(Table<ValueType, KeyType> Table, ValueType Value), ViewType>
                     .Default_FillViewByValue =
                     (c) =>
@@ -140,8 +150,8 @@ namespace Monsajem_Incs.Views.Maker.Database
                     };
 
                 var _FillView = default(Action<(ViewType View, (Table<ValueType, KeyType> Table, ValueType Value) Value)>);
-                if (FillView != null)
-                    _FillView = (c) => FillView((c.View, c.Value.Value));
+                if (Inputs.FillView != null)
+                    _FillView = (c) => Inputs.FillView((c.View, c.Value.Value));
 
 
                 ValueTypes.EditItemMaker<(Table<ValueType, KeyType> Table, ValueType Value), ViewType>
@@ -154,13 +164,13 @@ namespace Monsajem_Incs.Views.Maker.Database
                     };
 
                 var _FillValue = default(Func<(ViewType View, (Table<ValueType, KeyType> Table, ValueType Value) OldValue), (Table<ValueType, KeyType> Table, ValueType Value)>);
-                if (FillValue != null)
-                    _FillValue = (c) => (c.OldValue.Table, FillValue((c.View, c.OldValue.Value)));
+                if (Inputs.FillValue != null)
+                    _FillValue = (c) => (c.OldValue.Table, Inputs.FillValue((c.View, c.OldValue.Value)));
 
 
                 ValueTypes.EditItemMaker.MakeDefault
                     <(Table<ValueType, KeyType> Table, ValueType Key), ViewType>
-                        (_FillView, GetMain, _FillValue, SetEdited);
+                        (_FillView, Inputs.GetMain, _FillValue, Inputs.SetEdited);
             }
         }
 
@@ -173,15 +183,38 @@ namespace Monsajem_Incs.Views.Maker.Database
         {
             internal Table<ValueType, KeyType> Table;
 
-            public void SetDefault<ViewType>(
-                Action<(ViewType View, ValueType Value)> FillView = null,
-                Func<ViewType, HTMLElement> GetMain = null,
-                Action<(ViewType View, Action Edit)> RegisterEdit = null,
-                Action<(ViewType View, Action Delete)> RegisterDelete = null)
+            public class Inputs<ViewType>
+                where ViewType : new()
+            {
+                public Action<(ViewType View, ValueType Value)> FillView;
+                public Func<ViewType, HTMLElement> GetMain;
+                public Action<(ViewType View, Action Edit)> RegisterEdit;
+                public Action<(ViewType View, Action Delete)> RegisterDelete;
+                public Func<Table<ValueType, KeyType>, HTMLElement> MakeHolder
+                { 
+                    set
+                    {
+                        HolderViewMaker<Table<ValueType, KeyType>>.MakeHolder = value;
+                    } 
+                }
+
+                public static Func<(Table<ValueType, KeyType> Table, HTMLElement[] Views), HTMLElement> FillHolder
+                {
+                    set
+                    {
+                        HolderViewMaker<Table<ValueType, KeyType>>.FillHolder = value;
+                    }
+                }
+            }
+
+            public void SetDefault<ViewType>(Action<Inputs<ViewType>> FillInputs=null)
                 where ViewType : new()
             {
                 var ValueViewMaker = ValueTypes.ViewItemMaker<ValueType, ViewType>.Default;
                 var TableViewMaker = ValueTypes.ViewItemMaker<(Table<ValueType, KeyType> Table, ValueType Value), ViewType>.Default;
+                var Inputs = new Inputs<ViewType>();
+                FillInputs?.Invoke(Inputs);
+
 
                 TableViewMaker.Default_FillView =
                     (c) =>
@@ -190,15 +223,15 @@ namespace Monsajem_Incs.Views.Maker.Database
                     };
 
                 var _FillView = default(Action<(ViewType View, (Table<ValueType, KeyType> Table, ValueType Value) Value)>);
-                if (FillView != null)
-                    _FillView = (c) => FillView((c.View, c.Value.Value));
+                if (Inputs.FillView != null)
+                    _FillView = (c) => Inputs.FillView((c.View, c.Value.Value));
 
                 ValueTypes.ViewItemMaker.SetView
-                    <(Table<ValueType, KeyType> Table, ValueType Key), ViewType>
+                    <(Table<ValueType, KeyType>, ValueType), ViewType>
                     (FillView: _FillView,
-                     GetMain: GetMain,
-                     RegisterEdit: RegisterEdit,
-                     RegisterDelete: RegisterDelete);
+                     GetMain: Inputs.GetMain,
+                     RegisterEdit: Inputs.RegisterEdit,
+                     RegisterDelete: Inputs.RegisterDelete);
             }
         }
     }

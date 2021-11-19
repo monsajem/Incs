@@ -36,13 +36,13 @@ namespace Test
 
         static void Main(string[] args)
         {
-            var Address = Environment.CurrentDirectory + "\\Cache";
-            try { System.IO.File.Delete(Address); } catch { }
-            Monsajem_Incs.Serialization.StreamCacheSerialize.Stream =
-                new System.IO.FileStream(Address, System.IO.FileMode.CreateNew);
-            Test();
+            //var Address = Environment.CurrentDirectory + "\\Cache";
+            //try { System.IO.File.Delete(Address); } catch { }
+            //Monsajem_Incs.Serialization.StreamCacheSerialize.Stream =
+            //    new System.IO.FileStream(Address, System.IO.FileMode.CreateNew);
+            //Test();
             //PerformanceTestMixed();
-            //PerformanceTest();
+            PerformanceTest();
         }
 
         public static void Test()

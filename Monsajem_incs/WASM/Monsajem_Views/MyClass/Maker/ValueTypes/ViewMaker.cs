@@ -53,26 +53,30 @@ namespace Monsajem_Incs.Views.Maker.ValueTypes
             }
             catch
             {
-                var ViewType = typeof(ViewType);
-                RegisterEdit = (c) =>
-                    throw new MissingMemberException("Edit Element not found at " + ViewType.Name +
-                    System.Environment.NewLine +
-                    ViewType.FullName.Substring(14));
+                //var ViewType = typeof(ViewType);
+                //RegisterEdit = (c) =>
+                //    throw new MissingMemberException("Edit Element not found at " + ViewType.Name +
+                //    System.Environment.NewLine +
+                //    ViewType.FullName.Substring(14));
+
+                RegisterEdit = (c) => { };
             }
             try
             {
-                var btn_Edit_Field = FieldControler.Make(
+                var btn_Delete_Field = FieldControler.Make(
                     ShowNames.Where((c) => c.Name.ToLower() == "delete").First());
-                RegisterDelete = (c) => ((HTMLElement)btn_Edit_Field.GetValue(c.View)).
+                RegisterDelete = (c) => ((HTMLElement)btn_Delete_Field.GetValue(c.View)).
                                         OnClick += (c1, c2) => c.Delete();
             }
             catch
             {
-                var ViewType = typeof(ViewType);
-                RegisterDelete = (c) =>
-                    throw new MissingMemberException("Delete Element not found at " + ViewType.Name +
-                    System.Environment.NewLine +
-                    ViewType.FullName.Substring(14));
+                //var ViewType = typeof(ViewType);
+                //RegisterDelete = (c) =>
+                //    throw new MissingMemberException("Delete Element not found at " + ViewType.Name +
+                //    System.Environment.NewLine +
+                //    ViewType.FullName.Substring(14));
+
+                RegisterDelete = (c) => { };
             }
 
             FieldsNames = FieldsNames.Where((c) =>
@@ -83,6 +87,8 @@ namespace Monsajem_Incs.Views.Maker.ValueTypes
                             OrderBy((c) => c.Name).ToArray();
             var ValueFields = FieldControler.Make(FieldsNames);
             var ViewFields = FieldControler.Make(ShowNames);
+
+            Default_FillView +=(c)=>{};
 
             for (int i = 0; i < ValueFields.Length; i++)
             {

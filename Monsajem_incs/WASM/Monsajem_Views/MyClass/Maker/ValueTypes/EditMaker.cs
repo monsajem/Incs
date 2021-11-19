@@ -13,7 +13,7 @@ using Monsajem_Incs.DynamicAssembly;
 using Monsajem_Incs.Collection.Array;
 using System.Runtime.Serialization;
 using Monsajem_Incs.Serialization;
-using Monsajem_incs;
+using Monsajem_Incs;
 using Monsajem_Incs.Convertors;
 using static System.Runtime.Serialization.FormatterServices;
 
@@ -38,7 +38,7 @@ namespace Monsajem_Incs.Views.Maker.ValueTypes
             GetMainElementFromView;
 
         public static Func<(ViewType View, ValueType OldValue), ValueType>
-            MakeValueFromView;
+            MakeValueFromView=(c)=>c.OldValue;
 
         static EditItemMaker()
         {

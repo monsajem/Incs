@@ -1,11 +1,13 @@
-﻿using System;
+﻿using Microsoft.CSharp.RuntimeBinder;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Monsajem_incs
+namespace Monsajem_Incs
 {
     public struct ValueHolder<t>
     {
@@ -15,28 +17,32 @@ namespace Monsajem_incs
             [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
             get => _HaveValue;
         }
-    
+
         private t _Value;
-        public t Value 
+        public t Value
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-            get =>_Value;
+            get => _Value;
             [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-            set { _Value = value; _HaveValue = true; } 
+            set { _Value = value; _HaveValue = true; }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static implicit operator ValueHolder<t> (t Value)
+        public static implicit operator ValueHolder<t>(t Value)
         {
             return new ValueHolder<t>() { Value = Value };
         }
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static implicit operator t(ValueHolder<t> ValueHolder)
+        public static implicit operator t(ValueHolder<t> ValueHolder)=> ValueHolder.ConvertToT();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        private t ConvertToT()
         {
-            if (ValueHolder.HaveValue)
-                return ValueHolder.Value;
+            return Value;
+            if (HaveValue)
+                return Value;
             else
                 return default(t);
         }
@@ -192,6 +198,33 @@ namespace Monsajem_incs
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public override string ToString() => Value.ToString();
-        
+
+        public static CallSite<Func<CallSite, input1, input2, object>>
+            MakeAction<input1, input2>(
+            ExpressionType OpType,
+            CSharpArgumentInfoFlags Op1Flag = CSharpArgumentInfoFlags.None,
+            CSharpArgumentInfoFlags Op2Flag = CSharpArgumentInfoFlags.None)
+        {
+            Type typeFromHandle = typeof(ValueHolder<t>);
+            CSharpArgumentInfo[] array = new CSharpArgumentInfo[2];
+
+            if (Op1Flag == CSharpArgumentInfoFlags.None && typeof(input1) != typeof(object))
+                array[0] = CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.UseCompileTimeType, null);
+            else
+                array[0] = CSharpArgumentInfo.Create(Op1Flag, null);
+
+            if (Op2Flag == CSharpArgumentInfoFlags.None && typeof(input2) != typeof(object))
+                array[1] = CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.UseCompileTimeType, null);
+            else
+                array[1] = CSharpArgumentInfo.Create(Op2Flag, null);
+
+            return CallSite<Func<CallSite, input1, input2, object>>
+                        .Create(Microsoft.CSharp.RuntimeBinder.Binder.BinaryOperation(
+                                                CSharpBinderFlags.None,
+                                                OpType,
+                                                typeFromHandle,
+                                                array));
+        }
+
     }
 }

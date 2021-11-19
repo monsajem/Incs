@@ -57,11 +57,11 @@ Module.postRun.push(() => {
     const load_runtime = Module.cwrap('mono_wasm_load_runtime', null, ['string', 'number']);
     load_runtime('appBinDir', 0);
     MONO.mono_wasm_runtime_is_ready = true;
-    self.MN.RunAction = Module.mono_bind_static_method('[Monsajem_incs_WASM]WebAssembly.Browser.MonsajemDomHelpers.WebProcess:RunAction');
-    self.MN.RunFunction = Module.mono_bind_static_method('[Monsajem_incs_WASM]WebAssembly.Browser.MonsajemDomHelpers.WebProcess:RunFunction');
-    self.MN.RunFunctionTask = Module.mono_bind_static_method('[Monsajem_incs_WASM]WebAssembly.Browser.MonsajemDomHelpers.WebProcess:RunFunctionTask');
-    self.MN.RunFunctionTaskResult = Module.mono_bind_static_method('[Monsajem_incs_WASM]WebAssembly.Browser.MonsajemDomHelpers.WebProcess:RunFunctionTaskResult');
-    Module.mono_bind_static_method('[Monsajem_incs_WASM]WebAssembly.Browser.MonsajemDomHelpers.WebProcess:ThisIsInWorker')();
+    self.MN.RunAction = Module.mono_bind_static_method('[Monsajem_Incs_WASM]WebAssembly.Browser.MonsajemDomHelpers.WebProcess:RunAction');
+    self.MN.RunFunction = Module.mono_bind_static_method('[Monsajem_Incs_WASM]WebAssembly.Browser.MonsajemDomHelpers.WebProcess:RunFunction');
+    self.MN.RunFunctionTask = Module.mono_bind_static_method('[Monsajem_Incs_WASM]WebAssembly.Browser.MonsajemDomHelpers.WebProcess:RunFunctionTask');
+    self.MN.RunFunctionTaskResult = Module.mono_bind_static_method('[Monsajem_Incs_WASM]WebAssembly.Browser.MonsajemDomHelpers.WebProcess:RunFunctionTaskResult');
+    Module.mono_bind_static_method('[Monsajem_Incs_WASM]WebAssembly.Browser.MonsajemDomHelpers.WebProcess:ThisIsInWorker')();
 });
 
 function asyncLoad(url, reponseType) {

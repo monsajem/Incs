@@ -11,7 +11,7 @@ using Monsajem_Incs.Resources.Base.Html;
 using WebAssembly.Browser.DOM;
 using Monsajem_Incs.DynamicAssembly;
 using Monsajem_Incs.Collection.Array;
-using Monsajem_incs;
+using Monsajem_Incs;
 
 namespace Monsajem_Incs.Views.Maker.ValueTypes
 {
