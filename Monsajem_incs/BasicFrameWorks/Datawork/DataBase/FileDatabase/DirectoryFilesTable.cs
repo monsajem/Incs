@@ -19,7 +19,8 @@ namespace Monsajem_Incs.Database.DirectoryTable
             Func<ValueType, KeyType> GetKey,
             bool IsUpdateAble,
             bool FastSave):
-            base(new StreamCollection<ValueType>(),GetKey,false)
+            base(new StreamCollection<ValueType>(
+                    File.Open(DirectoryAddress + "\\Keys\\PK", FileMode.OpenOrCreate)),GetKey,false)
         {
             this.TableName = new DirectoryInfo(DirectoryAddress).Name;
             Directory.CreateDirectory(DirectoryAddress);

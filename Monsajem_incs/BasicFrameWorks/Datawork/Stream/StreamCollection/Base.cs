@@ -17,9 +17,9 @@ namespace Monsajem_Incs.Collection
     { 
         public StreamCollection Collection;
         
-        public StreamCollection(int MinCount = 5000)
+        public StreamCollection(System.IO.Stream Stream, int MinCount = 5000)
         {
-            Collection = new StreamCollection(MinCount);
+            Collection = new StreamCollection(Stream,MinCount);
         }
 
         public override ValueType this[int Pos] { 
@@ -43,6 +43,8 @@ namespace Monsajem_Incs.Collection
         {
             this.Collection = Data;
         }
+
+        public override int Length { get => Collection.Length; protected set { } }
 
         protected override StreamCollection<ValueType> MakeSameNew()
         {

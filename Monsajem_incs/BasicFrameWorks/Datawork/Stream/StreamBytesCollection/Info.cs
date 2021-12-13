@@ -11,12 +11,17 @@ using Monsajem_Incs.Collection.Array.TreeBased;
 namespace Monsajem_Incs.Collection
 {
 
+    internal struct DataHeader
+    {
+        public int NextData;
+        public int DataLen;
+    }
+
     internal struct Data : IComparable<Data>
     {
         public int From;
         public int To;
         public int Len;
-
         public int CompareTo(Data other)
         {
             return From - other.From;
@@ -51,133 +56,120 @@ namespace Monsajem_Incs.Collection
     }
 
     public partial class StreamCollection :
-        Array.Base.IArray<byte[], StreamCollection>,
-        ISerializable<StreamCollection.MyData>
+        Array.Base.IArray<byte[], StreamCollection>
     {
-#if DEBUG
-        public MyData Info = new MyData();
-#else
-        private MyData Info = new MyData();
-#endif
+        [Serialization.NonSerialized]
+        internal Array<Data> Keys;
+        [Serialization.NonSerialized]
+        internal Array<DataByForm> GapsByFrom;
+        [Serialization.NonSerialized]
+        internal Array<DataByLen> GapsByLen;
+        [Serialization.NonSerialized]
+        internal Array<DataByTo> GapsByTo;
 
-#if DEBUG
-        public
-#else
-        internal
-#endif
-            class MyData : ISerializable<(Array<Data> Keys, long StreamLen)>
+        private int HeadSize = new DataHeader().SizeOf();
+
+
+        internal Data GetInfo(int Pos)
         {
-            internal Array<Data> Keys;
-            internal Array<DataByForm> GapsByFrom;
-            internal Array<DataByLen> GapsByLen;
-            internal Array<DataByTo> GapsByTo;
+            return Keys[Pos];
+        }
+        internal Data PopInfo(int Pos)
+        {
+            var Result = Keys[Pos];
+            Keys.DeleteByPosition(Pos);
+            return Result;
+        }
+        internal void DeleteInfo(int Pos)
+        {
+            Keys.DeleteByPosition(Pos);
+        }
+        internal bool PopGapMinLen(int Len, out Data Gap)
+        {
+            Gap = default;
+            if (GapsByLen.Length == 0)
+                return false;
+            var Finded = GapsByLen.FirstOrDefault();
+            if (Finded.Data.Len < Len)
+                return false;
+            Gap = Finded.Data;
+            DeleteGap(Gap);
+            return true;
+        }
 
-            internal long MinLen = -500;
-            internal long MaxLen = 500;
-            internal long minCount = 500;
-            [CopyOrginalObject]
-            public long StreamLen;
-
-            internal Data GetData(int Pos)
+        internal bool PopNextGap(ref Data Data)
+        {
+            var Result = GapsByFrom.BinarySearch(new DataByForm()
             {
-                return Keys[Pos];
-            }
-            internal Data PopData(int Pos)
+                Data = new Data() { From = Data.To + 1 }
+            });
+            if (Result.Index > -1)
             {
-                var Result = Keys[Pos];
-                Keys.DeleteByPosition(Pos);
-                return Result;
-            }
-            internal void InsertData(Data Data, int Pos)
-            {
-                Keys.Insert(Data, Pos);
-            }
-            internal void DeleteData(int Pos)
-            {
-                Keys.DeleteByPosition(Pos);
-            }
-            internal bool PopGapMinLen(int Len, out Data Gap)
-            {
-                Gap = default;
-                if (GapsByLen.Length == 0)
-                    return false;
-                var Finded = GapsByLen.FirstOrDefault();
-                if (Finded.Data.Len < Len)
-                    return false;
-                Gap = Finded.Data;
-                DeleteGap(Gap);
+                Data = Result.Value.Data;
+                DeleteGap(Data);
                 return true;
             }
+            return false;
+        }
+        internal bool PopBeforeGap(ref Data Data)
+        {
+            var Result = GapsByTo.BinarySearch(new DataByTo()
+            {
+                Data = new Data() { To = Data.From - 1 }
+            });
+            if (Result.Index > -1)
+            {
+                Data = Result.Value.Data;
+                DeleteGap(Data);
+                return true;
+            }
+            return false;
+        }
 
-            internal bool PopNextGap(ref Data Data)
-            {
-                var Result = GapsByFrom.BinarySearch(new DataByForm()
-                {
-                    Data = new Data() { From = Data.To + 1 }
-                });
-                if (Result.Index>-1)
-                {
-                    Data = Result.Value.Data;
-                    DeleteGap(Data);
-                    return true;
-                }
-                return false;
-            }
-            internal bool PopBeforeGap(ref Data Data)
-            {
-                var Result = GapsByTo.BinarySearch(new DataByTo()
-                {
-                    Data = new Data() { To = Data.From - 1 }
-                });
-                if (Result.Index>-1)
-                {
-                    Data = Result.Value.Data;
-                    DeleteGap(Data);
-                    return true;
-                }
-                return false;
-            }
-
-            internal void InsertGap(Data Gap)
-            {
-                GapsByFrom.BinaryInsert(new DataByForm() { Data = Gap });
-                GapsByLen.BinaryInsert(new DataByLen() { Data = Gap });
-                GapsByTo.BinaryInsert(new DataByTo() { Data = Gap });
-            }
-            internal void DeleteGap(Data Gap)
-            {
+        internal void InsertGap(Data Gap)
+        {
+            GapsByFrom.BinaryInsert(new DataByForm() { Data = Gap });
+            GapsByLen.BinaryInsert(new DataByLen() { Data = Gap });
+            GapsByTo.BinaryInsert(new DataByTo() { Data = Gap });
+        }
+        internal void DeleteGap(Data Gap)
+        {
 #if DEBUG
-                if (
+            if (
 #endif
-                    GapsByFrom.BinaryDelete(new DataByForm() { Data = Gap })
+            GapsByFrom.BinaryDelete(new DataByForm() { Data = Gap })
 #if DEBUG
-                   .Index<0) throw new Exception()
+                   .Index < 0) throw new Exception()
 #endif
                     ;
 #if DEBUG
-                if (
+            if (
 #endif
-                GapsByLen.BinaryDelete(new DataByLen() { Data = Gap })
+            GapsByLen.BinaryDelete(new DataByLen() { Data = Gap })
 #if DEBUG
-                  .Index<0) throw new Exception()
-#endif
-                        ;
-#if DEBUG
-                if (
-#endif
-                    GapsByTo.BinaryDelete(new DataByTo() { Data = Gap })
-#if DEBUG
-                  .Index<0) throw new Exception()
+                  .Index < 0) throw new Exception()
 #endif
                         ;
-            }
 #if DEBUG
-            public void Browse(StreamCollection Parent)
+            if (
+#endif
+            GapsByTo.BinaryDelete(new DataByTo() { Data = Gap })
+#if DEBUG
+                  .Index < 0) throw new Exception()
+#endif
+                        ;
+        }
+#if DEBUG
+        private void Debug(StreamCollection Parent)
+        {
+
             {
+                // Debug Keys and gaps
+
                 if (Parent.Length != this.Keys.Length)
                     throw new Exception("miss match Len");
                 if (GapsByFrom.Where((c) =>
-                     GapsByLen.Contains(new DataByLen() { Data = c.Data })==false).
+                     GapsByLen.Contains(new DataByLen() { Data = c.Data }) == false).
                     Count() > 0)
                     throw new Exception();
                 var Datas = new List<(string Role, Data Data)>(
@@ -187,65 +179,64 @@ namespace Monsajem_Incs.Collection
                 var Keys = Datas.OrderBy((c) => c.Data.From).ToArray();
                 for (int i = 0; i < Keys.Length; i++)
                 {
-                    Browse(i, Keys);
+                    Debug(i, Keys);
                 }
-            }
-            internal void Browse(
-                int i,
-                (string Role, Data Data)[] Keys)
-            {
-                var Key = Keys[i];
-                if (Key.Data.To >= StreamLen)
-                    throw new Exception();
-                if (Key.Data.Len != (Key.Data.To - Key.Data.From) + 1)
-                    throw new Exception();
-                if (Keys.Length > i + 1)
-                {
-                    var NextKey = Keys[i + 1];
-                    if (Key.Data.To + 1 != NextKey.Data.From)
-                        throw new Exception("Conflict Key place and NextKey Place!");
-                    if (Key.Role == "isGap" & NextKey.Role == "isGap")
-                        throw new Exception("Gap is in wrong place!");
-                }
-                else
-                {
-                    if (Key.Data.To != StreamLen - 1)
-                        throw new Exception();
-                }
-            }
-#endif
-            (Array<Data> Keys, long StreamLen) ISerializable<(Array<Data> Keys, long StreamLen)>.
-                GetData()
-            {
-                return (Keys, StreamLen);
             }
 
-            void ISerializable<(Array<Data> Keys, long StreamLen)>.
-                SetData((Array<Data> Keys, long StreamLen) Data)
             {
-                Keys = Data.Keys;
-                StreamLen = Data.StreamLen;
-                GapsByFrom = new Array<DataByForm>();
-                GapsByLen = new Array<DataByLen>();
-                GapsByTo = new Array<DataByTo>();
-                var NewDatas = new Array<Data>();
-                NewDatas.BinaryInsert(Keys.ToArray());
-                var CurrentPos = 0;
-                for (int i = 0; i < NewDatas.Length; i++)
+                // Debug Stream Keys
+                var NextPos = BitConverter.ToInt32(Stream.GetHeader());
+
+                NextPos--;
+
+                if (Keys.Length == 0 && NextPos != -1)
+                    throw new Exception();
+
+                if (Keys.Length > 0 && NextPos == -1)
+                    throw new Exception();
+
+                for (int i = 0; i < Keys.Length; i++)
                 {
-                    var NewData = NewDatas[i];
-                    if (CurrentPos != NewData.From)
-                    {
-                        InsertGap(new Data()
-                        {
-                            From = CurrentPos,
-                            Len = (NewData.From - CurrentPos),
-                            To = NewData.From - 1
-                        });
-                    }
-                    CurrentPos = NewData.To + 1;
+                    if (Keys[i].From != NextPos)
+                        throw new Exception();
+
+                    Stream.Seek(NextPos, System.IO.SeekOrigin.Begin);
+                    var Header = Stream.Read(HeadSize).Deserialize<DataHeader>();
+
+                    if (Keys[i].Len != Header.DataLen)
+                        throw new Exception();
+
+                    NextPos = Header.NextData;
                 }
+
+                if (NextPos != -1)
+                    throw new Exception();
             }
         }
+        private void Debug(
+            int i,
+            (string Role, Data Data)[] Keys)
+        {
+            var Key = Keys[i];
+            if (Key.Data.To >= Stream.Length)
+                throw new Exception();
+            if (Key.Data.Len != (Key.Data.To - Key.Data.From) + 1)
+                throw new Exception();
+            if (Keys.Length > i + 1)
+            {
+                var NextKey = Keys[i + 1];
+                if (Key.Data.To + 1 != NextKey.Data.From)
+                    throw new Exception("Conflict Key place and NextKey Place!");
+                if (Key.Role == "isGap" & NextKey.Role == "isGap")
+                    throw new Exception("Gap is in wrong place!");
+            }
+            else
+            {
+                if (Key.Data.To != Stream.Length - 1)
+                    throw new Exception();
+            }
+        }
+#endif
+
     }
 }

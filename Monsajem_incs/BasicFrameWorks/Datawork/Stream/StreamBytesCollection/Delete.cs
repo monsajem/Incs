@@ -12,37 +12,37 @@ namespace Monsajem_Incs.Collection
         public override void DeleteByPosition(int Position)
         {
 #if DEBUG
-            Info.Browse(this);
+            Debug(this);
 #endif
-            var DataLoc = Info.PopData(Position);
+            var DataLoc = PopInfo(Position);
             var NGap = DataLoc;
             Data BGap;
-            if (Info.PopNextGap(ref NGap))
+            if (PopNextGap(ref NGap))
             {
                 DataLoc.To = NGap.To;
                 DataLoc.Len += NGap.Len;
             }
-            if (DataLoc.To == Info.StreamLen - 1)//// is last data;
+            if (DataLoc.To == Stream.Length - 1)//// is last data;
             {
                 BGap = DataLoc;
-                if (Info.PopBeforeGap(ref BGap))
+                if (PopBeforeGap(ref BGap))
                     DataLoc.Len += BGap.Len;
-                DeleteLen(DataLoc.Len);
+                Stream.DropLen(DataLoc.Len);
                 Stream.Flush();
             }
             else
             {
                 BGap = DataLoc;
-                if (Info.PopBeforeGap(ref BGap))
+                if (PopBeforeGap(ref BGap))
                 {
                     DataLoc.From = BGap.From;
                     DataLoc.Len += BGap.Len;
                 }
-                Info.InsertGap(DataLoc);
+                InsertGap(DataLoc);
             }
             Length -= 1;
 #if DEBUG
-            Info.Browse(this);
+            Debug(this);
 #endif
         }
 

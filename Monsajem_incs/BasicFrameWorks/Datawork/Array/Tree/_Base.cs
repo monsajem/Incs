@@ -12,40 +12,21 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
     public partial class Array<ValueType> :
         Base.IArray<ValueType, Array<ValueType>>,
 #if DEBUG
-        Serialization.ISerializable<(Array<ValueType>.INode Root,int Len,bool CacheSerialize, 
+        Serialization.ISerializable<(Array<ValueType>.Node Root,int Len, 
             ArrayBased.DynamicSize.Array<ValueType> ItemsForDebug)>
 #else
-        Serialization.ISerializable<(Array<ValueType>.INode Root, int Len, bool CacheSerialize)>
+        Serialization.ISerializable<(Array<ValueType>.Node Root, int Len)>
 #endif
     {
 
         public Array()
-        {
-            CreateNode = _CreateNode;
-        }
+        {}
         public Array(ValueType[] Values)
         {
-            CreateNode = _CreateNode;
-            this.Insert(Values);
-        }
-        public Array(bool CacheSerialize)
-        {
-            if (CacheSerialize)
-                CreateNode = _CreateCacheSerializeNode;
-            else
-                CreateNode = _CreateNode;
-        }
-        public Array(ValueType[] Values, bool CacheSerialize)
-        {
-            if (CacheSerialize)
-                CreateNode = _CreateCacheSerializeNode;
-            else
-                CreateNode = _CreateNode;
             this.Insert(Values);
         }
 
-        private static Func<ValueType, INode> _CreateCacheSerializeNode = (Value) => new CacheSerializeNode(Value);
-        private static Func<ValueType, INode> _CreateNode = (Value) => new Node(Value);
+        public Action<(Node Before,Node Next)> ChangedNextSequence;
 
 #if DEBUG
         private Array.ArrayBased.DynamicSize.Array<ValueType> ItemsForDebug =
@@ -54,7 +35,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
         private void CheckBugs()
         {
 
-            (int Len, int Deep) CheckInners(INode Current)
+            (int Len, int Deep) CheckInners(Node Current)
             {
                 var Next = Current.Next;
                 var Before = Current.Before;
@@ -137,25 +118,42 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
         }
 #endif
 
-        public INode Root;
-        public interface INode
-        {
-            int Balance { get => NextDeep - BeforeDeep; }
-            int NextDeep { get; set; }
-            int BeforeDeep { get; set; }
-            int NextLen { get; set; }
-            int BeforeLen { get; set; }
-            ValueType Value { get; set; }
-            INode Holder { get; set; }
-            bool IsNext { get; set; }
-            INode Next { get; set; }
-            public INode Before { get; set; }
-            int Hash { get; }
+        private Node _Root;
+        public Node Root { get=>_Root; set { _Root = value; } }
 
-            [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
-            public INode FineNextSequnce()
+        public class Node
+        {
+            public Node(ValueType Value,Array<ValueType> Collector)
             {
-                INode holder = default;
+                this.Value = Value;
+                this.Collector = Collector;
+            }
+
+            public Array<ValueType> Collector;
+
+            public int Balance { get => NextDeep - BeforeDeep; }
+            public int NextDeep { get; set; }
+            public int BeforeDeep { get; set; }
+            public int NextLen { get; set; }
+            public int BeforeLen { get; set; }
+            public ValueType Value { get; set; }
+
+
+            public Node _Holder;
+            public Node Holder { get=>_Holder; set { _Holder = value;} }
+
+            public bool IsNext { get; set; }
+
+            private Node _Next;
+            public Node Next { get=>_Next; set { _Next = value;} }
+
+            private Node _Before;
+            public Node Before { get=>_Before; set { _Before = value;} }
+
+            [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
+            public Node FindNextSequnce()
+            {
+                Node holder = default;
                 var next = Next;
                 if (next != null)
                 {
@@ -179,9 +177,9 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
                 return holder;
             }
 
-            public INode FineBeforeSequnce()
+            public Node FindBeforeSequnce()
             {
-                INode holder = default;
+                Node holder = default;
                 var before = Before;
                 if (before != null)
                 {
@@ -204,116 +202,6 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
                 }
                 return holder;
             }
-        }
-        public Func<ValueType, INode> CreateNode;
-
-        public class Node : INode
-        {
-            public Node(ValueType Value)
-            {
-                this.Hash = this.GetHashCode();
-                this.Value = Value;
-            }
-
-            public int NextDeep { get; set; }
-            public int BeforeDeep { get; set; }
-            public int NextLen { get; set; }
-            public int BeforeLen { get; set; }
-            public ValueType Value { get; set; }
-            public INode Holder { get; set; }
-            public bool IsNext { get; set; }
-            public INode Next { get; set; }
-            public INode Before { get; set; }
-
-            public int Hash { get; }
-
-            public override string ToString()
-            {
-                if (Holder == null)
-                    return "Root";
-                else
-                {
-                    if (IsNext)
-                        return $"Body next: {Value}";
-                    else
-                        return $"Body before: {Value}";
-                }
-            }
-        }
-        public class CacheSerializeNode
-            : Serialization.StreamCacheSerialize, INode
-        {
-            public CacheSerializeNode(ValueType Value)
-            {
-                this._Hash = this.GetHashCode();
-                this.Value = Value;
-            }
-
-            private int _NextDeep;
-            public int NextDeep
-            {
-                get => _NextDeep;
-                set { Cache = null; _NextDeep = value; }
-            }
-
-            private int _BeforeDeep;
-            public int BeforeDeep
-            {
-                get => _BeforeDeep;
-                set { Cache = null; _BeforeDeep = value; }
-            }
-
-            private int _NextLen;
-            public int NextLen
-            {
-                get => _NextLen;
-                set { Cache = null; _NextLen = value; }
-            }
-
-            private int _BeforeLen;
-            public int BeforeLen
-            {
-                get => _BeforeLen;
-                set { Cache = null; _BeforeLen = value; }
-            }
-
-            private ValueType _Value;
-            public ValueType Value
-            {
-                get => _Value;
-                set { Cache = null; _Value = value; }
-            }
-
-            private INode _Holder;
-            public INode Holder
-            {
-                get => _Holder;
-                set { Cache = null; _Holder = value; }
-            }
-
-            public bool _IsNext;
-            public bool IsNext
-            {
-                get => _IsNext;
-                set { Cache = null; _IsNext = value; }
-            }
-
-            private INode _Next;
-            public INode Next
-            {
-                get => _Next;
-                set { Cache = null; _Next = value; }
-            }
-
-            private INode _Before;
-            public INode Before
-            {
-                get => _Before;
-                set { Cache = null; _Before = value; }
-            }
-
-            private int _Hash;
-            public int Hash { get => _Hash; }
 
             public override string ToString()
             {
@@ -329,10 +217,10 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             }
         }
 
-        private INode GetItem(
+        private Node GetItem(
             int position,
-            out INode Before,
-            out INode Next)
+            out Node Before,
+            out Node Next)
         {
             Before = default;
             Next = default;
@@ -376,7 +264,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
 
         public override void Insert(ValueType Value, int Position)
         {
-            INode Before; INode Next;
+            Node Before; Node Next;
             var Current = GetItem(Position, out Before, out Next);
             Insert(Value, Current, Before, Next);
 #if DEBUG
@@ -394,7 +282,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
                 throw new Exception("Dup")
                 ;
 #endif
-            INode Before; INode Next; int Pos;
+            Node Before; Node Next; int Pos;
             var Current = Find(Value, out Before, out Next, out Pos);
             Insert(Value, Current, Before, Next);
 
@@ -411,7 +299,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
         public override (int Index, ValueType Value) BinarySearch(ValueType key, int minNum, int maxNum)
         {
             (int Index, ValueType Value) Result = default;
-            INode Before; INode Next; int Pos;
+            Node Before; Node Next; int Pos;
             var Current = Find(key, out Before, out Next, out Pos);
             if (Current != null)
                 Result = (Pos, Current.Value);
@@ -426,14 +314,13 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             return Result;
         }
 
-        private void Insert(ValueType Value, INode Current, INode Before, INode Next)
+        private void Insert(ValueType Value, Node Current, Node Before, Node Next)
         {
             if (Root == null)
             {
-                Current = CreateNode(Value);
+                Current = new Node(Value,this);
                 Root = Current;
-                Length++;
-                return;
+                goto End;
             }
 
             if (Current != null)
@@ -452,7 +339,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
                 if (Before.NextDeep > Next.BeforeDeep)
                     Before = null;
             }
-            Current = CreateNode(Value);
+            Current = new Node(Value,this);
 
             if (Before != null)
             {
@@ -489,15 +376,31 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
                 }
             }
             FixBalance(Current);
+
+            End:
             Length++;
+
+            if(ChangedNextSequence!=null)
+            {
+                ChangedNextSequence.Invoke((Current.FindBeforeSequnce(),Current));
+            }
         }
 
         public override void DeleteByPosition(int Position)
         {
-            INode Before; INode Next;
+            Node Before; Node Next;
             var Item = GetItem(Position, out Before, out Next);
+
+            Node BeforeSequnce=default;
+            var ChangedNextSequence = this.ChangedNextSequence;
+            if (ChangedNextSequence != null)
+                BeforeSequnce = Item.FindBeforeSequnce();
+
             Drop(Item);
             Length--;
+
+            if (ChangedNextSequence != null)
+                ChangedNextSequence.Invoke((BeforeSequnce, BeforeSequnce?.FindNextSequnce()));
 
 #if DEBUG
             ItemsForDebug.DeleteByPosition(Position);
@@ -507,7 +410,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
 
         public override (int Index, ValueType Value) BinaryDelete(ValueType Value)
         {
-            INode Before; INode Next; int Pos;
+            Node Before; Node Next; int Pos;
             var Item = Find(Value, out Before, out Next, out Pos);
             if (Item == null)
                 throw new Exception($"{Value} not found!");
@@ -523,7 +426,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             return Result;
         }
 
-        private void MoveToHolder(INode Node)
+        private void MoveToHolder(Node Node)
         {
             var Holder = Node.Holder;
             var Root = Holder.Holder;
@@ -595,7 +498,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
                 Node.Holder = null;
         }
 
-        private void Drop(INode Node)
+        private void Drop(Node Node)
         {
             var Root = Node.Holder;
             var BeforeLen = Node.BeforeLen;
@@ -678,7 +581,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             FixWay(Root);
         }
 
-        private void DropFromHolder(INode Node, INode Replace)
+        private void DropFromHolder(Node Node, Node Replace)
         {
             var Holder = Node.Holder;
             if (Holder == null)
@@ -717,7 +620,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             return;
         }
 
-        private void FixWay(INode Holder)
+        private void FixWay(Node Holder)
         {
             while (Holder != null)
             {
@@ -781,17 +684,17 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             }
         }
 
-        public INode Find(ValueType Value)
+        public Node Find(ValueType Value)
         {
             return Find(Value, out var Before, out var Next, out var Pos);
         }
 
         public override object MyOptions { get => null; set { } }
 
-        public INode Find(
+        public Node Find(
             ValueType Value,
-            out INode Before,
-            out INode Next,
+            out Node Before,
+            out Node Next,
             out int Position)
         {
             Before = default;
@@ -823,7 +726,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             return null;
         }
 
-        private void FixBalance(INode node)
+        private void FixBalance(Node node)
         {
             while (node != null && node.Holder != null)
             {
@@ -879,50 +782,42 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
         [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
         public override IEnumerator<ValueType> GetEnumerator()
         {
-            INode Node = this.GetItem(0, out var b, out var n);
+            Node Node = this.GetItem(0, out var b, out var n);
             while (Node != null)
             {
                 yield return Node.Value;
-                Node = Node.FineNextSequnce();
+                Node = Node.FindNextSequnce();
             }
         }
 
 #if DEBUG
-        (INode Root, int Len, bool CacheSerialize, ArrayBased.DynamicSize.Array<ValueType> ItemsForDebug) 
-            ISerializable<(INode Root, int Len, bool CacheSerialize, ArrayBased.DynamicSize.Array<ValueType> ItemsForDebug)>.
+        (Node Root, int Len, ArrayBased.DynamicSize.Array<ValueType> ItemsForDebug) 
+            ISerializable<(Node Root, int Len, ArrayBased.DynamicSize.Array<ValueType> ItemsForDebug)>.
             GetData()
         {
-            return (Root, Length,CreateNode==_CreateCacheSerializeNode,ItemsForDebug);
+            return (Root, Length,ItemsForDebug);
         }
 
-        void ISerializable<(INode Root, int Len, bool CacheSerialize, ArrayBased.DynamicSize.Array<ValueType> ItemsForDebug)>.
-            SetData((INode Root, int Len, bool CacheSerialize, ArrayBased.DynamicSize.Array<ValueType> ItemsForDebug) Data)
+        void ISerializable<(Node Root, int Len, ArrayBased.DynamicSize.Array<ValueType> ItemsForDebug)>.
+            SetData((Node Root, int Len, ArrayBased.DynamicSize.Array<ValueType> ItemsForDebug) Data)
         {
             Comparer = Comparer<ValueType>.Default;
             this.Root = Data.Root;
             this.Length = Data.Len;
             this.ItemsForDebug = Data.ItemsForDebug;
-            if (Data.CacheSerialize)
-                CreateNode = _CreateCacheSerializeNode;
-            else
-                CreateNode = _CreateNode;
             return;
         }
 #else
-        (INode Root, int Len, bool CacheSerialize) ISerializable<(INode Root, int Len, bool CacheSerialize)>.GetData()
+        (Node Root, int Len) ISerializable<(Node Root, int Len)>.GetData()
         {
-            return (this.Root, Length, CreateNode == _CreateCacheSerializeNode);
+            return (this.Root, Length);
         }
 
-        void ISerializable<(INode Root, int Len, bool CacheSerialize)>.SetData((INode Root, int Len, bool CacheSerialize) Data)
+        void ISerializable<(Node Root, int Len)>.SetData((Node Root, int Len) Data)
         {
             Comparer = Comparer<ValueType>.Default;
             this.Root = Data.Root;
             this.Length = Data.Len;
-            if (Data.CacheSerialize)
-                CreateNode = _CreateCacheSerializeNode;
-            else
-                CreateNode = _CreateNode;
         }
 #endif
 

@@ -15,20 +15,34 @@ namespace Monsajem_Incs.Collection
         public override void Insert(byte[] DataAsByte, int Position)
         {
 #if DEBUG
-            Info.Browse(this);
+            Debug(this);
 #endif
-            var DataLen = DataAsByte.Length;
+            var Info = InsertInfo(DataAsByte.Length, Position);
+            
+            Stream.Seek(Info.Info.From, System.IO.SeekOrigin.Begin);
+            Stream.Write(Info.Header.Serialize(), 0, HeadSize);
+            Stream.Write(DataAsByte, 0, DataAsByte.Length);
+            Stream.Flush();
+            Length += 1;
+#if DEBUG
+            Debug(this);
+#endif
+        }
+
+        private (DataHeader Header, Data Info) InsertInfo(int DataLen, int Pos)
+        {
+            var TotalLen = DataLen + HeadSize;
             Data Gap;
             Data Data;
-            if (Info.PopGapMinLen(DataLen,out Gap)==false)//// haven't free gap
+            if (PopGapMinLen(TotalLen, out Gap) == false)//// haven't free gap
             {
-                var StreamLen = (int)Info.StreamLen;
-                AddLen(DataLen);
+                var StreamLen = (int)Stream.Length;
+                Stream.AddLen(TotalLen);
                 Data = new Data()
                 {
                     From = StreamLen,
-                    Len = DataLen,
-                    To = StreamLen + DataLen - 1
+                    Len = TotalLen,
+                    To = StreamLen + TotalLen - 1
                 };
             }
             else
@@ -36,31 +50,32 @@ namespace Monsajem_Incs.Collection
                 Data = new Data()
                 {
                     From = Gap.From,
-                    Len = DataLen,
-                    To = Gap.From + DataLen - 1
+                    Len = TotalLen,
+                    To = Gap.From + TotalLen - 1
                 };
-                if (Gap.Len > DataLen)
+                if (Gap.Len > TotalLen)
                 {
-                    Gap.Len = Gap.Len - DataLen;
-                    Gap.From = Gap.From + DataLen;
+                    Gap.Len = Gap.Len - TotalLen;
+                    Gap.From = Gap.From + TotalLen;
                     var NextGap = Gap;
-                    if(Info.PopNextGap(ref NextGap))
+                    if (PopNextGap(ref NextGap))
                     {
                         Gap.Len += NextGap.Len;
                         Gap.To = NextGap.To;
                     }
-                    Info.InsertGap(Gap);
+                    InsertGap(Gap);
                 }
             }
-            Info.InsertData(Data, Position);
-            
-            Stream.Seek(Data.From, System.IO.SeekOrigin.Begin);
-            Stream.Write(DataAsByte, 0, Data.Len);
-            Stream.Flush();
-            Length += 1;
-#if DEBUG
-            Info.Browse(this);
-#endif
+
+            var Header = new DataHeader();
+            Header.DataLen = Data.Len;
+            Keys.Insert(Data, Pos);
+            if (Keys.Length == Pos + 1)
+                Header.NextData = -1;
+            else
+                Header.NextData = Keys[Pos + 1].From;
+
+            return (Header, Data);
         }
     }
 }

@@ -145,7 +145,7 @@ namespace Monsajem_Incs.Serialization
         {
             byte[] Result;
             var SR = SerializeInfo<t>.GetSerialize();
-            SerializeData SR_Data;
+            SerializeData SR_Data = default;
             try
             {
 #if DEBUG
@@ -207,7 +207,7 @@ namespace Monsajem_Incs.Serialization
         {
             t Result = default;
             var SR = SerializeInfo<t>.GetSerialize();
-            DeserializeData DR_Data;
+            DeserializeData DR_Data = default;
             try
             {
 #if DEBUG

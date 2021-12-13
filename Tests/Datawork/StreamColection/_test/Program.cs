@@ -41,8 +41,7 @@ namespace _test
 
             var FileStream = System.IO.File.Open(System.Environment.CurrentDirectory + "\\a.txt", System.IO.FileMode.Truncate);
 
-            var SC = new StreamCollection<Data>();
-            SC.Collection.Stream = FileStream;
+            var SC = new StreamCollection<Data>(FileStream);
 
             var Stream = new Monsajem_Incs.Database.Base.Table<Data, string>(
                 SC, (c) => c.Name, false);
@@ -54,7 +53,7 @@ namespace _test
             Stream.Insert(new Data() { Name = "0", Id = 0 });
             Stream.Delete();
 
-            var Count = 1000000;
+            var Count = 4000000;
 
             var InsertTime = Timing.run(() =>
             {
@@ -150,8 +149,7 @@ namespace _test
         {
             System.IO.File.WriteAllBytes(System.Environment.CurrentDirectory + "\\a.txt", new byte[0]);
             StreamLoger.Stream = System.IO.File.Open(Environment.CurrentDirectory + "\\DebugLog", System.IO.FileMode.OpenOrCreate);
-            Ar = new StreamCollection<TestClass>();
-            Ar.Collection.Stream = System.IO.File.Open(Environment.CurrentDirectory + "\\a.txt", System.IO.FileMode.Truncate);
+            Ar = new StreamCollection<TestClass>(System.IO.File.Open(Environment.CurrentDirectory + "\\a.txt", System.IO.FileMode.Truncate));
         s:
 
             var Role = random.Next(0, 5);
@@ -224,8 +222,7 @@ namespace _test
             StreamLoger.Stream = System.IO.File.Open(Environment.CurrentDirectory + "\\DebugLog",
                 System.IO.FileMode.Open,
                 System.IO.FileAccess.Read);
-            Ar = new StreamCollection<TestClass>();
-            Ar.Collection.Stream = System.IO.File.Open(Environment.CurrentDirectory + "\\a.txt", System.IO.FileMode.Truncate);
+            Ar = new StreamCollection<TestClass>(System.IO.File.Open(Environment.CurrentDirectory + "\\a.txt", System.IO.FileMode.Truncate));
 
             StreamLoger.DebugStream((c) =>
             {

@@ -34,8 +34,7 @@ namespace Monsajem_Incs.Serialization
         {
             set
             {
-                Data = new Collection.StreamCollection();
-                Data.Stream = value;
+                Data = new Collection.StreamCollection(value);
                 GUID = new Collection.Array.TreeBased.Array<string>();
             }
         }
