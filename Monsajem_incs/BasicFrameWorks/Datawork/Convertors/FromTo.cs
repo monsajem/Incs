@@ -90,6 +90,11 @@ namespace Monsajem_Incs.Convertors
                 throw new Exception($"{nameof(FromGenericType)} is null.");
             if (GenericMethod == null)
                 throw new Exception($"{nameof(GenericMethod)} is null.");
+            if (FromGenericType.IsGenericTypeDefinition == false&&FromGenericType.IsArray==false)
+                throw new Exception($"{nameof(FromGenericType)} must be a generic type definition or array of object.");
+            if (FromGenericType.IsArray == true && FromGenericType.GetElementType() != typeof(object))
+                throw new Exception($"{nameof(FromGenericType)} must be a generic type definition or array of object.");
+            
             GenericConvertor.Add(FromGenericType, GenericMethod);
         }
     }
@@ -108,6 +113,17 @@ namespace Monsajem_Incs.Convertors
                 {
                     var Convertor = ConvertorFromTo.GenericConvertor[FromType];
                     _Convertor = Convertor.MakeGenericMethod(GenericArguments).
+                                           CreateDelegate<Func<FromType, ToType>>();
+                }
+            }
+            else if(FromType.IsArray)
+            {
+                var GenericArgument = FromType.GetElementType();
+                FromType = Array.CreateInstance(typeof(object),new int[FromType.GetArrayRank()]).GetType();
+                if (ConvertorFromTo.GenericConvertor.ContainsKey(FromType))
+                {
+                    var Convertor = ConvertorFromTo.GenericConvertor[FromType];
+                    _Convertor = Convertor.MakeGenericMethod(GenericArgument).
                                            CreateDelegate<Func<FromType, ToType>>();
                 }
             }

@@ -11,12 +11,6 @@ using Monsajem_Incs.TimeingTester;
 
 namespace _test
 {
-    public class Data
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-    }
-
     class Program
     {
         static void Main(string[] args)
@@ -30,13 +24,11 @@ namespace _test
 
             var FileStream = System.IO.File.Open(System.Environment.CurrentDirectory + "\\a.txt", System.IO.FileMode.Truncate);
 
-            var Stream = new StreamCollection<Data>(FileStream);
-
-            System.IO.File.WriteAllBytes(System.Environment.CurrentDirectory + "\\b.txt", new byte[0]);
+            var Stream = new StreamCollection<int>(FileStream);
 
             //// warm up
 
-            Stream.Insert(new Data() { Name = "0", Id = 0 });
+            Stream.Insert(0);
             Stream.DeleteByPosition(0);
 
             var Count = 4000000;
@@ -45,7 +37,7 @@ namespace _test
             {
                 for (int i =0;i<Count;i++)
                 {
-                    Stream.Insert(new Data(){ Name = i.ToString(), Id = i},i);
+                    Stream.Insert(i,i);
                 }
             });
 
@@ -57,7 +49,7 @@ namespace _test
             {
                 for (int i = 0; i < Count; i++)
                 {
-                    Stream[i]=new Data(){ Name = i.ToString(),Id = i };
+                    Stream[i]=i;
                 }
             });
             var Update1_Per_Second = (int)(Count / UpdateTime.TotalSeconds);
