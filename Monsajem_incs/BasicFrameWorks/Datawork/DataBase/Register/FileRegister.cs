@@ -6,11 +6,13 @@ using Monsajem_Incs.Serialization;
 using Monsajem_Incs.Database.Base;
 using Monsajem_Incs.DynamicAssembly;
 using System.Threading.Tasks;
+using Monsajem_Incs.Database.Register.Base;
 
 namespace Monsajem_Incs.Database.Register
 {
+
     public class FileRegister<ValueType>:
-        Base.Register<ValueType>
+        Register<ValueType>
     {
         [Serialization.NonSerialized]
         private string FileAddress;
@@ -20,14 +22,14 @@ namespace Monsajem_Incs.Database.Register
             this.FileAddress = FileAddress;
         }
 
-        protected override async Task<byte[]> LoadData()
+        protected override ValueType LoadData()
         {
-            return System.IO.File.ReadAllBytes(FileAddress);
+            return System.IO.File.ReadAllBytes(FileAddress).Deserialize<ValueType>();
         }
 
-        protected override async Task SaveData(byte[] Data)
+        protected override void SaveData(ValueType Data)
         {
-            System.IO.File.WriteAllBytes(FileAddress, Data);
+            System.IO.File.WriteAllBytes(FileAddress, Data.Serialize());
         }
     }
 }

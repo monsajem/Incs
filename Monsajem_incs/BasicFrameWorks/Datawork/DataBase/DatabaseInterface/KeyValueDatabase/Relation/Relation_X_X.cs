@@ -61,13 +61,13 @@ namespace Monsajem_Incs.Database.Base
 #if TRACE
                     Console.WriteLine("@ " + this.GetType().Namespace + this.GetType().Name + " _AddRelation_X_X >> Accepted");
 #endif
-                    using (this.IgnoreUpdateAble.Block())
+                    using (this.IgnoreUpdateAble.UseBlock())
                     {
                         PartTable.SaveToParent();
                     }
 
 
-                    using (ThisRelation.LinkArray.IgnoreUpdateAble.Block())
+                    using (ThisRelation.LinkArray.IgnoreUpdateAble.UseBlock())
                     {
                         ThisRelation.LinkArray.Update(AcceptedKey,
                         (c) => ThatRelation.Field.Value(c).Accept(Key));
@@ -79,13 +79,13 @@ namespace Monsajem_Incs.Database.Base
 #if TRACE
                     Console.WriteLine("@ " + this.GetType().Namespace + this.GetType().Name + " _AddRelation_X_X >> Ignored");
 #endif
-                    using (this.IgnoreUpdateAble.Block())
+                    using (this.IgnoreUpdateAble.UseBlock())
                     {
                         PartTable.SaveToParent();
                     }
 
 
-                    using (ThisRelation.LinkArray.IgnoreUpdateAble.Block())
+                    using (ThisRelation.LinkArray.IgnoreUpdateAble.UseBlock())
                     {
                         ThisRelation.LinkArray.Update(IgnoredKey,
                              (c) => (ThatRelation.Field.Value(c)).Ignore(Key));
@@ -100,7 +100,7 @@ namespace Monsajem_Incs.Database.Base
 #endif
                 if (Run.Use(RelationName))
                 {
-                    using (ThisRelation.LinkArray.IgnoreUpdateAble.Block())
+                    using (ThisRelation.LinkArray.IgnoreUpdateAble.UseBlock())
                     {
                         var ThisValue = ThisRelation.Field.Value(info.Value);
                         foreach (var ThatValue in ThisValue)
@@ -121,7 +121,7 @@ namespace Monsajem_Incs.Database.Base
 #endif
                 if (Run.Use(RelationName))
                 {
-                    using (ThisRelation.LinkArray.IgnoreUpdateAble.Block())
+                    using (ThisRelation.LinkArray.IgnoreUpdateAble.UseBlock())
                     {
                         ThisRelation.LinkArray.Update(ThisRelation.Field.Value(info.Value),
                                  (c) => ThatRelation.Field.Value(c).Ignore(
@@ -141,7 +141,7 @@ namespace Monsajem_Incs.Database.Base
                     if (this.IgnoreUpdateAble.BlockLengths == 0)
                         if (Run.Use(RelationName_Update))
                         {
-                            using (ThisRelation.LinkArray.IgnoreUpdateAble.Block())
+                            using (ThisRelation.LinkArray.IgnoreUpdateAble.UseBlock())
                             {
                                 var ThisValue = ThisRelation.Field.Value(info.Value);
                                 foreach (var ThatValue in ThisValue)

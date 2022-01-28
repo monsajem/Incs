@@ -34,9 +34,13 @@ namespace Monsajem_Incs.Database.Base
             base.Events = new Events<ValueType>();
             base.SecurityEvents = new SecurityEvents<ValueType>();
 
-            base.BasicActions.Items = new Collection.Array.Base.DynamicArray<ValueType>()
+            base.BasicActions.Items = new Collection.Array.Base.DynamicArray<(ValueType, ulong)>()
             {
-                _GetItem = (pos) => Parent.GetItem(KeysInfo.Keys[pos]).Value
+                _GetItem = (pos) =>
+                {
+                    var Value = Parent.GetItem(KeysInfo.Keys[pos]);
+                    return (Value.Value, Value.UpdateCode);
+                }
             };
             base.BasicActions.Keys = Parent.BasicActions.Keys;
 

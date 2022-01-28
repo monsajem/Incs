@@ -20,18 +20,9 @@ namespace Test
 
         public static bool Check_SR_DR = false;
 
-        public static (Func<int, object> Get, Action<int, object> Set) Convertor<t>(t[] ar)
-        {
-            return ((pos) => ar[pos], (pos, value) => ar[pos] =(t)value);
-        }
-
-        static Span<T> AsSpan<T>(T[,] values)
-        {
-            return MemoryMarshal.CreateSpan(ref values[0, 0], values.Length).ToArray();
-        }
-
         static void Main(string[] args)
         {
+
             //var xar = new Monsajem_Incs.Collection.Array.TreeBased.Array<string>();
 
             //xar.ChangedNextSequence = (c) =>

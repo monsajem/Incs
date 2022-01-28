@@ -21,14 +21,14 @@ namespace Monsajem_Incs.DataWork
         private long MaxLen;
         private long minCount;
         private long StreamLen;
-        public StreamController(Stream Stream,int HeaderSize=0,int MinLen = 0)
+        public StreamController(Stream Stream, int HeaderSize = 0, int MinLen = 0)
         {
             this.Stream = Stream;
             this.HeaderSize = HeaderSize;
             this.minCount = MinLen;
             if (Stream.Length < HeaderSize)
                 Stream.SetLength(HeaderSize);
-            SetLength(Stream.Length-HeaderSize);
+            SetLength(Stream.Length - HeaderSize);
             Position = 0;
         }
 
@@ -44,16 +44,16 @@ namespace Monsajem_Incs.DataWork
         {
             var OldPos = Stream.Position;
             Stream.Position = 0;
-            Stream.Write(Bytes,0,HeaderSize);
+            Stream.Write(Bytes, 0, HeaderSize);
             Stream.Position = OldPos;
         }
 
         public override bool CanRead => Stream.CanRead;
         public override bool CanSeek => Stream.CanSeek;
         public override bool CanWrite => Stream.CanWrite;
-        public override long Length => StreamLen-HeaderSize;
+        public override long Length => StreamLen - HeaderSize;
 
-        public override long Position { get => Stream.Position-HeaderSize; set => Stream.Position= value+HeaderSize;}
+        public override long Position { get => Stream.Position - HeaderSize; set => Stream.Position = value + HeaderSize; }
 
         public override void Flush() => Stream.Flush();
 
@@ -77,27 +77,32 @@ namespace Monsajem_Incs.DataWork
         public override long Seek(long offset, SeekOrigin origin)
         {
             if (origin == SeekOrigin.Begin)
-                return Stream.Seek(offset + HeaderSize, SeekOrigin.Begin)-HeaderSize;
+                return Stream.Seek(offset + HeaderSize, SeekOrigin.Begin) - HeaderSize;
             else
-                return Stream.Seek(offset, origin)-HeaderSize;
+                return Stream.Seek(offset, origin) - HeaderSize;
         }
 
         public override void SetLength(long value)
         {
-            StreamLen = value + HeaderSize;
+            var StreamLen = value + HeaderSize;
+            this.StreamLen = StreamLen;
 
             if (StreamLen < MinLen)
             {
-                    MaxLen = StreamLen + minCount;
-                    MinLen = StreamLen - minCount;
-                    Stream.SetLength(MaxLen);
+                var minCount = this.minCount;
+                var MaxLen = StreamLen + minCount;
+                this.MaxLen = MaxLen;
+                MinLen = StreamLen - minCount;
+                Stream.SetLength(MaxLen);
             }
-           else if(StreamLen > MaxLen)
-           {
-                    MaxLen = StreamLen + minCount;
-                    MinLen = StreamLen - minCount;
-                    Stream.SetLength(MaxLen);
-           }
+            else if (StreamLen > MaxLen)
+            {
+                var minCount = this.minCount;
+                var MaxLen = StreamLen + minCount;
+                this.MaxLen = MaxLen;
+                MinLen = StreamLen - minCount;
+                Stream.SetLength(MaxLen);
+            }
         }
 
         public void DropLen(int Count)
@@ -111,7 +116,7 @@ namespace Monsajem_Incs.DataWork
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            var NewLen =(Position + count)-Length;
+            var NewLen = (Position + count) - Length;
             if (NewLen > 0)
                 AddLen(NewLen);
             Stream.Write(buffer, offset, count);

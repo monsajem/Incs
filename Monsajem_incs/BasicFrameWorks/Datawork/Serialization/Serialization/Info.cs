@@ -29,6 +29,9 @@ namespace Monsajem_Incs.Serialization
 
             public abstract void Make();
 
+            public abstract void ArraySerializer(SerializeData Data, System.Array ar);
+            public abstract void ArrayDeserializer (DeserializeData Data, System.Array ar);
+
 
             private class ExactSerializer
             {

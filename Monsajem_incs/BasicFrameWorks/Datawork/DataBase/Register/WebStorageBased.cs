@@ -25,14 +25,14 @@ namespace Monsajem_Incs.Database.Register
             this.WebStorage = WebStorage;
         }
 
-        protected override async Task<byte[]> LoadData()
+        protected override ValueType LoadData()
         {
-            return MyUTF.GetBytes(WebStorage.GetItem(Key));
+            return MyUTF.GetBytes(WebStorage.GetItem(Key)).Deserialize<ValueType>();
         }
 
-        protected override async Task SaveData(byte[] Data)
+        protected override void SaveData(ValueType Data)
         {
-            WebStorage.SetItem(Key,MyUTF.GetString(Data));
+            WebStorage.SetItem(Key,MyUTF.GetString(Data.Serialize()));
         }
     }
 }

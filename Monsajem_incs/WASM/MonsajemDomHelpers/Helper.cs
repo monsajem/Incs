@@ -189,6 +189,8 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
             using (var WebClient = new HttpClient())
                 return await WebClient.GetByteArrayAsync(URL);
         }
+
+        public static void RunAtServer(Action ac) => ac();
     }
 
     public class WebProcess

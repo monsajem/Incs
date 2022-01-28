@@ -111,7 +111,7 @@ namespace Monsajem_Incs.Database.Base
                    where KeyType : IComparable<KeyType>
         {
             var LastUpdateCode = await Client.GetData<ulong>();//1
-            await Client.SendData(Table.UpdateAble.UpdateCode);//2
+            await Client.SendData(Table.UpdateAble.UpdateCode.Value);//2
             if (Table.UpdateAble.UpdateCode < LastUpdateCode)
                 LastUpdateCode = 0;
             if (Table.UpdateAble.UpdateCode != LastUpdateCode)

@@ -50,6 +50,7 @@ namespace Monsajem_Incs.Database.Base
 {
     public partial class Table<ValueType, KeyType>
     {
+        [Serialization.NonSerialized]
         internal Func<KeyType, Func<ValueType, ValueType>, ValueType> IUpdateOrInsert;
 
         public void UpdateOrInsert(ValueType OldValue) => 

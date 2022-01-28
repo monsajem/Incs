@@ -22,7 +22,7 @@ namespace Monsajem_Incs.Database.Base
 
         public int Accept(KeyType Key)
         {
-            using (Run.Block())
+            using (Run.UseBlock())
             {
                 var KeyInfo = new TableExtras.KeyInfo();
                 KeyInfo.Key = Key;

@@ -20,61 +20,64 @@ namespace Monsajem_Incs.DynamicAssembly
         }
     }
 
-    public struct RunOnceInStack
+    public class BlocksCounter
     {
-        private SortedSet<string> RunIfNotRuning_Name;
-        public bool Use(string Name)
+        public event Action OnClosedAllBlocks;
+        private int _Count;
+        public int Count
         {
-            if (RunIfNotRuning_Name == null)
-                RunIfNotRuning_Name = new SortedSet<string>();
-            if (RunIfNotRuning_Name.Contains(Name)==false)
+            get => _Count;
+        }
+
+        public BlockContainer UseBlock()
+        {
+            _Count++;
+            return new BlockContainer(this);
+        }
+
+        public class BlockContainer : IDisposable
+        {
+            private bool BlockEnded;
+            private BlocksCounter Parent;
+
+            internal BlockContainer(BlocksCounter Parent)
             {
-                RunIfNotRuning_Name.Add(Name);
-                return true;
+                this.Parent = Parent;
             }
-            else
-                return false;
-        }
 
-        public void EndUse(string Name)
-        {
-            RunIfNotRuning_Name.Remove(Name);
-        }
-
-        private bool RunIfAnyNotRuning_flag;
-        public bool AnyUse()
-        {
-            if (RunIfNotRuning_Name == null)
-                RunIfNotRuning_Name =new SortedSet<string>();
-            if (RunIfNotRuning_Name.Count == 0 &&
-                RunIfAnyNotRuning_flag == false)
+            public void Dispose()
             {
-                RunIfAnyNotRuning_flag = true;
-                return true;
+                if (BlockEnded == true)
+                    throw new Exception("This block is disposed!");
+                BlockEnded = true;
+                Parent._Count--;
+                if (Parent._Count == 0)
+                    Parent.OnClosedAllBlocks?.Invoke();
+                Parent = null;
             }
-            else
-                return false;
-        }
-
-        public void EndAnyUse()
-        {
-            RunIfAnyNotRuning_flag = true;
         }
     }
 
-    public class RunOnceInBlock:IDisposable 
+    public class RunOnceInBlock
     {
-        public event Action OnEndBlocks;
-        private SortedSet<string> Used;
-        private int Blocks;
+        public event Action OnClosedAllBlocks;
+        private HashSet<string> Used;
+        private BlocksCounter Counter;
+
+        public RunOnceInBlock ()
+        {
+            Used = new HashSet<string>();
+            Counter = new BlocksCounter();
+            Counter.OnClosedAllBlocks += () => this.Used.Clear();
+        }
+
         public int BlockLengths
         {
-            get => Blocks;
+            get => Counter.Count;
         }
+
         public bool Use(string Name)
         {
-            if (Used == null)
-                Used = new SortedSet<string>();
             if (Used.Contains(Name)==false)
             {
                 Used.Add(Name);
@@ -89,30 +92,9 @@ namespace Monsajem_Incs.DynamicAssembly
             Used.Remove(Name);
         }
 
-        public RunOnceInBlock Block()
+        public BlocksCounter.BlockContainer UseBlock()
         {
-            Blocks++;
-            return this;
-        }
-
-        public void EndBlock()
-        {
-            Blocks--;
-            if (Blocks == 0)
-            {
-                Used = new SortedSet<string>();
-                OnEndBlocks?.Invoke();
-            }
-        }
-
-        public void Dispose()
-        {
-            Blocks--;
-            if (Blocks == 0)
-            {
-                Used = new SortedSet<string>();
-                OnEndBlocks?.Invoke();
-            };
+            return Counter.UseBlock();
         }
     }
 }

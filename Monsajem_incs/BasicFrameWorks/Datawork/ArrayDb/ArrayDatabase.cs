@@ -13,7 +13,9 @@ namespace Monsajem_Incs.Database
         public ArrayTable(
             Func<ValueType,KeyType> GetKey,
             bool IsUpdateAble,string Name=""):
-            base(new Collection.Array.TreeBased.Array<ValueType>(), GetKey,
+            base(new Collection.Array.TreeBased.Array<(ValueType,ulong)>(),
+                 new Register.MemoryRegister<ulong>(),                 
+                 GetKey,
                  IsUpdateAble)
         {
             this.TableName = Name;

@@ -19,7 +19,7 @@ namespace Monsajem_Incs.Database.Base
 
         public int Ignore(KeyType Key)
         {
-            using (Run.Block())
+            using (Run.UseBlock())
             {
                 var Keyinfo = new TableExtras.KeyInfo();
                 Keyinfo.Key = Key;

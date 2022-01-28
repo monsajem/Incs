@@ -32,7 +32,7 @@ namespace Monsajem_Incs.Database.Base
         {
             lock (this)
             {
-                using (Run.Block())
+                using (Run.UseBlock())
                 {
                     AutoFillRelations?.Invoke(Value);
                     var KeysLen = BasicActions.Keys;

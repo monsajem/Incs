@@ -31,10 +31,7 @@ namespace Monsajem_Incs.Views.Maker.ValueTypes
         }
 
         public static void MakeDefault<ValueType, ViewType>(
-            Action<(ViewType View, ValueType Value)> FillView=null,
-            Func<ViewType, HTMLElement> GetMain = null,
-            Func<(ViewType View,ValueType OldValue),ValueType> FillValue=null,
-            Action<(ViewType View,Action Edited)> SetEdited = null)
+            Action<Options<ValueType, ViewType>> Maker = null)
             where ViewType:new()
         {
             EditItemMaker<ValueType>.MakeView = (c) =>
@@ -45,17 +42,28 @@ namespace Monsajem_Incs.Views.Maker.ValueTypes
                  return HtmlView;
             };
 
-            if(FillView!=null)
-                EditItemMaker<ValueType, ViewType>.FillViewByValue = FillView;
+            var Options = new Options<ValueType, ViewType>();
+            Maker?.Invoke(Options);
+
+            if (Options.FillView != null)
+                EditItemMaker<ValueType, ViewType>.FillViewByValue = Options.FillView;
             
-            if(GetMain!=null)
-                EditItemMaker<ValueType, ViewType>.GetMainElementFromView = GetMain;
+            if(Options.GetMain !=null)
+                EditItemMaker<ValueType, ViewType>.GetMainElementFromView = Options.GetMain;
 
-            if(FillValue != null)
-                EditItemMaker<ValueType, ViewType>.MakeValueFromView = FillValue;
+            if(Options.FillValue != null)
+                EditItemMaker<ValueType, ViewType>.MakeValueFromView = Options.FillValue;
 
-            if (SetEdited != null)
-                EditItemMaker<ValueType, ViewType>.RegisterOnEditedToView = SetEdited;
+            if (Options.SetEdited != null)
+                EditItemMaker<ValueType, ViewType>.RegisterOnEditedToView = Options.SetEdited;
+        }
+
+        public class Options<ValueType, ViewType>
+        {
+            public Action<(ViewType View, ValueType Value)> FillView;
+            public Func<ViewType, HTMLElement> GetMain;
+            public Func<(ViewType View, ValueType OldValue), ValueType> FillValue ;
+            public Action<(ViewType View, Action Edited)> SetEdited;
         }
     }
 

@@ -4,7 +4,6 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using static Monsajem_Incs.Collection.Array.Extentions;
-using static Monsajem_Incs.Collection.Array.Extentions;
 using static Monsajem_Incs.DynamicAssembly.DelegatesExtentions;
 using static Monsajem_Incs.Database.Base.Runer;
 
@@ -32,12 +31,12 @@ namespace Monsajem_Incs.Database.Base
 #if TRACE
                     Console.WriteLine("@ " + this.GetType().Namespace + this.GetType().Name + " _AddRelation_1_X >> Accepted");
 #endif
-                    using (ThisRelation.LinkArray.IgnoreUpdateAble.Block())
+                    using (ThisRelation.LinkArray.IgnoreUpdateAble.UseBlock())
                     {
                         PartTable.SaveToParent();
                     }
 
-                    using (this.IgnoreUpdateAble.Block())
+                    using (this.IgnoreUpdateAble.UseBlock())
                     {
                         this.Update(AcceptedKey,
                              (c) => ThisRelation.Field.Value(c,(f)=> { f.Key = Key; return f; }));
@@ -48,13 +47,13 @@ namespace Monsajem_Incs.Database.Base
 #if TRACE
                     Console.WriteLine("@ " + this.GetType().Namespace + this.GetType().Name + " _AddRelation_1_X >> Ignored");
 #endif
-                    using (ThisRelation.LinkArray.IgnoreUpdateAble.Block())
+                    using (ThisRelation.LinkArray.IgnoreUpdateAble.UseBlock())
                     {
                         PartTable.SaveToParent();
                     }
 
 
-                    using (this.IgnoreUpdateAble.Block())
+                    using (this.IgnoreUpdateAble.UseBlock())
                     {
                         if (this.PositionOf(IgnoredKey) > -1)
                             this.Update(IgnoredKey,
@@ -77,7 +76,7 @@ namespace Monsajem_Incs.Database.Base
 #endif
                 if (Run.Use(RelationName))
                 {
-                    using (ThisRelation.LinkArray.IgnoreUpdateAble.Block())
+                    using (ThisRelation.LinkArray.IgnoreUpdateAble.UseBlock())
                     {
                         var ThisRelationArray = ThisRelation.Field.Value(info.Value);
                         if (ThisRelationArray.Key != null)
@@ -100,7 +99,7 @@ namespace Monsajem_Incs.Database.Base
 #endif
                 if (Run.Use(RelationName))
                 {
-                    using (this.IgnoreUpdateAble.Block())
+                    using (this.IgnoreUpdateAble.UseBlock())
                     {
                         var ThatRelation_array = ThatRelation.Field.Value(info.Value);
                         for (int i = 0; i < ThatRelation_array.KeysInfo.Keys.Length; i++)
@@ -122,7 +121,7 @@ namespace Monsajem_Incs.Database.Base
 #endif
                 if (Run.Use(RelationName))
                 {
-                    using (ThisRelation.LinkArray.IgnoreUpdateAble.Block())
+                    using (ThisRelation.LinkArray.IgnoreUpdateAble.UseBlock())
                     {
                         var ThisRelationArray = ThisRelation.Field.Value(Info.Value);
                         if (ThisRelationArray.Key != null)
@@ -233,7 +232,7 @@ namespace Monsajem_Incs.Database.Base
                         if (ThatValue.Key != null)
                             if (Run.Use(RelationName + "UP"))
                             {
-                                using (ThisRelation.LinkArray.IgnoreUpdateAble.Block())
+                                using (ThisRelation.LinkArray.IgnoreUpdateAble.UseBlock())
                                 {
 
                                     ThisRelation.LinkArray.Update(ThatValue, (c) =>

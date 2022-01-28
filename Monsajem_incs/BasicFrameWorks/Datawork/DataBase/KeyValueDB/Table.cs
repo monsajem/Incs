@@ -22,9 +22,9 @@ namespace Monsajem_Incs.Database.KeyValue.Base
         public Table(
             Action<byte[]> SaveKeys,
             Func<byte[]> LoadKeys,
-            Collection.IDictionary<KeyType, ValueType> Data, 
+            Collection.IDictionary<KeyType, (ValueType Value, ulong UpdateCode)> Data, 
             Func<ValueType, KeyType> GetKey, bool IsUpdateAble) :
-            base(new DynamicArray<ValueType>(), GetKey, false)
+            base(new DynamicArray<(ValueType,ulong)>(),new Register.MemoryRegister<ulong>(), GetKey, IsUpdateAble)
         {
             var OldData = LoadKeys();
 
@@ -32,29 +32,16 @@ namespace Monsajem_Incs.Database.KeyValue.Base
             {
                 var OldTable = OldData.Deserialize(this);
                 this.KeysInfo.Keys = OldTable.KeysInfo.Keys;
-                if (IsUpdateAble)
-                {
-                    ReadyForUpdateAble();
-                }
-                this.UpdateAble = OldTable.UpdateAble;
-            }
-            else
-            {
-                if (IsUpdateAble)
-                {
-                    ReadyForUpdateAble();
-                    this.UpdateAble = new UpdateAbles<KeyType>();
-                }
             }
 
-            var Ar = (DynamicArray<ValueType>)this.BasicActions.Items;
+            var Ar = (DynamicArray<(ValueType Value, ulong UpdateCode)>)this.BasicActions.Items;
             
             Ar._GetItem = (Pos) => Data[this.KeysInfo.Keys[Pos]];
 
             Ar._SetItem = (Pos, Value) =>
             {
                 var OldKey = this.KeysInfo.Keys[Pos];
-                var NewKey = GetKey(Value);
+                var NewKey = GetKey(Value.Value);
                 if (OldKey.CompareTo(NewKey) !=0)
                 {
                     Data.Remove(OldKey);
@@ -136,7 +123,7 @@ namespace Monsajem_Incs.Database.KeyValue.Base
             }
             else
             {
-                Runer.Run.OnEndBlocks += () => Save();
+                Runer.Run.OnClosedAllBlocks += () => Save();
             }
         }
 

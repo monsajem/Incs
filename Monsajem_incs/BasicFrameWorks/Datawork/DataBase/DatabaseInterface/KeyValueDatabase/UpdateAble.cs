@@ -33,6 +33,11 @@ namespace Monsajem_Incs.Database.Base
                 return x.UpdateCode.CompareTo(y.UpdateCode);
             }
         }
+
+        public override string ToString()
+        {
+            return "Key: " + Key.ToString() + " UpdateCode:" + UpdateCode;
+        }
     }
     public partial class UpdateAbles<KeyType>
         where KeyType : IComparable<KeyType>
@@ -41,21 +46,52 @@ namespace Monsajem_Incs.Database.Base
         public static DynamicAssembly.RunOnceInBlock[] IgnoreUpdateAble;
         public static int IgnoreUpdateAble_Len;
 
-        public UpdateAbles(int Len=0)
+        public Register.Base.Register<ulong> UpdateCode;
+        public Monsajem_Incs.Collection.Array.Base.IArray<UpdateAble<KeyType>> UpdateCodes;
+        public Monsajem_Incs.Collection.Array.Base.IArray<UpdateAble<KeyType>> UpdateKeys;
+
+        [Serialization.NonSerialized]
+        public Action<UpdateAble<KeyType>> OnChanged;
+
+
+        public UpdateAbles(
+            Register.Base.Register<ulong> UpdateCode,
+            IEnumerable<(KeyType Key, ulong UpdateCode)> OldCodes=null)
         {
-            UpdateCodes = new UpdateAble<KeyType>[Len];
-            UpdateKeys = new UpdateAble<KeyType>[Len];
+            this.UpdateCode = UpdateCode;
+            UpdateCode.Load();
+            var UpdateCodes = new Collection.Array.TreeBased.Array<UpdateAble<KeyType>>();
+            UpdateCodes.Comparer = UpdateAble<KeyType>.CompareCode;
+            var UpdateKeys = new Collection.Array.TreeBased.Array<UpdateAble<KeyType>>();
+            UpdateKeys.Comparer = UpdateAble<KeyType>.CompareKey;
+
+            if(OldCodes!=null)
+                foreach(var OldCode in OldCodes)
+                {
+                    var Update = new UpdateAble<KeyType>() 
+                                        {Key = OldCode.Key,UpdateCode = OldCode.UpdateCode };
+
+                    UpdateCodes.BinaryInsert(Update);
+                    UpdateKeys.BinaryInsert(Update);
+                }
+            this.UpdateCodes = UpdateCodes;
+            this.UpdateKeys = UpdateKeys;
+        }
+
+        public void Clear()
+        {
+            UpdateCode.Save(0);
+            UpdateKeys.Clear();
+            UpdateCodes.Clear();
         }
 
         public UpdateAble<KeyType> this[KeyType Key] {
             get
             {
-                var Place = System.Array.BinarySearch(UpdateKeys,
-                    new UpdateAble<KeyType>() { Key = Key },
-                    UpdateAble<KeyType>.CompareKey);
-                if (Place < 0)
+                var Place = UpdateKeys.BinarySearch(new UpdateAble<KeyType>() { Key = Key });
+                if (Place.Index < 0)
                     return null;
-                return UpdateKeys[Place];
+                return Place.Value;
             }
         }
 
@@ -74,27 +110,27 @@ namespace Monsajem_Incs.Database.Base
 
         public bool IsExist(ulong Code)
         {
-            var Place = System.Array.BinarySearch(UpdateKeys,
-                new UpdateAble<KeyType>() { UpdateCode = Code },
-                    UpdateAble<KeyType>.CompareCode);
-            return Place >= 0;
+            var Place = UpdateKeys.BinarySearch(new UpdateAble<KeyType>() { UpdateCode = Code });
+            return Place.Index >= 0;
         }
 
         public void Update()
         {
-            UpdateCode += 1;
+            UpdateCode.Value += 1;
+            UpdateCode.Save();
         }
 
         public void Insert(KeyType Key)
         {
-            UpdateCode += 1;
+            UpdateCode.Value += 1;
+            UpdateCode.Save();
             Insert(Key, UpdateCode);
         }
 
         public void Insert(KeyType Key, ulong UpdateCode)
         {
             var Update = new UpdateAble<KeyType>() { Key = Key, UpdateCode = UpdateCode };
-            var Place = System.Array.BinarySearch(UpdateKeys, Update, UpdateAble<KeyType>.CompareKey);
+            var Place = UpdateKeys.BinarySearch(Update).Index;
             if (Place >= 0)
             {
                 _Changed(Key, Key, UpdateCode, Place);
@@ -105,42 +141,35 @@ namespace Monsajem_Incs.Database.Base
         private void _Insert(KeyType Key, ulong UpdateCode)
         {
             var Update = new UpdateAble<KeyType>() { Key = Key, UpdateCode = UpdateCode };
-            Collection.Array.Extentions.BinaryInsert(
-                ref UpdateCodes, Update, UpdateAble<KeyType>.CompareCode);
-            Collection.Array.Extentions.BinaryInsert(
-                ref UpdateKeys, Update, UpdateAble<KeyType>.CompareKey);
+            UpdateCodes.BinaryInsert(Update);
+            UpdateKeys.BinaryInsert(Update);
+            OnChanged?.Invoke(Update);
         }
 
         public void Delete(KeyType Key)
         {
-            UpdateCode += 1;
+            UpdateCode.Value += 1;
+            UpdateCode.Save();
             DeleteDontUpdate(Key);
         }
         public void DeleteDontUpdate(KeyType Key)
         {
-            var Place = System.Array.BinarySearch(UpdateKeys,
-                new UpdateAble<KeyType>() { Key = Key },
-                UpdateAble<KeyType>.CompareKey);
-            if (Place < 0)
+            var Place = UpdateCodes.BinarySearch(new UpdateAble<KeyType>() { Key = Key });
+            if (Place.Index < 0)
                 return;
-            var Update = UpdateKeys[Place];
-            Collection.Array.Extentions.BinaryDelete(
-                ref UpdateCodes, Update, UpdateAble<KeyType>.CompareCode);
-            Collection.Array.Extentions.DeleteByPosition(
-                ref UpdateKeys, Place);
+            UpdateKeys.BinaryDelete(Place.Value);
         }
 
         public void Changed(KeyType Old, KeyType New)
         {
-            UpdateCode += 1;
+            UpdateCode.Value += 1;
+            UpdateCode.Save();
             Changed(Old, New, UpdateCode);
         }
 
         public void Changed(KeyType Old, KeyType New,ulong UpdateCode)
         {
-            var OldPlace = System.Array.BinarySearch(UpdateKeys,
-                        new UpdateAble<KeyType>() { Key = Old },
-                        UpdateAble<KeyType>.CompareKey);
+            var OldPlace = UpdateKeys.BinarySearch(new UpdateAble<KeyType>() { Key = Old }).Index;
             if(OldPlace<0)
             {
                 _Insert(New, UpdateCode);
@@ -153,15 +182,10 @@ namespace Monsajem_Incs.Database.Base
             var OldUpdate = UpdateKeys[OldPlace_key];
             var NewUpdate = new UpdateAble<KeyType>() { Key = New, UpdateCode = UpdateCode };
 
-            Collection.Array.Extentions.BinaryUpdate(
-                UpdateKeys, OldUpdate, NewUpdate, UpdateAble<KeyType>.CompareKey);
-            Collection.Array.Extentions.BinaryUpdate(
-                UpdateCodes, OldUpdate, NewUpdate, UpdateAble<KeyType>.CompareCode);
+            UpdateKeys.BinaryUpdate(OldUpdate, NewUpdate);
+            UpdateCodes.BinaryUpdate(OldUpdate, NewUpdate);
+            OnChanged?.Invoke(NewUpdate);
         }
-
-        public ulong UpdateCode;
-        public UpdateAble<KeyType>[] UpdateCodes;
-        public UpdateAble<KeyType>[] UpdateKeys;
     }
 
     public partial class Table<ValueType, KeyType>

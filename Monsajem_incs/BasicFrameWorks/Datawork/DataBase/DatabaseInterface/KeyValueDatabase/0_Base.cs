@@ -17,7 +17,8 @@ namespace Monsajem_Incs.Database.Base
 
     public partial class BasicActions<ValueType>
     {
-        public Collection.Array.Base.IArray<ValueType> Items;
+        public Collection.Array.Base.IArray<(ValueType Value, ulong UpdateCode)> Items;
+        public Register.Base.Register<ulong> UpdateCode;
     }
 
     public class Runer
@@ -33,7 +34,6 @@ namespace Monsajem_Incs.Database.Base
                     _Run = new Monsajem_Incs.DynamicAssembly.RunOnceInBlock();
                 return _Run;
             }
-
         }
     }
 
@@ -183,12 +183,13 @@ namespace Monsajem_Incs.Database.Base
 
                     if(OldPos!=NewPos)
                     {
-                        this.BasicActions.Items.DeleteByPosition(OldPos);
-                        this.BasicActions.Items.Insert(MyValue, NewPos);
+                        var OldValue = this.BasicActions.Items.Pop(OldPos);
+                        this.BasicActions.Items.Insert((MyValue,OldValue.UpdateCode), NewPos);
                     }
                     else
                     {
-                        this.BasicActions.Items[OldPos]= MyValue;
+                        var OldValue = this.BasicActions.Items[OldPos];
+                        this.BasicActions.Items[OldPos]= (MyValue,OldValue.UpdateCode);
                     }
 
                     if (OldKey.CompareTo(NewKey) != 0)
@@ -270,7 +271,7 @@ namespace Monsajem_Incs.Database.Base
                     var MyInfo = info.Info[KeyPos];
                     var Pos = MyInfo.Pos;
                     KeysInfo.Keys.Insert((KeyType)MyInfo.Key, Pos);
-                    this.BasicActions.Items.Insert(info.Value, Pos);
+                    this.BasicActions.Items.Insert((info.Value,0), Pos);
                 };
             }
             else
@@ -329,7 +330,14 @@ namespace Monsajem_Incs.Database.Base
             if (IsUpdateAble)
             {
                 ReadyForUpdateAble();
-                this.UpdateAble = new UpdateAbles<KeyType>();
+                this.UpdateAble = new UpdateAbles<KeyType>(BasicActions.UpdateCode,BasicActions.Items.Select((c)=>(GetKey(c.Value),c.UpdateCode)));
+                this.UpdateAble.OnChanged += (c) =>
+                {
+                    var Pos = GetPosition(c.Key);
+                    var Info = BasicActions.Items[Pos];
+                    Info.UpdateCode = c.UpdateCode;
+                    BasicActions.Items[Pos] = Info;
+                };
             }
             IgnoreUpdateAble_pos = UpdateAbles<KeyType>.IgnoreUpdateAble_Len;
             UpdateAbles<KeyType>.IgnoreUpdateAble_Len++;
@@ -346,12 +354,14 @@ namespace Monsajem_Incs.Database.Base
         internal Table() { }
 
         public Table(
-            Collection.Array.Base.IArray<ValueType> Items,
+            Collection.Array.Base.IArray<(ValueType Value, ulong UpdateCode)> Items,
+            Register.Base.Register<ulong> UpdateCodeRegister,
             Func<ValueType, KeyType> GetKey,
             bool IsUpdateAble) :
             this(new BasicActions<ValueType>()
             {
-                Items=Items
+                Items=Items,
+                UpdateCode = UpdateCodeRegister,
             }, GetKey, new KeyType[0], 0, true, IsUpdateAble)
         { }
 

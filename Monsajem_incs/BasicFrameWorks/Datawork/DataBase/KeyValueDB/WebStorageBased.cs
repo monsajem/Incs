@@ -117,7 +117,7 @@ namespace Monsajem_Incs.Database.KeyValue.WebStorageBased
                          return MyUTF.GetBytes(WebStorage.GetItem(KeyName));
                      return null;
                  },
-                 new StorageDictionary<KeyType, ValueType>("V" + TableName, WebStorage), GetKey, IsUpdatAble)
+                 new StorageDictionary<KeyType,(ValueType,ulong)>("V" + TableName, WebStorage), GetKey, IsUpdatAble)
         {
             this.TableName = TableName;
         }        

@@ -15,7 +15,7 @@ using static Monsajem_Client.Network;
 
 namespace Monsajem_Client
 {
-	public class App
+    public class App
     {
         public static Uri Client = new Uri("http://localhost:49696/ServerInfo/net5.0/DB");
         internal static DataBase Data;
@@ -37,49 +37,55 @@ namespace Monsajem_Client
 
             {
                 Data.Groups.RegisterEdit().SetDefault<GroupEdit_html>(
-                    FillView: (c) =>
+                    (c) =>
                     {
-                        if(c.Value!=null)
-                            c.View.Name.Value = c.Value.Name;
-                    },
-                    FillValue: (c) =>
-                     {
-                         return new ProductGroup()
-                         {
-                             Name = c.View.Name.Value
-                         };
-                     },
-                    SetEdited: (c) => c.View.Done.OnClick += (c1, c2) => c.Edited(),
-                    GetMain: (c) => c.Main);
+                        c.FillView = (c) =>
+                        {
+                            if (c.Value != null)
+                                c.View.Name.Value = c.Value.Name;
+                        };
+                        c.FillValue = (c) =>
+                        {
+                            return new ProductGroup()
+                            {
+                                Name = c.View.Name.Value
+                            };
+                        };
+                        c.SetEdited = (c) => c.View.Done.OnClick += (c1, c2) => c.Edited();
+                        c.GetMain = (c) => c.Main;
+                    });
                 Data.Groups.RegisterView().SetDefault<GroupView_html>(
-                    FillView: (c) =>
+                    (c) =>
                     {
-                        c.View.Name.Value = c.Value.Name;
-                    },
-                    GetMain: (c) => c.Main,
-                    RegisterEdit:(c)=>
-                    {
-                        c.View.Edit.OnClick += (c1, c2) => c.Edit();
-                    },
-                    RegisterDelete:(c)=>
-                    {
-                        c.View.Delete.OnClick += (c1, c2) => c.Delete();
+                        c.FillView = (c) =>
+                        {
+                            c.View.Name.Value = c.Value.Name;
+                        };
+                        c.GetMain = (c) => c.Main;
+                        c.RegisterEdit = (c) =>
+                        {
+                            c.View.Edit.OnClick += (c1, c2) => c.Edit();
+                        };
+                        c.RegisterDelete = (c) =>
+                        {
+                            c.View.Delete.OnClick += (c1, c2) => c.Delete();
+                        };
                     });
             }
 
-            await Data.Groups.SyncUpdate();
+            //await Data.Groups.SyncUpdate();
 
             Data.Groups.ShowItems();
 
             return;
 
             MainElement.ReplaceChilds(await Data.Groups.MakeShowView(
-                async (c)=>
+                async (c) =>
                 {
                     MainElement.ReplaceChilds(Data.Groups.MakeEditView(c.Key));
                     Console.WriteLine("Edit" + c.ToString());
                 },
-                async (c)=>
+                async (c) =>
                 {
                     await c.TableInfo.Delete(c.Key);
                     Console.WriteLine("Delete" + c.ToString());

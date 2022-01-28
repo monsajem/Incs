@@ -145,7 +145,7 @@ namespace Monsajem_Incs.Database.Base
                         {
                             Action Ac = null;
                             Ac = () => {
-                                Run.OnEndBlocks -= Ac;
+                                Run.OnClosedAllBlocks -= Ac;
                                 c = Filler.GetItem(c);
                                 foreach (var Des in DestintionField.Value(c))
                                 {
@@ -155,7 +155,7 @@ namespace Monsajem_Incs.Database.Base
                                             Relation.Accept(ac.Key);
                                 }
                             };
-                            Run.OnEndBlocks += Ac;
+                            Run.OnClosedAllBlocks += Ac;
                         }
                     };
                     Sources.Extras.Ignored += (PartOfTable<RelationValueType, RelationKeyType>.TableExtras.KeyInfo ac) =>
@@ -164,7 +164,7 @@ namespace Monsajem_Incs.Database.Base
                         {
                             Action Ac = null;
                             Ac = () => {
-                                Run.OnEndBlocks -= Ac;
+                                Run.OnClosedAllBlocks -= Ac;
                                 c = Filler.GetItem(c);
                                 foreach (var Des in DestintionField.Value(c))
                                 {
@@ -173,7 +173,7 @@ namespace Monsajem_Incs.Database.Base
                                         Relation.Ignore(ac.Key);
                                 }
                             };
-                            Run.OnEndBlocks += Ac;
+                            Run.OnClosedAllBlocks += Ac;
                         }
                     };
 
@@ -184,7 +184,7 @@ namespace Monsajem_Incs.Database.Base
                         {
                             Action Ac = null;
                             Ac = () => {
-                                Run.OnEndBlocks -= Ac;
+                                Run.OnClosedAllBlocks -= Ac;
                                 c = Filler.GetItem(c);
                                 if (Destintions.KeysInfo.Keys.BinarySearch(ac.Key).Index > -1)
                                 {
@@ -197,7 +197,7 @@ namespace Monsajem_Incs.Database.Base
                                     }
                                 }
                             };
-                            Run.OnEndBlocks += Ac;
+                            Run.OnClosedAllBlocks += Ac;
                         }
                     };
                     Destintions.Extras.Ignored += (PartOfTable<ValueType, KeyType>.TableExtras.KeyInfo ac) =>
@@ -206,7 +206,7 @@ namespace Monsajem_Incs.Database.Base
                         {
                             Action Ac = null;
                             Ac = () => {
-                                Run.OnEndBlocks -= Ac;
+                                Run.OnClosedAllBlocks -= Ac;
                                 c = Filler.GetItem(c);
                                 if (Destintions.KeysInfo.Keys.BinarySearch(ac.Key).Index > -1)
                                 {
@@ -218,7 +218,7 @@ namespace Monsajem_Incs.Database.Base
                                     }
                                 }
                             };
-                            Run.OnEndBlocks += Ac;
+                            Run.OnClosedAllBlocks += Ac;
                         }
                     };
                 };
@@ -254,13 +254,13 @@ namespace Monsajem_Incs.Database.Base
                                 Action Ac = null;
                                 Ac = () =>
                                 {
-                                    Run.OnEndBlocks -= Ac;
+                                    Run.OnClosedAllBlocks -= Ac;
                                     c = Filler.GetItem(c);
                                     var Relation = RelationField.Value(Destintions.GetItem(ac.Key));
                                     if (Relation.KeysInfo.Keys.BinarySearch((RelationKeyType)Key).Index < 0)
                                         Relation.Accept((RelationKeyType)Key);
                                 };
-                                Run.OnEndBlocks += Ac;
+                                Run.OnClosedAllBlocks += Ac;
                             }
                         };
                         Destintions.Extras.Ignored += (PartOfTable<ValueType, KeyType>.TableExtras.KeyInfo ac) =>
@@ -270,13 +270,13 @@ namespace Monsajem_Incs.Database.Base
                                 Action Ac = null;
                                 Ac = () =>
                                 {
-                                    Run.OnEndBlocks -= Ac;
+                                    Run.OnClosedAllBlocks -= Ac;
                                     c = Filler.GetItem(c);
                                     var Relation = RelationField.Value(Destintions.GetItem(ac.Key));
                                     if (Relation.KeysInfo.Keys.BinarySearch((RelationKeyType)Key).Index > -1)
                                         Relation.Ignore((RelationKeyType)Key);
                                 };
-                                Run.OnEndBlocks += Ac;
+                                Run.OnClosedAllBlocks += Ac;
                             }
                         };
                     }
@@ -289,7 +289,7 @@ namespace Monsajem_Incs.Database.Base
                         Action Ac = null;
                         Ac = () =>
                         {
-                            Run.OnEndBlocks -= Ac;
+                            Run.OnClosedAllBlocks -= Ac;
 
                             var Destintions = DestintionField.Value(c);
                             var Source = SourceField.Value(c);
@@ -315,7 +315,7 @@ namespace Monsajem_Incs.Database.Base
                                 }
                             }
                         };
-                        Run.OnEndBlocks += Ac;
+                        Run.OnClosedAllBlocks += Ac;
                     }
                 };
             };

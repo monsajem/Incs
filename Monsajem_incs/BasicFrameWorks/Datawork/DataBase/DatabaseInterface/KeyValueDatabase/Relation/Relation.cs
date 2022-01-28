@@ -235,7 +235,7 @@ namespace Monsajem_Incs.Database.Base
 
                    if (Relation.IsUpdateAble)
                        if (ThisRelation.UpdateAble == null)
-                           ThisRelation.UpdateAble = new UpdateAbles<ToKeyType>();
+                           ThisRelation.UpdateAble = new UpdateAbles<ToKeyType>(new Register.MemoryRegister<ulong>());
                    return ThisRelation;
                });
             };

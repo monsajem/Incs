@@ -20,6 +20,7 @@ namespace Monsajem_Incs.Database.Base
         public class ValueInfo
         {
             public ValueType Value;
+            public ulong UpdateCode;
             public int Pos;
             public KeyType Key;
             public Table<ValueType, KeyType> Parent;
@@ -46,13 +47,14 @@ namespace Monsajem_Incs.Database.Base
         {
             lock (this)
             {
-                using (Run.Block())
+                using (Run.UseBlock())
                 {
                     var Item = BasicActions.Items[Position];
-                    Events.loading?.Invoke(Item);
+                    Events.loading?.Invoke(Item.Value);
                     return new ValueInfo()
                     {
-                        Value = Item,
+                        Value = Item.Value,
+                        UpdateCode = Item.UpdateCode,
                         Pos = Position,
                         Parent = this
                     };
@@ -64,11 +66,22 @@ namespace Monsajem_Incs.Database.Base
         {
             lock (this)
             {
-                using (Run.Block())
+                using (Run.UseBlock())
+                {
+                    return GetItem(GetPosition(Key));
+                }
+            }
+        }
+
+        public int GetPosition(KeyType Key)
+        {
+            lock (this)
+            {
+                using (Run.UseBlock())
                 {
                     var Pos = KeysInfo.Keys.BinarySearch(Key).Index;
                     if (Pos > -1)
-                        return GetItem(Pos);
+                        return Pos;
                     else
                         throw new ArgumentOutOfRangeException("Key", Key, "Key Not Exist");
                 }
@@ -169,7 +182,7 @@ namespace Monsajem_Incs.Database.Base
                 var Position = KeysInfo.Keys.BinarySearch(Key).Index;
                 if (Position > -1)
                 {
-                    Result = BasicActions.Items[Position];
+                    Result = BasicActions.Items[Position].Value;
                 }
                 else
                 {

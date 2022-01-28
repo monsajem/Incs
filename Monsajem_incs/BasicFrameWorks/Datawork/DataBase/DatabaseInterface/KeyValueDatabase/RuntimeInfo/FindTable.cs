@@ -196,7 +196,17 @@ namespace Monsajem_Incs.Database.Base
 
             public async override Task SyncUpdate()
             {
-                await Table.SyncUpdate();
+                await Remote(
+                            async (c) =>
+                            {
+                                var TableName = await c.GetData<string>();
+                                await TableFinder.FindTable(TableName).SendUpdate(c);
+                            },
+                            async (c) =>
+                            {
+                                await c.SendData(Table.TableName);
+                                await c.GetUpdate(Table);
+                            });
             }
 
             public async override Task<HTMLElement> MakeShowView(
@@ -397,8 +407,24 @@ namespace Monsajem_Incs.Database.Base
 
             public override async Task SyncUpdate(object HolderKey)
             {
-                var Table = GetterRealtionByKey((HolderKeyType)HolderKey);
-                await Table.SyncUpdate();
+                var PartTable = GetterRealtionByKey((HolderKeyType)HolderKey); ;
+                await Remote(
+                        async (c) =>
+                        {
+                            var Info = await c.GetData<(string TableName, HolderKeyType Key, string RealtionName)>();
+                            await TableFinder.FindTable(Info.TableName)
+                                             .FindRelation(Info.RealtionName)
+                                             .SendUpdate(Info.Key, c);
+                        },
+                        async (c) =>
+                        {
+                            var HolderName = Holder.TableName;
+                            var HolderKey = (HolderKeyType)PartTable.HolderTable.Key;
+                            await c.SendData((Holder.TableName,
+                                              HolderKey,
+                                              PartTable.TableName));
+                            await c.GetUpdate(PartTable);
+                        });
             }
 
             public override async Task<HTMLElement> MakeShowView(

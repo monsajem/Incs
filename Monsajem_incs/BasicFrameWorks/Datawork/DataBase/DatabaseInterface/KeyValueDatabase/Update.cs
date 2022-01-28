@@ -52,7 +52,7 @@ namespace Monsajem_Incs.Database.Base
         {
             lock(this)
             {
-                using (Run.Block())
+                using (Run.UseBlock())
                 {
                     var NewValue = GetItem(OldKey);
                     AutoFillRelations?.Invoke(NewValue.Value);

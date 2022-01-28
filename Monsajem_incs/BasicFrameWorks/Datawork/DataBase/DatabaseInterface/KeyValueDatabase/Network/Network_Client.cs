@@ -212,14 +212,10 @@ namespace Monsajem_Incs.Database.Base
             {
                 if (Table.UpdateAble.UpdateCode > ServerLastUpCode)
                 {
-                    Table.UpdateAble.UpdateCode = 0;
-                    Table.UpdateAble.UpdateCodes = new UpdateAble<KeyType>[0];
-                    Table.UpdateAble.UpdateKeys = new UpdateAble<KeyType>[0];
+                    Table.UpdateAble.Clear();
                     if (IsPartOfTable)
                     {
-                        ParentTable.UpdateAble.UpdateCode = 0;
-                        ParentTable.UpdateAble.UpdateCodes = new UpdateAble<KeyType>[0];
-                        ParentTable.UpdateAble.UpdateKeys = new UpdateAble<KeyType>[0];
+                        ParentTable.UpdateAble.Clear();
                     }
                 }
                 while (StartPos <= EndPos)
@@ -256,7 +252,8 @@ namespace Monsajem_Incs.Database.Base
                     foreach (var Delete in ShouldDelete)
                         Table.Delete(Delete);
 
-                Table.UpdateAble.UpdateCode = ServerLastUpCode;
+                Table.UpdateAble.UpdateCode.Save(ServerLastUpCode);
+
                 if (IsPartOfTable)
                     PartTable.SaveToParent();
 #if DEBUG_UpdateAble
@@ -274,12 +271,14 @@ namespace Monsajem_Incs.Database.Base
             where KeyType : IComparable<KeyType>
         {
             if (Table._UpdateAble == null)
-                Table._UpdateAble = new UpdateAbles<KeyType>(0);
+                Table._UpdateAble = new UpdateAbles<KeyType>(
+                                            Table.BasicActions.UpdateCode,
+                                            Table.BasicActions.Items.Select((c)=>(Table.GetKey(c.Value),c.UpdateCode)));
             var Result = false;
 
-            await Client.SendData(Table.UpdateAble.UpdateCode);//1
+            await Client.SendData(Table.UpdateAble.UpdateCode.Value);//1
             var LastUpdateCode = await Client.GetData<ulong>();//2
-            if (Table.UpdateAble.UpdateCode != LastUpdateCode)
+            if (Table.UpdateAble.UpdateCode.Value != LastUpdateCode)
             {
                 var ServerItemsCount = await Client.GetData<int>();//3
                 var Remote = new IRemoteUpdateReciver<ValueType, KeyType>(

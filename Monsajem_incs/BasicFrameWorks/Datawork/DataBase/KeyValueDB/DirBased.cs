@@ -93,7 +93,7 @@ namespace Monsajem_Incs.Database.KeyValue.DirBased
             Func<ValueType, KeyType> GetKey, bool IsUpdatAble) :
             base((b)=>File.WriteAllBytes(Dir+"\\K",b),
                  ()=>File.Exists(Dir + "\\K") ? File.ReadAllBytes(Dir + "\\K"):null,
-                 new FileDictionary<KeyType,ValueType>(Dir+"\\V"), GetKey, IsUpdatAble)
+                 new FileDictionary<KeyType,(ValueType,ulong)>(Dir+"\\V"), GetKey, IsUpdatAble)
         {
             this.TableName = new DirectoryInfo(Dir).Name;
         }

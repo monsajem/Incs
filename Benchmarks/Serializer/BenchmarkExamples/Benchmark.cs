@@ -47,6 +47,8 @@ namespace BenchmarkExample
         public int[] Int_Ar;
         public string String_Value;
         public Cls Cls_Value;
+        public Cls[] Cls_Ar_Same;
+        public Cls[] Cls_Ar_NSame;
         public Str_Unmanaged StrUN_Value;
         public Str_Managed StrMN_Value;
 
@@ -57,6 +59,7 @@ namespace BenchmarkExample
                 Int_Value = 12;
                 Int_Value = SrDr(Int_Value);
                 Int_Value = SrDrMP(Int_Value);
+                Int_Value = SrDrBP(Int_Value);
             }
             {
                 Int_Ar = new int[1_000_000];
@@ -74,18 +77,35 @@ namespace BenchmarkExample
                 Cls_Value.StringValue = String_Value;
                 Cls_Value = SrDr(Cls_Value);
                 Cls_Value = SrDrMP(Cls_Value);
+                Cls_Value = SrDrBP(Cls_Value);
+            }
+            {
+                Cls_Ar_Same = new Cls[1_000];
+                Cls_Ar_NSame = new Cls[1_000];
+                for (int i = 0; i < Cls_Ar_Same.Length; i++)
+                {
+                    Cls_Ar_Same[i] = Cls_Value;
+                    Cls_Ar_NSame[i] = new Cls() { IntValue = Int_Value, StringValue = String_Value };
+
+                }
+                Cls_Ar_Same = SrDr(Cls_Ar_Same);
+                Cls_Ar_Same = SrDrMP(Cls_Ar_Same);
+                Cls_Ar_NSame = SrDr(Cls_Ar_NSame);
+                Cls_Ar_NSame = SrDrMP(Cls_Ar_NSame);
             }
             {
                 StrUN_Value.Int1Value = Int_Value;
                 StrUN_Value.Int2Value = Int_Value;
                 StrUN_Value = SrDr(StrUN_Value);
                 StrUN_Value = SrDrMP(StrUN_Value);
+                StrUN_Value = SrDrBP(StrUN_Value);
             }
             {
                 StrMN_Value.ClsValue = Cls_Value;
                 StrMN_Value.IntValue = Int_Value;
                 StrMN_Value = SrDr(StrMN_Value);
-                StrMN_Value =SrDrMP(StrMN_Value);
+                StrMN_Value = SrDrMP(StrMN_Value);
+                StrMN_Value = SrDrBP(StrMN_Value);
             }
         }
 
@@ -101,6 +121,12 @@ namespace BenchmarkExample
 
         [Benchmark]
         public object ArInteger() => SrDr(Int_Ar);
+
+        [Benchmark]
+        public object ArSameCls() => SrDr(Cls_Ar_Same);
+
+        [Benchmark]
+        public object ArNSameCls() => SrDr(Cls_Ar_NSame);
 
         [Benchmark]
         public object String() => SrDr(String_Value);
@@ -122,6 +148,12 @@ namespace BenchmarkExample
 
         [Benchmark]
         public object ArInteger_MP() => SrDrMP(Int_Ar);
+
+        [Benchmark]
+        public object ArSameCls_MP() => SrDrMP(Cls_Ar_Same);
+
+        [Benchmark]
+        public object ArNSameCls_MP() => SrDrMP(Cls_Ar_NSame);
 
         [Benchmark]
         public object String_MP() => SrDrMP(String_Value);

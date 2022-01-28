@@ -50,9 +50,9 @@ namespace Monsajem_Incs.Database.Base
                 {
                     Field.NewField.SetValue(NewItem,Field.OldField.GetValue(Item));
                 }
-                Upgrid?.Invoke((Item, NewItem));
+                Upgrid?.Invoke((Item.Value, NewItem));
                 NewTbl.BasicActions.Items.DeleteByPosition(i);
-                NewTbl.BasicActions.Items.Insert(NewItem, i);
+                NewTbl.BasicActions.Items.Insert((NewItem,0), i);
             }
 
             //if (tbl.KeysInfo.Keys.Length > 0)

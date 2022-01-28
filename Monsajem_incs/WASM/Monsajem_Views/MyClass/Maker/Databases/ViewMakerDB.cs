@@ -30,7 +30,7 @@ namespace Monsajem_Incs.Views.Maker.Database
                 () => OnUpdate?.Invoke((TableInfo,Key)),
                 () => OnDelete?.Invoke((TableInfo, Key)));
             }
-            return HolderViewMaker<Table<ValueType,KeyType>>.FillHolder((Table,Views));
+            return HolderViewItemMaker<Table<ValueType,KeyType>>.FillHolder((Table,Views));
         }
     }
 }

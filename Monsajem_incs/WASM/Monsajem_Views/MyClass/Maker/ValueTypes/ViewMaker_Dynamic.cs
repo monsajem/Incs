@@ -30,22 +30,33 @@ namespace Monsajem_Incs.Views.Maker.ValueTypes
             ViewItemMaker<ValueType>.OnMakeView((obj,OnEdit,OnDelete));
         
         public static void SetView<ValueType, ViewType>(
-            Action<(ViewType View, ValueType Value)> FillView=null,
-            Action<(ViewType View, Action Edit)> RegisterEdit=null,
-            Action<(ViewType View, Action Delete)> RegisterDelete = null,
-            Func<ViewType, HTMLElement> GetMain = null)
+            Action<Options<ValueType,ViewType>> Maker = null)
             where ViewType : new()
         {
-            var ViewMaker = ViewItemMaker<ValueType, ViewType>.Default;
-            if (FillView!=null)
-                ViewMaker.FillView = FillView;
-            if (RegisterEdit != null)
-                ViewMaker.RegisterEdit = RegisterEdit;
-            if (RegisterDelete != null)
-                ViewMaker.RegisterDelete = RegisterDelete;
-            if(GetMain!=null)
-                ViewMaker.GetMain = GetMain;
-            ViewItemMaker<ValueType>.OnMakeView = ViewMaker.MakeHtml;
+            var ViewItemMaker = ViewItemMaker<ValueType, ViewType>.Default;
+
+            var Options = new Options<ValueType, ViewType>();
+            Maker?.Invoke(Options);
+
+            if (Options.FillView != null)
+                ViewItemMaker.FillView = Options.FillView;
+            if (Options.RegisterEdit != null)
+                ViewItemMaker.RegisterEdit = Options.RegisterEdit;
+            if (Options.RegisterDelete != null)
+                ViewItemMaker.RegisterDelete = Options.RegisterDelete;
+            if(Options.GetMain !=null)
+                ViewItemMaker.GetMain = Options.GetMain;
+            ViewItemMaker<ValueType>.OnMakeView = ViewItemMaker.MakeHtml;
+        }
+
+        public class Options<ValueType, ViewType>
+            where ViewType : new()
+        {
+
+            public Action<(ViewType View, ValueType Value)> FillView;
+            public Action<(ViewType View, Action Edit)> RegisterEdit;
+            public Action<(ViewType View, Action Delete)> RegisterDelete;
+            public Func<ViewType, HTMLElement> GetMain;
         }
 
         public static void SetHolderView<HolderType>(
@@ -53,9 +64,9 @@ namespace Monsajem_Incs.Views.Maker.ValueTypes
             Func<HolderType,HTMLElement> MakeHolder = null)
         {
             if (FillHolder != null)
-                HolderViewMaker<HolderType>.FillHolder = FillHolder;
+                HolderViewItemMaker<HolderType>.FillHolder = FillHolder;
             if (MakeHolder != null)
-                HolderViewMaker<HolderType>.MakeHolder = MakeHolder;
+                HolderViewItemMaker<HolderType>.MakeHolder = MakeHolder;
         }
     }
     internal class ViewItemMaker<ValueType>
@@ -66,7 +77,7 @@ namespace Monsajem_Incs.Views.Maker.ValueTypes
                 throw new Exception("Show View Missing in " + typeof(ValueType).FullName);
     }
 
-    internal class HolderViewMaker<HolderType>
+    internal class HolderViewItemMaker<HolderType>
     {
         public static Func<HolderType,HTMLElement> MakeHolder = 
             (c) => new Monsajem_Incs.Resources.Base.Html.Div_html().Main;

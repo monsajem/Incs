@@ -24,6 +24,10 @@ namespace _test
 
             var FileStream = System.IO.File.Open(System.Environment.CurrentDirectory + "\\a.txt", System.IO.FileMode.Truncate);
 
+            var MemoryStream = new System.IO.MemoryStream();
+
+            var Sr = new List<int>();
+
             var Stream = new StreamCollection<int>(FileStream);
 
             //// warm up
@@ -31,7 +35,7 @@ namespace _test
             Stream.Insert(0);
             Stream.DeleteByPosition(0);
 
-            var Count = 4000000;
+            var Count = 1_000_000;
 
             var InsertTime = Timing.run(() =>
             {

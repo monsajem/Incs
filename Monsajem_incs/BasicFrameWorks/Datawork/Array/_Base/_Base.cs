@@ -310,6 +310,14 @@ namespace Monsajem_Incs.Collection.Array.Base
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
+        public virtual (int OldIndex,int NewIndex) BinaryUpdate(ArrayType OldValue, ArrayType NewValue)
+        {
+            var OldIndex = BinaryDelete(OldValue).Index;
+            var NewIndex = BinaryInsert(NewValue);
+            return (OldIndex, NewIndex);
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
         public (int Index, ArrayType Value) BinarySearch(ArrayType key)
         {
@@ -331,7 +339,7 @@ namespace Monsajem_Incs.Collection.Array.Base
             {
                 mid = (minNum + maxNum) / 2;
                 Value = this[mid];
-                var cmp =Comparer.Compare(Value,key);
+                var cmp = Comparer.Compare(Value,key);
                 if (cmp == 0)
                 {
                     return (mid, Value);
