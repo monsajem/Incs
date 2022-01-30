@@ -13,13 +13,12 @@ namespace Monsajem_Incs.Views.Maker.Database
 {
     public static partial class EditItemMaker
     {
-        public static async Task<HTMLElement> MakeShowView<ValueType, KeyType>(
+        public static HTMLElement MakeShowView<ValueType, KeyType>(
             this Table<ValueType, KeyType> Table,
             Action<(TableFinder.TableInfo TableInfo,KeyType Key)> OnUpdate = null,
             Action<(TableFinder.TableInfo TableInfo, KeyType Key)> OnDelete = null)
             where KeyType : IComparable<KeyType>
         {
-            await Table.SyncUpdate();
             var Views = new HTMLElement[Table.Length];
             var i = 0;
             var TableInfo = TableFinder.FindTable(Table.TableName);

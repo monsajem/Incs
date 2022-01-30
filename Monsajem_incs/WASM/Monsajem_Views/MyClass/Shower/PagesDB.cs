@@ -59,28 +59,28 @@ namespace Monsajem_Incs.Views.Shower.Database
             var TableInfo = TableFinder.FindTable(Data.TableName);
             if (Data.RelationName=="")
             {
-                MainElement.ReplaceChilds(await TableInfo.MakeShowView(
+                MainElement.ReplaceChilds(TableInfo.MakeShowViewForItems(
                     OnUpdate:(c)=>
                     {
                         new UpdatePage().Show(c.TableInfo.TableName, c.Key);
                     },
-                    OnDelete:async (c)=>
+                    OnDelete:(c)=>
                     {
-                        await c.TableInfo.Delete(c.Key);
+                        c.TableInfo.Delete(c.Key);
                         this.Ready();
                     }));
             }
             else
             {
                 var RelationInfo = TableInfo.FindRelation(Data.RelationName);
-                MainElement.ReplaceChilds(await RelationInfo.MakeShowView(Data.ItemKey,
+                MainElement.ReplaceChilds(RelationInfo.MakeShowViewForItems(Data.ItemKey,
                     OnUpdate: (c) =>
                     {
                         new UpdatePage().Show(c.TableInfo.TableName, c.Key);
                     },
-                    OnDelete: async (c) =>
+                    OnDelete: (c) =>
                     {
-                        await c.TableInfo.Delete(c.Key);
+                        c.TableInfo.Delete(c.Key);
                         this.Ready();
                     }));
             }

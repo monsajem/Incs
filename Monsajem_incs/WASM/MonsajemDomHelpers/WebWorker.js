@@ -1,4 +1,5 @@
-﻿self.Module = {};
+﻿var ProccessNameSpace = '[Monsajem_incs]WebAssembly.Browser.MonsajemDomHelpers.WebProcess';
+self.Module = {};
 Module.print = msg => console.log(`WASM-WORKER: ${msg}`);
 Module.printErr = msg => {
     console.error(`WASM-WORKER: ${msg}`);
@@ -9,7 +10,7 @@ Module.preloadPlugins = [];
 
 Module.locateFile = fileName => {
     switch (fileName) {
-        case 'dotnet.wasm': return self.MN.baseUrl+'dotnet.wasm';
+        case 'dotnet.wasm': return self.MN.baseUrl + 'dotnet.wasm';
         default: return fileName;
     }
 };
@@ -25,12 +26,11 @@ Module.preRun.push(() => {
 
     MONO.loaded_files = [];
 
-     self.MN.AssemblyFilenames.forEach(url => {
-
+    self.MN.AssemblyFilenames.forEach(url => {
         const runDependencyId = `blazor:${url}`;
         addRunDependency(runDependencyId);
 
-         asyncLoad(self.MN.baseUrl + url).then(
+        asyncLoad(self.MN.baseUrl + url).then(
             data => {
                 const heapAddress = Module._malloc(data.length);
                 const heapMemory = new Uint8Array(Module.HEAPU8.buffer, heapAddress, data.length);
@@ -57,11 +57,8 @@ Module.postRun.push(() => {
     const load_runtime = Module.cwrap('mono_wasm_load_runtime', null, ['string', 'number']);
     load_runtime('appBinDir', 0);
     MONO.mono_wasm_runtime_is_ready = true;
-    self.MN.RunAction = Module.mono_bind_static_method('[Monsajem_Incs_WASM]WebAssembly.Browser.MonsajemDomHelpers.WebProcess:RunAction');
-    self.MN.RunFunction = Module.mono_bind_static_method('[Monsajem_Incs_WASM]WebAssembly.Browser.MonsajemDomHelpers.WebProcess:RunFunction');
-    self.MN.RunFunctionTask = Module.mono_bind_static_method('[Monsajem_Incs_WASM]WebAssembly.Browser.MonsajemDomHelpers.WebProcess:RunFunctionTask');
-    self.MN.RunFunctionTaskResult = Module.mono_bind_static_method('[Monsajem_Incs_WASM]WebAssembly.Browser.MonsajemDomHelpers.WebProcess:RunFunctionTaskResult');
-    Module.mono_bind_static_method('[Monsajem_Incs_WASM]WebAssembly.Browser.MonsajemDomHelpers.WebProcess:ThisIsInWorker')();
+    self.MN.RunFunctionTaskResult = Module.mono_bind_static_method(ProccessNameSpace + ':RunFunctionTaskResult');
+    Module.mono_bind_static_method(ProccessNameSpace + ':ThisIsInWorker')();
 });
 
 function asyncLoad(url, reponseType) {
@@ -87,4 +84,4 @@ function asyncLoad(url, reponseType) {
     });
 }
 
-self.importScripts(self.MN.baseUrl+`dotnet.5.0.0.js`);
+self.importScripts(self.MN.baseUrl + `dotnet.5.0.0.js`);

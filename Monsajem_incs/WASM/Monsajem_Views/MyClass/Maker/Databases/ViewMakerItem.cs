@@ -66,9 +66,9 @@ namespace Monsajem_Incs.Views.Maker.Database
             var Value = Table[Key].Value;
             var TableInfo = TableFinder.FindTable(Table.TableName);
             return (Table, Value).MakeEditView(
-                   async (c) =>
+                   (c) =>
                    {
-                       await TableInfo.Update(Key, c.NewValue.Value);
+                       TableInfo.Update(Key, c.NewValue.Value);
                        Done?.Invoke();
                    });
         }
@@ -80,9 +80,9 @@ namespace Monsajem_Incs.Views.Maker.Database
         {
             var TableInfo = TableFinder.FindTable(Table.TableName);
             return (Table, Value: default(ValueType)).MakeEditView(
-                   async (c) =>
+                   (c) =>
                    {
-                       await TableInfo.Insert(c.NewValue.Value);
+                       TableInfo.Insert(c.NewValue.Value);
                        Done?.Invoke();
                    });
         }
@@ -95,9 +95,9 @@ namespace Monsajem_Incs.Views.Maker.Database
             var TableInfo = TableFinder.FindTable((string)Table.HolderTable.Table.TableName);
             var RelationInfo = TableInfo.FindRelation(Table.TableName);
             return (Table, Value: default(ValueType)).MakeEditView(
-                   async (c) =>
+                   (c) =>
                    {
-                       await RelationInfo.Insert(Table.HolderTable.Key, c.NewValue.Value);
+                       RelationInfo.Insert(Table.HolderTable.Key, c.NewValue.Value);
                        Done?.Invoke();
                    });
         }

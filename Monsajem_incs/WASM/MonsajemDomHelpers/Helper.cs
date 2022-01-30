@@ -197,7 +197,7 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
     {
         private readonly static string WebWorkerJs = ((Func<string>)(() => {
             var assembly = typeof(WebWorker).Assembly;
-            var resourceName = "Monsajem_Incs_WASM.MonsajemDomHelpers.WebWorker.js";
+            var resourceName = "Monsajem_incs.WASM.MonsajemDomHelpers.WebWorker.js";
             using (Stream stream = assembly.GetManifestResourceStream(resourceName))
             using (StreamReader reader = new StreamReader(stream))
             {
@@ -243,27 +243,26 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
 
         public async Task Run(Action Action)
         {
-            await IsReady;
-            Worker.PostMessage("MNData", Uint8Array.From(Action.Serialize()));
-            var Message = Worker.GetMessage();
-            await Worker.Run($"self.MN.RunAction()");
-            await Message;
+            await Run(async () =>
+            {
+                Action();
+                return null;
+            });
         }
         public async Task<object> Run(Func<object> Func)
         {
-            await IsReady;
-            Worker.PostMessage("MNData", Uint8Array.From(Func.Serialize()));
-            var Message = Worker.GetMessage();
-            await Worker.Run($"self.MN.RunFunction()");
-            return (await Message).GetData<Uint8Array>().ToArray().Deserialize<object>();
+            return await Run(async () =>
+            {
+                return Func();
+            });
         }
         public async Task Run(Func<Task> Action)
         {
-            await IsReady;
-            Worker.PostMessage("MNData", Uint8Array.From(Action.Serialize()));
-            var Message = Worker.GetMessage();
-            await Worker.Run($"self.MN.RunFunctionTask()");
-            await Message;
+            await Run(async () =>
+            {
+                await Action();
+                return null;
+            });
         }
         public async Task<object> Run(Func<Task<object>> Func)
         {
@@ -271,32 +270,23 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
             Worker.PostMessage("MNData", Uint8Array.From(Func.Serialize()));
             var Message = Worker.GetMessage();
             await Worker.Run($"self.MN.RunFunctionTaskResult()");
-            return (await Message).GetData<Uint8Array>().ToArray().Deserialize<object>();
-        }
-
-        private static void RunAction()
-        {
-            ((Uint8Array)Runtime.GetGlobalObject("MNData")).ToArray().
-                Deserialize<Action>()();
-            js.Eval("postMessage('');");
-        }
-        private static void RunFunction()
-        {
-            var result = ((Uint8Array)Runtime.GetGlobalObject("MNData")).ToArray().
-                            Deserialize<Func<object>>()();
-            WebWorker.CurrentWebWorker.PostMessage(Uint8Array.From(result.Serialize()));
-        }
-        private static void RunFunctionTask()
-        {
-            ((Uint8Array)Runtime.GetGlobalObject("MNData")).ToArray().
-                Deserialize<Func<Task>>()();
-            js.Eval($"postMessage('');");
+            var Result = (await Message).GetData<Uint8Array>().ToArray();
+            if (Result.Length == 0)
+                throw new Exception("Error On Proccess");
+            return Result.Deserialize<object>();
         }
         private static async void RunFunctionTaskResult()
         {
-            var result = await ((Uint8Array)Runtime.GetGlobalObject("MNData")).ToArray().
-                            Deserialize<Func<Task<object>>>()();
-            WebWorker.CurrentWebWorker.PostMessage(Uint8Array.From(result.Serialize()));
+            try
+            {
+                var result = await ((Uint8Array)Runtime.GetGlobalObject("MNData")).ToArray().
+                Deserialize<Func<Task<object>>>()();
+                WebWorker.CurrentWebWorker.PostMessage(Uint8Array.From(result.Serialize()));
+            }
+            catch
+            {
+                WebWorker.CurrentWebWorker.PostMessage(Uint8Array.From(new byte[0]));
+            }
         }
     }
 }

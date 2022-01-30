@@ -69,11 +69,11 @@ namespace Monsajem_Incs.Database.Base
                 throw new Exception("ConvertKeyToString not implemented in table finder!");
             public virtual object ConvertStringToKey(string Key)=>
                 throw new Exception("ConvertKeyToString not implemented in table finder!");
-            public virtual Task Insert(object Data) =>
+            public virtual void Insert(object Data) =>
                 throw new Exception("SyncInsert not implemented in table finder!");
-            public virtual Task Update(object Key, object Data) =>
+            public virtual void Update(object Key, object Data) =>
                 throw new Exception("SyncUpdate not implemented in table finder!");
-            public virtual Task Delete(object Key) =>
+            public virtual void Delete(object Key) =>
                 throw new Exception("SyncDelete not implemented in table finder!");
 
             public virtual Task SendUpdate(IAsyncOprations Client) =>
@@ -83,12 +83,12 @@ namespace Monsajem_Incs.Database.Base
             public virtual Task SyncUpdate() =>
                 throw new Exception("SyncUpdate not implemented in table finder!");
 
-            public virtual HTMLElement MakeShowView(
+            public virtual HTMLElement MakeShowViewForItem(
                    object Key,
                    Action<(TableInfo TableInfo, object Key)> OnUpdate = null,
                    Action<(TableInfo TableInfo, object Key)> OnDelete = null) =>
                 throw new Exception("MakeShowView for item not implemented in table finder!");
-            public virtual Task<HTMLElement> MakeShowView(
+            public virtual HTMLElement MakeShowViewForItems(
                     Action<(TableInfo TableInfo, object Key)> OnUpdate = null,
                     Action<(TableInfo TableInfo, object Key)> OnDelete = null) =>
                 throw new Exception("MakeShowView for table not implemented in table finder!");
@@ -101,11 +101,11 @@ namespace Monsajem_Incs.Database.Base
                     Action Done = null) =>
                 throw new Exception("MakeShowView for item not implemented in table finder!");
 
-            public HTMLElement MakeShowView(
+            public HTMLElement MakeShowViewForItem(
                     string Key,
                     Action<(TableInfo TableInfo, object Key)> OnUpdate = null,
                     Action<(TableInfo TableInfo, object Key)> OnDelete = null) =>
-                MakeShowView(ConvertStringToKey(Key));
+                MakeShowViewForItem(ConvertStringToKey(Key));
 
             public HTMLElement MakeEditView(
                     string Key,
@@ -135,55 +135,20 @@ namespace Monsajem_Incs.Database.Base
             public override object ConvertStringToKey(string Key) =>
                 Key.ConvertFromString<KeyType>();
 
-            public override async Task Insert(object Value)
-            {
-                await Remote(
-                async (Client) =>
-                {
-                    var Info = await Client.GetData<(string TableName, ValueType Value)>();
-                    FindTable<ValueType, KeyType>(Info.TableName).Table.Insert(Info.Value);
+            public override void Insert(object Value)=>
+                Table.Insert((ValueType)Value);
+            
 
-                },
-                async (Client) =>
-                {
-                    await Client.SendData((TableName, (ValueType)Value));
-                });
-            }
-
-            public override async Task Update(object Key, object Value)
-            {
-                await Remote(
-                async (Client) =>
-                {
-                    var Info = await Client.GetData<(string TableName,KeyType Key, ValueType Value)>();
-                    var Table = FindTable<ValueType, KeyType>(Info.TableName).Table;
-                    Table.Update(Info.Key,
-                            (c)=> 
-                            {
-                                var Value = Info.Value;
-                                Table.MoveRelations(c, Value);
-                                return Value;
+            public override void Update(object Key, object Value)=>
+                Table.Update((KeyType)Key,
+                            (c)=>{
+                                var NewValue =(ValueType) Value;
+                                Table.MoveRelations(c, NewValue);
+                                return NewValue;
                             });
-                },
-                async (Client) =>
-                {
-                    await Client.SendData((TableName,(KeyType) Key, (ValueType)Value));
-                });
-            }
 
-            public override async Task Delete(object Key)
-            {
-                await Remote(
-                async (Client) =>
-                {
-                    var Info = await Client.GetData<(string TableName, KeyType Key)>();
-                    FindTable<ValueType, KeyType>(Info.TableName).Table.Delete(Info.Key);
-                },
-                async (Client) =>
-                {
-                    await Client.SendData((TableName, (KeyType)Key));
-                });
-            }
+            public override void Delete(object Key)=>
+                Table.Delete((KeyType)Key);
 
             public override async Task SendUpdate(IAsyncOprations Client)
             {
@@ -209,16 +174,16 @@ namespace Monsajem_Incs.Database.Base
                             });
             }
 
-            public async override Task<HTMLElement> MakeShowView(
+            public override HTMLElement MakeShowViewForItems(
                 Action<(TableInfo TableInfo, object Key)> OnUpdate = null,
                 Action<(TableInfo TableInfo, object Key)> OnDelete = null)
             {
-                return await Table.MakeShowView(
+                return Table.MakeShowView(
                                     OnUpdate: (c) => OnUpdate?.Invoke(c),
                                     OnDelete: (c) => OnDelete?.Invoke(c));
             }
 
-            public override HTMLElement MakeShowView(
+            public override HTMLElement MakeShowViewForItem(
                 object Key,
                 Action<(TableInfo TableInfo, object Key)> OnUpdate = null,
                 Action<(TableInfo TableInfo, object Key)> OnDelete = null)
@@ -260,13 +225,13 @@ namespace Monsajem_Incs.Database.Base
             public virtual object GetRelationTableByKey(object HolderKey) =>
                 throw new Exception("Not impelemented.");
 
-            public virtual Task Insert(object HolderKey , object Data) =>
+            public virtual void Insert(object HolderKey , object Data) =>
                 throw new Exception("SyncInsert not implemented in table finder!");
-            public virtual Task Delete(object HolderKey, object Key) =>
+            public virtual void Delete(object HolderKey, object Key) =>
                 throw new Exception("SyncDelete not implemented in table finder!");
-            public virtual Task Accept(object HolderKey, object Key) =>
+            public virtual void Accept(object HolderKey, object Key) =>
                 throw new Exception("SyncDelete not implemented in table finder!");
-            public virtual Task Ignore(object HolderKey, object Key) =>
+            public virtual void Ignore(object HolderKey, object Key) =>
                 throw new Exception("SyncDelete not implemented in table finder!");
 
             public virtual Task SendUpdate(object HolderKey, IAsyncOprations Client) =>
@@ -283,7 +248,7 @@ namespace Monsajem_Incs.Database.Base
                    Action<(TableInfo TableInfo, object Key)> OnDelete = null) =>
                 throw new Exception("MakeShowView for item not implemented in table finder!");
 
-            public virtual Task<HTMLElement> MakeShowView(
+            public virtual HTMLElement MakeShowViewForItems(
                 object HolderKey,
                 Action<(TableInfo TableInfo, object Key)> OnUpdate = null,
                 Action<(TableInfo TableInfo, object Key)> OnDelete = null) =>
@@ -294,7 +259,7 @@ namespace Monsajem_Incs.Database.Base
                 Action Done = null) =>
                     throw new Exception(nameof(MakeInsertView) + " for item not implemented in table finder!");
 
-            public HTMLElement MakeShowView(
+            public HTMLElement MakeShowViewForItem(
                 string HolderKey,
                 string Key,
                 Action<(TableInfo TableInfo, object Key)> OnUpdate = null,
@@ -302,11 +267,11 @@ namespace Monsajem_Incs.Database.Base
                     MakeShowView(ConvertStringToHolderKey(HolderKey),
                                  ConvertStringToKey(Key),OnUpdate,OnDelete);
 
-            public Task<HTMLElement> MakeShowView(
+            public HTMLElement MakeShowViewForItems(
                 string HolderKey,
                 Action<(TableInfo TableInfo, object Key)> OnUpdate = null,
                 Action<(TableInfo TableInfo, object Key)> OnDelete = null) =>
-                     MakeShowView(ConvertStringToHolderKey(HolderKey),
+                     MakeShowViewForItems(ConvertStringToHolderKey(HolderKey),
                      OnUpdate, OnDelete);
 
             public virtual HTMLElement MakeInsertView(
@@ -339,59 +304,17 @@ namespace Monsajem_Incs.Database.Base
             public override object ConvertStringToKey(string Key) => Key.ConvertFromString<RelationKeyType>();
             public override string ConvertHolderKeyToString(object Key) => ((HolderKeyType)Key).ConvertToString();
             public override object ConvertStringToHolderKey(string Key) => Key.ConvertFromString<HolderKeyType>();
-            public override async Task Insert(object HolderKey,object Value)
-            {
-                await Remote(
-                async (Client) =>
-                {
-                    var Info = await Client.GetData<(string HolderName, string RelationName, HolderKeyType HolderKey, RelationValueType Value)>();
-                    var RelationInfo = FindTable(Info.HolderName).FindRelation(Info.RelationName) 
-                                        as RelationInfo<HolderKeyType, HolderValueType, RelationKeyType, RelationValueType>;
-                    RelationInfo.GetterRealtionByKey(Info.HolderKey).Insert(Info.Value);
-                },
-                async (Client) =>
-                {
-                    await Client.SendData((Holder.TableName,RelationName,(HolderKeyType)HolderKey,(RelationValueType) Value));
-                });
-            }
+            public override void Insert(object HolderKey,object Value)=>
+                GetterRealtionByKey((HolderKeyType)HolderKey).Insert((RelationValueType)Value);
 
-            public override async Task Delete(object HolderKey, object Key)
-            {
-                var Table = GetterRealtionByKey((HolderKeyType)HolderKey);
-                await FindTable(Table.Parent.TableName).Delete(Key);
-            }
+            public override void Delete(object HolderKey, object Key) =>
+                GetterRealtionByKey((HolderKeyType)HolderKey).Delete((RelationKeyType)Key);
 
-            public override async Task Accept(object HolderKey, object Key)
-            {
-                await Remote(
-                async (Client) =>
-                {
-                    var Info = await Client.GetData<(string HolderName, string RelationName, HolderKeyType HolderKey, RelationKeyType Key)>();
-                    var RelationInfo = FindTable(Info.HolderName).FindRelation(Info.RelationName)
-                                        as RelationInfo<HolderKeyType, HolderValueType, RelationKeyType, RelationValueType>;
-                    RelationInfo.GetterRealtionByKey(Info.HolderKey).Accept(Info.Key);
-                },
-                async (Client) =>
-                {
-                    await Client.SendData((Holder.TableName, RelationName, (HolderKeyType)HolderKey, (RelationValueType)Key));
-                });
-            }
+            public override void Accept(object HolderKey, object Key)=>
+                GetterRealtionByKey((HolderKeyType)HolderKey).Accept((RelationKeyType)Key);
 
-            public override async Task Ignore(object HolderKey, object Key)
-            {
-                await Remote(
-                async (Client) =>
-                {
-                    var Info = await Client.GetData<(string HolderName, string RelationName, HolderKeyType HolderKey, RelationKeyType Key)>();
-                    var RelationInfo = FindTable(Info.HolderName).FindRelation(Info.RelationName)
-                                        as RelationInfo<HolderKeyType, HolderValueType, RelationKeyType, RelationValueType>;
-                    RelationInfo.GetterRealtionByKey(Info.HolderKey).Ignore(Info.Key);
-                },
-                async (Client) =>
-                {
-                    await Client.SendData((Holder.TableName, RelationName, (HolderKeyType)HolderKey, (RelationValueType)Key));
-                });
-            }
+            public override void Ignore(object HolderKey, object Key)=>
+                GetterRealtionByKey((HolderKeyType)HolderKey).Ignore((RelationKeyType)Key);
 
             public override async Task SendUpdate(object HolderKey, IAsyncOprations Client)
             {
@@ -427,13 +350,13 @@ namespace Monsajem_Incs.Database.Base
                         });
             }
 
-            public override async Task<HTMLElement> MakeShowView(
+            public override HTMLElement MakeShowViewForItems(
                 object HolderKey,
                 Action<(TableInfo TableInfo, object Key)> OnUpdate = null,
                 Action<(TableInfo TableInfo, object Key)> OnDelete = null)
             {
                 var Table = GetterRealtionByKey((HolderKeyType)HolderKey);
-                return await Table.MakeShowView(
+                return Table.MakeShowView(
                                OnUpdate: (c) => OnUpdate?.Invoke(c),
                                OnDelete: (c) => OnDelete?.Invoke(c));
             }

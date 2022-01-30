@@ -75,19 +75,21 @@ namespace Monsajem_Client
 
             //await Data.Groups.SyncUpdate();
 
+            Data.Groups.Insert((c) => c.Name = "aaa'");
+
             Data.Groups.ShowItems();
 
             return;
 
-            MainElement.ReplaceChilds(await Data.Groups.MakeShowView(
-                async (c) =>
+            MainElement.ReplaceChilds(Data.Groups.MakeShowView(
+                (c) =>
                 {
                     MainElement.ReplaceChilds(Data.Groups.MakeEditView(c.Key));
                     Console.WriteLine("Edit" + c.ToString());
                 },
-                async (c) =>
+                (c) =>
                 {
-                    await c.TableInfo.Delete(c.Key);
+                    c.TableInfo.Delete(c.Key);
                     Console.WriteLine("Delete" + c.ToString());
                 }));
         }

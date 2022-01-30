@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30711.63
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorApp_MultiProcessTest", "BlazorApp_MultiProcessTest\BlazorApp_MultiProcessTest.csproj", "{D89AC223-B777-43DA-9213-8BA2AC8C365E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{5A6AD48A-6487-4730-A5E1-D7131BBAB9F3}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monsajem_incs", "..\..\..\Monsajem_incs\Monsajem_incs.csproj", "{B14E287C-D14B-4E0C-8780-ECC5319EE7A6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WASM_NetCore", "..\..\..\Others\WASM\WASM_NetCore\WASM_NetCore.csproj", "{11159241-55A5-4831-8685-F612D5EBC727}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D89AC223-B777-43DA-9213-8BA2AC8C365E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D89AC223-B777-43DA-9213-8BA2AC8C365E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D89AC223-B777-43DA-9213-8BA2AC8C365E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D89AC223-B777-43DA-9213-8BA2AC8C365E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B14E287C-D14B-4E0C-8780-ECC5319EE7A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B14E287C-D14B-4E0C-8780-ECC5319EE7A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B14E287C-D14B-4E0C-8780-ECC5319EE7A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B14E287C-D14B-4E0C-8780-ECC5319EE7A6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11159241-55A5-4831-8685-F612D5EBC727}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11159241-55A5-4831-8685-F612D5EBC727}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11159241-55A5-4831-8685-F612D5EBC727}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11159241-55A5-4831-8685-F612D5EBC727}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{B14E287C-D14B-4E0C-8780-ECC5319EE7A6} = {5A6AD48A-6487-4730-A5E1-D7131BBAB9F3}
+		{11159241-55A5-4831-8685-F612D5EBC727} = {5A6AD48A-6487-4730-A5E1-D7131BBAB9F3}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {67844AAB-1D7D-4156-87F3-47688DC84923}
+	EndGlobalSection
+EndGlobal
