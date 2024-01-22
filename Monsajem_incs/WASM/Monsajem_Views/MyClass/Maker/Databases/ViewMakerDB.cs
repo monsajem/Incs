@@ -1,35 +1,41 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using WebAssembly.Browser.DOM;
-using Monsajem_Incs.Collection.Array;
-using Monsajem_Incs.Database.Base;
+﻿using Monsajem_Incs.Database.Base;
 using Monsajem_Incs.Views.Maker.ValueTypes;
-using static Monsajem_Client.SafeRun;
-using static Monsajem_Client.Network;
+using System;
+using WebAssembly.Browser.DOM;
+using System.Linq;
+using System.Collections.Generic;
+using static Monsajem_Incs.Collection.Array.Extentions;
 
 namespace Monsajem_Incs.Views.Maker.Database
 {
     public static partial class EditItemMaker
     {
+
         public static HTMLElement MakeShowView<ValueType, KeyType>(
             this Table<ValueType, KeyType> Table,
-            Action<(TableFinder.TableInfo TableInfo,KeyType Key)> OnUpdate = null,
+            string Query = null,
+            Action<(TableFinder.TableInfo TableInfo, KeyType Key)> OnUpdate = null,
             Action<(TableFinder.TableInfo TableInfo, KeyType Key)> OnDelete = null)
             where KeyType : IComparable<KeyType>
         {
-            var Views = new HTMLElement[Table.Length];
-            var i = 0;
-            var TableInfo = TableFinder.FindTable(Table.TableName);
-            foreach (var Key in Table.KeysInfo.Keys)
+            HTMLElement[] Views = new HTMLElement[0];
+            string TableName;
+            var PartTable = Table as PartOfTable<ValueType, KeyType>;
+            if (PartTable != null)
+                TableName = PartTable.Parent.TableName;
+            else
+                TableName = Table.TableName;
+
+            var TableInfo = TableFinder.FindTable(Table,TableName);
+            foreach (var Value in TableInfo.SelectorItems((Table.Select((c)=>c.Value), Query)))
             {
-                var Value = Table[Key].Value;
-                Views[i++] = (Table, Value).MakeView(
-                () => OnUpdate?.Invoke((TableInfo,Key)),
+                var Key = Table.GetKey(Value);
+                var View = (Table, Value).MakeView(
+                () => OnUpdate?.Invoke((TableInfo, Key)),
                 () => OnDelete?.Invoke((TableInfo, Key)));
+                Insert(ref Views,View);
             }
-            return HolderViewItemMaker<Table<ValueType,KeyType>>.FillHolder((Table,Views));
+            return HolderViewItemMaker<Table<ValueType, KeyType>>.FillHolder((Table, Views));
         }
     }
 }

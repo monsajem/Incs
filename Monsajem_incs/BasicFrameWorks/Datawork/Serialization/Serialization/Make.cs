@@ -464,7 +464,7 @@ namespace Monsajem_Incs.Serialization
                              var Key = new LoadedFunc(MethodName + TypeName);
                              if (Serializere.LoadedFuncs_Des.TryGetValue(Key, out LoadedFunc) == false)
                              {
-                                 var ReflectedType = TypeName.GetTypeByName();
+                                 var ReflectedType = Assembly.Assembly.GetType(TypeName);
                                  var Method = ReflectedType.GetMethod(MethodName,
                                      BindingFlags.Public |
                                      BindingFlags.NonPublic |

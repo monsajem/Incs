@@ -1,0 +1,196 @@
+﻿<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="icon" type="image/x-icon" sizes="32x32" href="/favicon_32x32.ico">
+    <link rel="icon" type="image/x-icon" sizes="16x16" href="/favicon_16x16.ico">
+    <meta name="ROBOTS" content="INDEX, FOLLOW">
+    <meta charset="utf-8" lang="en" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="viewport" content="width=device-width , initial-scale=1" />
+    <title>فروشگاه زعفران صادقی</title>
+    <meta name="description"
+          content="فروشگاه صادقی مشهد خیابان هفده 17 شهریور مجتمع سینور طبقه همکف پلاک 270 شماره تماس 09151011972 09381556657">
+
+    <meta name="keywords" content="
+          زعفران , زرشک , نبات , هل , قیمت زعفران , صادقی , 09381556657 , 09151011972 , سینور , سی نور
+          , هفده شهریور, 17 شهریور, مشهد ,
+          ">
+
+    <style>
+        @media (display-mode: standalone) {
+        }
+    </style>
+
+    <script type="text/javascript" class="ClearOnBot">
+        (function (c, l, a, r, i, t, y) {
+            c[a] = c[a] || function () { (c[a].q = c[a].q || []).push(arguments) };
+            t = l.createElement(r); t.async = 1; t.src = "https://www.clarity.ms/tag/" + i;
+            y = l.getElementsByTagName(r)[0]; y.parentNode.insertBefore(t, y);
+        })(window, document, "clarity", "script", "b3551vvr7b");
+    </script>
+
+    <!--<link href="../Files/bootstrap.min.css" rel="stylesheet">
+    <link href="../Files/animate.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../Files/materialize.min.css">
+    <link rel="stylesheet" href="../Files/w3.css">
+    <link rel="stylesheet" href="../FilesMprdaa_data/normalize.css">-->
+    <!--<script src="../Files/jquery-1.12.4.min.js"></script>
+    <script src="../Files/bootstrap-notify.min.js"></script>
+    <script src="../Files/materialize.min.js"></script>
+    <script src="../Files/qrcode.js"></script>-->
+    <!--<script src="../Files/sketch.min.js"></script>-->
+    <!--<script src="../Files/instascan.min.js"></script>-->
+
+</head>
+<body style="background-color:black">
+
+    <script>
+        (function () {
+            var oldLog = console.log;
+            var oldError = console.error;
+
+            function Error_Handler(message) {
+                if (message.toString().includes("Could not load file or assembly")) {
+                    location.reload();
+                }
+                if (message.toString().includes("Failed to start platform")) {
+                    location.reload();
+                }
+                if (message.toString().includes("Failed to fetch")) {
+                    if (message.toString().includes("Function.e.initAsync")) {
+                        location.reload();
+                    }
+                }
+            }
+
+            console.log = function (message) {
+                oldLog.apply(console, arguments);
+            };
+
+            console.error = function (message) {
+                Error_Handler(message);
+                oldError.apply(console, arguments);
+            };
+
+            window.onerror = function (msg, url, line) {
+                Error_Handler(msg);
+            };
+        })();
+    </script>
+    <!--<script>
+
+        var OldConsole = console;
+
+        var Console = {
+            log: OldConsole.log,
+            error: function (c) {
+
+                if (c.toString().indexOf("Failed to start platform") > -1) {
+                    OldConsole.log("Debuging......");
+                    caches.keys().then(function (c) {
+                        var KeysLen = c.length;
+                        c.forEach(function (c) {
+                            caches.delete(c).then(function () {
+                                OldConsole.log("Deleted cache " + c);
+                                KeysLen -= 1;
+                                if (KeysLen == 0) {
+                                    OldConsole.log("Debug Done.");
+                                }
+                            });
+                        });
+                    });
+                }
+
+                OldConsole.error(c);
+            },
+            info: OldConsole.info,
+            groupCollapsed: OldConsole.groupCollapsed,
+        };
+        self.console = Console;
+    </script>-->
+
+    <myApp></myApp>
+    <div id="Loading" class="ClearOnBot" style="transition-duration:0.5s;position:fixed;top:0;left:0;z-index:1000;height:100vh;width:100vw;overflow:hidden;display:flex;align-items: center;justify-content: center;background-color:rgba(0,0,0,1);">
+        <style>
+            .loader {
+                width: 20em;
+                height: 20em;
+                font-size: 10px;
+                position: relative;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+                .loader .face {
+                    position: absolute;
+                    border-radius: 50%;
+                    border-style: solid;
+                    animation: animate 3s linear infinite;
+                }
+
+                    .loader .face:nth-child(1) {
+                        width: 100%;
+                        height: 100%;
+                        color: gold;
+                        border-color: currentColor transparent transparent currentColor;
+                        border-width: 0.2em 0.2em 0em 0em;
+                        --deg: -45deg;
+                        animation-direction: normal;
+                    }
+
+                    .loader .face:nth-child(2) {
+                        width: 70%;
+                        height: 70%;
+                        color: lime;
+                        border-color: currentColor currentColor transparent transparent;
+                        border-width: 0.2em 0em 0em 0.2em;
+                        --deg: -135deg;
+                        animation-direction: reverse;
+                    }
+
+                    .loader .face .circle {
+                        position: absolute;
+                        width: 50%;
+                        height: 0.1em;
+                        top: 50%;
+                        left: 50%;
+                        background-color: transparent;
+                        transform: rotate(var(--deg));
+                        transform-origin: left;
+                    }
+
+                        .loader .face .circle::before {
+                            position: absolute;
+                            top: -0.5em;
+                            right: -0.5em;
+                            content: '';
+                            width: 1em;
+                            height: 1em;
+                            background-color: currentColor;
+                            border-radius: 50%;
+                            box-shadow: 0 0 2em, 0 0 4em, 0 0 6em, 0 0 8em, 0 0 10em, 0 0 0 0.5em rgba(255, 255, 0, 0.1);
+                        }
+
+            @keyframes animate {
+                to {
+                    transform: rotate(1turn);
+                }
+            }
+        </style>
+        <div class="loader">
+            <div class="face">
+                <div class="circle"></div>
+            </div>
+            <div class="face">
+                <div class="circle"></div>
+            </div>
+            <label id="LoaderMessage" style="color:white;font-size:20px">در حال تکمیل</label>
+        </div>
+    </div>
+    <script src="_framework/blazor.webassembly.js" class="ClearOnBot"></script>
+    <div id="AppPreload"></div>
+</body>
+</html>

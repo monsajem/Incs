@@ -1,0 +1,102 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+	<!--sdasd-->
+	
+	<PropertyGroup>
+		<BlazorEnableCompression>false</BlazorEnableCompression>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<BlazorEnableTimeZoneSupport>false</BlazorEnableTimeZoneSupport>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<BlazorWebAssemblyPreserveCollationData>false</BlazorWebAssemblyPreserveCollationData>
+	</PropertyGroup>
+	
+	<PropertyGroup>
+        <PublishTrimmed>true</PublishTrimmed>
+		<TrimMode>Link</TrimMode>
+    </PropertyGroup>
+	
+	<!--sdasd-->
+	
+  <ItemGroup>
+    <Content Remove="wwwroot\index.html~RF17ed9fba.TMP" />
+  </ItemGroup>
+
+	<ItemGroup>
+		<BlazorWebAssemblyLazyLoad Include="System.Security.Cryptography.Primitives.dll" />
+		<BlazorWebAssemblyLazyLoad Include="System.Text.RegularExpressions.dll" />
+		<BlazorWebAssemblyLazyLoad Include="System.Threading.ThreadPool.dll" />
+		<BlazorWebAssemblyLazyLoad Include="System.IO.FileSystem.dll" />
+		<BlazorWebAssemblyLazyLoad Include="System.Net.Sockets.dll" />
+		<BlazorWebAssemblyLazyLoad Include="System.Net.WebSockets.dll" />
+		<BlazorWebAssemblyLazyLoad Include="System.IO.FileSystem.dll" />		
+		<BlazorWebAssemblyLazyLoad Include="System.Text.RegularExpressions.dll" />
+	</ItemGroup>
+
+  <ItemGroup>
+    <None Remove="DB" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\Files\_3D_Type\circ-cross-thin-blue.svg" />
+    <None Include="wwwroot\Files\_3D_Type\down.svg" />
+    <None Include="wwwroot\Files\_3D_Type\fullscreenoff.svg" />
+    <None Include="wwwroot\Files\_3D_Type\fullscreenon.svg" />
+    <None Include="wwwroot\Files\_3D_Type\hotspotoff.svg" />
+    <None Include="wwwroot\Files\_3D_Type\hotspoton.svg" />
+    <None Include="wwwroot\Files\_3D_Type\left.svg" />
+    <None Include="wwwroot\Files\_3D_Type\lightbox_close.svg" />
+    <None Include="wwwroot\Files\_3D_Type\pause.svg" />
+    <None Include="wwwroot\Files\_3D_Type\play.svg" />
+    <None Include="wwwroot\Files\_3D_Type\pointer-zoom-in.svg" />
+    <None Include="wwwroot\Files\_3D_Type\pointer-zoom-off.svg" />
+    <None Include="wwwroot\Files\_3D_Type\pointer-zoom-out.svg" />
+    <None Include="wwwroot\Files\_3D_Type\right.svg" />
+    <None Include="wwwroot\Files\_3D_Type\up.svg" />
+    <None Include="wwwroot\Files\_3D_Type\zoomin.svg" />
+    <None Include="wwwroot\Files\_3D_Type\zoomout.svg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.42" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="5.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="5.0.0" PrivateAssets="all" />
+    <PackageReference Include="Skender.Stock.Indicators" Version="1.22.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Resorces\Monsajem.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Monsajem.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Monsajem_incs">
+      <HintPath>..\..\..\..\Monsajem_incs\bin\Release\net5.0\Monsajem_incs.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Private.Runtime.InteropServices.JavaScript">
+      <HintPath>C:\Users\xtron\Desktop\saffronshop_Site\System.Private.Runtime.InteropServices.JavaScript.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Resorces\Monsajem.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Monsajem.tt</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+</Project>

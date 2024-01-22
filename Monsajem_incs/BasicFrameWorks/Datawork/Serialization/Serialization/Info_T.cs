@@ -1,12 +1,6 @@
-﻿using Monsajem_Incs.Collection.Array.ArrayBased.DynamicSize;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
+﻿using System;
 using System.Runtime.CompilerServices;
 using static Monsajem_Incs.Collection.Array.Extentions;
-using static System.Runtime.Serialization.FormatterServices;
 using static System.Text.Encoding;
 
 namespace Monsajem_Incs.Serialization
@@ -46,17 +40,8 @@ namespace Monsajem_Incs.Serialization
 
                 if(ConstantSize>-1)
                 {
-                    Default_Serializer = (Data, Obj) =>
-                    {
-                        Data.Data.Write(StructToBytes((t)Obj, ConstantSize));
-                    };
-                    Default_Deserializer = (Data) =>
-                    {
-                        var From = Data.From;
-                        var Result = BytesToStruct<t>(Data.Data, From);
-                        Data.From = From + ConstantSize;
-                        return Result;
-                    };
+                    Default_Serializer = (Data, Obj) => StrongSerializer(Data, (t)Obj);
+                    Default_Deserializer = (Data) => StrongDeserializer(Data);
                 }
 
 
@@ -65,6 +50,33 @@ namespace Monsajem_Incs.Serialization
                       Type.BaseType == typeof(MulticastDelegate) |
                       Type.IsPrimitive);
             }
+
+            [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
+            public void StrongSerializer(SerializeData Data, t Obj)
+            {
+                if (ConstantSize > -1)
+                    Data.Data.Write(StructToBytes(Obj, ConstantSize));
+                else
+                    Serializer(Data, Obj);
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
+            public t StrongDeserializer(DeserializeData Data)
+            {
+                if (ConstantSize > -1)
+                {
+                   
+                        var From = Data.From;
+                        var Result = BytesToStruct<t>(Data.Data, From);
+                        Data.From = From + ConstantSize;
+                        return Result;
+                }
+                else
+                {
+                    return (t)Deserializer(Data);
+                }
+            }
+        
 
             private static readonly SerializeInfo<t> SerializerObj = new SerializeInfo<t>();
 

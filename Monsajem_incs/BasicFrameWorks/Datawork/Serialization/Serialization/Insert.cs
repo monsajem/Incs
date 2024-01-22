@@ -101,16 +101,17 @@ namespace Monsajem_Incs.Serialization
                                 var Cache = ICache.Cache;
                                 if (Cache == null)
                                 {
-                                    var FromPosition = Data.Data.Position;
-                                    SR(Data,obj);
-                                    var len = (int)(Data.Data.Length - FromPosition);
-                                    Cache = new byte[len];
-                                    Data.Data.Seek(FromPosition, SeekOrigin.Begin);
-                                    var AllLen = len;
-                                    while (len > 0)
-                                        len -= Data.Data.Read(Cache, AllLen - len, len);
-                                    ICache.Cache = Cache;
-                                    Data.Data.Seek(Data.Data.Length, SeekOrigin.Begin);
+                                    throw new Exception("need implement!");
+                                    //var FromPosition = Data.Data.Position;
+                                    //SR(Data, obj);
+                                    //var len = (int)(Data.Data.Length - FromPosition);
+                                    //Cache = new byte[len];
+                                    //Data.Data.Seek(FromPosition, SeekOrigin.Begin);
+                                    //var AllLen = len;
+                                    //while (len > 0)
+                                    //    len -= Data.Data.Read(Cache, AllLen - len, len);
+                                    //ICache.Cache = Cache;
+                                    //Data.Data.Seek(Data.Data.Length, SeekOrigin.Begin);
                                 }
                                 else
                                 {

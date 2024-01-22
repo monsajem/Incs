@@ -187,7 +187,7 @@ namespace Monsajem_Incs.Database.Base
                     var ThisRelationArray = ThisRelation.Field.Value(Value.Value);
                     var Key = ThisRelationArray.Key;
                     var OldKey = ThisRelationArray.OldKey;
-                    if (Compare(Key, OldKey) != 0)
+                    if (Table<To,ToKeyType>.Compare(Key, OldKey) != 0)
                     {
                         var ChangedKey = this.GetKey(Value.Value);
                         if (Key != null)

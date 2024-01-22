@@ -9,6 +9,6 @@ namespace WebAssembly.Browser.DOM
     {
         internal File(JSObject jSObject):base(jSObject){}
         [Export("name")]
-        public string Name { get => InvokeMethod<string>("name"); }
+        public string Name { get => GetProperty<string>("name"); }
     }
 }

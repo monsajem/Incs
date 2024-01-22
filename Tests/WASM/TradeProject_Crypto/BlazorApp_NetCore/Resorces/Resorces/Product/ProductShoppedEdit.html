@@ -1,0 +1,39 @@
+﻿<html>
+<body>
+    <div id="Main" class="card w3-round-large mn-obj">
+        <div style="position:relative;display:inline-block;min-height:0px;min-width:0px;overflow:hidden;">
+            <h5 id="Name" class="card-title"></h5>
+        </div>
+        <div class="card-body">
+            <table>
+                <tr>
+                    <td style="direction:rtl;-webkit-flex-wrap:nowrap;display: flex;flex-wrap:nowrap;">
+                        <div class="input-field">
+                            <input type="number" class="form-control" id="Price">
+                            <label for="Price">قیمت</label>
+                        </div>
+                        <div style="margin-left:10px;margin-right:10px;color:chocolate;"> تومان </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="direction:rtl;-webkit-flex-wrap:nowrap;display: flex;flex-wrap:nowrap;">
+                        <div class="input-field">
+                            <input type="number" class="form-control" id="Value">
+                            <label for="Value">مقدار</label>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="direction:rtl;-webkit-flex-wrap:nowrap;display: flex;flex-wrap:nowrap;">
+                        <div style="margin-left:10px;margin-right:10px;color:chocolate;">مجموع قیمت:</div>
+                        <div id="SumPrice" style="text-align:right" class="card-text"></div>
+                        <div style="margin-left:10px;margin-right:10px;color:chocolate;"> تومان </div>
+                    </td>
+                </tr>
+            </table>
+            <br />
+            <input type="button" id="Done" value="ثبت" />
+        </div>
+    </div>
+</body>
+</html>

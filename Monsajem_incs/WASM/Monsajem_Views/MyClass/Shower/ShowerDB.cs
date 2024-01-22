@@ -6,25 +6,28 @@ using WebAssembly.Browser.DOM;
 using Monsajem_Incs.Collection.Array;
 using Monsajem_Incs.Database.Base;
 using Monsajem_Incs.Views.Maker.ValueTypes;
-using static Monsajem_Client.SafeRun;
-using static Monsajem_Client.Network;
+using static Monsajem_Incs.WasmClient.SafeRun;
+using static Monsajem_Incs.WasmClient.Network;
 using Monsajem_Incs.Views.Maker.Database;
 
 namespace Monsajem_Incs.Views.Shower.Database
 {
     public static partial class Shower
     {
-        public static void ShowItems<ValueType, KeyType>(
+        public static string ProvideUri<ValueType, KeyType>(
             this Table<ValueType, KeyType> Table)
             where KeyType : IComparable<KeyType>
         {
-            new ShowPage().Show(Table);
+            var Uri = new ShowPage().ProvideFullUri(Table);
+            return Uri;
         }
+
         public static void ShowItems<ValueType, KeyType>(
-            this PartOfTable<ValueType, KeyType> Table)
+            this Table<ValueType, KeyType> Table,
+            string Query = null)
             where KeyType : IComparable<KeyType>
         {
-            new ShowPage().Show(Table);
+            new ShowPage().Show(Table,Query);
         }
 
         public static void ShowInsert<ValueType, KeyType>(
@@ -33,11 +36,9 @@ namespace Monsajem_Incs.Views.Shower.Database
         {
             new insertPage().Show(Table);
         }
-        public static void ShowInsert<ValueType, KeyType>(
-            this PartOfTable<ValueType, KeyType> Table)
-            where KeyType : IComparable<KeyType>
+        public static void ShowInsertForCurrentURL()
         {
-            new insertPage().Show(Table);
+            new insertPage().Show();
         }
 
         public static void ShowUpdate<ValueType, KeyType>(

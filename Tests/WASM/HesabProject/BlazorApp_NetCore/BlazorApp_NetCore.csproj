@@ -1,0 +1,160 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+	<!--sdasd-->
+	
+	<PropertyGroup>
+		<BlazorEnableCompression>false</BlazorEnableCompression>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<BlazorEnableTimeZoneSupport>false</BlazorEnableTimeZoneSupport>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<BlazorWebAssemblyPreserveCollationData>false</BlazorWebAssemblyPreserveCollationData>
+	</PropertyGroup>
+	
+	<PropertyGroup>
+        <PublishTrimmed>true</PublishTrimmed>
+		<TrimMode>Link</TrimMode>
+    </PropertyGroup>
+	
+	<!--sdasd-->
+	
+  <ItemGroup>
+    <Content Remove="wwwroot\index.html~RF17ed9fba.TMP" />
+  </ItemGroup>
+
+	<ItemGroup>
+		<BlazorWebAssemblyLazyLoad Include="System.Security.Cryptography.Primitives.dll" />
+		<BlazorWebAssemblyLazyLoad Include="System.Text.RegularExpressions.dll" />
+		<BlazorWebAssemblyLazyLoad Include="System.Threading.ThreadPool.dll" />
+		<BlazorWebAssemblyLazyLoad Include="System.IO.FileSystem.dll" />
+		<BlazorWebAssemblyLazyLoad Include="System.Net.Sockets.dll" />
+		<BlazorWebAssemblyLazyLoad Include="System.Net.WebSockets.dll" />
+		<BlazorWebAssemblyLazyLoad Include="System.IO.FileSystem.dll" />		
+		<BlazorWebAssemblyLazyLoad Include="System.Text.RegularExpressions.dll" />
+	</ItemGroup>
+
+  <ItemGroup>
+    <None Remove="DB" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\ChachedInfo.txt" />
+    <None Include="wwwroot\favicon.ico" />
+    <None Include="wwwroot\favicon_16x16.ico" />
+    <None Include="wwwroot\favicon_32x32.ico" />
+    <None Include="wwwroot\Files\AddedToShop.jpg" />
+    <None Include="wwwroot\Files\animate.min.css" />
+    <None Include="wwwroot\Files\BackGround.jpg" />
+    <None Include="wwwroot\Files\BackGround.png" />
+    <None Include="wwwroot\Files\BackGround1.png" />
+    <None Include="wwwroot\Files\BackGround2.png" />
+    <None Include="wwwroot\Files\BasePage.js" />
+    <None Include="wwwroot\Files\bootstrap-notify.min.js" />
+    <None Include="wwwroot\Files\bootstrap.min.css" />
+    <None Include="wwwroot\Files\Close.png" />
+    <None Include="wwwroot\Files\Contact.png" />
+    <None Include="wwwroot\Files\DropFromShop.png" />
+    <None Include="wwwroot\Files\GetSize.png" />
+    <None Include="wwwroot\Files\home.png" />
+    <None Include="wwwroot\Files\imagerotator.js" />
+    <None Include="wwwroot\Files\InsertToShop.ico" />
+    <None Include="wwwroot\Files\instascan.min.js" />
+    <None Include="wwwroot\Files\jquery-1.12.4.min.js" />
+    <None Include="wwwroot\Files\jquery-3.2.1.slim.min.js" />
+    <None Include="wwwroot\Files\loading.gif" />
+    <None Include="wwwroot\Files\Login.png" />
+    <None Include="wwwroot\Files\Login1.png" />
+    <None Include="wwwroot\Files\Logo.png" />
+    <None Include="wwwroot\Files\Logout.png" />
+    <None Include="wwwroot\Files\materialize.min.css" />
+    <None Include="wwwroot\Files\materialize.min.js" />
+    <None Include="wwwroot\Files\MonsajemLogo.png" />
+    <None Include="wwwroot\Files\NeedUpdate.png" />
+    <None Include="wwwroot\Files\normalize.css" />
+    <None Include="wwwroot\Files\PercentOff.png" />
+    <None Include="wwwroot\Files\Play.png" />
+    <None Include="wwwroot\Files\Playing.gif" />
+    <None Include="wwwroot\Files\problem.png" />
+    <None Include="wwwroot\Files\qrcode.js" />
+    <None Include="wwwroot\Files\ScanQR.png" />
+    <None Include="wwwroot\Files\Search.png" />
+    <None Include="wwwroot\Files\Search2.png" />
+    <None Include="wwwroot\Files\Seller.png" />
+    <None Include="wwwroot\Files\shopicon - Copy.png" />
+    <None Include="wwwroot\Files\shopicon.png" />
+    <None Include="wwwroot\Files\ShoppedProduct.png" />
+    <None Include="wwwroot\Files\Sizer.png" />
+    <None Include="wwwroot\Files\sketch.min.js" />
+    <None Include="wwwroot\Files\StartDelivery.png" />
+    <None Include="wwwroot\Files\us.png" />
+    <None Include="wwwroot\Files\w3.css" />
+    <None Include="wwwroot\Files\_3D.png" />
+    <None Include="wwwroot\Files\_3D_Type\circ-cross-thin-blue.svg" />
+    <None Include="wwwroot\Files\_3D_Type\down.svg" />
+    <None Include="wwwroot\Files\_3D_Type\fullscreenoff.svg" />
+    <None Include="wwwroot\Files\_3D_Type\fullscreenon.svg" />
+    <None Include="wwwroot\Files\_3D_Type\hotspotoff.svg" />
+    <None Include="wwwroot\Files\_3D_Type\hotspoton.svg" />
+    <None Include="wwwroot\Files\_3D_Type\left.svg" />
+    <None Include="wwwroot\Files\_3D_Type\lightbox_close.svg" />
+    <None Include="wwwroot\Files\_3D_Type\pause.svg" />
+    <None Include="wwwroot\Files\_3D_Type\pixel.png" />
+    <None Include="wwwroot\Files\_3D_Type\play.svg" />
+    <None Include="wwwroot\Files\_3D_Type\pointer-zoom-in.svg" />
+    <None Include="wwwroot\Files\_3D_Type\pointer-zoom-off.svg" />
+    <None Include="wwwroot\Files\_3D_Type\pointer-zoom-out.svg" />
+    <None Include="wwwroot\Files\_3D_Type\right.svg" />
+    <None Include="wwwroot\Files\_3D_Type\up.svg" />
+    <None Include="wwwroot\Files\_3D_Type\zoomin.svg" />
+    <None Include="wwwroot\Files\_3D_Type\zoomout.svg" />
+    <None Include="wwwroot\index.html" />
+    <None Include="wwwroot\manifest.webmanifest" />
+    <None Include="wwwroot\ProductImages\زعفران دو گرمی سفید مکعب" />
+    <None Include="wwwroot\ProductImages\زعفران نیم مثقالی سفید مکعب" />
+    <None Include="wwwroot\ProductImages\زعفران یک مثقالی سفید مکعب" />
+    <None Include="wwwroot\ProductImages\زعفران یک و نیم گرمی سفید مکعب" />
+    <None Include="wwwroot\ProductImages\زعفران یک گرمی سفید مکعب" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="5.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="5.0.0" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Resorces\Monsajem.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Monsajem.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Monsajem_incs">
+      <HintPath>..\..\..\..\Monsajem_incs\bin\Release\net5.0\Monsajem_incs.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Private.Runtime.InteropServices.JavaScript">
+      <HintPath>C:\Users\xtron\Desktop\saffronshop_Site\System.Private.Runtime.InteropServices.JavaScript.dll</HintPath>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Resorces\Monsajem.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Monsajem.tt</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+</Project>

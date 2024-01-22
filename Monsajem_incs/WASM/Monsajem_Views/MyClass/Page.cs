@@ -9,13 +9,25 @@ using static WASM_Global.Publisher;
 using Monsajem_Incs.Database.Base;
 using Monsajem_Incs.Serialization;
 using Monsajem_Incs.Collection.Array.ArrayBased.DynamicSize;
-using static Monsajem_Client.SafeRun;
+using static Monsajem_Incs.WasmClient.SafeRun;
 using Monsajem_Incs.UserControler;
 
 namespace Monsajem_Incs.Views
 {
-    public abstract class Page:IComparable<Page>
+    public abstract class Page : IComparable<Page>
     {
+        public static Microsoft.AspNetCore.Components.NavigationManager NavigationManager { get => WASM_Global.Publisher.NavigationManager; }
+        public static readonly string DataUrlSperator = "&";
+        public static event Action<(Page Page,string CurrentUrl)> LoadingPage;
+        public static bool IsLocalUrl {
+            get
+            {
+                var Url = new System.Uri(NavigationManager.BaseUri);
+                Console.WriteLine(Url.Host);
+                return Url.Host == "localhost";
+            }
+        }
+
         private static HTMLElement AppMainElement;
         private class _Page : Page
         {
@@ -24,18 +36,26 @@ namespace Monsajem_Incs.Views
 
             protected async override Task Ready()
             {
-                
+
             }
         }
         private static Array<Page> Pages = new Array<Page>(10);
-        private static string CurrentAddress;
+        public static string CurrentAddress { get; private set; }
+        public static Page CurrentPage { get; private set; }
         public abstract string Address { get; }
         public HTMLDivElement MainElement;
-        public async Task Show()
+        public async Task Show(bool NewStateIfIsInPage=false)
         {
             await Task.Delay(1);
-            await Safe(async ()=> await Route("/?" + Address));
-            NavigationManager.NavigateTo("/?"+Address);
+            var LastAddress = CurrentAddress;
+            await Safe(async () => await Route("/?" + Address));
+            if (NewStateIfIsInPage == false)
+            {
+                if (CurrentAddress != LastAddress)
+                    NavigationManager.NavigateTo("/?" + Address);
+            }
+            else
+                NavigationManager.NavigateTo("/?" + Address);
         }
 
         protected abstract Task Ready();
@@ -47,7 +67,7 @@ namespace Monsajem_Incs.Views
 
         public static async Task Route(string Address)
         {
-            if (Address.Contains('?')==false)
+            if (Address.Contains('?') == false)
                 Address = Address + "?";
             var FirstPos = Address.IndexOf('?');
             if (FirstPos > -1)
@@ -61,8 +81,10 @@ namespace Monsajem_Incs.Views
                 return;
             }
             var LastAddress = CurrentAddress;
+            var LastPage = CurrentPage;
             CurrentAddress = Address;
             Address = Address.Split('?')[0];
+            Address = Address.Split(DataUrlSperator)[0];
             var Pos = Pages.BinarySearch(new _Page() { _Address = Address }).Index;
             if (Pos < 0)
             {
@@ -70,23 +92,31 @@ namespace Monsajem_Incs.Views
                 return;
             }
             var page = Pages[Pos];
+            CurrentPage = page;
             try
             {
-                page.MainElement = Document.document.CreateElement<HTMLDivElement>();
-                await page.Ready();
-                AppMainElement.ReplaceChilds(page.MainElement);
+                await Replay();
             }
             catch
             {
+                CurrentPage = LastPage;
                 CurrentAddress = LastAddress;
                 throw;
             }
         }
 
-        private static bool DB_PagesLoaded;
-        public static void SubmitPage(HTMLElement MainElement,params Page[] Page)
+        public static async Task Replay()
         {
-            if(DB_PagesLoaded==false)
+            LoadingPage?.Invoke((CurrentPage, CurrentAddress));
+            CurrentPage.MainElement = Document.document.CreateElement<HTMLDivElement>();
+            await CurrentPage.Ready();
+            AppMainElement.ReplaceChilds(CurrentPage.MainElement);
+        }
+
+        private static bool DB_PagesLoaded;
+        public static void SubmitPage(HTMLElement MainElement, params Page[] Page)
+        {
+            if (DB_PagesLoaded == false)
             {
                 Pages.BinaryInsert(
                     new Shower.Database.ShowPage(),
@@ -98,13 +128,21 @@ namespace Monsajem_Incs.Views
             AppMainElement = MainElement;
         }
 
-        public abstract class HaveData:Page
+        public abstract class HaveData : Page
         {
-            public async Task Show(string Data)
+            protected string ProvideUri(params string[] Datas)
+            {
+                var NewUri = "/?" + Address;
+                foreach (var Data in Datas)
+                    NewUri = NewUri + DataUrlSperator + Uri.EscapeDataString(Data);
+                return NewUri;
+            }
+
+            public async Task Show(params string[] Datas)
             {
                 await Task.Delay(1);
-                await Safe(async () => await Route("/?" + Address + "?" + Data));
-                NavigationManager.NavigateTo("/?" + Address + "?" + Data);
+                await Safe(async () => await Route(ProvideUri(Datas)));
+                NavigationManager.NavigateTo(ProvideUri(Datas));
             }
             public async Task Show<DataType>(DataType Data)
             {
@@ -118,7 +156,38 @@ namespace Monsajem_Incs.Views
             {
                 try
                 {
-                    return NavigationManager.ToAbsoluteUri(CurrentAddress).Query.Substring(1);
+                    var Pos = CurrentAddress.IndexOf(DataUrlSperator);
+                    if (Pos < 0)
+                        throw new Exception("Data in url not found!");
+                    var QString = CurrentAddress.Substring(Pos + 1);
+                    return QString;
+                }
+                catch
+                {
+                    Console.WriteLine(Address);
+                    Console.WriteLine(CurrentAddress);
+                    throw;
+                    Publish.ShowDangerMessage("خطا در مقادیر ورودی");
+                    NavigationManager.NavigateTo("/");
+                    throw;
+                }
+            }
+
+            protected string[] GetDataStringParameters()
+            {
+                var QString = GetDataString();
+                var Inputs = QString.Split(DataUrlSperator)
+                                    .Select((c) => Uri.UnescapeDataString(c))
+                                    .ToArray();
+                return Inputs;
+            }
+
+            protected DataType GetData<DataType>()
+            {
+                var Data = GetDataString();
+                try
+                {
+                    return Convert.FromBase64String(Data).Deserialize<DataType>();
                 }
                 catch
                 {
@@ -126,20 +195,6 @@ namespace Monsajem_Incs.Views
                     NavigationManager.NavigateTo("/");
                     throw;
                 }
-            }
-            protected DataType GetData<DataType>()
-            {
-                var Data = GetDataString();
-                  try
-                  {
-                        return Convert.FromBase64String(Data).Deserialize<DataType>();
-                  }
-                  catch
-                  {
-                        Publish.ShowDangerMessage("خطا در مقادیر ورودی");
-                        NavigationManager.NavigateTo("/");
-                        throw;
-                  }
             }
         }
     }

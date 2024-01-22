@@ -1,0 +1,27 @@
+﻿<html>
+<body>
+    <div id="Main">
+        <div><img id="Image" style="max-width:50%;max-height:50%;" /></div>
+        <div>
+            <input type="file" id="ImageFile" placeholder="تصویر" />
+        </div>
+        <input type="button" id="Done" value="تایید" />
+    </div>
+    <script>
+        var img = document.getElementById("Image");
+        var ImageFile = document.getElementById("ImageFile");
+        ImageFile.onchange = () => {
+
+            if (ImageFile.files && ImageFile.files[0]) {
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    img.setAttribute('src', e.target.result);
+                };
+
+                reader.readAsDataURL(ImageFile.files[0]);
+            }
+        };
+    </script>
+</body>
+</html>

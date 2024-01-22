@@ -12,13 +12,14 @@ namespace Monsajem_Incs.Database
     {
         public ArrayTable(
             Func<ValueType,KeyType> GetKey,
-            bool IsUpdateAble,string Name=""):
+            bool IsUpdateAble,string Name=null):
             base(new Collection.Array.TreeBased.Array<(ValueType,ulong)>(),
                  new Register.MemoryRegister<ulong>(),                 
                  GetKey,
                  IsUpdateAble)
         {
-            this.TableName = Name;
+            if(Name!=null)
+                this.TableName = Name;
         }
     }
 }

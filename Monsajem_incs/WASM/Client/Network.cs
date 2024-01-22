@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 using static WASM_Global.Publisher;
 using Monsajem_Incs.UserControler;
 
-namespace Monsajem_Client
+namespace Monsajem_Incs.WasmClient
 {
     public class Network
     {

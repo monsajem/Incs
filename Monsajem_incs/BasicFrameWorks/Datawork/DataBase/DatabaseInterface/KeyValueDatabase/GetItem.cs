@@ -6,6 +6,7 @@ using System.Collections;
 using Monsajem_Incs.Collection.Array.TreeBased;
 using static Monsajem_Incs.Database.Base.Runer;
 using static System.Runtime.Serialization.FormatterServices;
+using Monsajem_Incs.Serialization;
 
 namespace Monsajem_Incs.Database.Base
 {
@@ -43,13 +44,15 @@ namespace Monsajem_Incs.Database.Base
             get => GetItem(Key);
         }
 
-        public ValueInfo GetItem(int Position)
+        public ValueInfo GetItem(int Position,bool MakeCopy = false)
         {
             lock (this)
             {
                 using (Run.UseBlock())
                 {
                     var Item = BasicActions.Items[Position];
+                    if (MakeCopy)
+                        Item = Item.Serialize().Deserialize(Item);
                     Events.loading?.Invoke(Item.Value);
                     return new ValueInfo()
                     {
@@ -62,13 +65,13 @@ namespace Monsajem_Incs.Database.Base
             }
         }
 
-        public ValueInfo GetItem(KeyType Key)
+        public ValueInfo GetItem(KeyType Key, bool MakeCopy = false)
         {
             lock (this)
             {
                 using (Run.UseBlock())
                 {
-                    return GetItem(GetPosition(Key));
+                    return GetItem(GetPosition(Key),MakeCopy);
                 }
             }
         }
@@ -182,7 +185,7 @@ namespace Monsajem_Incs.Database.Base
                 var Position = KeysInfo.Keys.BinarySearch(Key).Index;
                 if (Position > -1)
                 {
-                    Result = BasicActions.Items[Position].Value;
+                    Result = this.GetItem(Position).Value;
                 }
                 else
                 {

@@ -18,13 +18,13 @@ namespace Monsajem_Incs.Database.Base
         public TableExtras Extras;
 
         [Serialization.NonSerialized]
-        internal Table<ValueType, KeyType> Parent;
+        public Table<ValueType, KeyType> Parent;
 
         [Serialization.NonSerialized]
         internal Action SaveToParent;
 
         [Serialization.NonSerialized]
-        internal (dynamic Table, object Key) HolderTable;
+        public (dynamic Table, object Key) HolderTable;
 
         public PartOfTable(KeyType[] NewKEys, Table<ValueType, KeyType> Parent)
         {
@@ -91,6 +91,8 @@ namespace Monsajem_Incs.Database.Base
             {
                 if (KeysInfo.Keys.BinarySearch(Key.Key).Index > -1)
                     throw new InvalidOperationException("Value be exist!");
+                if(Parent.IsExist(Key.Key)==false)
+                    throw new InvalidOperationException("Value not exist at Parent!");
             };
 
             UpdateAbleChanged += (_UpdateAble) =>
@@ -129,5 +131,6 @@ namespace Monsajem_Incs.Database.Base
         {
             return "PartTable " + typeof(ValueType).ToString();
         }
+
     }
 }

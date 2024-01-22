@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices.JavaScript;
+using WebAssembly.Browser.MonsajemDomHelpers;
 
 namespace WebAssembly.Browser.DOM
 {
@@ -43,7 +44,7 @@ namespace WebAssembly.Browser.DOM
         {}
 
         public WebWorker(System.Uri Uri) : 
-            this(new JSObject(Runtime.New("Worker", Uri.ToString()),true))
+            this(js.NewJsObject("Worker",Uri.ToString()))
         {}
 
         public WebWorker(JSObject handle) : base(handle) 

@@ -8,7 +8,7 @@ using Monsajem_Incs.Resources;
 using Monsajem_Incs.Resources.Base.Partials;
 using WebAssembly.Browser.DOM;
 using static Monsajem_Incs.Collection.Array.Extentions;
-using Monsajem_Client;
+using Monsajem_Incs.WasmClient;
 
 namespace Monsajem_Incs.UserControler
 {
@@ -124,6 +124,23 @@ namespace Monsajem_Incs.UserControler
                 LastPos = 3;
             Result = "<div style='flex-wrap:nowrap'><b>" + Value.Substring(0, LastPos) + "</b>" + Result + "</div>";
             return Result;
+        }
+
+        public static void ShowModal(HTMLElement Element, Action OnBack = null)
+        {
+            var Modal = new Modal_html();
+            Modal.body.AppendChild(Element);
+            js.Document.Body.AppendChild(Modal.myModal);
+            Modal.myModal.SetStyleAttribute("display","block");
+            Modal.Btn_Close.OnClick+=(c1,c2)=>
+            {
+                js.GoBack();
+            };
+            js.PushState(() =>
+            { 
+                OnBack?.Invoke();
+                Modal.myModal.Remove();
+            });
         }
     }
 }

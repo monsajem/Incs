@@ -1,0 +1,474 @@
+﻿<html lang="en">
+
+<head>
+</head>
+
+<body>
+
+    <script src="Files/jquery-1.12.4.min.js"></script>
+    <script src="Files/bootstrap-notify.min.js"></script>
+    <script src="Files/materialize.min.js"></script>
+    <script src="Files/qrcode.js"></script>
+    <!--<script src="Files/sketch.min.js"></script>-->
+    <script src="Files/instascan.min.js"></script>
+    <link href="Files/bootstrap.min.css" rel="stylesheet">
+    <link href="Files/animate.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="Files/materialize.min.css">
+    <link rel="stylesheet" href="Files/w3.css">
+    <link rel="stylesheet" href="Files/normalize.css">
+
+    <script>
+
+        function Particle(x, y, radius) {
+            this.init(x, y, radius);
+        }
+
+        Particle.prototype = {
+
+            init: function (x, y, radius) {
+
+                this.alive = true;
+
+                this.radius = radius || 10;
+                this.wander = 0.15;
+                this.theta = random(TWO_PI);
+                this.drag = 0.92;
+                this.color = '#000';
+
+                this.x = x || 0.0;
+                this.y = y || 0.0;
+
+                this.vx = 0.0;
+                this.vy = 0.0;
+            },
+
+            move: function () {
+
+                this.x += this.vx;
+                this.y += this.vy;
+
+                this.vx *= this.drag;
+                this.vy *= this.drag;
+
+                this.theta += random(-0.5, 0.5) * this.wander;
+                this.vx += sin(this.theta) * 0.1;
+                this.vy += cos(this.theta) * 0.1;
+
+                this.radius *= 0.96;
+                this.alive = this.radius > 0.5;
+            },
+
+            draw: function (ctx) {
+
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, TWO_PI);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+        };
+
+        // ----------------------------------------
+        // Example
+        // ----------------------------------------
+
+        var MAX_PARTICLES = 280;
+        var COLOURS = ['#69D2E7', '#A7DBD8', '#5F9EA0', '#F38630', '#FA6900', '#FF4E50', '#F9D423'];
+
+        var particles = [];
+        var pool = [];
+
+        var demo = Sketch.create({
+            container: document.getElementById("background"),
+            retina: 'auto'
+        });
+
+        demo.setup = function () {
+
+            // Set off some initial particles.
+            var i, x, y;
+
+            for (i = 0; i < 20; i++) {
+                x = (demo.width * 0.5) + random(-100, 100);
+                y = (demo.height * 0.5) + random(-100, 100);
+                demo.spawn(x, y);
+            }
+        };
+
+        demo.spawn = function (x, y) {
+
+            var particle, theta, force;
+
+            if (particles.length >= MAX_PARTICLES)
+                pool.push(particles.shift());
+
+            particle = pool.length ? pool.pop() : new Particle();
+            particle.init(x, y, random(5, 40));
+
+            particle.wander = random(0.5, 2.0);
+            particle.color = random(COLOURS);
+            particle.drag = random(0.9, 0.99);
+
+            theta = random(TWO_PI);
+            force = random(30, 8);
+
+            particle.vx = sin(theta) * force;
+            particle.vy = cos(theta) * force;
+
+            particles.push(particle);
+        };
+
+        demo.update = function () {
+
+            var i, particle;
+
+            for (i = particles.length - 1; i >= 0; i--) {
+
+                particle = particles[i];
+
+                if (particle.alive) particle.move();
+                else pool.push(particles.splice(i, 1)[0]);
+            }
+        };
+
+        demo.draw = function () {
+            for (var i = particles.length - 1; i >= 0; i--) {
+                particles[i].draw(demo);
+            }
+        };
+
+
+        function tuch(e) {
+
+            var max, j;
+
+            max = random(1, 4);
+            for (j = 0; j < max; j++) {
+                demo.spawn(e.x, e.y);
+            }
+        }
+
+        document.body.onmousemove = tuch;
+
+        document.body.ontouchstart = function (e) {
+
+            for (i = 0, n = e.touches.length; i < n; i++) {
+
+                var t =
+                {
+                    x: e.touches[i].clientX,
+                    y: e.touches[i].clientY
+                };
+                tuch(t);
+            }
+        };
+
+        document.body.ontouchmove = function (e) {
+
+            for (i = 0, n = e.touches.length; i < n; i++) {
+                var t =
+                {
+                    x: e.touches[i].clientX,
+                    y: e.touches[i].clientY
+                };
+                tuch(t);
+            }
+        };
+
+        document.body.ontouchend = function (e) {
+
+            for (i = 0, n = e.touches.length; i < n; i++) {
+
+                var t =
+                {
+                    x: e.touches[i].clientX,
+                    y: e.touches[i].clientY
+                };
+                tuch(t);
+            }
+        };
+
+    </script>
+
+    <div id="background" alt="background image" style="top:0;left:0; position:fixed;width:100%;height:calc(100vh); z-index:-1;">
+        <img src="./Files/BackGround.jpg" style="top:0;left:0; position:fixed;width:100%;height:calc(100vh); z-index:-1;" />
+    </div>
+
+    <div style="width:100%;height:100%;background-color:rgba(0,0,0,0);" id="Hole">
+        <!-- Start your project here-->
+        <style>
+            input {
+                width: 100%;
+                height: 8%;
+            }
+
+            .mn-btn {
+                margin-top: 4%;
+                margin-left: auto;
+                margin-right: auto;
+                background-color: rgba(255,255,255, 0.7);
+                transition-duration: 0.2s;
+                width: 90%;
+                height: calc(10vh);
+                box-shadow: 0 4px 8px 0 rgba(182, 255, 0, 0.52),0 6px 20px 0 rgba(182, 255, 0, 0.70);
+            }
+
+                .mn-btn:active {
+                    width: 75%;
+                    height: calc(7vh);
+                    background-color: rgba(229, 255, 0, 0.83);
+                    box-shadow: 0 4px 8px 0 rgba(252, 255, 0, 0.70),0 6px 20px 0 rgba(229, 255, 0, 0.83);
+                }
+
+            .mn-obj {
+                background-color: rgba(255,255,255,0.7);
+                margin-left: 2.5%;
+                width: 95%;
+            }
+
+                .mn-obj:active {
+                    box-shadow: 0 4px 8px 0 rgba(252, 255, 0, 0.70),0 6px 20px 0 rgba(229, 255, 0, 0.83);
+                }
+
+            .mn-btn-basket {
+                transition-duration: 0.2s;
+            }
+
+                .mn-btn-basket:active {
+                    background-color: rgb(134, 187, 0);
+                }
+
+            .ViewObject {
+                background-color: rgba(255,255,255, 0.7);
+                transition-duration: 0.5s;
+            }
+
+                .ViewObject:hover {
+                    background-color: rgba(19, 211, 246, 0.61);
+                }
+
+            .overlay {
+                border-radius: 100%;
+                height: 0%;
+                width: 0%;
+                position: fixed;
+                z-index: 3;
+                top: 0;
+                right: 0;
+                background-color: rgba(0,0,0, 0.9);
+                overflow-y: scroll;
+                transition: 0.3s;
+            }
+
+            .overlay-content {
+                position: relative;
+                top: 15%;
+                width: 100%;
+                text-align: center;
+                margin-top: 30px;
+            }
+
+            .overlay-closebtn {
+                color: aliceblue;
+                position: absolute;
+                top: 4%;
+                right: 10%;
+                font-size: 40px;
+            }
+
+            a[href*="webrotate360"] {
+                content: "";
+                pointer-events: none;
+            }
+
+                a[href*="webrotate360"]:after {
+                    visibility: visible;
+                    position: absolute;
+                    top: 0;
+                    height: 9px;
+                    right: 0;
+                    color: black;
+                    background-color: darkorange;
+                    content: "فروشگاه صادقیSadeghi Store(C)";
+                }
+
+            .default_3DView {
+                padding-left: 0 !important;
+            }
+        </style>
+
+
+        <div id="myNav" class="overlay">
+            <a id="Btn_MenuClose" href="javascript:void(0)" class="overlay-closebtn" onclick="closeNav()">&#215;</a>
+            <div id="Menu" class="overlay-content">
+
+            </div>
+        </div>
+        <ul id="Title" class="w3-round-medium" style="top:0;left:0;width:100%;overflow:hidden;z-index:2;background-color:rgba(255,255,255, 0.7);position:fixed;max-height:37px;">
+            <li style="float:right;padding-right:10%"><span style="font-size:28px;cursor:pointer;" onclick="openNav()">&#9776;</span></li>
+            <li style="float:left;padding-left:7%">
+                <div class="w3-display-container" id="btn_basket">
+                    <img id="img_basket" style="max-height:32px;max-width:32px" src="./Files/shopicon.png" class="w3-grayscale-max" />
+                    <div class="w3-display-topleft w3-container">
+                        <span id="lbl_ShopedCount" style="font-size:8px" class="w3-badge w3-red"></span>
+                    </div>
+                </div>
+            </li>
+        </ul>
+        <script>
+            var MyNav = document.getElementById("myNav");
+            function openNav() {
+                MyNav.style.height = "100%";
+                MyNav.style.width = "100%";
+                MyNav.style.borderRadius = "0%"
+            }
+
+            function closeNav() {
+                MyNav.style.height = "0%";
+                MyNav.style.width = "0%";
+                MyNav.style.borderRadius = "100%"
+            }
+        </script>
+        <style>
+            body {
+                text-align: center;
+            }
+        </style>
+
+        <div id="P_Page" style="background-color:rgba(0,0,0,0);z-index:1;position:relative;display:inline-block;width:100%;height:100%;margin-top:40px">
+        </div>
+        <div id="P_Action" style="z-index:10;opacity:0;display:none;position:fixed;top:0;left:0;width:100%;height:100%">
+            <style>
+                #in {
+                    overflow: hidden;
+                }
+
+                a {
+                    color: #FFF;
+                }
+
+                div.l {
+                    float: left;
+                    margin: 20px 20px 0 0;
+                    border: 2px solid #666;
+                    background: #000;
+                    height: 150px;
+                    width: 150px;
+                    position: relative;
+                }
+
+                .sonic {
+                    height: 100%;
+                    width: 100%;
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    -webkit-transform: translate(-50%, -50%);
+                }
+
+                canvas {
+                    display: block;
+                }
+            </style>
+            <div class="w3-display-container" style="background-color:rgba(255,255,255, 0.72) ;opacity:inherit;margin:0;z-index:1;position:fixed;width:100%;height:100%;">
+                <!--<img class="w3-display-middle w3-round-large" src="./Files/ActionBackGround" style="opacity:0.5;top:0;left:0; position:absolute;max-width:93%;max-height:calc(93vh);" />-->
+            </div>
+            <div id="container" style="top:0;left:0;opacity:0.9;width:100%;height:100%; position:fixed;z-index:1;">
+                <div id="inEl" style="width:100%;height:100%;">
+                    <canvas class="sonic"></canvas>
+                    <canvas class="sonic"></canvas>
+                </div>
+            </div>
+            <script src="../Files/BasePageNeeds/BasePage.js"></script>
+            <div id="P_Action_Content" style="position:relative;margin-left:auto;margin-right:auto;top:50%;background-color:rgba(0,0,0,0); z-index:2">
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* The Modal (background) */
+        .imgTop {
+            display: block; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 3; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            animation: ShopAnimation;
+            animation-duration: 2s;
+            animation-fill-mode: forwards;
+        }
+
+        @-webkit-keyframes ShopAnimation {
+            0% {
+                opacity: 0;
+                top: 0px;
+                left: 0px;
+                width: 100%;
+                height: 100%;
+            }
+
+            50% {
+                opacity: 1;
+                top: 0px;
+                left: 0px;
+                width: 100%;
+                height: 100%;
+            }
+
+            70% {
+                opacity: 1;
+                top: 0px;
+                left: 0px;
+                width: 32px;
+                height: 32px;
+            }
+
+            100% {
+                top: 0px;
+                left: 15%;
+                opacity: 0;
+                width: 32px;
+                height: 32px;
+            }
+        }
+
+        @keyframes ShopAnimation {
+            0% {
+                opacity: 0;
+                top: 0px;
+                left: 0px;
+                width: 100%;
+                height: 100%;
+            }
+
+            50% {
+                opacity: 1;
+                top: 0px;
+                left: 0px;
+                width: 100%;
+                height: 100%;
+            }
+
+            70% {
+                opacity: 1;
+                top: 0px;
+                left: 0px;
+                width: 32px;
+                height: 32px;
+            }
+
+            100% {
+                top: 0px;
+                left: 15%;
+                opacity: 0;
+                width: 32px;
+                height: 32px;
+            }
+        }
+    </style>
+</body>
+
+</html>

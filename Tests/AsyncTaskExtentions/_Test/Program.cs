@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Monsajem_Incs.DelegateExtentions;
-using static Monsajem_Incs.DelegateExtentions.Actions;
 
 namespace _Test
 {
@@ -14,15 +12,18 @@ namespace _Test
         public static Action b;
         static void Main(string[] args)
         {
-            new System.Threading.Thread(() =>
+            var Tasks = new Func<Task>[10];
+
+            for(int i=0;i<Tasks.Length;i++)
             {
-                WaitForHandle(() => ref a, () => ref b).Wait(); ;
+                var x = i;
+                Tasks[i]= async ()=>
+                {
+                    Console.WriteLine(x);
+                };
+            }
 
-                Console.WriteLine("handled");
-            }).Start();
-            a.Invoke();
-
-            Console.ReadKey();
+            Monsajem_Incs.Async.Task_EX.StartWait(3, Tasks).Wait();
         }
     }
 }

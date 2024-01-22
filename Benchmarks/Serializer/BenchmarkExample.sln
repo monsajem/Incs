@@ -9,8 +9,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_MN", "_MN", "{AA501911-E77
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monsajem_incs", "..\..\Monsajem_incs\Monsajem_incs.csproj", "{F1FCBF66-B3C1-49DA-82D2-0BA0AF269C69}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WASM_NetCore", "..\..\Others\WASM\WASM_NetCore\WASM_NetCore.csproj", "{4A7643AF-C57F-417F-877F-7ADE4C68D2FF}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,17 +23,12 @@ Global
 		{F1FCBF66-B3C1-49DA-82D2-0BA0AF269C69}.Debug|Any CPU.Build.0 = Release|Any CPU
 		{F1FCBF66-B3C1-49DA-82D2-0BA0AF269C69}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F1FCBF66-B3C1-49DA-82D2-0BA0AF269C69}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4A7643AF-C57F-417F-877F-7ADE4C68D2FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4A7643AF-C57F-417F-877F-7ADE4C68D2FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4A7643AF-C57F-417F-877F-7ADE4C68D2FF}.Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{4A7643AF-C57F-417F-877F-7ADE4C68D2FF}.Release|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{F1FCBF66-B3C1-49DA-82D2-0BA0AF269C69} = {AA501911-E77C-494F-93BC-6761CFBA2506}
-		{4A7643AF-C57F-417F-877F-7ADE4C68D2FF} = {AA501911-E77C-494F-93BC-6761CFBA2506}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A1F0554C-C58B-4D57-8DC4-EB274A7B21B8}

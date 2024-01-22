@@ -44,6 +44,11 @@ namespace System.Runtime.InteropServices.JavaScript
             RawObject = rawObj;
         }
 
+#if NET6_0
+        public JSObject(string TypeName, object[] Params) : this(Runtime.New(TypeName, Params), true)
+        { }
+#endif
+
         public JSObject(int jsHandle, Delegate rawDelegate, bool ownsHandle = true) : base(jsHandle, ownsHandle)
         {
             WeakRawObject = new WeakReference<Delegate>(rawDelegate, trackResurrection: false);

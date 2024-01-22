@@ -114,6 +114,35 @@ namespace Monsajem_Incs.Async
                 Tasks[i] = Task.Run(Actions[i]);
             await CheckAll(Tasks);
         }
+        public static async Task StartWait(int StartLimitation,params Func<Task>[] Actions)
+        {
+            var Len = Actions.Length;
+
+            Task[] Tasks;
+
+            if (Len > StartLimitation)
+                Tasks = new Task[StartLimitation];
+            else
+                Tasks = new Task[Len];
+
+            int i = 0;
+            for (; i < Tasks.Length; i++)
+                Tasks[i] = Task.Run(Actions[i]);
+
+            while (i<Len)
+            {
+                var Result = await Task.WhenAny(Tasks);
+                await Result;
+                Tasks = Tasks.Select((c) =>
+                {
+                    if (c.Id == Result.Id)
+                        return Task.Run(Actions[i++]);
+                    else
+                        return c;
+                }).ToArray();
+            }
+            await CheckAll(Tasks);
+        }
 
         public static async Task TimeOut(this Task Task,int TimeOut)
         {

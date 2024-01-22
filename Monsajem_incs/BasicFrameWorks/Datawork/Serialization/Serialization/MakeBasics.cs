@@ -64,7 +64,7 @@ namespace Monsajem_Incs.Serialization
             },
             (Data) =>
             {
-                return Read(Data).GetTypeByName();
+                return Assembly.Assembly.GetType(Read(Data));
             }, true);
 
             {

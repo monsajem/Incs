@@ -1,0 +1,74 @@
+﻿<html>
+<body>
+
+    <div id="Main" style="background-color:rgba(255,255,255,0.7)">
+        <table>
+            <tr>
+                <td><img id="Image" style="width:80%" /></td>
+                <td><input type="file" id="ImageFile" /> </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="input-field">
+                        <input type="text" id="Name">
+                        <label for="Name">نام گروه</label>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="input-field">
+                        <input type="text" id="Describe">
+                        <label for="Describe">توضیحات</label>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label> زیر گروه ها:</label>
+                    <br />
+                    <div id="GroupChildsText"></div>
+                    <br />
+                    <input type="text" id="txt_SubGroup" placeholder="زیرگروه" />
+                    <br />
+                    <input type="button" value="افزودن زیر گروه" id="btn_AddSubGroups" />
+                    <br />
+                    <input type="button" value="حذف زیر گروه" id="btn_RemoveSubGroups" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label> کالاها:</label>
+                    <br />
+                    <div id="ProductsChildsText"></div>
+                    <br />
+                    <input type="text" id="txt_SubProduct" placeholder="کالا" />
+                    <br />
+                    <input type="button" value="افزودن کالا" id="btn_AddSubProducts" />
+                    <br />
+                    <input type="button" value="حذف کالا" id="btn_RemoveSubProducts" />
+                </td>
+            </tr>
+            <tr>
+                <td><input type="button" id="Done" value="ثبت" /></td>
+            </tr>
+        </table>
+    </div>
+    <script>
+        var img = document.getElementById("Image");
+        var ImageFile = document.getElementById("ImageFile");
+        ImageFile.onchange = () => {
+
+            if (ImageFile.files && ImageFile.files[0]) {
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    img.setAttribute('src', e.target.result);
+                };
+
+                reader.readAsDataURL(ImageFile.files[0]);
+            }
+        };
+    </script>
+</body>
+</html>

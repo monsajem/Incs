@@ -25,7 +25,11 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
                 MyHistorySates=new Action[0];
                 Window.window.OnPopState += (c1, c2) => OnPopState();
             }
-            OnPopState=()=>Pop(ref MyHistorySates)();
+            OnPopState = () =>
+            {
+                if(MyHistorySates.Length>0)
+                    Pop(ref MyHistorySates)();
+            };
         }
         public static void DropState()
         {
@@ -52,9 +56,11 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
             PushState(Lock);
         }
 
-        public static void GoBack()
+        public static async Task GoBack()
         {
+            await Task.Delay(1);
             Window.window.History.Back();
+            await Task.Delay(1);
         }
 
         public static void UnLockBack()
@@ -161,7 +167,7 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
                   canvas.height = height;
                   var ctx = canvas.getContext('2d');
                   ctx.drawImage(document.getElementById('" + img.Id + @"'),0,0, width, height);
-                  return canvas.toDataURL('image/jpeg',"+quality.ToString("#.############")+");}).call(null);");
+                  return canvas.toDataURL('image/jpeg',"+quality.ToString("#.############", System.Globalization.CultureInfo.InvariantCulture) +");}).call(null);");
             img.Id = imgID;
             return System.Convert.FromBase64String(URL.Substring(23));
         }
@@ -190,7 +196,39 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
                 return await WebClient.GetByteArrayAsync(URL);
         }
 
-        public static void RunAtServer(Action ac) => ac();
+        public static async Task<byte[]> LoadBytesFromURL(string URL)
+        {
+            using (var WebClient = new HttpClient())
+                return await WebClient.GetByteArrayAsync(URL);
+        }
+
+        public static Task<byte[]> LoadBytesFromBaseURL(string URL) =>
+            LoadBytesFromURL(WASM_Global.Publisher.NavigationManager.ToAbsoluteUri("/") + URL);
+
+        public static async Task<string> LoadStringFromURL(string URL)
+        {
+            using (var WebClient = new HttpClient())
+                return await WebClient.GetStringAsync(URL);
+        }
+
+        public static Task<string> LoadStringFromBaseURL(string URL) =>
+            LoadStringFromURL(WASM_Global.Publisher.NavigationManager.ToAbsoluteUri("/") + URL);
+    
+        
+        public static JSObject NewJsObject(string TypeName,params object[] Params)
+        {
+            if (Params!=null && Params.Length == 0)
+                Params = null;
+
+#if NET5_0
+            return new JSObject(Runtime.New(TypeName, Params), true);
+#endif
+
+#if NET6_0
+            return new JSObject(TypeName, Params);
+#endif
+        }
+
     }
 
     public class WebProcess

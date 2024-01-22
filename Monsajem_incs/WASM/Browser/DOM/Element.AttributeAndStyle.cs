@@ -76,7 +76,7 @@ namespace WebAssembly.Browser.DOM
             if (string.IsNullOrEmpty(qualifiedName))
                 throw new ArgumentNullException(nameof(qualifiedName));
 
-            SetJSStyleAttribute(qualifiedName, null);
+            SetJSStyleAttribute(qualifiedName, "");
 
         }
 

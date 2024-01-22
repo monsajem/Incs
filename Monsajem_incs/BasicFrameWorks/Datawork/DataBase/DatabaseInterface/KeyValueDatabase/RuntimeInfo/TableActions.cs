@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using WebAssembly.Browser.DOM;
 using Monsajem_Incs.Views.Maker.Database;
-using static Monsajem_Client.Network;
+using static Monsajem_Incs.WasmClient.Network;
 using Monsajem_Incs.Convertors;
 
 namespace Monsajem_Incs.Database.Base

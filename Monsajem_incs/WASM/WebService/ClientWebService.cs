@@ -21,11 +21,11 @@ namespace Monsajem_Incs.Net.Web
         { }
         private class ClientSocket : Net.Base.Socket.ClientSocket<EndPoint>
         {
-            public WebAssembly.Net.WebSockets.ClientWebSocket Socket;
+            public System.Net.WebSockets.ClientWebSocket Socket;
 
             protected async override Task Inner_Connect(EndPoint Address)
             {
-                Socket = new WebAssembly.Net.WebSockets.ClientWebSocket();
+                Socket = new System.Net.WebSockets.ClientWebSocket();
                 await Socket.ConnectAsync(
                         new Uri("ws://" + Address.IpAddress + ":" + Address.Port.ToString() + "/"), 
                         CancellationToken.None);

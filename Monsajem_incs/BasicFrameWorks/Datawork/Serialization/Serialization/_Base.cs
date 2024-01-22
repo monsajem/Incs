@@ -107,18 +107,14 @@ namespace Monsajem_Incs.Serialization
             [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
             public SerializeData(bool NeedVisitors,
                                  Action<Type> TrustToType,
-                                 Action<MethodInfo> TrustToMethod,
-                                 MemoryStream Stream=null) :
+                                 Action<MethodInfo> TrustToMethod) :
                             base(NeedVisitors,
                                  TrustToType,
                                  TrustToMethod)
-            {
-                if (Stream == null)
-                    Data = new MemoryStream();
-                else
-                    Data = Stream;
-            }
-            public MemoryStream Data;
+            {}
+            public Monsajem_Incs.Collection.UnsafeCollector<byte> Data =
+                new Collection.UnsafeCollector<byte>();
+            //public MemoryStream Data = new MemoryStream();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
@@ -169,10 +165,9 @@ namespace Monsajem_Incs.Serialization
                 }
                 else
                 {
-                    //return StructToBytes(obj, ConstantSize);
-                    SR_Data = new SerializeData(false, TrustToType, TrustToMethod,
-                                                new MemoryStream(ConstantSize));
-                    SR.Serializer(SR_Data,obj);
+                    return StructToBytes(obj, ConstantSize);
+                    SR_Data = new SerializeData(false, TrustToType, TrustToMethod);
+                    SR.StrongSerializer(SR_Data,obj);
                     Result = SR_Data.Data.ToArray();
                 }
             }
@@ -230,9 +225,9 @@ namespace Monsajem_Incs.Serialization
                 }
                 else
                 {
-                    //return BytesToStruct<t>(Data, 0);
+                    return BytesToStruct<t>(Data, 0);
                     DR_Data = new DeserializeData(false, TrustToType, TrustToMethod, Data);
-                    Result = (t) SR.Deserializer(DR_Data);
+                    Result = SR.StrongDeserializer(DR_Data);
                 }
             }
 #if DEBUG

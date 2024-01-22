@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices.JavaScript;
+using WebAssembly.Browser.MonsajemDomHelpers;
 
 namespace WebAssembly.Browser.DOM
 {
@@ -15,7 +16,7 @@ namespace WebAssembly.Browser.DOM
 
         public static Document Parse(string Html)
         {
-            return new Document((JSObject) new JSObject(Runtime.New("DOMParser"),true).Invoke("parseFromString",Html, "text/html"));
+            return new Document((JSObject) js.NewJsObject("DOMParser").Invoke("parseFromString",Html, "text/html"));
         }
 
         [Export("activeElement")]

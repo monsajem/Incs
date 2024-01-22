@@ -1,0 +1,38 @@
+﻿<div id="Main" class="card w3-round-large" style="background-color:rgba(255,255,255,0.7);margin-left:2.5%;width:95%;">
+    <img id="Img" src="./Files/Seller.png" class="card-img-top w3-round-large" style="margin-top:3%;max-width:100%;max-height:65vh" id="Image">
+    <div id="Body" class="card-body">
+        <b style="color:chocolate">چند بسته لازم دارین؟</b>
+        <div style="direction:rtl;-webkit-flex-wrap:nowrap;display: flex;flex-wrap:nowrap;">
+            <label style="margin-left:10px;margin-right:10px;color:chocolate;">تعداد:</label><div id="Count" style="text-align:right" class="card-text">1</div>
+        </div>
+        <div style="direction:rtl;-webkit-flex-wrap:nowrap;display: flex;flex-wrap:nowrap;">
+            <label style="margin-left:10px;margin-right:10px;color:chocolate;">قیمت واحد:</label><div id="Price" style="text-align:right" class="card-text"></div>
+        </div>
+        <div style="direction:rtl;-webkit-flex-wrap:nowrap;display: flex;flex-wrap:nowrap;">
+            <b><label style="margin-left:10px;margin-right:10px;color:chocolate;">مجموع قیمت:</label></b>
+            <div id="SumPrice" class="card-text"></div>
+        </div>
+        <div style="direction:rtl;-webkit-flex-wrap:nowrap;display: flex;flex-wrap:nowrap;">
+            <input type="button" value="افزودن" onclick="Add();" style="width:50%" />
+            <input type="button" value="کم کردن" onclick="Drop();" style="width:50%" />
+        </div>
+
+        <script>
+            var input = document.getElementById("Count");
+
+            function Add() {
+                input.textContent = (Number(input.textContent) + 1).toString();
+                input.click();
+            }
+            function Drop() {
+                var Val = Number(input.textContent);
+                if (Val > 1) {
+                    input.textContent = (Val - 1).toString();
+                }
+                input.click();
+            }
+        </script>
+        <br />
+        <input type="button" value="تایید" id="btn_Done" />
+    </div>
+</div>

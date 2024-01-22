@@ -111,15 +111,30 @@ namespace Monsajem_Incs.Convertors
                 var Result = Int16.Parse(Value);
                 return Unsafe.As<Int16, t>(ref Result);
             }
+            else if (t == typeof(UInt16))
+            {
+                var Result = UInt16.Parse(Value);
+                return Unsafe.As<UInt16, t>(ref Result);
+            }
             else if (t == typeof(Int32))
             {
                 var Result = Int32.Parse(Value);
                 return Unsafe.As<Int32, t>(ref Result);
             }
+            else if (t == typeof(UInt32))
+            {
+                var Result = UInt32.Parse(Value);
+                return Unsafe.As<UInt32, t>(ref Result);
+            }
             else if (t == typeof(Int64))
             {
                 var Result = Int64.Parse(Value);
                 return Unsafe.As<Int64, t>(ref Result);
+            }
+            else if (t == typeof(UInt64))
+            {
+                var Result = UInt64.Parse(Value);
+                return Unsafe.As<UInt64, t>(ref Result);
             }
             else if (t == typeof(long))
             {
@@ -152,6 +167,12 @@ namespace Monsajem_Incs.Convertors
                 return Value.ToString();
             else if (t == typeof(Int64))
                 return Value.ToString();
+            else if (t == typeof(UInt16))
+                return Value.ToString();
+            else if (t == typeof(UInt32))
+                return Value.ToString();
+            else if (t == typeof(UInt64))
+                return Value.ToString();
             else if (t == typeof(long))
                 return Value.ToString();
             else if (t == typeof(float))
@@ -173,6 +194,12 @@ namespace Monsajem_Incs.Convertors
             else if (t == typeof(Int32))
                 return true;
             else if (t == typeof(Int64))
+                return true;
+            else if (t == typeof(UInt16))
+                return true;
+            else if (t == typeof(UInt32))
+                return true;
+            else if (t == typeof(UInt64))
                 return true;
             else if (t == typeof(long))
                 return true;

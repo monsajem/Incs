@@ -33,7 +33,7 @@ namespace Monsajem_Incs.Serialization
                     SR_Pos < 0)
                     throw new Exception($"Position Isn't Valid. SR:{SR_Pos} , DR:{DR_Pos}");
                 var TypeName = Serializere.Read(Data);
-                var SR_Type = TypeName.GetTypeByName();
+                var SR_Type = Assembly.Assembly.GetType(TypeName);
                 if (SR_Type != Type)
                     throw new Exception($"Type isn't match\nSR: {SR_Type.MidName()}\nDR: {Type.MidName()}");
             }

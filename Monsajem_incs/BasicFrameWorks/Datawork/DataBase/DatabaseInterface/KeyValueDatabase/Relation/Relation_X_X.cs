@@ -111,6 +111,7 @@ namespace Monsajem_Incs.Database.Base
                             ThisRelation.LinkArray.Update(ThatValue);
                         }
                     }
+                    Run.EndUse(RelationName);
                 }
             };
 
@@ -127,6 +128,7 @@ namespace Monsajem_Incs.Database.Base
                                  (c) => ThatRelation.Field.Value(c).Ignore(
                                      (KeyType)info.Info[ThatRelation.Field.Value(c).KeyPos].Key));
                     }
+                    Run.EndUse(RelationName);
                 }
             };
 

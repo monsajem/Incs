@@ -1,0 +1,40 @@
+﻿<html>
+<body>
+    <div id="Main" class="card w3-round-large" style="background-color:rgba(255,255,255,0.7);margin-left:0%;width:100%;">
+        <br />
+        <div style="position:relative;display:inline-block;min-height:0px;min-width:0px;overflow:hidden;">
+            <img id="Image_Product" class="card-img-top w3-round-large" style="max-height:calc(80vh);max-width:95%;">
+            <img id="Image_Sizer" src="./Files/Sizer.png" style="display:none;position:absolute;right:0;top:0;" />
+        </div>
+        <div class="card-body" style="background-color:rgba(255,255,255,0.7);">
+            <h5 id="Name" class="card-title"></h5>
+            <table>
+                <tr>
+                    <td style="text-align: center; vertical-align: middle;" align="center">
+                        <img id="btn_shop" src="./Files/shopicon.png" style="width:30px;height:30px" />
+                    </td>
+                    <td style="text-align: center; vertical-align: middle;" align="center">
+                        <img id="btn_GetSize" src="./Files/GetSize.png" style="width:30px;height:30px" />
+                    </td>
+                </tr>
+                <tr>
+                    <td id="OldPrice_Frame" style="direction:rtl;-webkit-flex-wrap:nowrap;display: flex;flex-wrap:nowrap;">
+                        <div style="margin-left:10px;margin-right:10px;color:chocolate;">قیمت:</div>
+                        <div id="OldPrice" style="text-decoration:line-through;text-decoration-color: red;text-decoration-style: wavy; color:gray;text-align:right" class="card-text"></div>
+                        <div style="margin-left:10px;margin-right:10px;color:chocolate;"> تومان </div>
+                    </td>
+                    <td style="direction:rtl;-webkit-flex-wrap:nowrap;display: flex;flex-wrap:nowrap;">
+                        <label style="margin-left:10px;margin-right:10px;color:chocolate;">قیمت:</label>
+                        <div id="Price" style="text-align:right" class="card-text"></div>
+                        <div style="margin-left:10px;margin-right:10px;color:chocolate;"> تومان </div>
+                    </td>
+                </tr>
+            </table>
+            <p id="ShortDescribe" class="card-text"></p>
+            <p id="LongDescribe" class="card-text"></p>
+            <br /><br /><br />
+
+        </div>
+    </div>
+</body>
+</html>

@@ -1,5 +1,7 @@
 
 using System.Runtime.InteropServices.JavaScript;
+using WebAssembly.Browser.MonsajemDomHelpers;
+
 namespace WebAssembly.Browser.DOM
 {
     
@@ -44,7 +46,7 @@ namespace WebAssembly.Browser.DOM
             this(((System.Func<JSObject>)(()=>
             {
                 var Uint8AR = Uint8Array.From(Data);
-                return new JSObject(Runtime.New("Blob", new Array(Uint8AR), new { type = "application/octet-stream" }),true);
+                return  js.NewJsObject("Blob",new Array(Uint8AR), new { type = "application/octet-stream" });
             }))())
         { }
         internal Blob(JSObject jSObject) : base(jSObject) { }

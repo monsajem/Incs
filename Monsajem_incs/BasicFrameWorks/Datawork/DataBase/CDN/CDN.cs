@@ -21,6 +21,8 @@ namespace Monsajem_Incs.Database.CDN
         {
             if(IsLoaded==false)
             {
+                if (Register == null)
+                    throw new Exception("deafult register of object not set.");
                 Register.Load();
                 IsLoaded = true;
             }
@@ -125,10 +127,16 @@ namespace Monsajem_Incs.Database.CDN
     {
         public CDNTable(
             string TableName,
-            Func<ValueType, KeyType> GetKey) :
+            Func<ValueType, KeyType> GetKey,
+            bool SubmitTableName = true) :
             this(TableName,DataRegister.GetData<ValueType>(TableName),GetKey)
         {
-            this.TableName = TableName;
+            if (typeof(KeyType) == typeof(string))
+            {
+                KeysInfo.Keys.Comparer = (System.Collections.Generic.IComparer<KeyType>)StringComparer.InvariantCulture;
+            }
+            if(SubmitTableName)
+                this.TableName = TableName;
             foreach (var Value in this.BasicActions.Items)
                 KeysInfo.Keys.BinaryInsert(GetKey(Value.Value));
         }

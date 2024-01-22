@@ -119,26 +119,26 @@ namespace BenchmarkExample
         [Benchmark]
         public object Integer()=>SrDr(Int_Value);
 
-        [Benchmark]
-        public object ArInteger() => SrDr(Int_Ar);
+        //[Benchmark]
+        //public object ArInteger() => SrDr(Int_Ar);
 
-        [Benchmark]
-        public object ArSameCls() => SrDr(Cls_Ar_Same);
+        //[Benchmark]
+        //public object ArSameCls() => SrDr(Cls_Ar_Same);
 
-        [Benchmark]
-        public object ArNSameCls() => SrDr(Cls_Ar_NSame);
+        //[Benchmark]
+        //public object ArNSameCls() => SrDr(Cls_Ar_NSame);
 
-        [Benchmark]
-        public object String() => SrDr(String_Value);
+        //[Benchmark]
+        //public object String() => SrDr(String_Value);
 
-        [Benchmark]
-        public object Class() => SrDr(Cls_Value);
+        //[Benchmark]
+        //public object Class() => SrDr(Cls_Value);
 
-        [Benchmark]
-        public object Struct_UnManaged() => SrDr(StrUN_Value);
+        //[Benchmark]
+        //public object Struct_UnManaged() => SrDr(StrUN_Value);
 
-        [Benchmark]
-        public object Struct_Managed() => SrDr(StrMN_Value);
+        //[Benchmark]
+        //public object Struct_Managed() => SrDr(StrMN_Value);
 
 
 
@@ -146,48 +146,48 @@ namespace BenchmarkExample
         [Benchmark]
         public object Integer_MP() => SrDrMP(Int_Value.Serialize());
 
-        [Benchmark]
-        public object ArInteger_MP() => SrDrMP(Int_Ar);
+        //[Benchmark]
+        //public object ArInteger_MP() => SrDrMP(Int_Ar);
 
-        [Benchmark]
-        public object ArSameCls_MP() => SrDrMP(Cls_Ar_Same);
+        //[Benchmark]
+        //public object ArSameCls_MP() => SrDrMP(Cls_Ar_Same);
 
-        [Benchmark]
-        public object ArNSameCls_MP() => SrDrMP(Cls_Ar_NSame);
+        //[Benchmark]
+        //public object ArNSameCls_MP() => SrDrMP(Cls_Ar_NSame);
 
-        [Benchmark]
-        public object String_MP() => SrDrMP(String_Value);
+        //[Benchmark]
+        //public object String_MP() => SrDrMP(String_Value);
 
-        [Benchmark]
-        public object Class_MP() => SrDrMP(Cls_Value);
+        //[Benchmark]
+        //public object Class_MP() => SrDrMP(Cls_Value);
 
-        [Benchmark]
-        public object Struct_UnManaged_MP() => SrDrMP(StrUN_Value);
+        //[Benchmark]
+        //public object Struct_UnManaged_MP() => SrDrMP(StrUN_Value);
 
-        [Benchmark]
-        public object Struct_Managed_MP() => SrDrMP(StrMN_Value);
+        //[Benchmark]
+        //public object Struct_Managed_MP() => SrDrMP(StrMN_Value);
 
 
         [Benchmark]
         public object Integer_BP() => 
             BinaryConverter.Deserialize<int>(BinaryConverter.Serialize(Int_Value));
 
-        [Benchmark]
-        public object Class_BP() => SrDrBP(Cls_Value);
+        //[Benchmark]
+        //public object Class_BP() => SrDrBP(Cls_Value);
 
-        [Benchmark]
-        public object Struct_UnManaged_BP() => SrDrBP(StrUN_Value);
+        //[Benchmark]
+        //public object Struct_UnManaged_BP() => SrDrBP(StrUN_Value);
 
-        [Benchmark]
-        public object Struct_Managed_BP() => SrDrBP(StrMN_Value);
+        //[Benchmark]
+        //public object Struct_Managed_BP() => SrDrBP(StrMN_Value);
 
-        [Benchmark]
-        public object Struct_UnManaged_SP()
-        {
-            var y = StrUN_Value.Pack();
-            var x = new Str_Unmanaged();
-            x.Unpack(y);
-            return x;
-        }
+        //[Benchmark]
+        //public object Struct_UnManaged_SP()
+        //{
+        //    var y = StrUN_Value.Pack();
+        //    var x = new Str_Unmanaged();
+        //    x.Unpack(y);
+        //    return x;
+        //}
     }
 }

@@ -1,0 +1,42 @@
+<html>
+<body>
+    <video id="prvQR" style="width:100%;height:calc(80vh)"></video>
+    <input type="button" style="opacity:0" id="ScannedValue" />
+    <script type="text/javascript">
+        var prvQR = document.getElementById('prvQR');
+        var scanner = new Instascan.Scanner({ mirror: false, video: prvQR });
+        var Scanned = document.getElementById("ScannedValue");
+        scanner.addListener('scan', function (content) {
+            scanner.stop();
+            Scanned.value = content;
+            Scanned.click();
+        });
+        Instascan.Camera.getCameras().then(function (cameras) {
+
+            if (cameras.length > 0) {
+                if (cameras.length > 1) {
+                    scanner.start(cameras[1]);
+                }
+                else {
+                    scanner.start(cameras[0]);
+                }
+            } else {
+
+                $.notify('No cameras found.', {
+                    allow_dismiss: false,
+                    delay: 3000,
+                    type: 'danger'
+                });
+                window.history.back();
+            }
+        }).catch(function (e) {
+            $.notify(e, {
+                allow_dismiss: false,
+                delay: 3000,
+                type: 'danger'
+            });
+            window.history.back();
+        });
+    </script>
+</body>
+</html>

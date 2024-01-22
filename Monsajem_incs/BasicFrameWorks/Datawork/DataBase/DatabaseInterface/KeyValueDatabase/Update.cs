@@ -54,7 +54,7 @@ namespace Monsajem_Incs.Database.Base
             {
                 using (Run.UseBlock())
                 {
-                    var NewValue = GetItem(OldKey);
+                    var NewValue = GetItem(OldKey,true);
                     AutoFillRelations?.Invoke(NewValue.Value);
                     var KeysLen = BasicActions.Keys;
                     var Info = (NewValue, new Events<ValueType>.UpdateInfo[KeysLen]);

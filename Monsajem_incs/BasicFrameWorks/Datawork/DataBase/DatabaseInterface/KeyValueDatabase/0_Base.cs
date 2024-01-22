@@ -67,7 +67,8 @@ namespace Monsajem_Incs.Database.Base
                 try
                 {
                     _TableName = value;
-                    TableFinder.AddTable(this);
+                    if(this.GetType()!= typeof(PartOfTable<ValueType,KeyType>))
+                        TableFinder.AddTable(this);
                     Done = true;
                 }
                 finally

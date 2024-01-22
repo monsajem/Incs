@@ -88,9 +88,14 @@ namespace Monsajem_Incs.Database.Base
                 return RL.Value;
             }
 
+
             public static implicit operator RelationItem(ValueType Value)
             {
                 return new RelationItem() { P_GetValue = () => Value };
+            }
+            public static implicit operator RelationItem(ValueInfo Value)
+            {
+                return Value.Value;
             }
 
             public override string ToString()
@@ -99,7 +104,7 @@ namespace Monsajem_Incs.Database.Base
             }
         }
 
-        private int Compare(object k1, object k2)
+        private static int Compare(object k1, object k2)
         {
             if (k1 == null)
                 if (k2 == null)
@@ -187,6 +192,7 @@ namespace Monsajem_Incs.Database.Base
                    var Key = this.GetKey(Value);
 
                    if (ThisRelation == null)
+                   {
                        ThisRelation = new PartOfTable<To, ToKeyType>(new ToKeyType[0], Relation.LinkArray)
                        {
                            AutoFillRelations = (c) =>
@@ -195,6 +201,8 @@ namespace Monsajem_Incs.Database.Base
                                MakeNew?.Invoke((Value, c));
                            }
                        };
+                       ThisRelation.TableName = Fild.Field.Name;
+                   }
                    else if (ThisRelation.Extras == null)
                    {
                        ThisRelation = new PartOfTable<To, ToKeyType>(ThisRelation.KeysInfo.Keys, Relation.LinkArray)
@@ -206,6 +214,7 @@ namespace Monsajem_Incs.Database.Base
                                MakeNew?.Invoke((Value, c));
                            }
                        };
+                       ThisRelation.TableName = Fild.Field.Name;
                        if (Relation.IsUpdateAble)
                            ThisRelation.ReadyForUpdateAble();
                    }

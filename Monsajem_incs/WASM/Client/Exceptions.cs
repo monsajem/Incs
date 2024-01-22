@@ -11,7 +11,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using static WASM_Global.Publisher;
 
-namespace Monsajem_Client
+namespace Monsajem_Incs.WasmClient
 {
     public class ThisException : Exception
     {

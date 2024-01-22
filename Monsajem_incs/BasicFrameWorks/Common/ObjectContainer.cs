@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Monsajem_Incs
 {
-    public struct ValueHolder<t>
+    public class ValueHolder<t>
     {
         private bool _HaveValue;
         public bool HaveValue

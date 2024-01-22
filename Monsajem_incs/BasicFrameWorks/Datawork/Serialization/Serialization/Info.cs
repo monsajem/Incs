@@ -116,7 +116,7 @@ namespace Monsajem_Incs.Serialization
                         if (SerializersByNameCode.TryGetValue(Key, out Result))
                             goto Again;
                         SR = (SerializeInfo)
-                            typeof(SerializeInfo<>).MakeGenericType(TypeName.GetTypeByName()).GetMethod("GetSerialize").
+                            typeof(SerializeInfo<>).MakeGenericType(Assembly.Assembly.GetType(TypeName)).GetMethod("GetSerialize").
                         Invoke(null, null);
                         Key.Serializer = SR;
                         if (SerializersByNameCode.Contains(Key) == false)
@@ -126,7 +126,7 @@ namespace Monsajem_Incs.Serialization
                 else
                     SR = Result.Serializer;
 #if DEBUG
-                if (SR.Type != TypeName.GetTypeByName())
+                if (SR.Type != Assembly.Assembly.GetType(TypeName))
                     throw new Exception("invalid Serializers Found!");
 #endif
                 return SR;

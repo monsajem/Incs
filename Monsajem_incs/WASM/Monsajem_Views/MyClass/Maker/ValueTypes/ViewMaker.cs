@@ -15,10 +15,32 @@ using Monsajem_Incs.Convertors;
 
 namespace Monsajem_Incs.Views.Maker.ValueTypes
 {
-    internal class ViewItemMaker<ValueType, ViewType>
+    public abstract class ViewItemMaker<ValueType>
+    {
+        private static ViewItemMaker<ValueType> _Default;
+        public static ViewItemMaker<ValueType> Default
+        {
+            get
+            {
+                if(_Default==null)
+                    throw new Exception("Default of Show View Missing in " + typeof(ValueType).FullName);
+                return _Default;
+            }
+            set => _Default = value;
+        }
+
+        public abstract HTMLElement MakeHtmlView(ValueType Value, Action Edit=null, Action Delete=null);
+    }
+
+    public class ViewItemMaker<ValueType, ViewType> : 
+        ViewItemMaker<ValueType>
         where ViewType : new()
     {
-        public static ViewItemMaker<ValueType, ViewType> Default = new ViewItemMaker<ValueType, ViewType>();
+        public static new ViewItemMaker<ValueType, ViewType> Default
+        {
+            get => ViewItemMaker<ValueType>.Default as ViewItemMaker<ValueType, ViewType> ;
+            set => ViewItemMaker<ValueType>.Default = value;
+        }
 
         public Action<(ViewType View, ValueType Value)> Default_FillView;
         public Action<(ViewType View, ValueType Value)> FillView;
@@ -122,13 +144,11 @@ namespace Monsajem_Incs.Views.Maker.ValueTypes
             return View;
         }
 
-        public HTMLElement MakeHtml(
-            (ValueType obj,
-            Action Edit,
-            Action Delete) Inputs)
+        public override HTMLElement MakeHtmlView(ValueType Value, Action Edit=null, Action Delete=null)
         {
-
-            return GetMain(MakeView(Inputs.obj,Inputs.Edit,Inputs.Delete));
+            return GetMain(MakeView(Value, Edit, Delete));
         }
+
+        public void SetAsDefault() => Default = this;
     }
 }

@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices.JavaScript;
+using WebAssembly.Browser.MonsajemDomHelpers;
 
 namespace WebAssembly.Browser.DOM
 {
@@ -10,7 +11,7 @@ namespace WebAssembly.Browser.DOM
     {
         internal FileReader(JSObject handle) : base(handle) { }
 
-        public FileReader() : this(new JSObject(Runtime.New("FileReader"),true)){ }
+        public FileReader() : this(js.NewJsObject("FileReader")){ }
 
         [Export("readAsDataURL")]
         public void ReadAsDataURL(Blob selectors)

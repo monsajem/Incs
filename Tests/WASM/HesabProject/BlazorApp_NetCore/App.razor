@@ -1,0 +1,61 @@
+@using Microsoft.AspNetCore.Components.Routing
+@using WASM_Global;
+@using Microsoft.JSInterop;
+@using WebAssembly.Browser.DOM;
+
+@inject Microsoft.JSInterop.IJSRuntime jSRuntime
+@inject NavigationManager NavigationManager
+@inject INavigationInterception NavigationInterception
+
+@using System.Reflection;
+@code
+{
+    protected override void OnInitialized()
+    {
+        Publisher.jSRuntime = jSRuntime;
+        Publisher.jSInProcessRuntime = jSRuntime as IJSInProcessRuntime;
+        Publisher.NavigationManager = NavigationManager;
+
+        NavigationManager.LocationChanged += async (s, e) =>
+        {
+            await Monsajem_Incs.WasmClient.SafeRun.Safe(async () =>
+            await Monsajem_Incs.Views.Page.Route(e.Location));
+        };
+        Monsajem_Incs.UserControler.Publish.HideAction();
+    }
+
+    protected async override Task OnInitializedAsync()
+    {
+        await Task.Delay(1);
+
+        //System.Net.Http.HttpClient request = new System.Net.Http.HttpClient();
+        //   await request.GetAsync("https://ipapi.co/8.8.8.8/country/");
+        //var response = await request.GetAsync("https://ipapi.co/8.8.8.8/country/");
+        //Console.WriteLine(await response.Content.ReadAsStringAsync());
+        await Monsajem_Incs.WasmClient.SafeRun.Safe(() => Monsajem_Client.App.Main_Run());
+
+        var NeedToRoute = true;
+        {
+            var Pos = NavigationManager.Uri.IndexOf("&i=");
+            if (Pos < 0)
+                Pos = NavigationManager.Uri.IndexOf("i=");
+            if (Pos > -1)
+            {
+                NeedToRoute = false;
+                NavigationManager.NavigateTo(NavigationManager.Uri.Substring(0, Pos));
+            }
+        }
+
+        if (NeedToRoute)
+            await Monsajem_Incs.WasmClient.SafeRun.Safe(async () =>
+                await Monsajem_Incs.Views.Page.Route(NavigationManager.Uri));
+    }
+}
+
+<Router AppAssembly="@typeof(Program).Assembly">
+    <Found Context="routeData">
+        <RouteView RouteData="@routeData" />
+    </Found>
+    <NotFound>
+    </NotFound>
+</Router>

@@ -29,6 +29,15 @@ namespace _test
     {
         static void Main(string[] args)
         {
+            var UC = new Monsajem_Incs.Collection.UnsafeCollector<byte>();
+
+            UC.WriteByte(1);
+            UC.Write(new byte[] { 2, 3});
+            UC.WriteByte(4);
+            UC.Write(new byte[] { 5, 6, 7 });
+
+            var UC_Res = UC.ToArray();
+
             object obj = 12;
             var D = obj.Serialize();
 

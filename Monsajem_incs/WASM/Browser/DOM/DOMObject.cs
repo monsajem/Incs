@@ -6,15 +6,15 @@ using static Monsajem_Incs.Collection.Array.Extentions;
 
 namespace WebAssembly.Browser.DOM
 {
-    public abstract class DOMObject : IDisposable,IComparable<DOMObject>
+    public abstract class DOMObject : IDisposable,IEquatable<DOMObject>
     {
         internal static JSObject StaticObject<type>()
         {
             return ExportClassAttribute.GetExportOf<type>().jSObjectStatic;
         }
 
-        internal static Array<DOMObject> objects =
-            new Array<DOMObject>(100);
+        internal static System.Collections.Generic.HashSet<DOMObject> objects =
+            new System.Collections.Generic.HashSet<DOMObject>();
 
         bool disposed = false;
 
@@ -29,8 +29,7 @@ namespace WebAssembly.Browser.DOM
 
         internal void ReadyForManageObject()
         {
-            if(objects.BinarySearch(this).Index<0)
-                objects.BinaryInsert(this);
+            objects.Add(this);
             //onRemoved = () => Console.WriteLine(JSHandle);
             //int last = GetProperty<int>("MNH");
             //if(last!=1)
@@ -239,9 +238,9 @@ namespace WebAssembly.Browser.DOM
             }
         }
 
-        public int CompareTo(DOMObject other)
+        public bool Equals(DOMObject other)
         {
-            return GetHashCode()-other.GetHashCode();
+            return JSHandle==other.JSHandle;
         }
 
         // We are hanging onto JavaScript objects and pointers.

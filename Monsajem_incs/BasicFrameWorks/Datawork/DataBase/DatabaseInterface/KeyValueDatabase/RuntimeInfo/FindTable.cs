@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using WebAssembly.Browser.DOM;
 using Monsajem_Incs.Views.Maker.Database;
-using static Monsajem_Client.Network;
+using static Monsajem_Incs.WasmClient.Network;
 using Monsajem_Incs.Convertors;
 
 namespace Monsajem_Incs.Database.Base
@@ -36,12 +36,19 @@ namespace Monsajem_Incs.Database.Base
             where KeyType : IComparable<KeyType>
             => FindTable(TableName) as TableInfo<KeyType, ValueType>;
 
+        public static TableInfo<KeyType, ValueType> FindTable<ValueType, KeyType>(
+            Table<ValueType,KeyType> SampleType, string TableName)
+            where KeyType : IComparable<KeyType>
+            => FindTable(TableName) as TableInfo<KeyType, ValueType>;
+
         public class TableInfo : IEquatable<TableInfo>
         {
             public string TableName;
             public object Table;
 
             private HashSet<RelationInfo> Relations = new HashSet<RelationInfo>();
+
+            public Func<object, object> SelectorItems { get;protected set; }
 
             public void AddRelation<HolderKeyType, HolderValueType, RelationKeyType, RelationValueType>(
                 Table<HolderValueType,HolderKeyType> Holder,
@@ -50,7 +57,9 @@ namespace Monsajem_Incs.Database.Base
                 where RelationKeyType : IComparable<RelationKeyType>
             {
                 var RelationInfo = new RelationInfo<HolderKeyType,HolderValueType, RelationKeyType, RelationValueType>()
-                { RelationName = Relation.Field.Field.Name };
+                { RelationName = Relation.Field.Field.Name,
+                  Holder = Holder,
+                  Relation = Relation};
                 if (Relations.Contains(RelationInfo) == true)
                     throw new Exception($"Relation with name '{Relation.Field.Field.Name}' is exist at '{TableName}' of TableFinder.");
                 else
@@ -89,6 +98,7 @@ namespace Monsajem_Incs.Database.Base
                    Action<(TableInfo TableInfo, object Key)> OnDelete = null) =>
                 throw new Exception("MakeShowView for item not implemented in table finder!");
             public virtual HTMLElement MakeShowViewForItems(
+                    string Query = null,
                     Action<(TableInfo TableInfo, object Key)> OnUpdate = null,
                     Action<(TableInfo TableInfo, object Key)> OnDelete = null) =>
                 throw new Exception("MakeShowView for table not implemented in table finder!");
@@ -126,8 +136,20 @@ namespace Monsajem_Incs.Database.Base
         public class TableInfo<KeyType, ValueType> : TableInfo
             where KeyType : IComparable<KeyType>
         {
+            public TableInfo()
+            {
+                SelectorItems = (c) => c.Values;
+            }
+
             private new Table<ValueType, KeyType> Table
-            { get => base.Table as Table<ValueType, KeyType>; }
+            { get =>(Table < ValueType, KeyType >) base.Table; }
+
+            public new Func<(IEnumerable<ValueType> Values,string Query),IEnumerable<ValueType>> 
+                SelectorItems {
+
+                get => (c) =>(IEnumerable<ValueType>) base.SelectorItems(c);
+                set => base.SelectorItems = (c) => value(((IEnumerable<ValueType> Values, string Query))c);
+            }
 
             public override string ConvertKeyToString(object Key) =>
                 ((KeyType)Key).ConvertToString();
@@ -143,7 +165,7 @@ namespace Monsajem_Incs.Database.Base
                 Table.Update((KeyType)Key,
                             (c)=>{
                                 var NewValue =(ValueType) Value;
-                                Table.MoveRelations(c, NewValue);
+                                Table.MoveRelations?.Invoke(c, NewValue);
                                 return NewValue;
                             });
 
@@ -175,10 +197,12 @@ namespace Monsajem_Incs.Database.Base
             }
 
             public override HTMLElement MakeShowViewForItems(
+                string Query,
                 Action<(TableInfo TableInfo, object Key)> OnUpdate = null,
                 Action<(TableInfo TableInfo, object Key)> OnDelete = null)
             {
                 return Table.MakeShowView(
+                                    Query:Query,
                                     OnUpdate: (c) => OnUpdate?.Invoke(c),
                                     OnDelete: (c) => OnDelete?.Invoke(c));
             }
@@ -250,6 +274,7 @@ namespace Monsajem_Incs.Database.Base
 
             public virtual HTMLElement MakeShowViewForItems(
                 object HolderKey,
+                string Query,
                 Action<(TableInfo TableInfo, object Key)> OnUpdate = null,
                 Action<(TableInfo TableInfo, object Key)> OnDelete = null) =>
                 throw new Exception("MakeShowView for table not implemented in table finder!");
@@ -269,10 +294,11 @@ namespace Monsajem_Incs.Database.Base
 
             public HTMLElement MakeShowViewForItems(
                 string HolderKey,
+                string Query = null,
                 Action<(TableInfo TableInfo, object Key)> OnUpdate = null,
                 Action<(TableInfo TableInfo, object Key)> OnDelete = null) =>
                      MakeShowViewForItems(ConvertStringToHolderKey(HolderKey),
-                     OnUpdate, OnDelete);
+                     Query,OnUpdate, OnDelete);
 
             public virtual HTMLElement MakeInsertView(
                 string HolderKey,
@@ -294,8 +320,8 @@ namespace Monsajem_Incs.Database.Base
             where HolderKeyType : IComparable<HolderKeyType>
             where RelationKeyType : IComparable<RelationKeyType>
         {
-            Table<HolderValueType, HolderKeyType> Holder;
-            Table<HolderValueType, HolderKeyType>.RelationTableInfo<RelationValueType, RelationKeyType> Relation;
+            public Table<HolderValueType, HolderKeyType> Holder;
+            public Table<HolderValueType, HolderKeyType>.RelationTableInfo<RelationValueType, RelationKeyType> Relation;
 
             public PartOfTable<RelationValueType, RelationKeyType>
                 GetterRealtionByKey(HolderKeyType HolderKey) => Relation.Field.Value(Holder[HolderKey]);
@@ -352,11 +378,13 @@ namespace Monsajem_Incs.Database.Base
 
             public override HTMLElement MakeShowViewForItems(
                 object HolderKey,
+                string Query=null,
                 Action<(TableInfo TableInfo, object Key)> OnUpdate = null,
                 Action<(TableInfo TableInfo, object Key)> OnDelete = null)
             {
                 var Table = GetterRealtionByKey((HolderKeyType)HolderKey);
                 return Table.MakeShowView(
+                               Query:Query,
                                OnUpdate: (c) => OnUpdate?.Invoke(c),
                                OnDelete: (c) => OnDelete?.Invoke(c));
             }
