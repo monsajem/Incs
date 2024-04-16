@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("HTMLFieldSetElement", typeof(JSObject))]
+    [Export("HTMLFieldSetElement", typeof(IJSInProcessObjectReference))]
     public sealed class HTMLFieldSetElement : HTMLElement, IHTMLFieldSetElement
     {
-        internal HTMLFieldSetElement(JSObject handle) : base(handle) { }
+        internal HTMLFieldSetElement(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public HTMLFieldSetElement() { }
         [Export("align")]

@@ -5,7 +5,7 @@ using System;
 
 namespace System.Runtime.InteropServices.JavaScript
 {
-    public class ArrayBuffer : CoreObject
+    public class ArrayBuffer : JSObject
     {
         /// <summary>
         /// Initializes a new instance of the JavaScript Core ArrayBuffer class.
@@ -32,13 +32,13 @@ namespace System.Runtime.InteropServices.JavaScript
         /// The length of an ArrayBuffer in bytes.
         /// </summary>
         /// <value>The length of the underlying ArrayBuffer in bytes.</value>
-        public int ByteLength => (int)GetObjectProperty("byteLength");
+        public int ByteLength => GetPropertyAsInt32("byteLength");
 
         /// <summary>
         /// Gets a value indicating whether this ArrayBuffer is view.
         /// </summary>
         /// <value><c>true</c> if is view; otherwise, <c>false</c>.</value>
-        public bool IsView => (bool)GetObjectProperty("isView");
+        public bool IsView => GetPropertyAsBoolean("isView");
 
         /// <summary>
         /// Slice the specified begin.

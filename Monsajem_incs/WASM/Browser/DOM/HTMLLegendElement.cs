@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("HTMLLegendElement", typeof(JSObject))]
+    [Export("HTMLLegendElement", typeof(IJSInProcessObjectReference))]
     public sealed class HTMLLegendElement : HTMLElement, IHTMLLegendElement
     {
-        internal HTMLLegendElement(JSObject handle) : base(handle) { }
+        internal HTMLLegendElement(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public HTMLLegendElement () { }
         [Export("align")]

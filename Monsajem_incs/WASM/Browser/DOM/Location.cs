@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("Location", typeof(JSObject))]
+    [Export("Location", typeof(IJSInProcessObjectReference))]
     public sealed class Location : DOMObject
     {
-        public Location(JSObject handle) : base(handle) { }
+        public Location(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public Location() { }
         [Export("hash")]

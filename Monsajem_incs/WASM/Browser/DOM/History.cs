@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("History", typeof(JSObject))]
+    [Export("History", typeof(IJSInProcessObjectReference))]
     public sealed class History : DOMObject, IHistory
     {
-        public History(JSObject handle) : base(handle) { }
+        public History(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public History() { }
         [Export("length")]

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
@@ -11,7 +11,7 @@ namespace WebAssembly.Browser.DOM
         {
             var type = typeof(T);
             var jsobjectnew = typeof(T).GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
-                            null, new Type[] { typeof(JSObject) }, null);
+                            null, new Type[] { typeof(IJSInProcessObjectReference) }, null);
 
             return (T)jsobjectnew.Invoke(new object[] { htmlElement.ManagedJSObject });
         }
@@ -34,7 +34,7 @@ namespace WebAssembly.Browser.DOM
         {
 
             var jsObjectConstructor = targetType.GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
-                null, new Type[] { typeof(JSObject) }, null);
+                null, new Type[] { typeof(IJSInProcessObjectReference) }, null);
 
             var newJSObject = jsObjectConstructor.Invoke(new object[] { parentObject.ManagedJSObject });
             //if (inheritFrom)

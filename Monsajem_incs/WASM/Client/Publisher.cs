@@ -7,6 +7,7 @@ using Microsoft.JSInterop;
 using Monsajem_Incs.Collection.Array.Base;
 using Monsajem_Incs.Resources.Base.Partials;
 using WebAssembly.Browser.DOM;
+using WebAssembly.Browser.MonsajemDomHelpers;
 
 namespace WASM_Global
 {
@@ -21,7 +22,7 @@ namespace WASM_Global
         {
             var Modal = new Modal_html();
             Modal.body.AppendChild(Element);
-            Document.document.Body.AppendChild(Modal.myModal);
+            js.Document.Body.AppendChild(Modal.myModal);
             Modal.Btn_Close.OnClick+=(c1,c2) =>
             {
                 Modal.myModal.Remove();

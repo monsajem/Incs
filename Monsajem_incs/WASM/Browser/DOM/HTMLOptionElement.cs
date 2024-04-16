@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("HTMLOptionElement", typeof(JSObject))]
+    [Export("HTMLOptionElement", typeof(IJSInProcessObjectReference))]
     public sealed class HTMLOptionElement : HTMLElement
     {
-        internal HTMLOptionElement(JSObject handle) : base(handle) { }
+        internal HTMLOptionElement(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public HTMLOptionElement () { }
         [Export("defaultSelected")]

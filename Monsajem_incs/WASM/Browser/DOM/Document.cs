@@ -1,22 +1,23 @@
-﻿using System;
+﻿using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
+using System;
 using System.Runtime.InteropServices.JavaScript;
+using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 using WebAssembly.Browser.MonsajemDomHelpers;
+using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("Document", typeof(JSObject))]
+    [Export("Document", typeof(IJSInProcessObjectReference))]
     public sealed partial class Document : Node
     {
-        internal Document(JSObject handle) : base(handle) { }
+        internal Document(IJSInProcessObjectReference handle) : base(handle) { }
 
         public Document() : base("document") { }
 
-        public static Document document = new Document();
-
         public static Document Parse(string Html)
         {
-            return new Document((JSObject) js.NewJsObject("DOMParser").Invoke("parseFromString",Html, "text/html"));
+            return new Document((IJSInProcessObjectReference) js.JsNewObject("DOMParser").Invoke<object>("parseFromString",Html, "text/html"));
         }
 
         [Export("activeElement")]

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 using WebAssembly.Browser.DOM.Events;
 
 namespace WebAssembly.Browser.DOM
@@ -14,7 +14,7 @@ namespace WebAssembly.Browser.DOM
         bool DispatchEvent(Event evt);
         [Export("removeEventListener")]
         void RemoveEventListener(string type, DOMEventHandler listener, object options);
-        int DispatchDOMEvent(string eventType, JSObject eventTarget);
+        int DispatchDOMEvent(string eventType, IJSInProcessObjectReference eventTarget);
 
     }
 

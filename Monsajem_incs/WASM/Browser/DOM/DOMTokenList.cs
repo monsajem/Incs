@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
-    [Export("DOMTokenList", typeof(JSObject))]
+    [Export("DOMTokenList", typeof(IJSInProcessObjectReference))]
     public class DOMTokenList : DOMObject
     {
-        public DOMTokenList(JSObject handle) : base(handle) { }
+        public DOMTokenList(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public DOMTokenList() { }
         [Export("length")]

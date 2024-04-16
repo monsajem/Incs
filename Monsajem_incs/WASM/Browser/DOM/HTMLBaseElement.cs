@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("HTMLBaseElement", typeof(JSObject))]
+    [Export("HTMLBaseElement", typeof(IJSInProcessObjectReference))]
     public sealed class HTMLBaseElement : HTMLElement, IHTMLBaseElement
     {
-        internal HTMLBaseElement(JSObject handle) : base(handle) { }
+        internal HTMLBaseElement(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public HTMLBaseElement() { }
         [Export("href")]

@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("HTMLQuoteElement", typeof(JSObject))]
+    [Export("HTMLQuoteElement", typeof(IJSInProcessObjectReference))]
     public sealed class HTMLQuoteElement : HTMLElement, IHTMLQuoteElement
     {
-        internal HTMLQuoteElement(JSObject handle) : base(handle) { }
+        internal HTMLQuoteElement(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public HTMLQuoteElement() { }
         [Export("cite")]

@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("DOMSettableTokenList", typeof(JSObject))]
+    [Export("DOMSettableTokenList", typeof(IJSInProcessObjectReference))]
     public sealed class DOMSettableTokenList : DOMTokenList, IDOMSettableTokenList
     {
-        internal DOMSettableTokenList(JSObject handle) : base(handle) { }
+        internal DOMSettableTokenList(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public DOMSettableTokenList() { }
         [Export("value")]

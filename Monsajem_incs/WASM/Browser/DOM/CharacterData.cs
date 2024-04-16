@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
-    [Export("CharacterData", typeof(JSObject))]
+    [Export("CharacterData", typeof(IJSInProcessObjectReference))]
     public class CharacterData : Node
     {
-        internal CharacterData(JSObject handle) : base(handle) { }
+        internal CharacterData(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public CharacterData() { }
         [Export("data")]

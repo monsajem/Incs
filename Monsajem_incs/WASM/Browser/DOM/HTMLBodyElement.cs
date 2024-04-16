@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM 
 {
 
-[Export("HTMLBodyElement", typeof(JSObject))]
+[Export("HTMLBodyElement", typeof(IJSInProcessObjectReference))]
     public sealed class HTMLBodyElement : HTMLElement, IHTMLBodyElement {
-    internal HTMLBodyElement  (JSObject handle) : base (handle) {} 
+    internal HTMLBodyElement  (IJSInProcessObjectReference handle) : base (handle) {} 
     
     //public HTMLBodyElement () { }
     [Export("aLink")]

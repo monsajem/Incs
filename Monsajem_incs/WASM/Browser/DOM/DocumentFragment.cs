@@ -1,15 +1,15 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
 
 
-    [Export("DocumentFragment", typeof(JSObject))]
+    [Export("DocumentFragment", typeof(IJSInProcessObjectReference))]
     public sealed class DocumentFragment : Node
     {
-        internal DocumentFragment(JSObject handle) : base(handle) { }
+        internal DocumentFragment(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public DocumentFragment() { }
         [Export("children")]

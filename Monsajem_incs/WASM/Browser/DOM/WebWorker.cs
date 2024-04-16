@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 using WebAssembly.Browser.MonsajemDomHelpers;
 
 namespace WebAssembly.Browser.DOM
 {
-    [Export("MessageEvent", typeof(JSObject))]
+    [Export("MessageEvent", typeof(IJSInProcessObjectReference))]
     public class MessageEvent : DOMObject
     {
-        public MessageEvent(JSObject handle) : base(handle) { }
+        public MessageEvent(IJSInProcessObjectReference handle) : base(handle) { }
 
         [Export("data")]
         public t GetData<t>()=> GetProperty<t>("data");
@@ -23,7 +23,7 @@ namespace WebAssembly.Browser.DOM
         public string lastEventId { get => GetProperty<string>("lastEventId"); }
     }
 
-    [Export("Worker", typeof(JSObject))]
+    [Export("Worker", typeof(IJSInProcessObjectReference))]
     public class WebWorker: DOMObject
     {
         private static WebWorker _CurrentWebWorker;
@@ -33,7 +33,7 @@ namespace WebAssembly.Browser.DOM
                 if (MonsajemDomHelpers.WebProcess.IsInWorker == false)
                     throw new PlatformNotSupportedException("CurrentWebWorker just declared in WebWorker.");
                 if(_CurrentWebWorker==null)
-                    _CurrentWebWorker = new WebWorker((JSObject)Runtime.GetGlobalObject("self"));
+                    _CurrentWebWorker = new WebWorker(js.JsGetValue("self"));
                 return _CurrentWebWorker;
             }
         }
@@ -44,12 +44,12 @@ namespace WebAssembly.Browser.DOM
         {}
 
         public WebWorker(System.Uri Uri) : 
-            this(js.NewJsObject("Worker",Uri.ToString()))
+            this(js.JsNewObject("Worker",Uri.ToString()))
         {}
 
-        public WebWorker(JSObject handle) : base(handle) 
+        public WebWorker(IJSInProcessObjectReference handle) : base(handle) 
         {
-            SetProperty("onmessage",(Action<JSObject>)onmessage);
+            SetProperty("onmessage",(Action<IJSInProcessObjectReference>)onmessage);
         }
 
         [Export("postMessage")]
@@ -58,7 +58,7 @@ namespace WebAssembly.Browser.DOM
             InvokeMethod<object>("postMessage", Message);
         }
 
-        private void onmessage(JSObject msg)
+        private void onmessage(IJSInProcessObjectReference msg)
         {
             OnMessage?.Invoke(new MessageEvent(msg));
         }
@@ -71,7 +71,9 @@ namespace WebAssembly.Browser.DOM
         private WebWorker worker;
         public WebWorkerClient()
         {
+            //worker = new WebWorker("console.log(\"WebWorker Script0\");");
             worker = new WebWorker("self.onmessage=function(e){eval(e.data);}");
+            //worker.PostMessage("console.log(\"WebWorker Script1\");");
             worker.OnMessage += OnMessage;
         }
 
@@ -113,14 +115,14 @@ namespace WebAssembly.Browser.DOM
         public async Task Run(string js)
         {
             var Compeleted = GetMessage(true);
-            worker.PostMessage($"eval({MonsajemDomHelpers.js.Js(js)});postMessage('');");
+            worker.PostMessage($"eval({MonsajemDomHelpers.js.ToJsValue(js)});postMessage('');");
             await Compeleted;
         }
 
         public async Task<t> Result<t>(string js)
         {
             var Compeleted = GetMessage(true);
-            worker.PostMessage($"postMessage(eval({MonsajemDomHelpers.js.Js(js)}));");
+            worker.PostMessage($"postMessage(eval({MonsajemDomHelpers.js.ToJsValue(js)}));");
             return (await Compeleted).GetData<t>();
         }
 
@@ -134,7 +136,7 @@ namespace WebAssembly.Browser.DOM
                         postMessage(eval(xhttp.responseText));
                     }
                   };
-                  xhttp.open('GET', "+MonsajemDomHelpers.js.Js(URL)+@", true);
+                  xhttp.open('GET', "+MonsajemDomHelpers.js.ToJsValue(URL)+@", true);
                   xhttp.send();");
             return (await Compeleted).GetData<t>();
         }
@@ -150,7 +152,7 @@ namespace WebAssembly.Browser.DOM
                         postMessage('');
                     }
                   };
-                  xhttp.open('GET', " + MonsajemDomHelpers.js.Js(URL) + @", true);
+                  xhttp.open('GET', " + MonsajemDomHelpers.js.ToJsValue(URL) + @", true);
                   xhttp.send();");
             await Compeleted;
         }

@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
 
-    [Export("NamedNodeMap", typeof(JSObject))]
+    [Export("NamedNodeMap", typeof(IJSInProcessObjectReference))]
     public sealed class NamedNodeMap : DOMObject
     {
-        public NamedNodeMap(JSObject handle) : base(handle) { }
+        public NamedNodeMap(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public NamedNodeMap() { }
         [Export("length")]

@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM 
 {
 
-    [Export("Text", typeof(JSObject))]
+    [Export("Text", typeof(IJSInProcessObjectReference))]
     public class Text : CharacterData, IText
     {
-        internal Text(JSObject handle) : base(handle) { }
+        internal Text(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public Text(string data) { }
         [Export("wholeText")]

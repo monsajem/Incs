@@ -1,15 +1,15 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM 
 {
 
 
 
-    [Export("HTMLLinkElement", typeof(JSObject))]
+    [Export("HTMLLinkElement", typeof(IJSInProcessObjectReference))]
     public sealed class HTMLLinkElement : HTMLElement, IHTMLLinkElement
     {
-        internal HTMLLinkElement(JSObject handle) : base(handle) { }
+        internal HTMLLinkElement(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public HTMLLinkElement() { }
 

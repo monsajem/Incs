@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM.Events
 {
 
-    [Export("DragEvent", typeof(JSObject))]
+    [Export("DragEvent", typeof(IJSInProcessObjectReference))]
     public sealed class DragEvent : MouseEvent
     {
-        internal DragEvent(JSObject handle) : base(handle) { }
+        internal DragEvent(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public DragEvent(object type, object dragEventInit) { }
         DataTransfer dataTransfer;

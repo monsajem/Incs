@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM 
 {
 
-[Export("HTMLSourceElement", typeof(JSObject))]
+[Export("HTMLSourceElement", typeof(IJSInProcessObjectReference))]
 public sealed class HTMLSourceElement : HTMLElement, IHTMLSourceElement {
-    internal HTMLSourceElement  (JSObject handle) : base (handle) {}
+    internal HTMLSourceElement  (IJSInProcessObjectReference handle) : base (handle) {}
 
     //public HTMLSourceElement () { }
     [Export("media")]

@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("TextTrackCue", typeof(JSObject))]
+    [Export("TextTrackCue", typeof(IJSInProcessObjectReference))]
     public sealed class TextTrackCue : EventTarget
     {
-        internal TextTrackCue(JSObject handle) : base(handle) { }
+        internal TextTrackCue(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public TextTrackCue(double startTime, double endTime, string text) { }
         [Export("endTime")]

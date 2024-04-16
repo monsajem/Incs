@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM 
 {
 
-[Export("HTMLHRElement", typeof(JSObject))]
+[Export("HTMLHRElement", typeof(IJSInProcessObjectReference))]
     public sealed class HTMLHRElement : HTMLElement, IHTMLHRElement {
-    internal HTMLHRElement  (JSObject handle) : base (handle) {}
+    internal HTMLHRElement  (IJSInProcessObjectReference handle) : base (handle) {}
 
     //public HTMLHRElement () { }
     [Export("align")]

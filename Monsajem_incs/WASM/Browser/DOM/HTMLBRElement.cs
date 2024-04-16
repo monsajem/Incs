@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("HTMLBRElement", typeof(JSObject))]
+    [Export("HTMLBRElement", typeof(IJSInProcessObjectReference))]
     public sealed class HTMLBRElement : HTMLElement, IHTMLBRElement
     {
-        internal HTMLBRElement(JSObject handle) : base(handle) { }
+        internal HTMLBRElement(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public HTMLBRElement() { }
         [Export("clear")]

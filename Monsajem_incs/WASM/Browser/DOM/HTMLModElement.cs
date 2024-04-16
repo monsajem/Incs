@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM 
 {
 
-[Export("HTMLModElement", typeof(JSObject))]
+[Export("HTMLModElement", typeof(IJSInProcessObjectReference))]
 public sealed class HTMLModElement : HTMLElement, IHTMLModElement {
-    internal HTMLModElement  (JSObject handle) : base (handle) {}
+    internal HTMLModElement  (IJSInProcessObjectReference handle) : base (handle) {}
 
     //public HTMLModElement () { }
     [Export("cite")]

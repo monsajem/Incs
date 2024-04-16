@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("WebKitPoint", typeof(JSObject))]
+    [Export("WebKitPoint", typeof(IJSInProcessObjectReference))]
     public sealed class WebKitPoint : DOMObject
     {
-        public WebKitPoint(JSObject handle) : base(handle) { }
+        public WebKitPoint(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public WebKitPoint(double x, double y) { }
         [Export("x")]

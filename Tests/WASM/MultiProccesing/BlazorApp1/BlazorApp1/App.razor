@@ -1,0 +1,90 @@
+@using System;
+@using WebAssembly.Browser.MonsajemDomHelpers;
+@using System.Threading.Tasks;
+@using Monsajem_Incs.TimeingTester;
+@using BlazorWorker.BackgroundServiceFactory;
+@using BlazorWorker.Core;
+@using System.Runtime.InteropServices.JavaScript
+@using Microsoft.JSInterop.Implementation
+@using Microsoft.JSInterop
+@inject BlazorWorker.Core.IWorkerFactory workerFactory
+@inject Microsoft.JSInterop.IJSRuntime Js
+<h1>Hello, world!</h1>
+
+Welcome to your new app.
+
+@code
+{
+    public const int Len = 1;//1024 * 1024 * 10]
+    public class CLSTRD
+    {
+        public byte[] GetSR()
+        {
+            return new byte[Len];
+        }
+    }
+
+    protected async override Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        WebAssembly.Browser.MonsajemDomHelpers.js.Start((JSInProcessRuntime)Js);
+
+        Console.WriteLine("//////////////////////////////////");
+        {
+            //// monsajem sample
+            WebProcess Worker = null;
+            Console.WriteLine("monsajem WebWorker");
+            Console.WriteLine("getting Ready....");
+            Console.WriteLine("Ready " + (await Timing.run(async () =>
+            {
+                Worker = new WebProcess();
+                await Worker.IsReady;
+            })).ToString());
+
+            Console.WriteLine("Runing....");
+            Console.WriteLine("execution time " + (await Timing.run(async () =>
+            {
+                try
+                {
+                    (await Worker.Run(() =>
+                    {
+                        return new byte[Len];
+                    })).ToString();
+                }
+                catch {
+
+                    Console.WriteLine("ERR");
+                }
+            })).ToString());
+        }
+
+        Console.WriteLine("//////////////////////////////////");
+        {
+            //// Tewr/BlazorWorker sample        
+            IWorker worker = null;
+            BlazorWorker.WorkerBackgroundService.IWorkerBackgroundService<CLSTRD>
+                service = null;
+            Console.WriteLine("Tewr BlazorWorker");
+            Console.WriteLine("getting Ready....");
+            Console.WriteLine("Ready " + (await Timing.run(async () =>
+            {
+                worker = await workerFactory.CreateAsync();
+                service = await worker.CreateBackgroundServiceAsync<CLSTRD>((op) =>
+                {
+                    op.AddAssemblies(
+                            "BlazorApp_MultiProcessTest.dll",
+                            "Microsoft.AspNetCore.Components.dll",
+                            "BlazorWorker.Core.dll");
+                });
+            })).ToString());
+
+            Console.WriteLine("Runing....");
+            Console.WriteLine("execution time " + (await Timing.run(async () =>
+            {
+                (await service.RunAsync(s => s.GetSR())).ToString();
+            })).ToString());
+        }
+
+    }
+}

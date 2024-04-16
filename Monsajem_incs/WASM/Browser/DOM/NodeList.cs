@@ -2,15 +2,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("NodeList", typeof(JSObject))]
+    [Export("NodeList", typeof(IJSInProcessObjectReference))]
     public sealed class NodeList : DOMObject, IEnumerable<Node>, IEnumerable
     {
-        public NodeList(JSObject handle) : base(handle) { }
+        public NodeList(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public NodeList() { }
         [Export("length")]

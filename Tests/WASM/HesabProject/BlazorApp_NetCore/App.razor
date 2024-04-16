@@ -4,6 +4,7 @@
 @using WebAssembly.Browser.DOM;
 
 @inject Microsoft.JSInterop.IJSRuntime jSRuntime
+@inject Microsoft.JSInterop.JSInProcessRuntime jSRuntime_inProcess
 @inject NavigationManager NavigationManager
 @inject INavigationInterception NavigationInterception
 
@@ -26,6 +27,8 @@
 
     protected async override Task OnInitializedAsync()
     {
+        IJSInProcessRuntime Js =(IJSInProcessRuntime) jSRuntime;
+        IJSUnmarshalledObjectReference j2;
         await Task.Delay(1);
 
         //System.Net.Http.HttpClient request = new System.Net.Http.HttpClient();
@@ -50,7 +53,8 @@
             await Monsajem_Incs.WasmClient.SafeRun.Safe(async () =>
                 await Monsajem_Incs.Views.Page.Route(NavigationManager.Uri));
     }
-}
+
+}
 
 <Router AppAssembly="@typeof(Program).Assembly">
     <Found Context="routeData">

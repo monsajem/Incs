@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("MSGraphicsTrust", typeof(JSObject))]
+    [Export("MSGraphicsTrust", typeof(IJSInProcessObjectReference))]
     public sealed class MSGraphicsTrust : DOMObject
     {
-        internal MSGraphicsTrust(JSObject handle) : base(handle) { }
+        internal MSGraphicsTrust(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public MSGraphicsTrust() { }
         [Export("constrictionActive")]

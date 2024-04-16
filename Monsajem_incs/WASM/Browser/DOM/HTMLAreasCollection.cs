@@ -5,15 +5,15 @@ using System.Collections;
 using System.Collections.Generic;
 
 
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("HTMLAreasCollection", typeof(JSObject))]
+    [Export("HTMLAreasCollection", typeof(IJSInProcessObjectReference))]
     public sealed class HTMLAreasCollection : DOMObject, IEnumerable<HTMLAreaElement>, IEnumerable
     {
-        internal HTMLAreasCollection(JSObject handle) : base(handle) { }
+        internal HTMLAreasCollection(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public HTMLAreasCollection() { }
         [Export("length")]

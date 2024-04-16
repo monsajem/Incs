@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("HTMLTextAreaElement", typeof(JSObject))]
+    [Export("HTMLTextAreaElement", typeof(IJSInProcessObjectReference))]
     public sealed class HTMLTextAreaElement : HTMLElement, IHTMLTextAreaElement
     {
-        internal HTMLTextAreaElement(JSObject handle) : base(handle) { }
+        internal HTMLTextAreaElement(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public HTMLTextAreaElement() { }
         [Export("autofocus")]

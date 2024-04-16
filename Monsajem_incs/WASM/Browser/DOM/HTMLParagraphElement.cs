@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("HTMLParagraphElement", typeof(JSObject))]
+    [Export("HTMLParagraphElement", typeof(IJSInProcessObjectReference))]
     public sealed class HTMLParagraphElement : HTMLElement, IHTMLParagraphElement
     {
-        public HTMLParagraphElement(JSObject handle) : base(handle) { }
+        public HTMLParagraphElement(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public HTMLParagraphElement() { }
         [Export("align")]

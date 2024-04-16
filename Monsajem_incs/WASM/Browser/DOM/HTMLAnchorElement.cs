@@ -1,14 +1,14 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM 
 {
 
-    [Export("HTMLAnchorElement", typeof(JSObject))]
+    [Export("HTMLAnchorElement", typeof(IJSInProcessObjectReference))]
     public sealed class HTMLAnchorElement : HTMLElement, IHTMLAnchorElement
     {
-        //internal HTMLAnchorElement(JSObject handle) : base(handle) { }
-        internal HTMLAnchorElement(JSObject jsObject) : base(jsObject) { }
+        //internal HTMLAnchorElement(IJSInProcessObjectReference handle) : base(handle) { }
+        internal HTMLAnchorElement(IJSInProcessObjectReference jsObject) : base(jsObject) { }
 
         //public HTMLAnchorElement() { }
         [Export("charset")]

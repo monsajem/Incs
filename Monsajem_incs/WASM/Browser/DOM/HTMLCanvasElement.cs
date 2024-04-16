@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 namespace WebAssembly.Browser.DOM
 {
-    [Export("HTMLCanvasElement", typeof(JSObject))]
+    [Export("HTMLCanvasElement", typeof(IJSInProcessObjectReference))]
     public sealed class HTMLCanvasElement : HTMLElement
     {
-        internal HTMLCanvasElement(JSObject handle) : base(handle) { }
+        internal HTMLCanvasElement(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public HTMLCanvasElement() { }
         [Export("height")]

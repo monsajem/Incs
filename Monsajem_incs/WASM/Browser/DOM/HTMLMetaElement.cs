@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("HTMLMetaElement", typeof(JSObject))]
+    [Export("HTMLMetaElement", typeof(IJSInProcessObjectReference))]
     public sealed class HTMLMetaElement : HTMLElement, IHTMLMetaElement
     {
-        internal HTMLMetaElement(JSObject handle) : base(handle) { }
+        internal HTMLMetaElement(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public HTMLMetaElement() { }
         [Export("charset")]

@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("ImageData", typeof(JSObject))]
+    [Export("ImageData", typeof(IJSInProcessObjectReference))]
     public sealed class ImageData : DOMObject, IImageData
     {
-        internal ImageData(JSObject handle) : base(handle) { }
+        internal ImageData(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public ImageData(double width, double height) { }
         //public ImageData(byte[] array, double width, double height) { }

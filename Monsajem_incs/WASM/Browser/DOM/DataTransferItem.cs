@@ -1,14 +1,14 @@
 ﻿using System;
 
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("DataTransferItem", typeof(JSObject))]
+    [Export("DataTransferItem", typeof(IJSInProcessObjectReference))]
     public sealed class DataTransferItem : DOMObject
     {
-        internal DataTransferItem(JSObject handle) : base(handle) { }
+        internal DataTransferItem(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public DataTransferItem() { }
         [Export("kind")]

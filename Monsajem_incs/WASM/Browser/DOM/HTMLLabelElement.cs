@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("HTMLLabelElement", typeof(JSObject))]
+    [Export("HTMLLabelElement", typeof(IJSInProcessObjectReference))]
     public sealed class HTMLLabelElement : HTMLElement, IHTMLLabelElement
     {
-        internal HTMLLabelElement(JSObject handle) : base(handle) { }
+        internal HTMLLabelElement(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public HTMLLabelElement() { }
         [Export("form")]

@@ -3,14 +3,14 @@ using System.Runtime.CompilerServices;
 using System.Collections;
 using System.Collections.Generic;
 
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
-    [Export("DataTransferItemList", typeof(JSObject))]
+    [Export("DataTransferItemList", typeof(IJSInProcessObjectReference))]
     public sealed class DataTransferItemList : DOMObject
     {
-        internal DataTransferItemList(JSObject handle) : base(handle) { }
+        internal DataTransferItemList(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public DataTransferItemList() { }
         [Export("length")]

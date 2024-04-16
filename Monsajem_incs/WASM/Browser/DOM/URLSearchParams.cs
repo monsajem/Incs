@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("URLSearchParams", typeof(JSObject))]
+    [Export("URLSearchParams", typeof(IJSInProcessObjectReference))]
     public sealed class URLSearchParams : DOMObject
     {
-        internal URLSearchParams(JSObject handle) : base(handle) { }
+        internal URLSearchParams(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public URLSearchParams (object init) { }
         [Export("append")]

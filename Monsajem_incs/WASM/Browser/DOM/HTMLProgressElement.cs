@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("HTMLProgressElement", typeof(JSObject))]
+    [Export("HTMLProgressElement", typeof(IJSInProcessObjectReference))]
     public sealed class HTMLProgressElement : HTMLElement, IHTMLProgressElement
     {
-        internal HTMLProgressElement(JSObject handle) : base(handle) { }
+        internal HTMLProgressElement(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public HTMLProgressElement () { }
         [Export("form")]

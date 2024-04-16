@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM.Events
 {
 
-    [Export("FocusEvent", typeof(JSObject))]
+    [Export("FocusEvent", typeof(IJSInProcessObjectReference))]
     public sealed class FocusEvent : UIEvent
     {
-        internal FocusEvent(JSObject handle) : base(handle) { }
+        internal FocusEvent(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public FocusEvent (string typeArg, FocusEventInit eventInitDict) { }
         [Export("relatedTarget")]

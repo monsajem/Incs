@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("HTMLOListElement", typeof(JSObject))]
+    [Export("HTMLOListElement", typeof(IJSInProcessObjectReference))]
     public sealed class HTMLOListElement : HTMLElement, IHTMLOListElement
     {
-        internal HTMLOListElement(JSObject handle) : base(handle) { }
+        internal HTMLOListElement(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public HTMLOListElement() { }
         [Export("compact")]

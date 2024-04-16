@@ -1,14 +1,14 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
 
-    [Export("HTMLObjectElement", typeof(JSObject))]
+    [Export("HTMLObjectElement", typeof(IJSInProcessObjectReference))]
     public sealed class HTMLObjectElement : HTMLElement, IHTMLObjectElement
     {
-        internal HTMLObjectElement(JSObject handle) : base(handle) { }
+        internal HTMLObjectElement(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public HTMLObjectElement () { }
         [Export("align")]

@@ -11,6 +11,7 @@ using Monsajem_Incs.Serialization;
 using Monsajem_Incs.Collection.Array.ArrayBased.DynamicSize;
 using static Monsajem_Incs.WasmClient.SafeRun;
 using Monsajem_Incs.UserControler;
+using WebAssembly.Browser.MonsajemDomHelpers;
 
 namespace Monsajem_Incs.Views
 {
@@ -108,7 +109,7 @@ namespace Monsajem_Incs.Views
         public static async Task Replay()
         {
             LoadingPage?.Invoke((CurrentPage, CurrentAddress));
-            CurrentPage.MainElement = Document.document.CreateElement<HTMLDivElement>();
+            CurrentPage.MainElement = js.Document.CreateElement<HTMLDivElement>();
             await CurrentPage.Ready();
             AppMainElement.ReplaceChilds(CurrentPage.MainElement);
         }

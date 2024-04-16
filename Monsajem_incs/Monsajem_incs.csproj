@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
   </PropertyGroup>
 
@@ -40,7 +40,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="5.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.15" />
     <PackageReference Include="System.Reflection.Emit" Version="4.7.0" />
   </ItemGroup>
 
@@ -66,10 +66,6 @@
   <ItemGroup>
     <Folder Include="BasicFrameWorks\Threading\" />
     <Folder Include="WASM\Client\UserControler\Partial\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Others\WASM\WASM_NetCore\WASM_Net_5.csproj" />
   </ItemGroup>
 
 </Project>

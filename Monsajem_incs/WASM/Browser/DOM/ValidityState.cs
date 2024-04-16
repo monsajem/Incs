@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("ValidityState", typeof(JSObject))]
+    [Export("ValidityState", typeof(IJSInProcessObjectReference))]
     public sealed class ValidityState : DOMObject
     {
-        internal ValidityState(JSObject handle) : base(handle) { }
+        internal ValidityState(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public ValidityState() { }
         [Export("badInput")]

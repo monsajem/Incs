@@ -1,13 +1,16 @@
-﻿using System;
+﻿using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
+using System;
 using System.Runtime.InteropServices.JavaScript;
+using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
+using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("Attr", typeof(JSObject))]
+    [Export("Attr", typeof(IJSInProcessObjectReference))]
     public sealed class Attr : DOMObject
     {
-        internal Attr(JSObject handle) : base(handle) { }
+        internal Attr(IJSInProcessObjectReference handle) : base(handle) { }
 
         //internal Attr() { }
 

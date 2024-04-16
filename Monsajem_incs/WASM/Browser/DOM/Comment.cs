@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("Comment", typeof(JSObject))]
+    [Export("Comment", typeof(IJSInProcessObjectReference))]
     public sealed class Comment : CharacterData, IComment
     {
-        internal Comment(JSObject handle) : base(handle) { }
+        internal Comment(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public Comment () { }
         [Export("text")]

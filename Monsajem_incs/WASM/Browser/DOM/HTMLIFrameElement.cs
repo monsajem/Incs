@@ -1,14 +1,14 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
 
-    [Export("HTMLIFrameElement", typeof(JSObject))]
+    [Export("HTMLIFrameElement", typeof(IJSInProcessObjectReference))]
     public sealed class HTMLIFrameElement : HTMLElement, IHTMLIFrameElement
     {
-        internal HTMLIFrameElement(JSObject handle) : base(handle) { }
+        internal HTMLIFrameElement(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public HTMLIFrameElement () { }
         [Export("align")]

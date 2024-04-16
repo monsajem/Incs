@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("HTMLOutputElement", typeof(JSObject))]
+    [Export("HTMLOutputElement", typeof(IJSInProcessObjectReference))]
     public sealed class HTMLOutputElement : HTMLElement, IHTMLOutputElement
     {
-        internal HTMLOutputElement(JSObject handle) : base(handle) { }
+        internal HTMLOutputElement(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public HTMLOutputElement () { }
         [Export("defaultNodeValue")]

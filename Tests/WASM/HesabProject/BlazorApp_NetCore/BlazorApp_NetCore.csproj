@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
   </PropertyGroup>
 
 	<!--sdasd-->
@@ -124,8 +124,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="5.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="5.0.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.15" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="7.0.15" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\Monsajem_incs\Monsajem_incs.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -137,16 +141,6 @@
 
   <ItemGroup>
     <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Monsajem_incs">
-      <HintPath>..\..\..\..\Monsajem_incs\bin\Release\net5.0\Monsajem_incs.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Private.Runtime.InteropServices.JavaScript">
-      <HintPath>C:\Users\xtron\Desktop\saffronshop_Site\System.Private.Runtime.InteropServices.JavaScript.dll</HintPath>
-      <SpecificVersion>false</SpecificVersion>
-    </Reference>
   </ItemGroup>
 
   <ItemGroup>

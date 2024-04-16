@@ -112,9 +112,9 @@ namespace Monsajem_Incs.Serialization
                                  TrustToType,
                                  TrustToMethod)
             {}
-            public Monsajem_Incs.Collection.UnsafeCollector<byte> Data =
-                new Collection.UnsafeCollector<byte>();
-            //public MemoryStream Data = new MemoryStream();
+            //public Monsajem_Incs.Collection.UnsafeCollector<byte> Data =
+            //    new Collection.UnsafeCollector<byte>();
+            public MemoryStream Data = new MemoryStream();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]

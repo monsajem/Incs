@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30711.63
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34511.84
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorApp_NetCore", "BlazorApp_NetCore\BlazorApp_NetCore.csproj", "{D3BD0B35-9588-4A2B-A465-6DE75B20AE1C}"
 EndProject
@@ -9,9 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_MN", "_MN", "{86F0EAFA-81F
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monsajem_incs", "..\..\..\Monsajem_incs\Monsajem_incs.csproj", "{11C07F43-C5B5-4B06-9A6E-199031F40F49}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WASM_Net_5", "..\..\..\Others\WASM\WASM_NetCore\WASM_Net_5.csproj", "{8199719B-DFD8-487A-AC15-5CBC0A6594DA}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tester", "Tester\Tester.csproj", "{C709E49A-C277-4C9F-9ED7-D31129CD431A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tester", "Tester\Tester.csproj", "{C709E49A-C277-4C9F-9ED7-D31129CD431A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,10 +25,6 @@ Global
 		{11C07F43-C5B5-4B06-9A6E-199031F40F49}.Debug|Any CPU.Build.0 = Release|Any CPU
 		{11C07F43-C5B5-4B06-9A6E-199031F40F49}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{11C07F43-C5B5-4B06-9A6E-199031F40F49}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8199719B-DFD8-487A-AC15-5CBC0A6594DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8199719B-DFD8-487A-AC15-5CBC0A6594DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8199719B-DFD8-487A-AC15-5CBC0A6594DA}.Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{8199719B-DFD8-487A-AC15-5CBC0A6594DA}.Release|Any CPU.Build.0 = Debug|Any CPU
 		{C709E49A-C277-4C9F-9ED7-D31129CD431A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C709E49A-C277-4C9F-9ED7-D31129CD431A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C709E49A-C277-4C9F-9ED7-D31129CD431A}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -41,7 +35,6 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{11C07F43-C5B5-4B06-9A6E-199031F40F49} = {86F0EAFA-81F2-47B4-9537-159DBC58A7BF}
-		{8199719B-DFD8-487A-AC15-5CBC0A6594DA} = {86F0EAFA-81F2-47B4-9537-159DBC58A7BF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A316234F-2961-419A-920F-93254B2765A0}

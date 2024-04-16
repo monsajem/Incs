@@ -1,13 +1,13 @@
 ﻿using System;
 using WebAssembly;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("HTMLFontElement", typeof(JSObject))]
+    [Export("HTMLFontElement", typeof(IJSInProcessObjectReference))]
     public sealed class HTMLFontElement : HTMLElement
     {
-        internal HTMLFontElement(JSObject handle) : base(handle) { }
+        internal HTMLFontElement(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public HTMLFontElement() { }
         [Export("face")]

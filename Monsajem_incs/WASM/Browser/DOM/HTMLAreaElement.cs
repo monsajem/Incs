@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("HTMLAreaElement", typeof(JSObject))]
+    [Export("HTMLAreaElement", typeof(IJSInProcessObjectReference))]
     public sealed class HTMLAreaElement : HTMLElement, IHTMLAreaElement
     {
-        internal HTMLAreaElement(JSObject handle) : base(handle) { }
+        internal HTMLAreaElement(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public HTMLAreaElement() { }
         [Export("alt")]

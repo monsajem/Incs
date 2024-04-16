@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("HTMLButtonElement", typeof(JSObject))]
+    [Export("HTMLButtonElement", typeof(IJSInProcessObjectReference))]
     public sealed class HTMLButtonElement : HTMLElement, IHTMLButtonElement
     {
-        internal HTMLButtonElement(JSObject handle) : base(handle) { }
+        internal HTMLButtonElement(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public HTMLButtonElement() { }
         [Export("autofocus")]

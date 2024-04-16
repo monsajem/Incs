@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("TimeRanges", typeof(JSObject))]
+    [Export("TimeRanges", typeof(IJSInProcessObjectReference))]
     public sealed class TimeRanges : DOMObject
     {
-        internal TimeRanges(JSObject handle) : base(handle) { }
+        internal TimeRanges(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public TimeRanges() { }
         [Export("length")]

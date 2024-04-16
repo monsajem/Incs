@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
@@ -8,7 +8,7 @@ namespace WebAssembly.Browser.DOM
     [ExportClass("URL", typeof(URL))]
     public sealed class URL : DOMObject
     {
-        internal URL(JSObject handle) : base(handle) { }
+        internal URL(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public URL (string url, object base) { }
         [Export("hash")]
@@ -38,7 +38,7 @@ namespace WebAssembly.Browser.DOM
         [Export("createObjectURL")]
         public static string CreateObjectUrl(Blob obj)
         {
-            return (string) StaticObject<URL>().Invoke("createObjectURL", obj.ManagedJSObject);
+            return StaticObject<URL>().Invoke<string>("createObjectURL", obj.ManagedJSObject);
         }
         public static string CreateDataUrl(byte[] Data)
         {
@@ -47,7 +47,7 @@ namespace WebAssembly.Browser.DOM
         [Export("revokeObjectURL")]
         public static void RevokeObjectUrl(string url)
         {
-            StaticObject<URL>().Invoke("revokeObjectURL", url);
+            StaticObject<URL>().InvokeVoid("revokeObjectURL", url);
         }
         [Export("toString")]
         public override string ToString()

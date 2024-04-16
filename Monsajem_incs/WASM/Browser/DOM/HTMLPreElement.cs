@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("HTMLPreElement", typeof(JSObject))]
+    [Export("HTMLPreElement", typeof(IJSInProcessObjectReference))]
     public sealed class HTMLPreElement : HTMLElement, IHTMLPreElement
     {
-        internal HTMLPreElement(JSObject handle) : base(handle) { }
+        internal HTMLPreElement(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public HTMLPreElement () { }
         [Export("width")]

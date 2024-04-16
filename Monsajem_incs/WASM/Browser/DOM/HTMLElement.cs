@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Runtime.InteropServices.JavaScript;
+using Microsoft.JSInterop.Implementation;
+using Microsoft.JSInterop;
 using System.Linq;
+using WebAssembly.Browser.MonsajemDomHelpers;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("HTMLElement", typeof(JSObject))]
+    [Export("HTMLElement", typeof(IJSInProcessObjectReference))]
     public class HTMLElement : Element, IHTMLElement
     {
-        //internal HTMLElement(JSObject handle) : base(handle) { }
-        internal HTMLElement(JSObject jsObject) : base(jsObject) {}
+        //internal HTMLElement(IJSInProcessObjectReference handle) : base(handle) { }
+        internal HTMLElement(IJSInProcessObjectReference jsObject) : base(jsObject) {}
 
         //public HTMLElement() { }
         [Export("accessKey")]
@@ -394,7 +397,7 @@ namespace WebAssembly.Browser.DOM
 
         public void AppendChild(string Data)
         {
-            var IDoc = Document.document.Implementation.CreateHTMLDocument("");
+            var IDoc = js.Document.Implementation.CreateHTMLDocument("");
             IDoc.DocumentElement.InnerHtml = Data;
             var HScripts = IDoc.Head.GetElementsByTagName("script").ToArray();
             var BScripts = IDoc.Body.GetElementsByTagName("script").ToArray();
@@ -402,7 +405,7 @@ namespace WebAssembly.Browser.DOM
             while(inner != null)
             {
                 var next = inner.NextElementSibling;
-                Document.document.Head.AppendChild(inner);
+                js.Document.Head.AppendChild(inner);
                 inner = next;
             }
             inner = IDoc.Body.FirstElementChild;
@@ -414,7 +417,7 @@ namespace WebAssembly.Browser.DOM
             }
             foreach(var Script in HScripts)
             {
-                var NewScript = Document.document.CreateElement("script");
+                var NewScript = js.Document.CreateElement("script");
                 NewScript.InnerHtml = Script.InnerHtml;
                 var Src = Script.GetAttribute("src");
                 if (Src != null)
@@ -424,7 +427,7 @@ namespace WebAssembly.Browser.DOM
             foreach(var Script in BScripts)
             {
                 var Src = Script.GetAttribute("src");
-                var NewScript = Document.document.CreateElement("script");
+                var NewScript = js.Document.CreateElement("script");
                 NewScript.InnerHtml = Script.InnerHtml;
                 if(Src != null)
                     NewScript.SetAttribute("src",Src);

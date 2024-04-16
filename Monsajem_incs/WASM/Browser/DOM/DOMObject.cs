@@ -1,14 +1,18 @@
 ﻿using System;
 using System.Reflection;
-using System.Runtime.InteropServices.JavaScript;
 using Monsajem_Incs.Collection.Array.ArrayBased.DynamicSize;
+using Microsoft.JSInterop.Implementation;
+using Microsoft.JSInterop;
 using static Monsajem_Incs.Collection.Array.Extentions;
+using WebAssembly.Browser.MonsajemDomHelpers;
+using Microsoft.JSInterop;
+using System.Collections.Generic;
 
 namespace WebAssembly.Browser.DOM
 {
-    public abstract class DOMObject : IDisposable,IEquatable<DOMObject>
+    public abstract class DOMObject : IDisposable
     {
-        internal static JSObject StaticObject<type>()
+        internal static IJSInProcessObjectReference StaticObject<type>()
         {
             return ExportClassAttribute.GetExportOf<type>().jSObjectStatic;
         }
@@ -18,12 +22,7 @@ namespace WebAssembly.Browser.DOM
 
         bool disposed = false;
 
-        public JSObject ManagedJSObject { get; private set; }
-
-        public int JSHandle
-        {
-            get { return ManagedJSObject.JSHandle;  }
-        }
+        public IJSInProcessObjectReference ManagedJSObject { get; private set; }
 
         private Action onRemoved;
 
@@ -34,9 +33,9 @@ namespace WebAssembly.Browser.DOM
             //int last = GetProperty<int>("MNH");
             //if(last!=1)
             //    SetProperty("onRemoved", onRemoved);
-            //ManagedJSObject.Invoke("onRemoved");
+            //ManagedJSObject.Invoke<object>("onRemoved");
         }
-        public DOMObject(JSObject jsObject)
+        public DOMObject(IJSInProcessObjectReference jsObject)
         {
             ManagedJSObject = jsObject;
             ReadyForManageObject();
@@ -44,7 +43,7 @@ namespace WebAssembly.Browser.DOM
 
         public DOMObject(string globalName)
         {
-            ManagedJSObject = (JSObject)Runtime.GetGlobalObject(globalName);
+            ManagedJSObject = (IJSInProcessObjectReference)js.JsGetGlobalObject(globalName);
             ReadyForManageObject();
         }
 
@@ -53,7 +52,7 @@ namespace WebAssembly.Browser.DOM
             if (args != null && args.Length > 0)
             {
                 Type argType = null;
-                // All DOMObjects will need to pass the JSObject that they are associated with
+                // All DOMObjects will need to pass the IJSInProcessObjectReference that they are associated with
                 for (int a = 0; a < args.Length; a++)
                 {
                     argType = args[a].GetType();
@@ -65,7 +64,7 @@ namespace WebAssembly.Browser.DOM
             }
             if (ManagedJSObject == null)
                 throw new Exception("JSObject Is null");
-            var res = ManagedJSObject.Invoke(methodName, args);
+            var res = ManagedJSObject.Invoke<object>(methodName, args);
             return UnWrapObject(type, res);
         }
 
@@ -77,7 +76,12 @@ namespace WebAssembly.Browser.DOM
         protected T GetProperty<T>(string expr)
         {
 
-            var propertyNodeValue = ManagedJSObject.GetObjectProperty(expr);
+            var type = typeof(T);
+            object propertyNodeValue = ManagedJSObject.JsGetValue<object>(expr);
+            if (type.IsSubclassOf(typeof(DOMObject)) || type == typeof(DOMObject))
+                propertyNodeValue = ManagedJSObject.JsGetValue<IJSInProcessObjectReference>(expr);
+            else
+                propertyNodeValue = ManagedJSObject.JsGetValue<T>(expr);
 
             if (propertyNodeValue == null)
                 return default;
@@ -88,26 +92,33 @@ namespace WebAssembly.Browser.DOM
             return UnWrapObject<T>(propertyNodeValue);
         }
 
-        protected void SetProperty<T>(string expr, T value, bool createIfNotExists = true, bool hasOwnProperty = false)
+        List<object> DGS = new List<object>();
+        protected void SetProperty<T>(string expr, T Value)
         {
+            object value = Value;
+            if (Value is Delegate)
+            {
+                value = DotNetObjectReference.Create((Delegate)value);
+                DGS.Add(value);
+            }
             if (value == null)
-                ManagedJSObject.SetObjectProperty(expr, value, createIfNotExists, hasOwnProperty);
+                ManagedJSObject.JsSetValue(expr, value);
             else
             {
                 var valueType = value.GetType();
 
                 if (valueType.IsSubclassOf(typeof(DOMObject)) || valueType == typeof(DOMObject))
                 {
-                    ManagedJSObject.SetObjectProperty(expr, ((DOMObject)(object)value).ManagedJSObject, createIfNotExists, hasOwnProperty);
+                    ManagedJSObject.JsSetValue(expr, ((DOMObject)(object)value).ManagedJSObject);
                 }
                 else
-                    ManagedJSObject.SetObjectProperty(expr, value, createIfNotExists, hasOwnProperty);
+                    ManagedJSObject.JsSetValue(expr, value);
             }
         }
 
         object UnWrapObject(Type type, object obj)
         {
-            if (type.IsSubclassOf(typeof(JSObject)) || type == typeof(JSObject))
+            if (type.IsSubclassOf(typeof(IJSInProcessObjectReference)) || type == typeof(IJSInProcessObjectReference))
             {
 
 
@@ -123,9 +134,9 @@ namespace WebAssembly.Browser.DOM
 
 
                 var jsobjectconstructor = type.GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
-                                null, new Type[] { typeof(JSObject) }, null);
+                                null, new Type[] { typeof(IJSInProcessObjectReference) }, null);
 
-                //var jsobjectnew = jsobjectconstructor.Invoke(new object[] { obj });
+                //var jsobjectnew = jsobjectconstructor.Invoke<object>(new object[] { obj });
                 return jsobjectconstructor.Invoke(new object[] { obj }); ;
 
             }
@@ -193,21 +204,20 @@ namespace WebAssembly.Browser.DOM
         private object[] Events = new object[0];
         protected void AddJSEventListener(string eventName, object eventDelegate, int uid)
         {
-            ManagedJSObject.Invoke("addEventListener", eventName, eventDelegate, uid);
+            ManagedJSObject.InvokeVoid("addEventListener", eventName, eventDelegate, uid);
             Insert(ref Events, eventDelegate);
         }
 
         protected void SetJSStyleAttribute(string qualifiedName, string value)
         {
 
-            ((JSObject)ManagedJSObject.GetObjectProperty("style")).SetObjectProperty(qualifiedName, value);
+            ManagedJSObject.JsGetValue("style").JsSetValue(qualifiedName, value);
 
         }
 
-        protected object GetJSStyleAttribute(string qualifiedName)
+        protected string GetJSStyleAttribute(string qualifiedName)
         {
-            return ((JSObject)ManagedJSObject.GetObjectProperty("style")).GetObjectProperty(qualifiedName);
-
+            return ManagedJSObject.JsGetValue("style").JsGetValue<string>(qualifiedName);
         }
 
 
@@ -236,11 +246,6 @@ namespace WebAssembly.Browser.DOM
 
                 disposed = true;
             }
-        }
-
-        public bool Equals(DOMObject other)
-        {
-            return JSHandle==other.JSHandle;
         }
 
         // We are hanging onto JavaScript objects and pointers.

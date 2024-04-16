@@ -3,16 +3,16 @@ using System.Runtime.CompilerServices;
 using System.Collections;
 using System.Collections.Generic;
 
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("HTMLCollection", typeof(JSObject))]
+    [Export("HTMLCollection", typeof(IJSInProcessObjectReference))]
     public class HTMLCollection : DOMObject, IEnumerable<Element>, IEnumerable
     {
 
-        internal HTMLCollection(JSObject handle) : base(handle) { }
+        internal HTMLCollection(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public HTMLCollection() { }
         [Export("length")]

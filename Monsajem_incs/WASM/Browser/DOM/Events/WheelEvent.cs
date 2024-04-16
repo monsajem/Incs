@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM.Events
 {
 
-    [Export("WheelEvent", typeof(JSObject))]
+    [Export("WheelEvent", typeof(IJSInProcessObjectReference))]
     public sealed class WheelEvent : MouseEvent
     {
-        internal WheelEvent(JSObject handle) : base(handle) { }
+        internal WheelEvent(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public WheelEvent(string typeArg, IWheelEventInit eventInitDict) { }
         [Export("DOM_DELTA_LINE")]

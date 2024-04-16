@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Runtime.InteropServices.JavaScript;
+using Microsoft.JSInterop;
+using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
 
-    [Export("Node", typeof(JSObject))]
+    [Export("Node", typeof(IJSInProcessObjectReference))]
     public class Node : EventTarget, IEventTarget
     {
-        public Node(JSObject handle) : base(handle) { }
+        public Node(IJSInProcessObjectReference handle) : base(handle) { }
         
         protected Node(string globalName) : base(globalName) { }
 

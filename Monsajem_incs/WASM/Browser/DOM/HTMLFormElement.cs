@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using WebAssembly;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("HTMLFormElement", typeof(JSObject))]
+    [Export("HTMLFormElement", typeof(IJSInProcessObjectReference))]
     public sealed class HTMLFormElement : HTMLElement, IHTMLFormElement
     {
-        internal HTMLFormElement(JSObject handle) : base(handle) { }
+        internal HTMLFormElement(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public HTMLFormElement () { }
         [Export("acceptCharset")]

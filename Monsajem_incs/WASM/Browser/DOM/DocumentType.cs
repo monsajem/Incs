@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM 
 {
 
-    [Export("DocumentType", typeof(JSObject))]
+    [Export("DocumentType", typeof(IJSInProcessObjectReference))]
     public sealed class DocumentType : Node, IDocumentType
     {
-        internal DocumentType(JSObject handle) : base(handle) { }
+        internal DocumentType(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public DocumentType() { }
         [Export("entities")]

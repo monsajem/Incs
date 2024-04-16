@@ -2,16 +2,16 @@
 using System.Runtime.CompilerServices;
 using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 using WebAssembly;
 
 namespace WebAssembly.Browser.DOM 
 {
 
-    [Export("HTMLFormControlsCollection", typeof(JSObject))]
+    [Export("HTMLFormControlsCollection", typeof(IJSInProcessObjectReference))]
     public sealed class HTMLFormControlsCollection : DOMObject, IEnumerable<Element>, IEnumerable
     {
-        internal HTMLFormControlsCollection(JSObject handle) : base(handle) { }
+        internal HTMLFormControlsCollection(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public HTMLFormControlsCollection() { }
         [Export("length")]

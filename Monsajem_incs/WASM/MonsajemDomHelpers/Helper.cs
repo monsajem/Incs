@@ -5,22 +5,130 @@ using static Monsajem_Incs.Collection.Array.Extentions;
 using WebAssembly.Browser.DOM;
 using System.Threading.Tasks;
 using System.Net.Http;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
+using Microsoft.JSInterop;
 using Microsoft.JSInterop;
 using System.IO;
 using Monsajem_Incs.Serialization;
+using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.MonsajemDomHelpers
 {
     public static class js
     {
-        public static Document Document = Document.document;
-        public static IJSUnmarshalledRuntime IJSUnmarshalledRuntime;
+        public static Document Document;
+        public static JSInProcessRuntime JsRuntime;
         private static Action OnPopState;
         private static Action[] MyHistorySates;
+        private static IJSInProcessObjectReference JsInfo;
+
+        private static void CreateJsInfo()
+        {
+            JsInfo = JsRuntime.Invoke<IJSInProcessObjectReference>("eval", @"({
+  GetValue_obj: function (obj,name) {
+        return obj[name];
+  },
+  GetValue_name: function (name) {
+        return self[name];
+  },
+  SetValue_obj: function (obj,name,val) {
+        obj[name]=val;
+  },
+  SetValue_name: function (name,val) {
+        self[name]=val;
+  },
+  HaveValue_obj: function (obj,name) {
+        return obj[name] !== undefined;
+  },
+  HaveValue_name: function (name) {
+        return self[name] !== undefined;
+  },
+  GetTypeName_obj: function (obj) {
+        return obj.constructor.name;
+  },
+  GetTypeName_name: function (name) {
+        return self[name].constructor.name;
+  },
+})");
+        }
+        public static void Start(JSInProcessRuntime JSR)
+        {
+            JsRuntime = JSR;
+            var Doc = JsRuntime.Invoke<IJSInProcessObjectReference>("eval", "document");
+            var Win = JsRuntime.Invoke<IJSInProcessObjectReference>("eval", "window");
+            CreateJsInfo();
+            Document = new Document();
+        }
+
+        public static t JsGetValue<t>(this string Name)
+        {
+            CreateJsInfo();
+            return JsInfo.Invoke<t>("GetValue_name", Name);
+        }
+        public static IJSInProcessObjectReference JsGetValue(this string Name)
+        {
+            CreateJsInfo();
+            return JsGetValue<IJSInProcessObjectReference>(Name);
+        }
+        public static void JsSetValue(this string Name, object Value)
+        {
+            CreateJsInfo();
+            JsInfo.InvokeVoid("SetValue_name", Name, Value);
+        }
+        public static bool JsHaveValue(this string Name)
+        {
+            CreateJsInfo();
+            return JsInfo.Invoke<bool>("HaveValue_name", Name);
+        }
+        public static t JsGetValue<t>(this IJSInProcessObjectReference obj, string Name)
+        {
+            CreateJsInfo();
+            return JsInfo.Invoke<t>("GetValue_obj", obj, Name);
+        }
+        public static IJSInProcessObjectReference JsGetValue(this IJSInProcessObjectReference obj, string Name)
+        {
+            CreateJsInfo();
+            return JsGetValue<IJSInProcessObjectReference>(obj, Name);
+        }
+        public static void JsSetValue(this IJSInProcessObjectReference obj, string Name, object Value)
+        {
+            CreateJsInfo();
+            JsInfo.InvokeVoid("SetValue_obj", obj, Name, Value);
+        }
+        public static bool JsHaveValue(this IJSInProcessObjectReference obj, string Name)
+        {
+            CreateJsInfo();
+            return JsInfo.Invoke<bool>("HaveValue_obj", obj, Name);
+        }
+
+        public static IJSInProcessObjectReference JsConvert(this object obj)
+        {
+            CreateJsInfo();
+            return JsRuntime.Invoke<IJSInProcessObjectReference>("eval", obj);
+        }
+
+        public static IJSInProcessObjectReference JsNewObject(this string TypeName, params object[] Params)
+        {
+            var ParamsInput = "name";
+            var ParamsFunc = "";
+            if (Params != null && Params.Length > 0)
+            {
+                for (int i = 0; i < Params.Length; i++)
+                    ParamsFunc += "P" + i.ToString() + ",";
+                ParamsFunc = ParamsFunc.Substring(0, ParamsFunc.Length - 1);
+                ParamsInput = ParamsInput + "," + ParamsFunc;
+            }
+            JsInfo = JsRuntime.Invoke<IJSInProcessObjectReference>("eval", @"({
+  CreateNewObj: function ("+ ParamsInput + @") {
+        return new window[name]("+ ParamsFunc + @");
+  }
+})");
+           return JsInfo.Invoke<IJSInProcessObjectReference>("CreateNewObj",TypeName, Params);
+        }
+
         private static void MakeState()
         {
-            if(MyHistorySates==null)
+            if (MyHistorySates==null)
             {
                 MyHistorySates=new Action[0];
                 Window.window.OnPopState += (c1, c2) => OnPopState();
@@ -48,10 +156,10 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
             Action Lock =null;
             Lock = () =>
             {
-                js.Eval("alert('1');");
+                js.JsEval("alert('1');");
                 Window.window.History.Go(1);
                 PushState(Lock);
-                js.Eval("alert('1');");
+                js.JsEval("alert('1');");
             };
             PushState(Lock);
         }
@@ -74,17 +182,17 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
         }
 
 
-        public static string Js(bool Value)
+        public static string ToJsValue(bool Value)
         {
             if (Value == true)
                 return "true";
             return "false";
         }
-        public static string Js(int Value)
+        public static string ToJsValue(int Value)
         {
             return Value.ToString();
         }
-        public static string Js(string Value)
+        public static string ToJsValue(string Value)
         {
             if (Value == null)
                 return"''";
@@ -92,11 +200,11 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
                 return $"decodeURIComponent(escape(atob('{Convert.ToBase64String(Encoding.UTF8.GetBytes(Value))}')))";
         }
 
-        public static string Eval(string js)
+        public static string JsEval(this string js)
         {
             try
             {
-                return Runtime.InvokeJS(js);
+                return JsRuntime.Invoke<string>(js);
             }
             catch(Exception ex)
             {
@@ -104,9 +212,9 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
             }
         }
 
-        public static void EvalGlobal(string js)
+        public static void JsEvalGlobal(this string js)
         {
-            Eval($"var s=document.createElement('script');s.innerHTML={Js(js)};document.body.appendChild(s);");
+            JsRuntime.InvokeVoid($"var s=document.createElement('script');s.innerHTML={ToJsValue(js)};document.body.appendChild(s);");
         }
 
         public static async Task<byte[]> ReadBytes(this Blob File)
@@ -120,18 +228,24 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
             return URL.CreateDataUrl(Data);
         }
 
+        public static T JsGetGlobalObject<T>(this string Name)
+        {
+            return JsRuntime.Invoke<T>("eval", Name);
+        }
+        public static object JsGetGlobalObject(this string Name) => JsGetGlobalObject<IJSInProcessObjectReference>(Name);
+
         public static string ToObjectUrlUnmarshalled(this byte[] Data)
         {
             //return Window.window.Url.CreateObjectUrl(new Blob(Data));
-            js.EvalGlobal(
+            js.JsEvalGlobal(
                 @"
                 var MNObjectUrl='';
                 function MNToObjectUrl(ar){
                     ar = Blazor.platform.toUint8Array(ar);
                     MNObjectUrl = URL.createObjectURL(new Blob([ar],{type:'application/octet-stream'}));
                 }");
-            IJSUnmarshalledRuntime.InvokeUnmarshalled<byte[], object>("MNToObjectUrl", Data);
-            return (string)Runtime.GetGlobalObject("MNObjectUrl");
+            JsRuntime.InvokeVoid("MNToObjectUrl", Data);
+            return "MNObjectUrl".JsGetGlobalObject<string>();
         }
 
         public static string ToObjectUrl(this byte[] Data)
@@ -155,7 +269,7 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
                 throw new ArgumentOutOfRangeException("quality should be equal or less than 1.");
             var imgID = img.Id;
             img.Id = "imgMN";
-            string URL = Eval(
+            string URL = JsEval(
                 @"(function(){
                   var MAX_WIDTH = 500;
                   var width = " + img.NaturalWidth + @";
@@ -178,7 +292,7 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
                 throw new ArgumentOutOfRangeException("quality should be equal or less than 1.");
             var imgID = img.Id;
             img.Id = "imgMN";
-            string URL = Eval(
+            string URL = JsEval(
                 @"(function(){
                   var MAX_WIDTH = 500;
                   var width = " + img.NaturalWidth + @";
@@ -213,22 +327,6 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
 
         public static Task<string> LoadStringFromBaseURL(string URL) =>
             LoadStringFromURL(WASM_Global.Publisher.NavigationManager.ToAbsoluteUri("/") + URL);
-    
-        
-        public static JSObject NewJsObject(string TypeName,params object[] Params)
-        {
-            if (Params!=null && Params.Length == 0)
-                Params = null;
-
-#if NET5_0
-            return new JSObject(Runtime.New(TypeName, Params), true);
-#endif
-
-#if NET6_0
-            return new JSObject(TypeName, Params);
-#endif
-        }
-
     }
 
     public class WebProcess
@@ -248,13 +346,12 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
         private static void ThisIsInWorker()
         {
             IsInWorker = true;
-            var AssemblyFilenames =
-                (System.Runtime.InteropServices.JavaScript.Array)
-                ((JSObject)Runtime.GetGlobalObject("MN")).GetObjectProperty("AssemblyFilenames");
-            var AsmLen = AssemblyFilenames.Length;
-            for (int i = 0; i < AsmLen; i++)
-                Monsajem_Incs.Assembly.Assembly.TryLoadAssembely(((string)AssemblyFilenames[i]));
-            js.Eval("postMessage('');");
+            var AssemblyFilenames = js.JsGetValue("MN").JsGetValue<string[]>("AssemblyFilenames");
+            foreach (var AssemblyFilename in AssemblyFilenames)
+                Monsajem_Incs.Assembly.Assembly.TryLoadAssembely(AssemblyFilename);
+            if (js.JsRuntime == null)
+                Console.WriteLine("No Runtime");
+            js.JsEval("postMessage('');");
         }
         
         public WebProcess()
@@ -273,10 +370,14 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
                 AssembellyNames = AssembellyNames.Substring(0, AssembellyNames.Length - 1);
             AssembellyNames += "]";
             var Location = Window.window.Location;
-            await Worker.Run($"self.MN={{}};self.MN.AssemblyFilenames={AssembellyNames};self.MN.baseUrl = '{Location.Protocol}//{Location.Hostname}:{Location.Port}/_framework/';");
+            Console.WriteLine("x1");
+            await Worker.Run($"console.log(\"WebWorker Script2\");self.MN={{}};self.MN.AssemblyFilenames={AssembellyNames};self.MN.baseUrl = '{Location.Protocol}//{Location.Hostname}:{Location.Port}/_framework/';");
+            Console.WriteLine("x2");
             var Ready = Worker.GetMessage();
             await Worker.Run(WebWorkerJs);
+            Console.WriteLine("x3");
             await Ready;
+            Console.WriteLine("x4");
         }
 
         public async Task Run(Action Action)
@@ -305,10 +406,10 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
         public async Task<object> Run(Func<Task<object>> Func)
         {
             await IsReady;
-            Worker.PostMessage("MNData", Uint8Array.From(Func.Serialize()));
+            Worker.PostMessage("MNData",Func.Serialize());
             var Message = Worker.GetMessage();
             await Worker.Run($"self.MN.RunFunctionTaskResult()");
-            var Result = (await Message).GetData<Uint8Array>().ToArray();
+            var Result = (await Message).GetData<byte[]>();
             if (Result.Length == 0)
                 throw new Exception("Error On Proccess");
             return Result.Deserialize<object>();
@@ -317,13 +418,13 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
         {
             try
             {
-                var result = await ((Uint8Array)Runtime.GetGlobalObject("MNData")).ToArray().
+                var result = await js.JsGetGlobalObject<byte[]>("MNData").
                 Deserialize<Func<Task<object>>>()();
-                WebWorker.CurrentWebWorker.PostMessage(Uint8Array.From(result.Serialize()));
+                WebWorker.CurrentWebWorker.PostMessage(result.Serialize());
             }
             catch
             {
-                WebWorker.CurrentWebWorker.PostMessage(Uint8Array.From(new byte[0]));
+                WebWorker.CurrentWebWorker.PostMessage(new byte[0]);
             }
         }
     }

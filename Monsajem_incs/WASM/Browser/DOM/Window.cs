@@ -1,16 +1,16 @@
 ﻿using System;
 //using System.ComponentModel.Composition;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("Window", typeof(JSObject))]
+    [Export("Window", typeof(IJSInProcessObjectReference))]
     public sealed class Window : EventTarget
     {
         public static Window window = new Window();
 
-        //internal Window(JSObject handle) : base(handle) { }
+        //internal Window(IJSInProcessObjectReference handle) : base(handle) { }
 
         public Window() : base("window") { } 
         // [Export("applicationCache")]

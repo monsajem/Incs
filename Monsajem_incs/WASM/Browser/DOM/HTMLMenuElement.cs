@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("HTMLMenuElement", typeof(JSObject))]
+    [Export("HTMLMenuElement", typeof(IJSInProcessObjectReference))]
     public sealed class HTMLMenuElement : HTMLElement, IHTMLMenuElement
     {
-        internal HTMLMenuElement(JSObject handle) : base(handle) { }
+        internal HTMLMenuElement(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public HTMLMenuElement () { }
         [Export("compact")]

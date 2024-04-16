@@ -2,11 +2,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34511.84
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WASM", "WASM", "{12BFA8E7-D942-4F5D-9A77-55966846E1F0}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monsajem_incs", "Monsajem_incs\Monsajem_incs.csproj", "{96844A4C-4CF7-470F-8ACB-6B2C693B57EE}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WASM_Net_5", "Others\WASM\WASM_NetCore\WASM_Net_5.csproj", "{CFBD3754-4BD5-4E55-9794-0F8D95A84456}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,16 +14,9 @@ Global
 		{96844A4C-4CF7-470F-8ACB-6B2C693B57EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{96844A4C-4CF7-470F-8ACB-6B2C693B57EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{96844A4C-4CF7-470F-8ACB-6B2C693B57EE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CFBD3754-4BD5-4E55-9794-0F8D95A84456}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CFBD3754-4BD5-4E55-9794-0F8D95A84456}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CFBD3754-4BD5-4E55-9794-0F8D95A84456}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CFBD3754-4BD5-4E55-9794-0F8D95A84456}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{CFBD3754-4BD5-4E55-9794-0F8D95A84456} = {12BFA8E7-D942-4F5D-9A77-55966846E1F0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D07884F6-BC04-44BA-B210-5B182AE8198E}

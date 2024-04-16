@@ -12,6 +12,7 @@ using WebAssembly.Browser.DOM;
 using Monsajem_Incs.DynamicAssembly;
 using Monsajem_Incs.Collection.Array;
 using System.Runtime.Serialization;
+using WebAssembly.Browser.MonsajemDomHelpers;
 
 namespace Monsajem_Incs.Views
 {
@@ -22,7 +23,7 @@ namespace Monsajem_Incs.Views
         {
             var Modal = new Resources.Base.Partials.Modal_html();
             Modal.body.AppendChild(Element);
-            Document.document.Body.AppendChild(Modal.myModal);
+            js.Document.Body.AppendChild(Modal.myModal);
             var Win = new Window();
             Win.OnPopState += (c1, c2) =>
             {

@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM 
 {
 
-[Export("HTMLSelectElement", typeof(JSObject))]
+[Export("HTMLSelectElement", typeof(IJSInProcessObjectReference))]
 public sealed class HTMLSelectElement : HTMLElement {
-    internal HTMLSelectElement  (JSObject handle) : base (handle) {}
+    internal HTMLSelectElement  (IJSInProcessObjectReference handle) : base (handle) {}
 
     //public HTMLSelectElement () { }
     [Export("autofocus")]

@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("StyleSheet", typeof(JSObject))]
+    [Export("StyleSheet", typeof(IJSInProcessObjectReference))]
     public sealed class StyleSheet : DOMObject
     {
-        public StyleSheet(JSObject handle) : base(handle) { }
+        public StyleSheet(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public StyleSheet() { }
         [Export("disabled")]

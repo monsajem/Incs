@@ -14,9 +14,9 @@ namespace Monsajem_Incs.UserControler
 {
     public static class Publish
     {
-        private static HTMLElement Loader = Document.document.GetElementById("Loading");
+        private static HTMLElement Loader = js.Document.GetElementById("Loading");
         private static HTMLLabelElement Loader_Message =
-            Document.document.GetElementById<HTMLLabelElement>("LoaderMessage");
+            js.Document.GetElementById<HTMLLabelElement>("LoaderMessage");
         public static Func<Task>[] States = new Func<Task>[0];
 
         public static void PushState(Action Action) =>
@@ -67,8 +67,8 @@ namespace Monsajem_Incs.UserControler
             int Delay,
             bool AllowDissmiss)
         {
-            js.Eval(@"$.notify(" +
-                js.Js(Message) + @", {
+            js.JsEval(@"$.notify(" +
+                js.ToJsValue(Message) + @", {
                 allow_dismiss: " + AllowDissmiss.ToString().ToLower() + @",
                 delay:" + Delay + @",
                 type: '" + Type + "'});");

@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM.Events
 {
 
 
-    [Export("KeyboardEvent", typeof(JSObject))]
+    [Export("KeyboardEvent", typeof(IJSInProcessObjectReference))]
     public sealed class KeyboardEvent : UIEvent
     {
-        internal KeyboardEvent(JSObject handle) : base(handle) { }
+        internal KeyboardEvent(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public KeyboardEvent(string typeArg, KeyboardEventInit eventInitDict) { }
         [Export("DOM_KEY_LOCATION_JOYSTICK")]

@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("HTMLTitleElement", typeof(JSObject))]
+    [Export("HTMLTitleElement", typeof(IJSInProcessObjectReference))]
     public sealed class HTMLTitleElement : HTMLElement, IHTMLSpanElement
     {
-        internal HTMLTitleElement(JSObject handle) : base(handle) { }
+        internal HTMLTitleElement(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public HTMLTitleElement() { }
         [Export("text")]

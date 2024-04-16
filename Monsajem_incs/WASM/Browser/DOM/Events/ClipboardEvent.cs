@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM.Events
 {
 
-    [Export("ClipboardEvent", typeof(JSObject))]
+    [Export("ClipboardEvent", typeof(IJSInProcessObjectReference))]
     public sealed class ClipboardEvent : Event
     {
-        internal ClipboardEvent(JSObject handle) : base(handle) { }
+        internal ClipboardEvent(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public ClipboardEvent (string type, ClipboardEventInit eventInitDict) { }
         DataTransfer clipboardData;

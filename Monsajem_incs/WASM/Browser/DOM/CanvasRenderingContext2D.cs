@@ -1,14 +1,14 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
 
-    [Export("CanvasRenderingContext2D", typeof(JSObject))]
+    [Export("CanvasRenderingContext2D", typeof(IJSInProcessObjectReference))]
     public sealed class CanvasRenderingContext2D : DOMObject, ICanvasRenderingContext2D
     {
-        internal CanvasRenderingContext2D(JSObject handle) : base(handle) { }
+        internal CanvasRenderingContext2D(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public CanvasRenderingContext2D() { }
         [Export("canvas")]

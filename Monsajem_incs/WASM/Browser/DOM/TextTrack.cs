@@ -1,14 +1,14 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
 
-    [Export("TextTrack", typeof(JSObject))]
+    [Export("TextTrack", typeof(IJSInProcessObjectReference))]
     public sealed class TextTrack : EventTarget
     {
-        internal TextTrack(JSObject handle) : base(handle) { }
+        internal TextTrack(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public TextTrack() { }
         [Export("DISABLED")]

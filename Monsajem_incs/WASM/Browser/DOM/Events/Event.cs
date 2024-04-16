@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM.Events
 {
-    [Export("Event", typeof(JSObject))]
+    [Export("Event", typeof(IJSInProcessObjectReference))]
     public class Event : DOMObject
     {
-        internal Event(JSObject handle) : base(handle) { }
+        internal Event(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public Event(string typeArg, IEventInit eventInitDict) { }
         [Export("AT_TARGET")]

@@ -1,14 +1,14 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
 
-    [Export("HTMLTableCellElement", typeof(JSObject))]
+    [Export("HTMLTableCellElement", typeof(IJSInProcessObjectReference))]
     public class HTMLTableCellElement : HTMLElement
     {
-        internal HTMLTableCellElement(JSObject handle) : base(handle) { }
+        internal HTMLTableCellElement(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public HTMLTableCellElement() { }
         [Export("abbr")]

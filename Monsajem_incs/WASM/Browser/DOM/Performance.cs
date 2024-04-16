@@ -1,14 +1,14 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
 
-    [Export("Performance", typeof(JSObject))]
+    [Export("Performance", typeof(IJSInProcessObjectReference))]
     public sealed class Performance : DOMObject
     {
-        internal Performance(JSObject handle) : base(handle) { }
+        internal Performance(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public Performance() { }
         [Export("navigation")]

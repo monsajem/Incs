@@ -1,17 +1,17 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 using WebAssembly.Browser.MonsajemDomHelpers;
 
 namespace WebAssembly.Browser.DOM
 {
-    [Export("FileReader", typeof(JSObject))]
+    [Export("FileReader", typeof(IJSInProcessObjectReference))]
     public class FileReader : EventTarget
     {
-        internal FileReader(JSObject handle) : base(handle) { }
+        internal FileReader(IJSInProcessObjectReference handle) : base(handle) { }
 
-        public FileReader() : this(js.NewJsObject("FileReader")){ }
+        public FileReader() : this(js.JsNewObject("FileReader")){ }
 
         [Export("readAsDataURL")]
         public void ReadAsDataURL(Blob selectors)
@@ -34,7 +34,7 @@ namespace WebAssembly.Browser.DOM
             InvokeMethod<object>("abort");
         }
 
-        public ArrayBuffer Result { get => GetProperty<ArrayBuffer>("result"); }
+        public object[] Result { get => GetProperty<object[]>("result"); }
 
         public event DOMEventHandler OnLoadStart
         {

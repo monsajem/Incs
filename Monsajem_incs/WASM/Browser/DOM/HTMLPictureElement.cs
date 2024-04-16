@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("HTMLPictureElement", typeof(JSObject))]
+    [Export("HTMLPictureElement", typeof(IJSInProcessObjectReference))]
     public sealed class HTMLPictureElement : HTMLElement
     {
-        internal HTMLPictureElement(JSObject handle) : base(handle) { }
+        internal HTMLPictureElement(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public HTMLPictureElement() { }
     }

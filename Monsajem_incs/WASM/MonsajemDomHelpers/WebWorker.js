@@ -1,4 +1,5 @@
-﻿var ProccessNameSpace = '[Monsajem_incs]WebAssembly.Browser.MonsajemDomHelpers.WebProcess';
+﻿console.log("WebWorker Script");
+var ProccessNameSpace = '[Monsajem_incs]WebAssembly.Browser.MonsajemDomHelpers.WebProcess';
 self.Module = {};
 Module.print = msg => console.log(`WASM-WORKER: ${msg}`);
 Module.printErr = msg => {

@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM.Events
 {
-    [Export("MouseEvent", typeof(JSObject))]
+    [Export("MouseEvent", typeof(IJSInProcessObjectReference))]
     public class MouseEvent : UIEvent
     {
-        internal MouseEvent(JSObject handle) : base(handle) { }
+        internal MouseEvent(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public MouseEvent(string typeArg, IMouseEventInit eventInitDict) { }
         [Export("altKey")]

@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM 
 {
 
-[Export("HTMLTableElement", typeof(JSObject))]
+[Export("HTMLTableElement", typeof(IJSInProcessObjectReference))]
     public sealed class HTMLTableElement : HTMLElement, IHTMLTableElement {
-    internal HTMLTableElement  (JSObject handle) : base (handle) {}
+    internal HTMLTableElement  (IJSInProcessObjectReference handle) : base (handle) {}
 
     //public HTMLTableElement () { }
     [Export("align")]

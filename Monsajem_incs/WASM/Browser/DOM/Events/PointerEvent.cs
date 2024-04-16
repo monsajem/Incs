@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM.Events
 {
 
-    [Export("PointerEvent", typeof(JSObject))]
+    [Export("PointerEvent", typeof(IJSInProcessObjectReference))]
     public sealed class PointerEvent : MouseEvent
     {
-        internal PointerEvent(JSObject handle) : base(handle) { }
+        internal PointerEvent(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public PointerEvent(string typeArg, IPointerEventInit eventInitDict) { }
         [Export("currentPoint")]

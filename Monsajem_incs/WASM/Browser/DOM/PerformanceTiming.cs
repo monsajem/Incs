@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("PerformanceTiming", typeof(JSObject))]
+    [Export("PerformanceTiming", typeof(IJSInProcessObjectReference))]
     public sealed class PerformanceTiming : DOMObject
     {
-        internal PerformanceTiming(JSObject handle) : base(handle) { }
+        internal PerformanceTiming(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public PerformanceTiming() { }
         [Export("connectEnd")]

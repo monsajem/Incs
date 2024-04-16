@@ -8,7 +8,7 @@ using Monsajem_Incs.Collection.Array.TreeBased;
 using System.Linq.Expressions;
 using Monsajem_Incs.Serialization;
 using WebAssembly.Browser.DOM;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 using System.Net.Http;
 
 namespace Monsajem_Incs.Database.Base
@@ -32,7 +32,7 @@ namespace Monsajem_Incs.Database.Base
                 {
                     var trs = db.Transaction("CDN");
                     var tbl = trs.ObjectStore("CDN");
-                    return (await tbl.Get<Uint8Array>(c)).ToArray();
+                    return await tbl.Get<byte[]>(c);
                 }, Table, MakeingUpdate,null);
             }catch{}
             var Result = await GetUpdate(async (c) =>
@@ -43,7 +43,7 @@ namespace Monsajem_Incs.Database.Base
                 var trs = db.Transaction("CDN");
                 var tbl = trs.ObjectStore("CDN");
 
-                tbl.Put(Uint8Array.From(Data), c);
+                tbl.Put(Data, c);
                 await trs.Commit();
                 return Data;
             }, Table, MakeingUpdate,
@@ -77,7 +77,7 @@ namespace Monsajem_Incs.Database.Base
                 {
                     var trs = db.Transaction("CDN");
                     var tbl = trs.ObjectStore("CDN");
-                    return (await tbl.Get<Uint8Array>(c)).ToArray();
+                    return await tbl.Get<byte[]>(c);
                 }, RLNTable, RLNKey, GetRelation, MakeingUpdate,null);
             }
             catch{}
@@ -89,7 +89,7 @@ namespace Monsajem_Incs.Database.Base
                 var trs = db.Transaction("CDN");
                 var tbl = trs.ObjectStore("CDN");
 
-                tbl.Put(Uint8Array.From(Data), "Data");
+                tbl.Put(Data, "Data");
                 await trs.Commit();
                 return Data;
             }, RLNTable, RLNKey, GetRelation, MakeingUpdate, 

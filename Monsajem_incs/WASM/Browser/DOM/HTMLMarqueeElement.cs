@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
-    [Export("HTMLMarqueeElement", typeof(JSObject))]
+    [Export("HTMLMarqueeElement", typeof(IJSInProcessObjectReference))]
     public sealed class HTMLMarqueeElement : HTMLElement, IHTMLMarqueeElement
     {
-        internal HTMLMarqueeElement(JSObject handle) : base(handle) { }
+        internal HTMLMarqueeElement(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public HTMLMarqueeElement () { }
         [Export("behavior")]

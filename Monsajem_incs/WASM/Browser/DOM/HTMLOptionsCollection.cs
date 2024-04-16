@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("HTMLOptionsCollection", typeof(JSObject))]
+    [Export("HTMLOptionsCollection", typeof(IJSInProcessObjectReference))]
     public sealed class HTMLOptionsCollection : HTMLCollectionOf<HTMLOptionElement>
     {
-        internal HTMLOptionsCollection(JSObject handle) : base(handle) { }
+        internal HTMLOptionsCollection(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public HTMLOptionsCollection() { }
         //[Export("length")]

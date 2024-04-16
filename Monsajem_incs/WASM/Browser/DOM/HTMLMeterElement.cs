@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("HTMLMeterElement", typeof(JSObject))]
+    [Export("HTMLMeterElement", typeof(IJSInProcessObjectReference))]
     public sealed class HTMLMeterElement : HTMLElement, IHTMLMeterElement
     {
-        internal HTMLMeterElement(JSObject handle) : base(handle) { }
+        internal HTMLMeterElement(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public HTMLMeterElement() { }
         [Export("high")]

@@ -1,15 +1,15 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
 
 
-    [Export("DOMImplementation", typeof(JSObject))]
+    [Export("DOMImplementation", typeof(IJSInProcessObjectReference))]
     public sealed class DOMImplementation : DOMObject
     {
-        internal DOMImplementation(JSObject handle) : base(handle) { }
+        internal DOMImplementation(IJSInProcessObjectReference handle) : base(handle) { }
 
         [Export("createDocument")]
         public Document CreateDocument(string namespaceURI,string qualifiedName,DocumentType doctype)

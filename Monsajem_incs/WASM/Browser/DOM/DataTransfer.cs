@@ -1,13 +1,13 @@
 ﻿using System;
 
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
-    [Export("DataTransfer", typeof(JSObject))]
+    [Export("DataTransfer", typeof(IJSInProcessObjectReference))]
     public sealed class DataTransfer : DOMObject
     {
-        internal DataTransfer(JSObject handle) : base(handle) { }
+        internal DataTransfer(IJSInProcessObjectReference handle) : base(handle) { }
         //public DataTransfer() { }
         [Export("dropEffect")]
         public DropEffect DropEffect { get => GetProperty<DropEffect>("dropEffect"); set => SetProperty<DropEffect>("dropEffect", value); }

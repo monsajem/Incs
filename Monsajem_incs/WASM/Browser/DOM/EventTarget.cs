@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 using WebAssembly.Browser.DOM.Events;
 using Monsajem_Incs.Serialization;
 using System.Linq;
@@ -10,14 +10,14 @@ namespace WebAssembly.Browser.DOM
 {
 
 
-    [Export("EventTarget", typeof(JSObject))]
+    [Export("EventTarget", typeof(IJSInProcessObjectReference))]
     public class EventTarget : DOMObject, IEventTarget
     {
 
         static int nextEventId = 0;
         static int NextEventId => nextEventId++;
 
-        internal EventTarget(JSObject handle) : base(handle) { }
+        internal EventTarget(IJSInProcessObjectReference handle) : base(handle) { }
 
         protected EventTarget(string globalName) : base(globalName)
         {
@@ -52,7 +52,7 @@ namespace WebAssembly.Browser.DOM
 
         }
 
-        public delegate int DOMEventDelegate(JSObject eventTarget);
+        public delegate int DOMEventDelegate(IJSInProcessObjectReference eventTarget);
 
 
         DOMEventDelegate dispather(string type)
@@ -72,7 +72,7 @@ namespace WebAssembly.Browser.DOM
 
         }
 
-        public int DispatchDOMEvent(string typeOfEvent, JSObject eventTarget)
+        public int DispatchDOMEvent(string typeOfEvent, IJSInProcessObjectReference eventTarget)
         {
 
             var eventArgs = new DOMEventArgs(this, typeOfEvent, eventTarget);

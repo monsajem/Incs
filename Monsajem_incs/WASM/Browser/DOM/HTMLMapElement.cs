@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("HTMLMapElement", typeof(JSObject))]
+    [Export("HTMLMapElement", typeof(IJSInProcessObjectReference))]
     public sealed class HTMLMapElement : HTMLElement, IHTMLMapElement
     {
-        internal HTMLMapElement(JSObject handle) : base(handle) { }
+        internal HTMLMapElement(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public HTMLMapElement () { }
         [Export("areas")]

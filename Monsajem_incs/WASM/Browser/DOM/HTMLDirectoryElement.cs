@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM 
 {
 
-[Export("HTMLDirectoryElement", typeof(JSObject))]
+[Export("HTMLDirectoryElement", typeof(IJSInProcessObjectReference))]
     public sealed class HTMLDirectoryElement : HTMLElement, IHTMLDirectoryElement {
-    internal HTMLDirectoryElement  (JSObject handle) : base (handle) {}
+    internal HTMLDirectoryElement  (IJSInProcessObjectReference handle) : base (handle) {}
 
     //public HTMLDirectoryElement () { }
     [Export("compact")]

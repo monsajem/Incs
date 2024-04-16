@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 namespace WebAssembly.Browser.DOM 
 {
 
-    [Export("Element", typeof(JSObject))]
+    [Export("Element", typeof(IJSInProcessObjectReference))]
     public partial class Element : Node
     {
-        public Element(JSObject handle) : base(handle) { }
+        public Element(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public Element() { }
         [Export("classList")]

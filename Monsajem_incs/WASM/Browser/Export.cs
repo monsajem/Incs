@@ -1,6 +1,9 @@
 ﻿using System;
 using Monsajem_Incs.Collection.Array.ArrayBased.DynamicSize;
 using System.Runtime.InteropServices.JavaScript;
+using Microsoft.JSInterop.Implementation;
+using Microsoft.JSInterop;
+using WebAssembly.Browser.MonsajemDomHelpers;
 
 namespace WebAssembly.Browser.DOM
 {
@@ -52,10 +55,10 @@ namespace WebAssembly.Browser.DOM
 			ContractHash = contractType.GetHashCode();
 			if (Info.BinarySearch(this).Value == null)
 				Info.BinaryInsert(this);
-			jSObjectStatic = (JSObject)Runtime.GetGlobalObject(ContractName);
+			jSObjectStatic = js.JsGetValue(ContractName);
 		}
 		private int ContractHash;
-		public readonly JSObject jSObjectStatic;
+		public readonly IJSInProcessObjectReference jSObjectStatic;
 		public static ExportClassAttribute GetExportOf<t>()
 		{
 			var Pos = Info.BinarySearch(new ExportClassAttribute(typeof(t)));

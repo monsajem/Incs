@@ -102,9 +102,9 @@ namespace System.Runtime.InteropServices.JavaScript
             }
         }
 
-        public int BytesPerElement => (int)GetObjectProperty("BYTES_PER_ELEMENT");
+        public int BytesPerElement => GetPropertyAsInt32("BYTES_PER_ELEMENT");
         public string Name => (string)GetObjectProperty("name");
-        public int ByteLength => (int)GetObjectProperty("byteLength");
+        public int ByteLength => GetPropertyAsInt32("byteLength");
         public ArrayBuffer Buffer => (ArrayBuffer)GetObjectProperty("buffer");
 
         public void Fill(U value) => Invoke("fill", value);

@@ -1,15 +1,15 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
     // experimental technology https://developer.mozilla.org/en-US/docs/Web/API/CanvasPattern/setTransform
     // do not use for now
-    [Export("SVGMatrix", typeof(JSObject))]
+    [Export("SVGMatrix", typeof(IJSInProcessObjectReference))]
     public sealed class SVGMatrix : DOMObject, ISVGMatrix
     {
-        internal SVGMatrix(JSObject handle) : base(handle) { }
+        internal SVGMatrix(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public SVGMatrix() { }
         [Export("a")]

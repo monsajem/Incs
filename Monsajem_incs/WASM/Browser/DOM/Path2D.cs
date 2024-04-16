@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("Path2D", typeof(JSObject))]
+    [Export("Path2D", typeof(IJSInProcessObjectReference))]
     public sealed class Path2D : DOMObject, IPath2D
     {
-        internal Path2D(JSObject handle) : base(handle) { }
+        internal Path2D(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public Path2D(object d) { }
         [Export("arc")]

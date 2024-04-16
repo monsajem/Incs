@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM 
 {
 
 
-[Export("HTMLFrameSetElement", typeof(JSObject))]
+[Export("HTMLFrameSetElement", typeof(IJSInProcessObjectReference))]
 public sealed class HTMLFrameSetElement : HTMLElement, IHTMLFrameSetElement {
-    internal HTMLFrameSetElement  (JSObject handle) : base (handle) {}
+    internal HTMLFrameSetElement  (IJSInProcessObjectReference handle) : base (handle) {}
 
     //public HTMLFrameSetElement () { }
     [Export("border")]

@@ -3,7 +3,7 @@ using System.Linq;
 using System.Text;
 using WebAssembly.Browser.MonsajemDomHelpers;
 using WebAssembly.Browser.DOM;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 using Microsoft.JSInterop;
 
 namespace Monsajem_Incs.JsPlatform

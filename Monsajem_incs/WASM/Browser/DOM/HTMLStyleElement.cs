@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("HTMLStyleElement", typeof(JSObject))]
+    [Export("HTMLStyleElement", typeof(IJSInProcessObjectReference))]
     public sealed class HTMLStyleElement : HTMLElement, IHTMLStyleElement
     {
-        internal HTMLStyleElement(JSObject handle) : base(handle) { }
+        internal HTMLStyleElement(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public HTMLStyleElement() { }
         [Export("disabled")]

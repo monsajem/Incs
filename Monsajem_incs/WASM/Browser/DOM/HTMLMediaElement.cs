@@ -1,14 +1,14 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
 
-    [Export("HTMLMediaElement", typeof(JSObject))]
+    [Export("HTMLMediaElement", typeof(IJSInProcessObjectReference))]
     public sealed class HTMLMediaElement : DOMObject
     {
-        internal HTMLMediaElement(JSObject handle) : base(handle) { }
+        internal HTMLMediaElement(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public HTMLMediaElement() { }
         //[Export("HAVE_CURRENT_DATA")]

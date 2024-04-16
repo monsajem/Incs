@@ -1,14 +1,14 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
 
-    [Export("HTMLTrackElement", typeof(JSObject))]
+    [Export("HTMLTrackElement", typeof(IJSInProcessObjectReference))]
     public sealed class HTMLTrackElement : HTMLElement, IHTMLTrackElement
     {
-        internal HTMLTrackElement(JSObject handle) : base(handle) { }
+        internal HTMLTrackElement(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public HTMLTrackElement () { }
         [Export("ERROR")]

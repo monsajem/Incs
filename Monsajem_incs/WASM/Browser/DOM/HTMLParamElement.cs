@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("HTMLParamElement", typeof(JSObject))]
+    [Export("HTMLParamElement", typeof(IJSInProcessObjectReference))]
     public sealed class HTMLParamElement : HTMLElement, IHTMLParamElement
     {
-        internal HTMLParamElement(JSObject handle) : base(handle) { }
+        internal HTMLParamElement(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public HTMLParamElement() { }
         [Export("name")]

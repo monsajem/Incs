@@ -1,13 +1,16 @@
-﻿using System;
+﻿using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
+using System;
 using System.Runtime.InteropServices.JavaScript;
+using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
+using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
 
-    [Export("CanvasGradient", typeof(JSObject))]
+    [Export("CanvasGradient", typeof(IJSInProcessObjectReference))]
     public sealed class CanvasGradient : DOMObject, ICanvasGradient
     {
-        internal CanvasGradient(JSObject handle) : base(handle) { }
+        internal CanvasGradient(IJSInProcessObjectReference handle) : base(handle) { }
 
         //public CanvasGradient() { }
         [Export("addColorStop")]
