@@ -1,5 +1,4 @@
-﻿console.log("WebWorker Script");
-var ProccessNameSpace = '[Monsajem_incs]WebAssembly.Browser.MonsajemDomHelpers.WebProcess';
+﻿var ProccessNameSpace = '[Monsajem_incs]WebAssembly.Browser.MonsajemDomHelpers.WebProcess';
 self.Module = {};
 Module.print = msg => console.log(`WASM-WORKER: ${msg}`);
 Module.printErr = msg => {
@@ -85,4 +84,4 @@ function asyncLoad(url, reponseType) {
     });
 }
 
-self.importScripts(self.MN.baseUrl + `dotnet.5.0.0.js`);
+self.importScripts(self.MN.baseUrl + `dotnet.js`);

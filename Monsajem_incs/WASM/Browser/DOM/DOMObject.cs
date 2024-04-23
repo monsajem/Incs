@@ -96,11 +96,6 @@ namespace WebAssembly.Browser.DOM
         protected void SetProperty<T>(string expr, T Value)
         {
             object value = Value;
-            if (Value is Delegate)
-            {
-                value = DotNetObjectReference.Create((Delegate)value);
-                DGS.Add(value);
-            }
             if (value == null)
                 ManagedJSObject.JsSetValue(expr, value);
             else

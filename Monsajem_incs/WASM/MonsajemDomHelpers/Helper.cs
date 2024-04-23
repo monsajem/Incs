@@ -92,13 +92,26 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
         }
         public static void JsSetValue(this IJSInProcessObjectReference obj, string Name, object Value)
         {
-            CreateJsInfo();
-            JsInfo.InvokeVoid("SetValue_obj", obj, Name, Value);
+            if(Value!=null &&
+               typeof(Delegate).IsAssignableFrom(Value.GetType()))
+            {
+                JsSetEvent(obj, Name, (Delegate)Value);
+            }
+            else
+            {
+                CreateJsInfo();
+                JsInfo.InvokeVoid("SetValue_obj", obj, Name, Value);
+            }
         }
         public static bool JsHaveValue(this IJSInProcessObjectReference obj, string Name)
         {
             CreateJsInfo();
             return JsInfo.Invoke<bool>("HaveValue_obj", obj, Name);
+        }
+        public static void JsSetEvent(this IJSInProcessObjectReference obj, string Name, Delegate Value)
+        {
+            var Binder = new InvokableDelegate() { DG = Value, Js = JsRuntime };
+            Binder.Bind(obj, Name);
         }
 
         public static IJSInProcessObjectReference JsConvert(this object obj)
@@ -327,6 +340,48 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
 
         public static Task<string> LoadStringFromBaseURL(string URL) =>
             LoadStringFromURL(WASM_Global.Publisher.NavigationManager.ToAbsoluteUri("/") + URL);
+
+        private class InvokableDelegate
+        {
+            public Delegate DG;
+            public JSInProcessRuntime Js;
+
+            [JSInvokable("Invoke")]
+            public void Invoke()
+            {
+                var MethodParams = DG.Method.GetParameters();
+                var Params = new object[MethodParams.Length];
+                for (int i = 0; i < Params.Length; i++)
+                {
+                    var methodParam = MethodParams[i];
+                    Params[i] = Js.GetType().GetMethod("Invoke").MakeGenericMethod(methodParam.ParameterType).Invoke(Js, new object[] { "eval", new object[] { "p" + i } });
+                }
+                DG.DynamicInvoke(Params);
+            }
+
+            public void Bind(IJSInProcessObjectReference obj, string Property)
+            {
+                var MethodParams = DG.Method.GetParameters();
+                var JsFunc = @"({
+  Binder: function (Invoker,obj,property) {
+obj[property] = function ( ";
+
+                for (int i = 0; i < MethodParams.Length; i++)
+                {
+                    JsFunc = JsFunc + "p" + i + ",";
+                }
+                JsFunc = JsFunc.Substring(0, JsFunc.Length - 1);
+                JsFunc = JsFunc + "){";
+                for (int i = 0; i < MethodParams.Length; i++)
+                {
+                    JsFunc = JsFunc + "self.p" + i + " = p" + i + ";";
+                }
+                JsFunc = JsFunc + "Invoker.invokeMethod('Invoke');}; },})";
+                var PropertyInfo = Js.Invoke<IJSInProcessObjectReference>("eval", JsFunc);
+                var Invoker = Js.Invoke<IJSInProcessObjectReference>("eval", DotNetObjectReference.Create(this));
+                PropertyInfo.InvokeVoid("Binder", Invoker, obj, Property);
+            }
+        }
     }
 
     public class WebProcess
@@ -371,7 +426,7 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
             AssembellyNames += "]";
             var Location = Window.window.Location;
             Console.WriteLine("x1");
-            await Worker.Run($"console.log(\"WebWorker Script2\");self.MN={{}};self.MN.AssemblyFilenames={AssembellyNames};self.MN.baseUrl = '{Location.Protocol}//{Location.Hostname}:{Location.Port}/_framework/';");
+            await Worker.Run($"self.MN={{}};self.MN.AssemblyFilenames={AssembellyNames};self.MN.baseUrl = '{Location.Protocol}//{Location.Hostname}:{Location.Port}/_framework/';");
             Console.WriteLine("x2");
             var Ready = Worker.GetMessage();
             await Worker.Run(WebWorkerJs);
