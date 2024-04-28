@@ -1,16 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using WebAssembly.Browser.DOM;
-using static MonsajemData.DataBase;
-using Monsajem_Incs.Convertors;
-using static WASM_Global.Publisher;
+﻿using Monsajem_Incs.Convertors;
 using Monsajem_Incs.Database.Base;
-using Monsajem_Incs.Collection.Array.ArrayBased.DynamicSize;
-using static Monsajem_Incs.WasmClient.SafeRun;
-using static Monsajem_Incs.WasmClient.Network;
-using MonsajemData;
+using System;
+using System.Threading.Tasks;
 using WebAssembly.Browser.MonsajemDomHelpers;
 using static Monsajem_Incs.Collection.Array.Extentions;
 
@@ -30,7 +21,7 @@ namespace Monsajem_Incs.Views.Shower.Database
             if (PartTable != null)
             {
                 var TableName = (string)PartTable.HolderTable.Table.TableName;
-                var RelationName = (string)PartTable.TableName;
+                var RelationName = PartTable.TableName;
                 Parameters = new string[]{TableName,
                                     RelationName,
                                     PartTable.HolderTable.Key.ConvertToString() };
@@ -56,7 +47,7 @@ namespace Monsajem_Incs.Views.Shower.Database
                                              string Query = null)
             where KeyType : IComparable<KeyType>
         {
-            base.Show(ProvideUriParams(Table,Query));
+            _ = base.Show(ProvideUriParams(Table, Query));
         }
 
         public static (string TableName, string RelationName, string ItemKey, string Query)
@@ -72,7 +63,7 @@ namespace Monsajem_Incs.Views.Shower.Database
             else if (Info.Length == 4)
                 Query = Info[3];
 
-            if(Info.Length>=3)
+            if (Info.Length >= 3)
             {
                 RelationName = Info[1];
                 ItemKey = Info[2];
@@ -85,18 +76,18 @@ namespace Monsajem_Incs.Views.Shower.Database
         {
             var Data = ShowPage.GetDataFrom(GetDataStringParameters());
             var TableInfo = TableFinder.FindTable(Data.TableName);
-            if (Data.RelationName=="")
+            if (Data.RelationName == "")
             {
                 MainElement.ReplaceChilds(TableInfo.MakeShowViewForItems(
                     Data.Query,
-                    OnUpdate:(c)=>
+                    OnUpdate: (c) =>
                     {
                         new UpdatePage().Show(c.TableInfo.TableName, c.Key);
                     },
-                    OnDelete:(c)=>
+                    OnDelete: (c) =>
                     {
                         c.TableInfo.Delete(c.Key);
-                        this.Ready();
+                        _ = Ready();
                     }));
             }
             else
@@ -112,7 +103,7 @@ namespace Monsajem_Incs.Views.Shower.Database
                     OnDelete: (c) =>
                     {
                         c.TableInfo.Delete(c.Key);
-                        this.Ready();
+                        _ = Ready();
                     }));
             }
         }
@@ -123,30 +114,29 @@ namespace Monsajem_Incs.Views.Shower.Database
         public void Show()
         {
             var Data = ShowPage.GetDataFrom(GetDataStringParameters());
-            if (Data.RelationName != "")
-                base.Show(Data.TableName, 
+            _ = Data.RelationName != ""
+                ? base.Show(Data.TableName,
                           Data.RelationName,
-                          Data.ItemKey);
-            else
-                base.Show(Data.TableName);
+                          Data.ItemKey)
+                : base.Show(Data.TableName);
         }
 
         public void Show<ValueType, KeyType>(Table<ValueType, KeyType> Table)
             where KeyType : IComparable<KeyType>
         {
             var PartTable = Table as PartOfTable<ValueType, KeyType>;
-            if(PartTable != null)
+            if (PartTable != null)
             {
                 var TableName = (string)PartTable.HolderTable.Table.TableName;
                 var RelationName = PartTable.TableName;
-                base.Show(TableName,
-                          RelationName, 
+                _ = base.Show(TableName,
+                          RelationName,
                           PartTable.HolderTable.Key.ConvertToString());
             }
             else
             {
                 var TableName = Table.TableName;
-                base.Show(TableName);
+                _ = base.Show(TableName);
             }
         }
 
@@ -158,14 +148,14 @@ namespace Monsajem_Incs.Views.Shower.Database
             var TableInfo = TableFinder.FindTable(Data.TableName);
             if (Data.RelationName == "")
             {
-                MainElement.ReplaceChilds(TableInfo.MakeInsertView(()=>js.GoBack()));
+                MainElement.ReplaceChilds(TableInfo.MakeInsertView(() => js.GoBack()));
             }
             else
             {
                 var RelationInfo = TableInfo.FindRelation(Data.RelationName);
                 MainElement.ReplaceChilds(RelationInfo.MakeInsertView(
                                 Data.ItemKey,
-                                ()=>js.GoBack()));
+                                () => js.GoBack()));
             }
         }
     }
@@ -174,11 +164,11 @@ namespace Monsajem_Incs.Views.Shower.Database
         public void Show<KeyType, ValueType>(Table<ValueType, KeyType> DB, KeyType Key)
             where KeyType : IComparable<KeyType>
         {
-            this.Show(DB.TableName,Key.ConvertToString());
+            Show(DB.TableName, Key.ConvertToString());
         }
         internal void Show(string TableName, object Key)
         {
-            base.Show(TableName,Key.ConvertToString());
+            _ = base.Show(TableName, Key.ConvertToString());
         }
 
         public override string Address => "DbUpdate";
@@ -191,7 +181,7 @@ namespace Monsajem_Incs.Views.Shower.Database
             var Key = Uri.UnescapeDataString(Data.Substring(SpratorPos + 1));
             var TableInfo = TableFinder.FindTable(TableName);
             MainElement.ReplaceChilds(TableInfo.MakeEditView(Key,
-                ()=> js.GoBack()));
+                () => js.GoBack()));
         }
     }
 }

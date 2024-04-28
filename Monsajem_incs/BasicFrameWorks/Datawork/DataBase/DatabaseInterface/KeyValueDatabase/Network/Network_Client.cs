@@ -1,23 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Monsajem_Incs.Net.Base.Service;
-using Monsajem_Incs.Database;
+﻿using Monsajem_Incs.Net.Base.Service;
+using System;
 using System.Linq;
-using Monsajem_Incs.Collection.Array.TreeBased;
-using System.Linq.Expressions;
-using static Monsajem_Incs.Collection.Array.Extentions;
+using System.Threading.Tasks;
 
 namespace Monsajem_Incs.Database.Base
 {
     public static partial class Extentions
     {
-        private class IRemoteUpdateReciver<ValueType, KeyType>:
-            IRemoteUpdateSender<ValueType,KeyType>
+        private class IRemoteUpdateReciver<ValueType, KeyType> :
+            IRemoteUpdateSender<ValueType, KeyType>
             where KeyType : IComparable<KeyType>
         {
-            public Collection.Array.TreeBased.Array<KeyType> ShouldDelete = 
-                new Collection.Array.TreeBased.Array<KeyType>();
+            public Collection.Array.TreeBased.Array<KeyType> ShouldDelete =
+                new();
             public int StartPos;
             public int ServerItemsCount;
             public int EndPos;
@@ -29,7 +24,7 @@ namespace Monsajem_Incs.Database.Base
                 Func<KeyType, Task<ValueType>> GetItem,
                 bool IsPartOfTable,
                 int ServerItemsCount) :
-                base(Client,Table, UpdateCodes,GetItem,IsPartOfTable)
+                base(Client, Table, UpdateCodes, GetItem, IsPartOfTable)
             {
                 this.ServerItemsCount = ServerItemsCount;
                 EndPos = Math.Min(Table.UpdateAble.UpdateCodes.Length, ServerItemsCount) - 1;
@@ -79,26 +74,26 @@ namespace Monsajem_Incs.Database.Base
 #endif
             }
 
-            private void Added(KeyType Key,ulong UpdateCode,ulong ParentUpdateCode=0)
+            private void Added(KeyType Key, ulong UpdateCode, ulong ParentUpdateCode = 0)
             {
-                Table.UpdateAble.Changed(Key,Key, UpdateCode);
+                Table.UpdateAble.Changed(Key, Key, UpdateCode);
                 if (IsPartOfTable)
                     ParentTable.UpdateAble.Changed(Key, Key, UpdateCode);
                 if (ShouldDelete.BinarySearch(Key).Index > -1)
-                    ShouldDelete.BinaryDelete(Key);
+                    _ = ShouldDelete.BinaryDelete(Key);
             }
 
             private void Removed(KeyType Key)
             {
                 Table.UpdateAble.DeleteDontUpdate(Key);
-                ShouldDelete.BinaryInsert(Key);
+                _ = ShouldDelete.BinaryInsert(Key);
             }
 
             private async Task UpdateNextItems()
             {
                 var Len = await Client.GetData<int>();
                 var ServerUpCodes = new ulong[Len];
-                ulong[] ServerUpCodes_Parent=null;
+                ulong[] ServerUpCodes_Parent = null;
                 if (IsPartOfTable)
                     ServerUpCodes_Parent = new ulong[Len];
                 for (int i = 0; i < Len; i++)
@@ -110,24 +105,24 @@ namespace Monsajem_Incs.Database.Base
                         if (ParentTable.UpdateAble.IsExist(ParentUpCode))
                         {
                             var ParentUpDate = ParentTable.UpdateAble[ParentUpCode];
-                            if(PartTable.IsExist(ParentUpDate.Key)==false)
-                                PartTable.Accept(ParentUpDate.Key);
+                            if (PartTable.IsExist(ParentUpDate.Key) == false)
+                                _ = PartTable.Accept(ParentUpDate.Key);
                             Added(ParentUpDate.Key, UpCode);
-                            await Client.SendData(false);
+                            _ = await Client.SendData(false);
                             StartPos++;
                             Len--;
                             i--;
                         }
                         else
                         {
-                            await Client.SendData(true);
+                            _ = await Client.SendData(true);
                             ServerUpCodes[i] = UpCode;
                             ServerUpCodes_Parent[i] = ParentUpCode;
                         }
                     }
                     else
                     {
-                        await Client.SendData(true);
+                        _ = await Client.SendData(true);
                         ServerUpCodes[i] = UpCode;
                     }
                 }
@@ -137,28 +132,28 @@ namespace Monsajem_Incs.Database.Base
                     var Key = Table.GetKey(Value);
                     var Update = new UpdateAble<KeyType>()
                     { Key = Key, UpdateCode = ServerUpCodes[i] };
-                    Table.UpdateOrInsert(Key, (c) =>
+                    _ = Table.UpdateOrInsert(Key, (c) =>
                     {
-                         Table.MoveRelations(c, Value);
-                         return Value;
+                        Table.MoveRelations(c, Value);
+                        return Value;
                     });
-                    if(IsPartOfTable)
-                        Added(Key, ServerUpCodes[i],ServerUpCodes_Parent[i]);
+                    if (IsPartOfTable)
+                        Added(Key, ServerUpCodes[i], ServerUpCodes_Parent[i]);
                     else
                         Added(Key, ServerUpCodes[i]);
                     StartPos++;
                 }
             }
-            
+
             public async Task FindLastTrue()
             {
                 var StartPos = this.StartPos;
                 var EndPos = this.EndPos;
                 var EndPosParameter = EndPos;
                 var Update = Table.UpdateAble;
-                if (StartPos == EndPos && 
+                if (StartPos == EndPos &&
                     Update.UpdateCodes[StartPos].UpdateCode !=
-                        await this.GetUpdateCodeAtPos(StartPos))
+                        await GetUpdateCodeAtPos(StartPos))
                 {
                     this.StartPos--;
                     return;
@@ -167,7 +162,7 @@ namespace Monsajem_Incs.Database.Base
                        EndPos <= EndPosParameter)
                 {
                     if (Update.UpdateCodes[EndPos].UpdateCode !=
-                        await this.GetUpdateCodeAtPos(EndPos))
+                        await GetUpdateCodeAtPos(EndPos))
                         EndPos = (EndPos + StartPos) / 2;
                     else
                     {
@@ -176,18 +171,14 @@ namespace Monsajem_Incs.Database.Base
                         StartPos = OldEnd;
                     }
                 }
-                if (EndPos > EndPosParameter)
-                    this.StartPos = EndPosParameter;
-                else
-                    this.StartPos = EndPos;
+                this.StartPos = EndPos > EndPosParameter ? EndPosParameter : EndPos;
             }
 
             public void DeleteExtraItems(ulong UpdateCode)
             {
-                UpdateAble<KeyType> MyUpCode = null;
                 while (Table.UpdateAble.UpdateCodes.Length > StartPos)
                 {
-                    MyUpCode = Table.UpdateAble.UpdateCodes[StartPos];
+                    UpdateAble<KeyType> MyUpCode = Table.UpdateAble.UpdateCodes[StartPos];
                     if (MyUpCode.UpdateCode < UpdateCode)
                     {
                         Table.UpdateAble.DeleteDontUpdate(MyUpCode.Key);
@@ -200,7 +191,7 @@ namespace Monsajem_Incs.Database.Base
 
             public void DeleteItemsFrom(int Pos)
             {
-                for(; Pos < Table.UpdateAble.UpdateCodes.Length; Pos++)
+                for (; Pos < Table.UpdateAble.UpdateCodes.Length; Pos++)
                 {
                     var MyUpCode = Table.UpdateAble.UpdateCodes[Pos];
                     Table.UpdateAble.DeleteDontUpdate(MyUpCode.Key);
@@ -240,8 +231,8 @@ namespace Monsajem_Incs.Database.Base
                 else
                     DeleteItemsFrom(ServerItemsCount);
 
-                if(IsPartOfTable)
-                    foreach(var Delete in ShouldDelete)
+                if (IsPartOfTable)
+                    foreach (var Delete in ShouldDelete)
                     {
                         if (await IsExistAtParent(Delete))
                             PartTable.Ignore(Delete);
@@ -270,21 +261,20 @@ namespace Monsajem_Incs.Database.Base
             bool IsPartOfTable)
             where KeyType : IComparable<KeyType>
         {
-            if (Table._UpdateAble == null)
-                Table._UpdateAble = new UpdateAbles<KeyType>(
+            Table._UpdateAble ??= new UpdateAbles<KeyType>(
                                             Table.BasicActions.UpdateCode,
-                                            Table.BasicActions.Items.Select((c)=>(Table.GetKey(c.Value),c.UpdateCode)));
+                                            Table.BasicActions.Items.Select((c) => (Table.GetKey(c.Value), c.UpdateCode)));
             var Result = false;
 
-            await Client.SendData(Table.UpdateAble.UpdateCode.Value);//1
+            _ = await Client.SendData(Table.UpdateAble.UpdateCode.Value);//1
             var LastUpdateCode = await Client.GetData<ulong>();//2
             if (Table.UpdateAble.UpdateCode.Value != LastUpdateCode)
             {
                 var ServerItemsCount = await Client.GetData<int>();//3
                 var Remote = new IRemoteUpdateReciver<ValueType, KeyType>(
-                                    Client, Table, null, null, IsPartOfTable,ServerItemsCount);
+                                    Client, Table, null, null, IsPartOfTable, ServerItemsCount);
                 await Client.Remote(Remote,
-                async (Remote) =>await Remote.MakeUpdate(LastUpdateCode));
+                async (Remote) => await Remote.MakeUpdate(LastUpdateCode));
             }
             return Result;
         }

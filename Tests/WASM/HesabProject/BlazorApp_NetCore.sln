@@ -9,8 +9,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_MN", "_MN", "{86F0EAFA-81F
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monsajem_incs", "..\..\..\Monsajem_incs\Monsajem_incs.csproj", "{11C07F43-C5B5-4B06-9A6E-199031F40F49}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tester", "Tester\Tester.csproj", "{C709E49A-C277-4C9F-9ED7-D31129CD431A}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,10 +23,6 @@ Global
 		{11C07F43-C5B5-4B06-9A6E-199031F40F49}.Debug|Any CPU.Build.0 = Release|Any CPU
 		{11C07F43-C5B5-4B06-9A6E-199031F40F49}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{11C07F43-C5B5-4B06-9A6E-199031F40F49}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C709E49A-C277-4C9F-9ED7-D31129CD431A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C709E49A-C277-4C9F-9ED7-D31129CD431A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C709E49A-C277-4C9F-9ED7-D31129CD431A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C709E49A-C277-4C9F-9ED7-D31129CD431A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

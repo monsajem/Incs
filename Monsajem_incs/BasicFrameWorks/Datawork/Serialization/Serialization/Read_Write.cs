@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using static Monsajem_Incs.Collection.Array.Extentions;
 using static System.Text.Encoding;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
 namespace Monsajem_Incs.Serialization
 {
@@ -23,20 +22,19 @@ namespace Monsajem_Incs.Serialization
 
             return bytes;
         }
-        static Func<(Array ar_Obj, int ElementSize), byte[]> 
+        static Func<(Array ar_Obj, int ElementSize), byte[]>
             ReadBytesOfArray(Type ElementType)
         {
             var method = typeof(Serialization).GetMethod("ReadBytesOfArray_T");
 
-            if (method == null)
-                throw new Exception("ReadBytesOfArray_T method not found!");
-
-            return method.MakeGenericMethod(ElementType).
+            return method == null
+                ? throw new Exception("ReadBytesOfArray_T method not found!")
+                : method.MakeGenericMethod(ElementType).
                 CreateDelegate<Func<(Array ar_Obj, int ElementSize), byte[]>>();
         }
 
         public static unsafe void WriteBytesOfArray_T<t>(
-            (Array ar_Obj ,byte[] BytesToWrite ,int From ,int Len ,int ElementSize) Info)
+            (Array ar_Obj, byte[] BytesToWrite, int From, int Len, int ElementSize) Info)
             where t : unmanaged
         {
             var ar = Unsafe.As<t[]>(Info.ar_Obj);
@@ -44,22 +42,22 @@ namespace Monsajem_Incs.Serialization
 
             fixed (t* ptr = ar)
             {
-                Marshal.Copy(Info.BytesToWrite, Info.From,(IntPtr) ptr, Info.Len);
+                Marshal.Copy(Info.BytesToWrite, Info.From, (IntPtr)ptr, Info.Len);
             }
         }
-        static Action<(Array ar_Obj, byte[] BytesToWrite, int From, int Len, int ElementSize)> 
+        static Action<(Array ar_Obj, byte[] BytesToWrite, int From, int Len, int ElementSize)>
             WriteBytesOfArray(Type ElementType)
         {
             var method = typeof(Serialization).GetMethod("WriteBytesOfArray_T");
 
-            if (method == null)
-                throw new Exception("WriteBytesOfArray_T method not found!");
-
-            return method.MakeGenericMethod(ElementType).
-                CreateDelegate<Action<(Array ar_Obj, byte[] BytesToWrite, int From, int Len, int ElementSize)>>(); ;
+            return method == null
+                ? throw new Exception("WriteBytesOfArray_T method not found!")
+                : method.MakeGenericMethod(ElementType).
+                CreateDelegate<Action<(Array ar_Obj, byte[] BytesToWrite, int From, int Len, int ElementSize)>>();
+            ;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         private static byte[] StructToBytes<t>(t value, int Size)
         {
             byte[] bytes = new byte[Size];
@@ -67,31 +65,31 @@ namespace Monsajem_Incs.Serialization
             return bytes;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         private static t BytesToStruct<t>(byte[] value, int startIndex)
         {
             return System.Runtime.CompilerServices.Unsafe.ReadUnaligned<t>(ref value[startIndex]);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
-        private SerializeInfo WriteSerializer(SerializeData Data,Type Type)
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
+        private SerializeInfo WriteSerializer(SerializeData Data, Type Type)
         {
             var Sr = SerializeInfo.GetSerialize(Type);
-            VisitedInfoSerialize<object>(Data, Sr.Type, () => (Sr.NameAsByte, null));
+            _ = VisitedInfoSerialize<object>(Data, Sr.Type, () => (Sr.NameAsByte, null));
             return Sr;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         private SerializeInfo ReadSerializer(DeserializeData Data)
         {
-            var Info = VisitedInfoDeserialize(Data,() =>
+            var Info = VisitedInfoDeserialize(Data, () =>
             {
                 return Read(Data);
             });
             return SerializeInfo.GetSerialize(Info);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         private byte[] Write(params string[] str)
         {
             byte[] Results = new byte[0];
@@ -106,13 +104,13 @@ namespace Monsajem_Incs.Serialization
             return Results;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         private string Read(DeserializeData Data)
         {
-            var Len = BitConverter.ToInt32(Data.Data, Data. From);
+            var Len = BitConverter.ToInt32(Data.Data, Data.From);
             Data.From += 4;
             var Result = UTF8.GetString(Data.Data, Data.From, Len);
-            Data. From += Result.Length;
+            Data.From += Result.Length;
             return Result;
         }
     }

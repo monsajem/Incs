@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.JSInterop;
+using System;
 using WebAssembly.Browser.DOM.Events;
-using System.Runtime.InteropServices.JavaScript;
-using Microsoft.JSInterop.Implementation;
-using Microsoft.JSInterop;
 using WebAssembly.Browser.MonsajemDomHelpers;
 
 namespace WebAssembly.Browser.DOM

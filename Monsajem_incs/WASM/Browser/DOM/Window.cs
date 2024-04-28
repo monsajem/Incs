@@ -1,6 +1,6 @@
-﻿using System;
-//using System.ComponentModel.Composition;
-using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
+﻿//using System.ComponentModel.Composition;
+using Microsoft.JSInterop;
+using System;
 
 namespace WebAssembly.Browser.DOM
 {
@@ -8,11 +8,11 @@ namespace WebAssembly.Browser.DOM
     [Export("Window", typeof(IJSInProcessObjectReference))]
     public sealed class Window : EventTarget
     {
-        public static Window window = new Window();
+        public static Window window = new();
 
         //internal Window(IJSInProcessObjectReference handle) : base(handle) { }
 
-        public Window() : base("window") { } 
+        public Window() : base("window") { }
         // [Export("applicationCache")]
         // public ApplicationCache ApplicationCache => GetProperty<ApplicationCache>("applicationCache");
         // [Export("caches")]
@@ -54,9 +54,9 @@ namespace WebAssembly.Browser.DOM
         [Export("locationbar")]
         public BarProp Locationbar => GetProperty<BarProp>("locationbar");
         [Export("localStorage")]
-        public Storage LocalStorage => new Storage(Storage.Type.LocalStorage);
+        public Storage LocalStorage => new(Storage.Type.LocalStorage);
         [Export("sessionStorage")]
-        public Storage SessionStorage => new Storage(Storage.Type.SessionStorage);
+        public Storage SessionStorage => new(Storage.Type.SessionStorage);
         [Export("menubar")]
         public BarProp Menubar => GetProperty<BarProp>("menubar");
         // [Export("msContentScript")]
@@ -559,10 +559,10 @@ namespace WebAssembly.Browser.DOM
         public Window Top => GetProperty<Window>("top");
         [Export("window")]
         public Window IWindow => GetProperty<Window>("window");
-         [Export("URL")]
-         public URL Url { get => GetProperty<URL>("URL"); set => SetProperty<URL>("URL", value); }
-         [Export("URLSearchParams")]
-         public URLSearchParams UrlSearchParams { get => GetProperty<URLSearchParams>("URLSearchParams"); set => SetProperty<URLSearchParams>("URLSearchParams", value); }
+        [Export("URL")]
+        public URL Url { get => GetProperty<URL>("URL"); set => SetProperty<URL>("URL", value); }
+        [Export("URLSearchParams")]
+        public URLSearchParams UrlSearchParams { get => GetProperty<URLSearchParams>("URLSearchParams"); set => SetProperty<URLSearchParams>("URLSearchParams", value); }
         // [Export("Blob")]
         // public Blob Blob { get => GetProperty<Blob>("Blob"); set => SetProperty<Blob>("Blob", value); }
         // [Export("customElements")]
@@ -617,27 +617,27 @@ namespace WebAssembly.Browser.DOM
         [Export("alert")]
         public void Alert(Object message)
         {
-            InvokeMethod<object>("alert", message);
+            _ = InvokeMethod<object>("alert", message);
         }
         [Export("blur")]
         public void Blur()
         {
-            InvokeMethod<object>("blur");
+            _ = InvokeMethod<object>("blur");
         }
         [Export("cancelAnimationFrame")]
         public void CancelAnimationFrame(double handle)
         {
-            InvokeMethod<object>("cancelAnimationFrame", handle);
+            _ = InvokeMethod<object>("cancelAnimationFrame", handle);
         }
         [Export("captureEvents")]
         public void CaptureEvents()
         {
-            InvokeMethod<object>("captureEvents");
+            _ = InvokeMethod<object>("captureEvents");
         }
         [Export("close")]
         public void Close()
         {
-            InvokeMethod<object>("close");
+            _ = InvokeMethod<object>("close");
         }
         [Export("confirm")]
         public bool Confirm(string message)
@@ -652,7 +652,7 @@ namespace WebAssembly.Browser.DOM
         [Export("focus")]
         public void Focus()
         {
-            InvokeMethod<object>("focus");
+            _ = InvokeMethod<object>("focus");
         }
         // [Export("getComputedStyle")]
         // public CSSStyleDeclaration GetComputedStyle(Element elt, string pseudoElt)
@@ -677,17 +677,17 @@ namespace WebAssembly.Browser.DOM
         [Export("moveBy")]
         public void MoveBy(double x, double y)
         {
-            InvokeMethod<object>("moveBy", x, y);
+            _ = InvokeMethod<object>("moveBy", x, y);
         }
         [Export("moveTo")]
         public void MoveTo(double x, double y)
         {
-            InvokeMethod<object>("moveTo", x, y);
+            _ = InvokeMethod<object>("moveTo", x, y);
         }
         [Export("msWriteProfilerMark")]
         public void MsWriteProfilerMark(string profilerMarkName)
         {
-            InvokeMethod<object>("msWriteProfilerMark", profilerMarkName);
+            _ = InvokeMethod<object>("msWriteProfilerMark", profilerMarkName);
         }
         [Export("open")]
         public Window Open(string url, string target, string features, bool replace)
@@ -697,12 +697,12 @@ namespace WebAssembly.Browser.DOM
         [Export("postMessage")]
         public void PostMessage(Object message, string targetOrigin, Object[] transfer)
         {
-            InvokeMethod<object>("postMessage", message, targetOrigin, transfer);
+            _ = InvokeMethod<object>("postMessage", message, targetOrigin, transfer);
         }
         [Export("print")]
         public void Print()
         {
-            InvokeMethod<object>("print");
+            _ = InvokeMethod<object>("print");
         }
         [Export("prompt")]
         public string Prompt(string message, string _default)
@@ -712,47 +712,47 @@ namespace WebAssembly.Browser.DOM
         [Export("releaseEvents")]
         public void ReleaseEvents()
         {
-            InvokeMethod<object>("releaseEvents");
+            _ = InvokeMethod<object>("releaseEvents");
         }
         [Export("requestAnimationFrame")]
         public double RequestAnimationFrame(FrameRequestCallback callback)
         {
-         return InvokeMethod<double>("requestAnimationFrame", callback);
+            return InvokeMethod<double>("requestAnimationFrame", callback);
         }
         [Export("resizeBy")]
         public void ResizeBy(double x, double y)
         {
-            InvokeMethod<object>("resizeBy", x, y);
+            _ = InvokeMethod<object>("resizeBy", x, y);
         }
         [Export("resizeTo")]
         public void ResizeTo(double x, double y)
         {
-            InvokeMethod<object>("resizeTo", x, y);
+            _ = InvokeMethod<object>("resizeTo", x, y);
         }
         [Export("scroll")]
         public void Scroll(double x, double y)
         {
-            InvokeMethod<object>("scroll", x, y);
+            _ = InvokeMethod<object>("scroll", x, y);
         }
         [Export("scrollBy")]
         public void ScrollBy(double x, double y)
         {
-            InvokeMethod<object>("scrollBy", x, y);
+            _ = InvokeMethod<object>("scrollBy", x, y);
         }
         [Export("scrollTo")]
         public void ScrollTo(double x, double y)
         {
-            InvokeMethod<object>("scrollTo", x, y);
+            _ = InvokeMethod<object>("scrollTo", x, y);
         }
         [Export("stop")]
         public void Stop()
         {
-            InvokeMethod<object>("stop");
+            _ = InvokeMethod<object>("stop");
         }
         [Export("webkitCancelAnimationFrame")]
         public void WebkitCancelAnimationFrame(double handle)
         {
-            InvokeMethod<object>("webkitCancelAnimationFrame", handle);
+            _ = InvokeMethod<object>("webkitCancelAnimationFrame", handle);
         }
         [Export("webkitConvertPointFromNodeToPage")]
         public WebKitPoint WebkitConvertPointFromNodeToPage(Node node, WebKitPoint pt)

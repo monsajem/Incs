@@ -1,26 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using Monsajem_Incs.Database.Base;
+﻿using Monsajem_Incs.Collection.Array.TreeBased;
 using Monsajem_Incs.Serialization;
-using Monsajem_Incs.Database;
-using Monsajem_Incs.Collection.Array.TreeBased;
+using System;
 
 namespace Monsajem_Incs.Collection
 {
 
-    public partial class StreamCollection:
+    public partial class StreamCollection :
         Array.Base.IArray<byte[], StreamCollection>
-    { 
+    {
         [Serialization.NonSerialized]
         [CopyOrginalObject]
         private Monsajem_Incs.DataWork.StreamController Stream;
-        
-        public StreamCollection(System.IO.Stream Stream,int MinCount = 5000)
+
+        public StreamCollection(System.IO.Stream Stream, int MinCount = 5000)
         {
-            this.Stream = new DataWork.StreamController(Stream,4,MinCount);
+            this.Stream = new DataWork.StreamController(Stream, 4, MinCount);
             {
                 Keys = new Array<Data>();
                 GapsByFrom = new Array<DataByForm>();
@@ -31,12 +25,12 @@ namespace Monsajem_Incs.Collection
 
                 NextPos--;
 
-                if(NextPos!=-1)
+                if (NextPos != -1)
                 {
-                    while (NextPos!=-1)
+                    while (NextPos != -1)
                     {
-                        this.Stream.Seek(NextPos, System.IO.SeekOrigin.Begin);
-                        var Header =this.Stream.Read(HeadSize).Deserialize<DataHeader>();
+                        _ = this.Stream.Seek(NextPos, System.IO.SeekOrigin.Begin);
+                        var Header = this.Stream.Read(HeadSize).Deserialize<DataHeader>();
                         Keys.Insert(new Data()
                         {
                             From = NextPos,
@@ -59,7 +53,7 @@ namespace Monsajem_Incs.Collection
                             InsertGap(new Data()
                             {
                                 From = CurrentPos,
-                                Len = (NewData.From - CurrentPos),
+                                Len = NewData.From - CurrentPos,
                                 To = NewData.From - 1
                             });
                         }
@@ -70,9 +64,9 @@ namespace Monsajem_Incs.Collection
 
             Keys.ChangedNextSequence = (c) =>
             {
-                if(c.Before==null)
+                if (c.Before == null)
                 {
-                    if(Keys.Length>0)
+                    if (Keys.Length > 0)
                         this.Stream.SetHeader(BitConverter.GetBytes(Keys[0].From + 1));
                     else
                         this.Stream.SetHeader(BitConverter.GetBytes(0));
@@ -80,14 +74,13 @@ namespace Monsajem_Incs.Collection
                 else
                 {
                     var Data = c.Before.Value;
-                    var Header = new DataHeader();
-                    Header.DataLen = Data.Len;
-                    if (c.Next == null)
-                        Header.NextData = -1;
-                    else
-                        Header.NextData = c.Next.Value.From;
+                    var Header = new DataHeader
+                    {
+                        DataLen = Data.Len,
+                        NextData = c.Next == null ? -1 : c.Next.Value.From
+                    };
                     var Stream = this.Stream;
-                    Stream.Seek(Data.From, System.IO.SeekOrigin.Begin);
+                    _ = Stream.Seek(Data.From, System.IO.SeekOrigin.Begin);
                     Stream.Write(Header.Serialize(), 0, HeadSize);
                 }
             };

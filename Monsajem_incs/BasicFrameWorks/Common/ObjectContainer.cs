@@ -1,11 +1,7 @@
 ﻿using Microsoft.CSharp.RuntimeBinder;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Monsajem_Incs
 {
@@ -35,16 +31,13 @@ namespace Monsajem_Incs
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static implicit operator t(ValueHolder<t> ValueHolder)=> ValueHolder.ConvertToT();
+        public static implicit operator t(ValueHolder<t> ValueHolder) => ValueHolder.ConvertToT();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         private t ConvertToT()
         {
             return Value;
-            if (HaveValue)
-                return Value;
-            else
-                return default(t);
+            return HaveValue ? Value : default;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -191,9 +184,7 @@ namespace Monsajem_Incs
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public override bool Equals(object obj)
         {
-            if (Value == null && obj == null)
-                return true;
-            return Value.Equals(obj);
+            return Value == null && obj == null ? true : Value.Equals(obj);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -208,15 +199,13 @@ namespace Monsajem_Incs
             Type typeFromHandle = typeof(ValueHolder<t>);
             CSharpArgumentInfo[] array = new CSharpArgumentInfo[2];
 
-            if (Op1Flag == CSharpArgumentInfoFlags.None && typeof(input1) != typeof(object))
-                array[0] = CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.UseCompileTimeType, null);
-            else
-                array[0] = CSharpArgumentInfo.Create(Op1Flag, null);
+            array[0] = Op1Flag == CSharpArgumentInfoFlags.None && typeof(input1) != typeof(object)
+                ? CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.UseCompileTimeType, null)
+                : CSharpArgumentInfo.Create(Op1Flag, null);
 
-            if (Op2Flag == CSharpArgumentInfoFlags.None && typeof(input2) != typeof(object))
-                array[1] = CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.UseCompileTimeType, null);
-            else
-                array[1] = CSharpArgumentInfo.Create(Op2Flag, null);
+            array[1] = Op2Flag == CSharpArgumentInfoFlags.None && typeof(input2) != typeof(object)
+                ? CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.UseCompileTimeType, null)
+                : CSharpArgumentInfo.Create(Op2Flag, null);
 
             return CallSite<Func<CallSite, input1, input2, object>>
                         .Create(Microsoft.CSharp.RuntimeBinder.Binder.BinaryOperation(

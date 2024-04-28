@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Monsajem_Incs.Collection.Array.ArrayBased.DynamicSize
 {
-    public class Array<ArrayType>:
+    public class Array<ArrayType> :
         OneArrayBase.Array<ArrayType, Array<ArrayType>>
     {
         public int MinLen;
@@ -18,34 +13,35 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.DynamicSize
 
         public Array(int MinCount)
         {
-            this.SetMyOptions(MinCount);
+            SetMyOptions(MinCount);
         }
 
-        public Array(ArrayType[] ar,int MinCount=500)
+        public Array(ArrayType[] ar, int MinCount = 500)
         {
             Length = ar.Length;
-            this.ar=ar;
-            this.SetMyOptions(MinCount);
+            this.ar = ar;
+            SetMyOptions(MinCount);
         }
 
         private void SetMyOptions(int value)
         {
-            this.MinCount = value;
+            MinCount = value;
             if (ar == null)
             {
-                this.MinLen = Length - MinCount;
-                this.MaxLen = Length + MinCount;
-                this.ar = new ArrayType[MaxLen];
+                MinLen = Length - MinCount;
+                MaxLen = Length + MinCount;
+                ar = new ArrayType[MaxLen];
             }
             else
             {
-                this.MinLen = Length;
-                this.MaxLen = Length;
+                MinLen = Length;
+                MaxLen = Length;
             }
         }
-        public override object MyOptions { 
+        public override object MyOptions
+        {
             get => MinCount;
-            set=> SetMyOptions((int) value);
+            set => SetMyOptions((int)value);
         }
 
         public override void DeleteFrom(int from)
@@ -60,7 +56,7 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.DynamicSize
         }
         internal override void AddLength(int Count)
         {
-            Length = Length + Count;
+            Length += Count;
             if (Length > MaxLen)
             {
                 MaxLen = Length + MinCount;
@@ -71,13 +67,13 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.DynamicSize
 
         public new Array<t> Browse<t>(Func<ArrayType, t> Selector)
         {
-            var Result = new Array<t>(this.MinCount);
+            var Result = new Array<t>(MinCount);
             Result.Insert(base.Browse(Selector));
             return Result;
         }
         public new Array<ArrayType> Browse(Func<ArrayType, bool> Selector)
         {
-            var Result = new Array<ArrayType>(this.MinCount);
+            var Result = new Array<ArrayType>(MinCount);
             Result.Insert(base.Browse(Selector));
             return Result;
         }

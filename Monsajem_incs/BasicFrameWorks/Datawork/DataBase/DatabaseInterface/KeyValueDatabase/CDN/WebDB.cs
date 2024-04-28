@@ -1,40 +1,33 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Monsajem_Incs.Net.Base.Service;
-using Monsajem_Incs.Database;
-using System.Linq;
-using Monsajem_Incs.Collection.Array.TreeBased;
-using System.Linq.Expressions;
-using Monsajem_Incs.Serialization;
-using WebAssembly.Browser.DOM;
-using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 using System.Net.Http;
+using System.Threading.Tasks;
+using WebAssembly.Browser.DOM;
 
 namespace Monsajem_Incs.Database.Base
 {
     public static partial class Extentions
     {
         public static async Task<bool> GetUpdate<ValueType, KeyType>(
-            this (string DBName,Uri CDN) CDN,
+            this (string DBName, Uri CDN) CDN,
             Table<ValueType, KeyType> Table,
             Action<ValueType> MakeingUpdate = null)
             where KeyType : IComparable<KeyType>
         {
             var db = await IndexedDB.Open(CDN.DBName, 1, async (c) =>
-            { 
+            {
                 var Table = c.CreateObjectStore("CDN");
-                Table.CreateIndex("Data", "Data");
+                _ = Table.CreateIndex("Data", "Data");
             });
             try
             {
-                await GetUpdate(async (c) =>
+                _ = await GetUpdate(async (c) =>
                 {
                     var trs = db.Transaction("CDN");
                     var tbl = trs.ObjectStore("CDN");
                     return await tbl.Get<byte[]>(c);
-                }, Table, MakeingUpdate,null);
-            }catch{}
+                }, Table, MakeingUpdate, null);
+            }
+            catch { }
             var Result = await GetUpdate(async (c) =>
             {
                 var WebClient = new HttpClient();
@@ -43,11 +36,12 @@ namespace Monsajem_Incs.Database.Base
                 var trs = db.Transaction("CDN");
                 var tbl = trs.ObjectStore("CDN");
 
-                tbl.Put(Data, c);
+                _ = tbl.Put(Data, c);
                 await trs.Commit();
                 return Data;
             }, Table, MakeingUpdate,
-            async (c)=> {
+            async (c) =>
+            {
                 var trs = db.Transaction("CDN");
                 var tbl = trs.ObjectStore("CDN");
                 await tbl.Delete(c);
@@ -69,18 +63,18 @@ namespace Monsajem_Incs.Database.Base
             var db = await IndexedDB.Open(CDN.DBName, 1, async (c) =>
             {
                 var Table = c.CreateObjectStore("CDN");
-                Table.CreateIndex("Data", "Data");
+                _ = Table.CreateIndex("Data", "Data");
             });
             try
             {
-                await GetUpdate(async (c) =>
+                _ = await GetUpdate(async (c) =>
                 {
                     var trs = db.Transaction("CDN");
                     var tbl = trs.ObjectStore("CDN");
                     return await tbl.Get<byte[]>(c);
-                }, RLNTable, RLNKey, GetRelation, MakeingUpdate,null);
+                }, RLNTable, RLNKey, GetRelation, MakeingUpdate, null);
             }
-            catch{}
+            catch { }
             var Result = await GetUpdate(async (c) =>
             {
                 var WebClient = new HttpClient();
@@ -89,11 +83,12 @@ namespace Monsajem_Incs.Database.Base
                 var trs = db.Transaction("CDN");
                 var tbl = trs.ObjectStore("CDN");
 
-                tbl.Put(Data, "Data");
+                _ = tbl.Put(Data, "Data");
                 await trs.Commit();
                 return Data;
-            }, RLNTable, RLNKey, GetRelation, MakeingUpdate, 
-            async (c) => {
+            }, RLNTable, RLNKey, GetRelation, MakeingUpdate,
+            async (c) =>
+            {
                 var trs = db.Transaction("CDN");
                 var tbl = trs.ObjectStore("CDN");
                 await tbl.Delete(c);
@@ -122,7 +117,7 @@ namespace Monsajem_Incs.Database.Base
             where KeyType : IComparable<KeyType>
             where KeyType_RLN : IComparable<KeyType_RLN>
         {
-            return GetUpdate((CDN.DBName, CDN.CDN), RLNTable,RLNKey,GetRelation, MakeingUpdate);
+            return GetUpdate((CDN.DBName, CDN.CDN), RLNTable, RLNKey, GetRelation, MakeingUpdate);
         }
     }
 }

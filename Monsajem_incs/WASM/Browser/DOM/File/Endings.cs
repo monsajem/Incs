@@ -3,7 +3,7 @@ namespace WebAssembly.Browser.DOM
     /// <summary>
     /// Specifies how strings containing \n are to be written out.
     /// </summary>
-    
+
     public enum Endings
     {
         /// <summary>

@@ -1,17 +1,15 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using static Monsajem_Incs.Collection.Array.Extentions;
-using System.Collections.Generic;
 namespace Monsajem_Incs.Async
 {
     public static class Task_EX
     {
-        public static async Task CheckAll(Task Task1,Task Task2)
+        public static async Task CheckAll(Task Task1, Task Task2)
         {
             var Checks = new Task[] { Task1, Task2 };
             var Result = await Task.WhenAny(Checks);
-            if(Result.Id==Task1.Id)
+            if (Result.Id == Task1.Id)
             {
                 await Task1;
                 await Task2;
@@ -20,11 +18,11 @@ namespace Monsajem_Incs.Async
             {
                 await Task2;
                 await Task1;
-            }    
+            }
         }
         public static async Task CheckAll(params Task[] Tasks)
         {
-            while(Tasks.Length>0)
+            while (Tasks.Length > 0)
             {
                 var Result = await Task.WhenAny(Tasks);
                 await Result;
@@ -41,14 +39,15 @@ namespace Monsajem_Incs.Async
         public static async Task StartTryWaitAsQueue(params Task[] Tasks)
         {
             var Len = Tasks.Length;
-            for(int i=0;i<Len;i++)
+            for (int i = 0; i < Len; i++)
             {
                 var Result = Tasks[i];
                 Result.Start();
                 try
                 {
                     await Result;
-                }catch{}
+                }
+                catch { }
             }
         }
         public static async Task StartWaitAsQueue(params Task[] Tasks)
@@ -114,40 +113,31 @@ namespace Monsajem_Incs.Async
                 Tasks[i] = Task.Run(Actions[i]);
             await CheckAll(Tasks);
         }
-        public static async Task StartWait(int StartLimitation,params Func<Task>[] Actions)
+        public static async Task StartWait(int StartLimitation, params Func<Task>[] Actions)
         {
             var Len = Actions.Length;
 
-            Task[] Tasks;
-
-            if (Len > StartLimitation)
-                Tasks = new Task[StartLimitation];
-            else
-                Tasks = new Task[Len];
-
+            Task[] Tasks = Len > StartLimitation ? (new Task[StartLimitation]) : (new Task[Len]);
             int i = 0;
             for (; i < Tasks.Length; i++)
                 Tasks[i] = Task.Run(Actions[i]);
 
-            while (i<Len)
+            while (i < Len)
             {
                 var Result = await Task.WhenAny(Tasks);
                 await Result;
                 Tasks = Tasks.Select((c) =>
                 {
-                    if (c.Id == Result.Id)
-                        return Task.Run(Actions[i++]);
-                    else
-                        return c;
+                    return c.Id == Result.Id ? Task.Run(Actions[i++]) : c;
                 }).ToArray();
             }
             await CheckAll(Tasks);
         }
 
-        public static async Task TimeOut(this Task Task,int TimeOut)
+        public static async Task TimeOut(this Task Task, int TimeOut)
         {
             var Timer = Task.Delay(TimeOut);
-            var Result = await Task.WhenAny(Task,Timer);
+            var Result = await Task.WhenAny(Task, Timer);
             if (Result.Id == Timer.Id)
                 throw new Exception("Task Time Out!");
         }
@@ -155,9 +145,7 @@ namespace Monsajem_Incs.Async
         {
             var Timer = Task.Delay(TimeOut);
             var Result = await Task.WhenAny(task, Timer);
-            if (Result.Id == Timer.Id)
-                throw new Exception("Task Time Out!");
-            return task.Result;
+            return Result.Id == Timer.Id ? throw new Exception("Task Time Out!") : task.Result;
         }
     }
 }

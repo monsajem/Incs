@@ -1,13 +1,6 @@
-﻿using System;
-using System.IO;
-using System.Linq.Expressions;
-using Monsajem_Incs.Collection;
+﻿using Monsajem_Incs.Database.KeyValue.WebStorageBased;
 using Monsajem_Incs.Serialization;
-using Monsajem_Incs.Database.Base;
-using Monsajem_Incs.DynamicAssembly;
-using System.Threading.Tasks;
 using WebAssembly.Browser.DOM;
-using Monsajem_Incs.Database.KeyValue.WebStorageBased;
 
 namespace Monsajem_Incs.Database.Register
 {
@@ -32,7 +25,7 @@ namespace Monsajem_Incs.Database.Register
 
         protected override void SaveData(ValueType Data)
         {
-            WebStorage.SetItem(Key,MyUTF.GetString(Data.Serialize()));
+            WebStorage.SetItem(Key, MyUTF.GetString(Data.Serialize()));
         }
     }
 }

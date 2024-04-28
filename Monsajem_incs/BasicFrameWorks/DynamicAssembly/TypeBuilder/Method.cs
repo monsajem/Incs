@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Linq;
 
 namespace Monsajem_Incs.DynamicAssembly
 {
@@ -14,8 +14,7 @@ namespace Monsajem_Incs.DynamicAssembly
             Type Ouput,
             Action<ILGenerator> ILGenerator)
         {
-            if (Inputs == null)
-                Inputs = Type.EmptyTypes;
+            Inputs ??= Type.EmptyTypes;
             MethodBuilder MethodBuilder =
                     myTypeBuilder.DefineMethod(Name,
                                                Attributes,

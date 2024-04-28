@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace Monsajem_Incs.Collection
 {
     public class UnsafeCollector<t>
     {
         private List<(t Value, t[] Values, int From, int Len)> Collects =
-            new List<(t Value, t[] Values, int From, int Len)>();
+            [];
         private int Len;
 
         public int Length { get => Len; }
@@ -24,13 +20,13 @@ namespace Monsajem_Incs.Collection
         public void Write(t Value)
         {
             Collects.Add((Value, null, 0, 1));
-            this.Len += 1;
+            Len += 1;
         }
 
         public void WriteByte(t Value)
         {
             Collects.Add((Value, null, 0, 1));
-            this.Len += 1;
+            Len += 1;
         }
 
         public t[] ToArray()
@@ -52,7 +48,7 @@ namespace Monsajem_Incs.Collection
                 if (Values.Values == null)
                     Result[Pos] = Values.Value;
                 else
-                   System.Array.Copy(Values.Values, Values.From, Result, Pos, BytesLen);
+                    System.Array.Copy(Values.Values, Values.From, Result, Pos, BytesLen);
                 Pos += BytesLen;
             }
             //this.Collects.Clear();

@@ -1,13 +1,6 @@
-﻿using Monsajem_Incs.Collection.Array.ArrayBased.DynamicSize;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.IO;
-using System.Linq;
-using System.Reflection;
 using System.Runtime.CompilerServices;
-using static Monsajem_Incs.Collection.Array.Extentions;
-using static System.Runtime.Serialization.FormatterServices;
-using static System.Text.Encoding;
 
 namespace Monsajem_Incs.Serialization
 {
@@ -20,11 +13,13 @@ namespace Monsajem_Incs.Serialization
     {
         [NonSerialized]
         private byte[] _Cache;
-        public byte[] Cache {
-            [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        public byte[] Cache
+        {
+            [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
             get => _Cache;
-            [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
-            set => _Cache = value; }
+            [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
+            set => _Cache = value;
+        }
         public bool IsReady => true;
     }
 
@@ -49,23 +44,19 @@ namespace Monsajem_Incs.Serialization
         /// </summary>
         public byte[] Cache
         {
-            [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
             get
             {
                 if (Data == null)
                     return null;
 
-                lock(Data)
+                lock (Data)
                 {
                     var Position = GUID.BinarySearch(MyGUID).Index;
-                    if (Position > -1)
-                    {
-                        return Data[Position];
-                    }
-                    return null;
+                    return Position > -1 ? Data[Position] : null;
                 }
             }
-            [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
             set
             {
                 if (Data == null)
@@ -96,13 +87,12 @@ namespace Monsajem_Incs.Serialization
 
         public bool IsReady
         {
-            [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
             get
             {
                 if (Data != null)
                 {
-                    if (MyGUID == null)
-                        MyGUID = Guid.NewGuid().ToString();
+                    MyGUID ??= Guid.NewGuid().ToString();
                     return true;
                 }
                 else
@@ -110,7 +100,7 @@ namespace Monsajem_Incs.Serialization
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         void IDisposable.Dispose()
         {
             var Position = GUID.BinarySearch(MyGUID).Index;

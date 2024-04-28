@@ -1,16 +1,9 @@
-﻿using System;
-using static MonsajemData.DataBase;
-using MonsajemData;
-using Monsajem_Incs.Database.Base;
-using Monsajem_Incs.Database.KeyValue;
-using Monsajem_Incs.Resources;
+﻿using Monsajem_Incs.Net.Base.Service;
 using Monsajem_Incs.Net.Web;
-using Monsajem_Incs.Net.Base.Service;
-using WebAssembly.Browser.DOM;
-using System.Reflection;
-using System.Threading.Tasks;
-using static WASM_Global.Publisher;
 using Monsajem_Incs.UserControler;
+using MonsajemData;
+using System;
+using System.Threading.Tasks;
 
 namespace Monsajem_Incs.WasmClient
 {
@@ -19,26 +12,26 @@ namespace Monsajem_Incs.WasmClient
         public static string Service_IpAddress;
         public static int Service_Port;
         public static bool ShowMessages = true;
-        internal static Client Server = new Client();
+        internal static Client Server = new();
 
         public static async Task Connect(
              int Port,
              string Ip,
              Func<IAsyncOprations, Task> Ac)
-          {
-              //try
-              //{
-              if (Service_IpAddress == null)
-                  throw new Exception("server ip address is empty");
-              if(Service_Port == 0)
-                  throw new Exception("server Port address is empty");
-              if (ShowMessages)
+        {
+            //try
+            //{
+            if (Service_IpAddress == null)
+                throw new Exception("server ip address is empty");
+            if (Service_Port == 0)
+                throw new Exception("server Port address is empty");
+            if (ShowMessages)
                 Publish.ShowAction("در حال اتصال");
-              await Server.Connect(new EndPoint()
-              {
-                  IpAddress = Service_IpAddress,
-                  Port = Service_Port
-              }, Ac);
+            await Server.Connect(new EndPoint()
+            {
+                IpAddress = Service_IpAddress,
+                Port = Service_Port
+            }, Ac);
             //}
             //catch (Exception ex)
             //{
@@ -55,7 +48,7 @@ namespace Monsajem_Incs.WasmClient
             Func<IAsyncOprations, Task> Ac) =>
             await Connect(Service_Port, Service_IpAddress, Ac);
 
-        public static Func<IAsyncOprations, Task> BaseLogin=async (c)=> { };
+        public static Func<IAsyncOprations, Task> BaseLogin = async (c) => { };
 
         public static async Task LoginCheck()
         {
@@ -64,7 +57,7 @@ namespace Monsajem_Incs.WasmClient
                 await BaseLogin?.Invoke(rq);
                 if (ShowMessages)
                     Publish.ShowAction("در حال انجام عملیات");
-                await rq.RunOnOtherSide(()=> { });
+                await rq.RunOnOtherSide(() => { });
             });
             if (ShowMessages)
                 Publish.HideAction();
@@ -79,13 +72,13 @@ namespace Monsajem_Incs.WasmClient
         {
             await Connect(async (rq) =>
             {
-                 await BaseLogin?.Invoke(rq);
-                 if(ShowMessages)
-                 Publish.ShowAction("در حال انجام عملیات");
-                 await rq.RunOnOtherSide(Ac);
+                await BaseLogin?.Invoke(rq);
+                if (ShowMessages)
+                    Publish.ShowAction("در حال انجام عملیات");
+                await rq.RunOnOtherSide(Ac);
             });
-            if(ShowMessages)
-            Publish.HideAction();
+            if (ShowMessages)
+                Publish.HideAction();
         }
         public static async Task Remote<UserType>(Action<UserType> Ac)
             where UserType : User<UserType>
@@ -94,7 +87,7 @@ namespace Monsajem_Incs.WasmClient
             {
                 await BaseLogin?.Invoke(rq);
                 if (ShowMessages)
-                Publish.ShowAction("در حال انجام عملیات");
+                    Publish.ShowAction("در حال انجام عملیات");
                 await rq.RunOnOtherSide(Ac);
             });
             if (ShowMessages)
@@ -102,7 +95,7 @@ namespace Monsajem_Incs.WasmClient
         }
         public static async Task<t> Remote<t>(Func<t> Ac)
         {
-            t Result=default;
+            t Result = default;
             await Connect(async (rq) =>
             {
                 await BaseLogin?.Invoke(rq);
@@ -112,10 +105,10 @@ namespace Monsajem_Incs.WasmClient
             });
             return Result;
         }
-        public static async Task<t> Remote<t,UserType>(Func<UserType, t> Ac)
+        public static async Task<t> Remote<t, UserType>(Func<UserType, t> Ac)
             where UserType : User<UserType>
         {
-            t Result=default;
+            t Result = default;
             await Connect(async (rq) =>
             {
                 await BaseLogin?.Invoke(rq);
@@ -140,7 +133,7 @@ namespace Monsajem_Incs.WasmClient
                     Publish.ShowAction("در حال انجام عملیات");
                 await ClientSide(rq);
             });
-            if(ShowMessages)
+            if (ShowMessages)
                 Publish.HideAction();
         }
 
@@ -165,7 +158,7 @@ namespace Monsajem_Incs.WasmClient
         public static async Task Remote<UserType>(
             Action<ISyncOprations, UserType> ServerSide,
             Func<IAsyncOprations, Task> ClientSide)
-            where UserType:User<UserType>
+            where UserType : User<UserType>
         {
             await Connect(async (rq) =>
             {

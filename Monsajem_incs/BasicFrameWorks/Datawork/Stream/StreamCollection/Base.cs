@@ -1,32 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using Monsajem_Incs.Database.Base;
-using Monsajem_Incs.Serialization;
-using Monsajem_Incs.Database;
-using Monsajem_Incs.Collection.Array.TreeBased;
+﻿using Monsajem_Incs.Serialization;
+using System;
 
 namespace Monsajem_Incs.Collection
 {
 
-    public partial class StreamCollection<ValueType>:
+    public partial class StreamCollection<ValueType> :
         Array.Base.IArray<ValueType, StreamCollection<ValueType>>,
         ISerializable<StreamCollection>
-    { 
+    {
         public StreamCollection Collection;
-        
+
         public StreamCollection(System.IO.Stream Stream, int MinCount = 5000)
         {
-            Collection = new StreamCollection(Stream,MinCount);
+            Collection = new StreamCollection(Stream, MinCount);
         }
 
-        public override ValueType this[int Pos] { 
-            get =>Collection[Pos].Deserialize<ValueType>(); 
-            set =>Collection[Pos]=value.Serialize(); }
+        public override ValueType this[int Pos]
+        {
+            get => Collection[Pos].Deserialize<ValueType>();
+            set => Collection[Pos] = value.Serialize();
+        }
 
-        public override object MyOptions { get =>null; set { } }
+        public override object MyOptions { get => null; set { } }
 
         public override void DeleteByPosition(int Position) =>
             Collection.DeleteByPosition(Position);
@@ -41,7 +36,7 @@ namespace Monsajem_Incs.Collection
 
         public void SetData(StreamCollection Data)
         {
-            this.Collection = Data;
+            Collection = Data;
         }
 
         public override int Length { get => Collection.Length; protected set { } }

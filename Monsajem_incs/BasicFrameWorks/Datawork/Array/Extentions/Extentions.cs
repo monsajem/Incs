@@ -2,8 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Monsajem_Incs.Collection.Array
 {
@@ -58,7 +56,7 @@ namespace Monsajem_Incs.Collection.Array
                 return;
             }
             System.Array.Copy(ar, 0, ar, 0, Position);
-            System.Array.Copy(ar, Position + 1, ar, Position, (ar.Length - Position) - 1);
+            System.Array.Copy(ar, Position + 1, ar, Position, ar.Length - Position - 1);
             System.Array.Resize(ref ar, ar.Length - 1);
         }
 
@@ -66,14 +64,14 @@ namespace Monsajem_Incs.Collection.Array
         {
             System.Array.Resize(ref ar, from);
         }
-        public static void DeleteFromTo<t>(ref t[] ar, int from,int To)
+        public static void DeleteFromTo<t>(ref t[] ar, int from, int To)
         {
-            System.Array.Copy(ar, To+1, ar, from, ar.Length-(To + 1));
+            System.Array.Copy(ar, To + 1, ar, from, ar.Length - (To + 1));
             System.Array.Resize(ref ar, ar.Length - (To - from + 1));
         }
         public static void DeleteTo<t>(ref t[] ar, int To)
         {
-            System.Array.Copy(ar, To+1, ar, 0, ar.Length - (To + 1));
+            System.Array.Copy(ar, To + 1, ar, 0, ar.Length - (To + 1));
             System.Array.Resize(ref ar, ar.Length - (To + 1));
         }
 
@@ -95,7 +93,7 @@ namespace Monsajem_Incs.Collection.Array
             DeleteTo(ref ar, to);
             return Result;
         }
-        public static t[] PopFromTo<t>(ref t[] ar,int From,int To)
+        public static t[] PopFromTo<t>(ref t[] ar, int From, int To)
         {
             var Result = ar.From(From).To(To);
             DeleteFromTo(ref ar, From, To);
@@ -105,13 +103,13 @@ namespace Monsajem_Incs.Collection.Array
         public static int BinaryDelete<t>(ref t[] ar, t Value)
         {
             var Place = System.Array.BinarySearch(ar, Value);
-            if(Place >= 0)
+            if (Place >= 0)
             {
-                DeleteByPosition(ref ar,Place);
+                DeleteByPosition(ref ar, Place);
             }
             return Place;
         }
-        public static int BinaryDelete<t>(ref t[] ar, t Value,IComparer comparer)
+        public static int BinaryDelete<t>(ref t[] ar, t Value, IComparer comparer)
         {
             var Place = System.Array.BinarySearch(ar, Value, comparer);
             if (Place >= 0)
@@ -133,17 +131,17 @@ namespace Monsajem_Incs.Collection.Array
         public static void BinaryDelete<t>(ref t[] ar, IEnumerable<t> Values)
         {
             foreach (var Value in Values)
-                BinaryDelete(ref ar, Value);
+                _ = BinaryDelete(ref ar, Value);
         }
-        public static void BinaryDelete<t>(ref t[] ar,IComparer comparer, IEnumerable<t> Values)
+        public static void BinaryDelete<t>(ref t[] ar, IComparer comparer, IEnumerable<t> Values)
         {
             foreach (var Value in Values)
-                BinaryDelete(ref ar, Value,comparer);
+                _ = BinaryDelete(ref ar, Value, comparer);
         }
-        public static void BinaryDelete<t>(ref t[] ar,IComparer<t> comparer, IEnumerable<t> Values)
+        public static void BinaryDelete<t>(ref t[] ar, IComparer<t> comparer, IEnumerable<t> Values)
         {
             foreach (var Value in Values)
-                BinaryDelete(ref ar, Value,comparer);
+                _ = BinaryDelete(ref ar, Value, comparer);
         }
 
         public static int BinaryInsert<t>(ref t[] ar, t Value)
@@ -172,51 +170,51 @@ namespace Monsajem_Incs.Collection.Array
         }
 
 
-        public static void BinaryInsert<t>(ref t[] ar,params t[] Values)
-        {
-            for (int i=0;i<Values.Length;i++)
-            {
-                BinaryInsert(ref ar, Values[i]);
-            }
-        }
-        public static void BinaryInsert<t>(ref t[] ar,IComparer comparer , params t[] Values)
+        public static void BinaryInsert<t>(ref t[] ar, params t[] Values)
         {
             for (int i = 0; i < Values.Length; i++)
             {
-                BinaryInsert(ref ar, Values[i],comparer);
+                _ = BinaryInsert(ref ar, Values[i]);
             }
         }
-        public static void BinaryInsert<t>(ref t[] ar,IComparer<t> comparer, params t[] Values)
+        public static void BinaryInsert<t>(ref t[] ar, IComparer comparer, params t[] Values)
         {
             for (int i = 0; i < Values.Length; i++)
             {
-                BinaryInsert(ref ar, Values[i],comparer);
+                _ = BinaryInsert(ref ar, Values[i], comparer);
+            }
+        }
+        public static void BinaryInsert<t>(ref t[] ar, IComparer<t> comparer, params t[] Values)
+        {
+            for (int i = 0; i < Values.Length; i++)
+            {
+                _ = BinaryInsert(ref ar, Values[i], comparer);
             }
         }
 
         public static void BinaryInsert<t>(ref t[] ar, IEnumerable<t> Values)
         {
-            foreach(var Value in Values)
+            foreach (var Value in Values)
             {
-                BinaryInsert(ref ar, Value);
+                _ = BinaryInsert(ref ar, Value);
             }
         }
-        public static void BinaryInsert<t>(ref t[] ar,IComparer comparer, IEnumerable<t> Values)
+        public static void BinaryInsert<t>(ref t[] ar, IComparer comparer, IEnumerable<t> Values)
         {
             foreach (var Value in Values)
             {
-                BinaryInsert(ref ar, Value,comparer);
+                _ = BinaryInsert(ref ar, Value, comparer);
             }
         }
-        public static void BinaryInsert<t>(ref t[] ar,IComparer<t> comparer, IEnumerable<t> Values)
+        public static void BinaryInsert<t>(ref t[] ar, IComparer<t> comparer, IEnumerable<t> Values)
         {
             foreach (var Value in Values)
             {
-                BinaryInsert(ref ar, Value,comparer);
+                _ = BinaryInsert(ref ar, Value, comparer);
             }
         }
 
-        public static (int OldPlace, int NewPlace) BinaryUpdate<t>(t[] ar, t OldValue, t NewValue)=>
+        public static (int OldPlace, int NewPlace) BinaryUpdate<t>(t[] ar, t OldValue, t NewValue) =>
             BinaryUpdate(ar, OldValue, NewValue,
                 System.Array.BinarySearch(ar, OldValue),
                 System.Array.BinarySearch(ar, NewValue));
@@ -227,7 +225,7 @@ namespace Monsajem_Incs.Collection.Array
                 System.Array.BinarySearch(ar, OldValue, Comparer),
                 System.Array.BinarySearch(ar, NewValue, Comparer));
 
-        private static (int OldPlace, int NewPlace) 
+        private static (int OldPlace, int NewPlace)
             BinaryUpdate<t>(t[] ar, t OldValue, t NewValue, int OldPlace, int NewPlace)
         {
             if (NewPlace < 0)
@@ -255,7 +253,7 @@ namespace Monsajem_Incs.Collection.Array
             ar[ar.Length - 1] = Value;
         }
 
-        public static void Insert<t>(ref t[] ar,params t[] Values)
+        public static void Insert<t>(ref t[] ar, params t[] Values)
         {
             var From = ar.Length;
             System.Array.Resize(ref ar, ar.Length + Values.Length);
@@ -269,20 +267,20 @@ namespace Monsajem_Incs.Collection.Array
             var i = From;
             Count = ar.Length;
             var Reader = Values.GetEnumerator();
-            Reader.MoveNext();
-            while(i<Count)
+            _ = Reader.MoveNext();
+            while (i < Count)
             {
                 ar[i] = Reader.Current;
-                Reader.MoveNext();
+                _ = Reader.MoveNext();
                 i++;
             }
             Reader.Dispose();
         }
-        public static void Insert<t>(ref t[] ar, t[] Values,int From)
+        public static void Insert<t>(ref t[] ar, t[] Values, int From)
         {
             var ArLen = ar.Length;
             System.Array.Resize(ref ar, ar.Length + Values.Length);
-            System.Array.Copy(ar, From, ar, ArLen+1, ArLen - From);
+            System.Array.Copy(ar, From, ar, ArLen + 1, ArLen - From);
             System.Array.Copy(Values, 0, ar, From, Values.Length);
         }
         public static void Insert<t>(ref t[] ar, IEnumerable<t> Values, int From)
@@ -290,15 +288,15 @@ namespace Monsajem_Incs.Collection.Array
             var ArLen = ar.Length;
             var Count = Values.Count();
             System.Array.Resize(ref ar, ar.Length + Count);
-            System.Array.Copy(ar, From, ar, ArLen+1, ArLen - From);
+            System.Array.Copy(ar, From, ar, ArLen + 1, ArLen - From);
             var i = From;
             Count = ar.Length;
             var Reader = Values.GetEnumerator();
-            Reader.MoveNext();
+            _ = Reader.MoveNext();
             while (i < Count)
             {
                 ar[i] = Reader.Current;
-                Reader.MoveNext();
+                _ = Reader.MoveNext();
                 i++;
             }
             Reader.Dispose();
@@ -321,11 +319,11 @@ namespace Monsajem_Incs.Collection.Array
         {
             if (From < To)
             {
-                System.Array.Copy(ar, From + 1, ar, From, (To - From));
+                System.Array.Copy(ar, From + 1, ar, From, To - From);
             }
             else if (From > To)
             {
-                System.Array.Copy(ar, To, ar, To + 1, (From - To));
+                System.Array.Copy(ar, To, ar, To + 1, From - To);
             }
             ar[To] = Value;
         }
@@ -334,11 +332,11 @@ namespace Monsajem_Incs.Collection.Array
             var Value = ar[From];
             if (From < To)
             {
-                System.Array.Copy(ar, From + 1, ar, From, (To - From));
+                System.Array.Copy(ar, From + 1, ar, From, To - From);
             }
             else if (From > To)
             {
-                System.Array.Copy(ar, To, ar, To + 1, (From - To));
+                System.Array.Copy(ar, To, ar, To + 1, From - To);
             }
             ar[To] = Value;
         }
@@ -360,17 +358,17 @@ namespace Monsajem_Incs.Collection.Array
 
         public static void shiftEnd<t>(t[] ar, int From, int To, int Len)
         {
-            System.Array.Copy(ar, From, ar, From + Len, ((To - From) + 1) - Len);
+            System.Array.Copy(ar, From, ar, From + Len, To - From + 1 - Len);
         }
         public static void shiftBegin<t>(t[] ar, int From, int To, int Len)
         {
-            System.Array.Copy(ar, From + Len, ar, From, ((To-From)+1) - Len);
+            System.Array.Copy(ar, From + Len, ar, From, To - From + 1 - Len);
         }
 
         public static void shiftRollEnd<t>(t[] ar, int From, int To, int Len)
         {
             var Roll = shiftExtraEnd(ar, From, To, Len);
-            To = To + 1 - Len;
+            _ = To + 1 - Len;
             System.Array.Copy(Roll, 0, ar, From, Len);
         }
         public static void shiftRollBegin<t>(t[] ar, int From, int To, int Len)

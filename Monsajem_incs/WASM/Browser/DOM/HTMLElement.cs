@@ -1,7 +1,4 @@
-﻿using System;
-using System.Runtime.InteropServices.JavaScript;
-using Microsoft.JSInterop.Implementation;
-using Microsoft.JSInterop;
+﻿using Microsoft.JSInterop;
 using System.Linq;
 using WebAssembly.Browser.MonsajemDomHelpers;
 
@@ -12,7 +9,7 @@ namespace WebAssembly.Browser.DOM
     public class HTMLElement : Element, IHTMLElement
     {
         //internal HTMLElement(IJSInProcessObjectReference handle) : base(handle) { }
-        internal HTMLElement(IJSInProcessObjectReference jsObject) : base(jsObject) {}
+        internal HTMLElement(IJSInProcessObjectReference jsObject) : base(jsObject) { }
 
         //public HTMLElement() { }
         [Export("accessKey")]
@@ -402,36 +399,36 @@ namespace WebAssembly.Browser.DOM
             var HScripts = IDoc.Head.GetElementsByTagName("script").ToArray();
             var BScripts = IDoc.Body.GetElementsByTagName("script").ToArray();
             var inner = IDoc.Head.FirstElementChild;
-            while(inner != null)
+            while (inner != null)
             {
                 var next = inner.NextElementSibling;
-                js.Document.Head.AppendChild(inner);
+                _ = js.Document.Head.AppendChild(inner);
                 inner = next;
             }
             inner = IDoc.Body.FirstElementChild;
-            while(inner != null)
+            while (inner != null)
             {
                 var next = inner.NextElementSibling;
-                this.AppendChild(inner);
+                _ = AppendChild(inner);
                 inner = next;
             }
-            foreach(var Script in HScripts)
+            foreach (var Script in HScripts)
             {
                 var NewScript = js.Document.CreateElement("script");
                 NewScript.InnerHtml = Script.InnerHtml;
                 var Src = Script.GetAttribute("src");
                 if (Src != null)
                     NewScript.SetAttribute("src", Src);
-                Script.ParentElement.ReplaceChild(NewScript, Script);
+                _ = Script.ParentElement.ReplaceChild(NewScript, Script);
             }
-            foreach(var Script in BScripts)
+            foreach (var Script in BScripts)
             {
                 var Src = Script.GetAttribute("src");
                 var NewScript = js.Document.CreateElement("script");
                 NewScript.InnerHtml = Script.InnerHtml;
-                if(Src != null)
-                    NewScript.SetAttribute("src",Src);
-                Script.ParentElement.ReplaceChild(NewScript, Script);
+                if (Src != null)
+                    NewScript.SetAttribute("src", Src);
+                _ = Script.ParentElement.ReplaceChild(NewScript, Script);
             }
         }
 
@@ -447,25 +444,25 @@ namespace WebAssembly.Browser.DOM
 
         public void ReplaceChilds(string Items)
         {
-            this.InnerHtml = "";
-            this.AppendChild(Items);
+            InnerHtml = "";
+            AppendChild(Items);
         }
 
         public void ReplaceChilds(HTMLElement Item)
         {
-            this.InnerHtml = "";
-            this.AppendChild(Item);
+            InnerHtml = "";
+            _ = AppendChild(Item);
         }
 
         [Export("blur")]
         public void Blur()
         {
-            InvokeMethod<object>("blur");
+            _ = InvokeMethod<object>("blur");
         }
         [Export("click")]
         public void Click()
         {
-            InvokeMethod<object>("click");
+            _ = InvokeMethod<object>("click");
         }
         [Export("dragDrop")]
         public bool DragDrop()
@@ -475,7 +472,7 @@ namespace WebAssembly.Browser.DOM
         [Export("focus")]
         public void Focus()
         {
-            InvokeMethod<object>("focus");
+            _ = InvokeMethod<object>("focus");
         }
         //[Export("msGetInputContext")]
         //public MSInputMethodContext MsGetInputContext()

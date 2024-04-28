@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
+﻿using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
@@ -16,22 +15,22 @@ namespace WebAssembly.Browser.DOM
         [Export("appendData")]
         public void AppendData(string arg)
         {
-            InvokeMethod<object>("appendData", arg);
+            _ = InvokeMethod<object>("appendData", arg);
         }
         [Export("deleteData")]
         public void DeleteData(double offset, double count)
         {
-            InvokeMethod<object>("deleteData", offset, count);
+            _ = InvokeMethod<object>("deleteData", offset, count);
         }
         [Export("insertData")]
         public void InsertData(double offset, string arg)
         {
-            InvokeMethod<object>("insertData", offset, arg);
+            _ = InvokeMethod<object>("insertData", offset, arg);
         }
         [Export("replaceData")]
         public void ReplaceData(double offset, double count, string arg)
         {
-            InvokeMethod<object>("replaceData", offset, count, arg);
+            _ = InvokeMethod<object>("replaceData", offset, count, arg);
         }
         [Export("substringData")]
         public string SubstringData(double offset, double count)
@@ -41,7 +40,7 @@ namespace WebAssembly.Browser.DOM
         [Export("remove")]
         public void Remove()
         {
-            InvokeMethod<object>("remove");
+            _ = InvokeMethod<object>("remove");
         }
     }
 }

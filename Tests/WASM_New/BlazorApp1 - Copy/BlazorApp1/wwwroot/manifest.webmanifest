@@ -1,0 +1,27 @@
+﻿{
+  "background_color": "purple",
+  "description": "زعفران",
+  "display": "standalone",
+  "icons": [
+    {
+        "src": "favicon.ico",
+        "sizes": "128x128",
+        "type": "image/ico"
+    },
+
+    {
+        "src": "favicon_16x16.ico",
+        "sizes": "16x16",
+        "type": "image/ico"
+    },
+
+    {
+        "src": "favicon_32x32.ico",
+        "sizes": "32x32",
+        "type": "image/ico"
+    }
+  ],
+  "name": "Awesome fox pictures",
+  "short_name": "Saffron sadeghi",
+  "start_url": "/index.html"
+}

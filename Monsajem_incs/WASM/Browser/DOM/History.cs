@@ -1,5 +1,5 @@
-﻿using System;
-using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
+﻿using Microsoft.JSInterop;
+using System;
 
 namespace WebAssembly.Browser.DOM
 {
@@ -19,27 +19,27 @@ namespace WebAssembly.Browser.DOM
         [Export("back")]
         public void Back()
         {
-            InvokeMethod<object>("back");
+            _ = InvokeMethod<object>("back");
         }
         [Export("forward")]
         public void Forward()
         {
-            InvokeMethod<object>("forward");
+            _ = InvokeMethod<object>("forward");
         }
         [Export("go")]
         public void Go(double delta)
         {
-            InvokeMethod<object>("go", delta);
+            _ = InvokeMethod<object>("go", delta);
         }
         [Export("pushState")]
         public void PushState(Object data, string title, string url)
         {
-            InvokeMethod<object>("pushState", data, title, url);
+            _ = InvokeMethod<object>("pushState", data, title, url);
         }
         [Export("replaceState")]
         public void ReplaceState(Object data, string title, string url)
         {
-            InvokeMethod<object>("replaceState", data, title, url);
+            _ = InvokeMethod<object>("replaceState", data, title, url);
         }
     }
 

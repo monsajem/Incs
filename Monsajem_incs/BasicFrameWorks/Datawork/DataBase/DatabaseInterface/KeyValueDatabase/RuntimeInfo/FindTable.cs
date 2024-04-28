@@ -1,43 +1,39 @@
-﻿using Monsajem_Incs.Net.Base.Service;
+﻿using Monsajem_Incs.Convertors;
+using Monsajem_Incs.Net.Base.Service;
+using Monsajem_Incs.Views.Maker.Database;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using WebAssembly.Browser.DOM;
-using Monsajem_Incs.Views.Maker.Database;
 using static Monsajem_Incs.WasmClient.Network;
-using Monsajem_Incs.Convertors;
 
 namespace Monsajem_Incs.Database.Base
 {
     public class TableFinder
     {
-        private static HashSet<TableInfo> Tables = new HashSet<TableInfo>();
+        private static HashSet<TableInfo> Tables = [];
 
         public static void AddTable<ValueType, KeyType>(Table<ValueType, KeyType> Table)
             where KeyType : IComparable<KeyType>
         {
             var TableInfo = new TableInfo<KeyType, ValueType>() { TableName = Table.TableName, Table = Table };
-            if (Tables.Contains(TableInfo) == true)
-                throw new Exception($"Table with name '{Table.TableName}' is exist at TableFinder.");
-            else
-                Tables.Add(TableInfo);
+            _ = Tables.Contains(TableInfo) == true
+                ? throw new Exception($"Table with name '{Table.TableName}' is exist at TableFinder.")
+                : Tables.Add(TableInfo);
         }
         public static TableInfo FindTable(string TableName)
         {
             var TableInfo = new TableInfo() { TableName = TableName };
-            if (Tables.TryGetValue(TableInfo, out TableInfo) == false)
-                throw new Exception($"Table with name '{TableName}' is not found at TableFinder.");
-            else
-                return TableInfo;
+            return Tables.TryGetValue(TableInfo, out TableInfo) == false
+                ? throw new Exception($"Table with name '{TableName}' is not found at TableFinder.")
+                : TableInfo;
         }
         public static TableInfo<KeyType, ValueType> FindTable<ValueType, KeyType>(string TableName)
             where KeyType : IComparable<KeyType>
             => FindTable(TableName) as TableInfo<KeyType, ValueType>;
 
         public static TableInfo<KeyType, ValueType> FindTable<ValueType, KeyType>(
-            Table<ValueType,KeyType> SampleType, string TableName)
+            Table<ValueType, KeyType> SampleType, string TableName)
             where KeyType : IComparable<KeyType>
             => FindTable(TableName) as TableInfo<KeyType, ValueType>;
 
@@ -46,37 +42,37 @@ namespace Monsajem_Incs.Database.Base
             public string TableName;
             public object Table;
 
-            private HashSet<RelationInfo> Relations = new HashSet<RelationInfo>();
+            private HashSet<RelationInfo> Relations = [];
 
-            public Func<object, object> SelectorItems { get;protected set; }
+            public Func<object, object> SelectorItems { get; protected set; }
 
             public void AddRelation<HolderKeyType, HolderValueType, RelationKeyType, RelationValueType>(
-                Table<HolderValueType,HolderKeyType> Holder,
-                Table<HolderValueType, HolderKeyType>.RelationTableInfo<RelationValueType,RelationKeyType> Relation)
+                Table<HolderValueType, HolderKeyType> Holder,
+                Table<HolderValueType, HolderKeyType>.RelationTableInfo<RelationValueType, RelationKeyType> Relation)
                 where HolderKeyType : IComparable<HolderKeyType>
                 where RelationKeyType : IComparable<RelationKeyType>
             {
-                var RelationInfo = new RelationInfo<HolderKeyType,HolderValueType, RelationKeyType, RelationValueType>()
-                { RelationName = Relation.Field.Field.Name,
-                  Holder = Holder,
-                  Relation = Relation};
-                if (Relations.Contains(RelationInfo) == true)
-                    throw new Exception($"Relation with name '{Relation.Field.Field.Name}' is exist at '{TableName}' of TableFinder.");
-                else
-                    Relations.Add(RelationInfo);
+                var RelationInfo = new RelationInfo<HolderKeyType, HolderValueType, RelationKeyType, RelationValueType>()
+                {
+                    RelationName = Relation.Field.Field.Name,
+                    Holder = Holder,
+                    Relation = Relation
+                };
+                _ = Relations.Contains(RelationInfo) == true
+                    ? throw new Exception($"Relation with name '{Relation.Field.Field.Name}' is exist at '{TableName}' of TableFinder.")
+                    : Relations.Add(RelationInfo);
             }
             public RelationInfo FindRelation(string RelationName)
             {
                 var RelationInfo = new RelationInfo() { RelationName = RelationName };
-                if (Relations.TryGetValue(RelationInfo, out RelationInfo) == false)
-                    throw new Exception($"Relation with name '{RelationName}' is not found at '{TableName}' of TableFinder.");
-                else
-                    return RelationInfo;
+                return Relations.TryGetValue(RelationInfo, out RelationInfo) == false
+                    ? throw new Exception($"Relation with name '{RelationName}' is not found at '{TableName}' of TableFinder.")
+                    : RelationInfo;
             }
 
-            public virtual string ConvertKeyToString(object Key)=>
+            public virtual string ConvertKeyToString(object Key) =>
                 throw new Exception("ConvertKeyToString not implemented in table finder!");
-            public virtual object ConvertStringToKey(string Key)=>
+            public virtual object ConvertStringToKey(string Key) =>
                 throw new Exception("ConvertKeyToString not implemented in table finder!");
             public virtual void Insert(object Data) =>
                 throw new Exception("SyncInsert not implemented in table finder!");
@@ -120,7 +116,7 @@ namespace Monsajem_Incs.Database.Base
             public HTMLElement MakeEditView(
                     string Key,
                     Action Done = null) =>
-                MakeEditView(ConvertStringToKey(Key),Done);
+                MakeEditView(ConvertStringToKey(Key), Done);
 
             public bool Equals(TableInfo other)
             {
@@ -142,12 +138,13 @@ namespace Monsajem_Incs.Database.Base
             }
 
             private new Table<ValueType, KeyType> Table
-            { get =>(Table < ValueType, KeyType >) base.Table; }
+            { get => (Table<ValueType, KeyType>)base.Table; }
 
-            public new Func<(IEnumerable<ValueType> Values,string Query),IEnumerable<ValueType>> 
-                SelectorItems {
+            public new Func<(IEnumerable<ValueType> Values, string Query), IEnumerable<ValueType>>
+                SelectorItems
+            {
 
-                get => (c) =>(IEnumerable<ValueType>) base.SelectorItems(c);
+                get => (c) => (IEnumerable<ValueType>)base.SelectorItems(c);
                 set => base.SelectorItems = (c) => value(((IEnumerable<ValueType> Values, string Query))c);
             }
 
@@ -157,19 +154,20 @@ namespace Monsajem_Incs.Database.Base
             public override object ConvertStringToKey(string Key) =>
                 Key.ConvertFromString<KeyType>();
 
-            public override void Insert(object Value)=>
+            public override void Insert(object Value) =>
                 Table.Insert((ValueType)Value);
-            
 
-            public override void Update(object Key, object Value)=>
+
+            public override void Update(object Key, object Value) =>
                 Table.Update((KeyType)Key,
-                            (c)=>{
-                                var NewValue =(ValueType) Value;
+                            (c) =>
+                            {
+                                var NewValue = (ValueType)Value;
                                 Table.MoveRelations?.Invoke(c, NewValue);
                                 return NewValue;
                             });
 
-            public override void Delete(object Key)=>
+            public override void Delete(object Key) =>
                 Table.Delete((KeyType)Key);
 
             public override async Task SendUpdate(IAsyncOprations Client)
@@ -178,7 +176,7 @@ namespace Monsajem_Incs.Database.Base
             }
             public override async Task GetUpdate(IAsyncOprations Client)
             {
-                await Client.GetUpdate(Table);
+                _ = await Client.GetUpdate(Table);
             }
 
             public async override Task SyncUpdate()
@@ -191,8 +189,8 @@ namespace Monsajem_Incs.Database.Base
                             },
                             async (c) =>
                             {
-                                await c.SendData(Table.TableName);
-                                await c.GetUpdate(Table);
+                                _ = await c.SendData(Table.TableName);
+                                _ = await c.GetUpdate(Table);
                             });
             }
 
@@ -202,7 +200,7 @@ namespace Monsajem_Incs.Database.Base
                 Action<(TableInfo TableInfo, object Key)> OnDelete = null)
             {
                 return Table.MakeShowView(
-                                    Query:Query,
+                                    Query: Query,
                                     OnUpdate: (c) => OnUpdate?.Invoke(c),
                                     OnDelete: (c) => OnDelete?.Invoke(c));
             }
@@ -214,8 +212,8 @@ namespace Monsajem_Incs.Database.Base
             {
                 return Table.MakeShowView(
                                 Key: (KeyType)Key,
-                                OnUpdate:(c)=> OnUpdate?.Invoke((c.TableInfo,c.Key)),
-                                OnDelete:(c) => OnDelete?.Invoke((c.TableInfo, c.Key)));
+                                OnUpdate: (c) => OnUpdate?.Invoke((c.TableInfo, c.Key)),
+                                OnDelete: (c) => OnDelete?.Invoke((c.TableInfo, c.Key)));
             }
 
             public override HTMLElement MakeEditView(
@@ -249,7 +247,7 @@ namespace Monsajem_Incs.Database.Base
             public virtual object GetRelationTableByKey(object HolderKey) =>
                 throw new Exception("Not impelemented.");
 
-            public virtual void Insert(object HolderKey , object Data) =>
+            public virtual void Insert(object HolderKey, object Data) =>
                 throw new Exception("SyncInsert not implemented in table finder!");
             public virtual void Delete(object HolderKey, object Key) =>
                 throw new Exception("SyncDelete not implemented in table finder!");
@@ -290,7 +288,7 @@ namespace Monsajem_Incs.Database.Base
                 Action<(TableInfo TableInfo, object Key)> OnUpdate = null,
                 Action<(TableInfo TableInfo, object Key)> OnDelete = null) =>
                     MakeShowView(ConvertStringToHolderKey(HolderKey),
-                                 ConvertStringToKey(Key),OnUpdate,OnDelete);
+                                 ConvertStringToKey(Key), OnUpdate, OnDelete);
 
             public HTMLElement MakeShowViewForItems(
                 string HolderKey,
@@ -298,12 +296,12 @@ namespace Monsajem_Incs.Database.Base
                 Action<(TableInfo TableInfo, object Key)> OnUpdate = null,
                 Action<(TableInfo TableInfo, object Key)> OnDelete = null) =>
                      MakeShowViewForItems(ConvertStringToHolderKey(HolderKey),
-                     Query,OnUpdate, OnDelete);
+                     Query, OnUpdate, OnDelete);
 
             public virtual HTMLElement MakeInsertView(
                 string HolderKey,
                 Action Done = null) =>
-                    MakeInsertView(ConvertStringToHolderKey(HolderKey),Done);
+                    MakeInsertView(ConvertStringToHolderKey(HolderKey), Done);
 
             public bool Equals(RelationInfo other)
             {
@@ -316,7 +314,7 @@ namespace Monsajem_Incs.Database.Base
             }
         }
 
-        public class RelationInfo<HolderKeyType,HolderValueType, RelationKeyType, RelationValueType> : RelationInfo
+        public class RelationInfo<HolderKeyType, HolderValueType, RelationKeyType, RelationValueType> : RelationInfo
             where HolderKeyType : IComparable<HolderKeyType>
             where RelationKeyType : IComparable<RelationKeyType>
         {
@@ -330,16 +328,16 @@ namespace Monsajem_Incs.Database.Base
             public override object ConvertStringToKey(string Key) => Key.ConvertFromString<RelationKeyType>();
             public override string ConvertHolderKeyToString(object Key) => ((HolderKeyType)Key).ConvertToString();
             public override object ConvertStringToHolderKey(string Key) => Key.ConvertFromString<HolderKeyType>();
-            public override void Insert(object HolderKey,object Value)=>
+            public override void Insert(object HolderKey, object Value) =>
                 GetterRealtionByKey((HolderKeyType)HolderKey).Insert((RelationValueType)Value);
 
             public override void Delete(object HolderKey, object Key) =>
                 GetterRealtionByKey((HolderKeyType)HolderKey).Delete((RelationKeyType)Key);
 
-            public override void Accept(object HolderKey, object Key)=>
+            public override void Accept(object HolderKey, object Key) =>
                 GetterRealtionByKey((HolderKeyType)HolderKey).Accept((RelationKeyType)Key);
 
-            public override void Ignore(object HolderKey, object Key)=>
+            public override void Ignore(object HolderKey, object Key) =>
                 GetterRealtionByKey((HolderKeyType)HolderKey).Ignore((RelationKeyType)Key);
 
             public override async Task SendUpdate(object HolderKey, IAsyncOprations Client)
@@ -351,7 +349,7 @@ namespace Monsajem_Incs.Database.Base
             public override async Task GetUpdate(object HolderKey, IAsyncOprations Client)
             {
                 var Table = GetterRealtionByKey((HolderKeyType)HolderKey);
-                await Client.GetUpdate(Table);
+                _ = await Client.GetUpdate(Table);
             }
 
             public override async Task SyncUpdate(object HolderKey)
@@ -369,22 +367,22 @@ namespace Monsajem_Incs.Database.Base
                         {
                             var HolderName = Holder.TableName;
                             var HolderKey = (HolderKeyType)PartTable.HolderTable.Key;
-                            await c.SendData((Holder.TableName,
+                            _ = await c.SendData((Holder.TableName,
                                               HolderKey,
                                               PartTable.TableName));
-                            await c.GetUpdate(PartTable);
+                            _ = await c.GetUpdate(PartTable);
                         });
             }
 
             public override HTMLElement MakeShowViewForItems(
                 object HolderKey,
-                string Query=null,
+                string Query = null,
                 Action<(TableInfo TableInfo, object Key)> OnUpdate = null,
                 Action<(TableInfo TableInfo, object Key)> OnDelete = null)
             {
                 var Table = GetterRealtionByKey((HolderKeyType)HolderKey);
                 return Table.MakeShowView(
-                               Query:Query,
+                               Query: Query,
                                OnUpdate: (c) => OnUpdate?.Invoke(c),
                                OnDelete: (c) => OnDelete?.Invoke(c));
             }
@@ -398,8 +396,8 @@ namespace Monsajem_Incs.Database.Base
                 var Table = GetterRealtionByKey((HolderKeyType)HolderKey);
                 return Table.MakeShowView(
                                 Key: (RelationKeyType)Key,
-                                OnUpdate:(c)=> OnUpdate?.Invoke((c.TableInfo,c.Key)),
-                                OnDelete:(c) => OnDelete?.Invoke((c.TableInfo, c.Key)));
+                                OnUpdate: (c) => OnUpdate?.Invoke((c.TableInfo, c.Key)),
+                                OnDelete: (c) => OnDelete?.Invoke((c.TableInfo, c.Key)));
             }
 
             public override HTMLElement MakeInsertView(object HolderKey, Action Done = null)

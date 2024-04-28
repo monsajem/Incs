@@ -1,19 +1,16 @@
-﻿using static Monsajem_Incs.Collection.Array.Extentions;
-using System.Threading.Tasks;
+﻿using Monsajem_Incs.Net.Base.Socket;
 using Monsajem_Incs.Net.Web.WebSocket.Server;
-using Monsajem_Incs.Net.Base.Socket;
-using System;
-using static Monsajem_Incs.Async.DelegateActions;
+using System.Threading.Tasks;
 
 namespace Monsajem_Incs.Net.Web
 {
-    public class Server:
+    public class Server :
         Base.Service.Server<int>
     {
-        public Server():base
+        public Server() : base
             (new ServerSocket())
         {
-            
+
         }
         private class WebSocket :
             Net.Base.Socket.ClientSocket<int>
@@ -25,7 +22,7 @@ namespace Monsajem_Incs.Net.Web
                     Recived(c);
                 };
                 this.Client = Client;
-                this.IsConnected = true;
+                IsConnected = true;
                 Client.StartMessageLoop();
             }
 

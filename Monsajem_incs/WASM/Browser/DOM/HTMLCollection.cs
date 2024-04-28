@@ -1,9 +1,8 @@
-﻿using System;
-using System.Runtime.CompilerServices;
+﻿using Microsoft.JSInterop;
+using System;
 using System.Collections;
 using System.Collections.Generic;
-
-using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
+using System.Runtime.CompilerServices;
 
 namespace WebAssembly.Browser.DOM
 {
@@ -52,11 +51,9 @@ namespace WebAssembly.Browser.DOM
             {
                 get
                 {
-                    if (this.htmlCollectionCollection == null)
-                    {
-                        throw new ObjectDisposedException("HTMLCollectionEnumerator is disposed");
-                    }
-                    return this.htmlCollectionCollection[this.htmlCollectionIndex];
+                    return htmlCollectionCollection == null
+                        ? throw new ObjectDisposedException("HTMLCollectionEnumerator is disposed")
+                        : htmlCollectionCollection[htmlCollectionIndex];
                 }
             }
 
@@ -64,7 +61,7 @@ namespace WebAssembly.Browser.DOM
             {
                 get
                 {
-                    return this.Current;
+                    return Current;
                 }
             }
 
@@ -72,31 +69,31 @@ namespace WebAssembly.Browser.DOM
             {
                 get
                 {
-                    return this.Current;
+                    return Current;
                 }
             }
 
             public ElementEnumerator(HTMLCollection collection)
             {
-                this.htmlCollectionCollection = collection;
-                this.htmlCollectionCount = this.htmlCollectionCollection.Length;
-                this.htmlCollectionIndex = -1;
+                htmlCollectionCollection = collection;
+                htmlCollectionCount = htmlCollectionCollection.Length;
+                htmlCollectionIndex = -1;
             }
 
             void IDisposable.Dispose()
             {
-                this.htmlCollectionCollection = null;
+                htmlCollectionCollection = null;
             }
 
             bool IEnumerator.MoveNext()
             {
-                this.htmlCollectionIndex++;
-                return this.htmlCollectionIndex < this.htmlCollectionCount;
+                htmlCollectionIndex++;
+                return htmlCollectionIndex < htmlCollectionCount;
             }
 
             void IEnumerator.Reset()
             {
-                this.htmlCollectionIndex = -1;
+                htmlCollectionIndex = -1;
             }
         }
 

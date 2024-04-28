@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using System.Threading;
-using System.Runtime.CompilerServices;
-using Monsajem_Incs.Async;
 
 namespace Monsajem_Incs.Async
 {
@@ -14,7 +8,7 @@ namespace Monsajem_Incs.Async
         private event Action OnCommand;
 
         private Collection.Array.ArrayBased.DynamicSize.Array<Func<Task>>
-            TaskQueue = new Collection.Array.ArrayBased.DynamicSize.Array<Func<Task>>(50);
+            TaskQueue = new(50);
 
         public AsyncTaskQueue()
         {
@@ -25,8 +19,8 @@ namespace Monsajem_Incs.Async
         {
             while (true)
             {
-                Task WaitForNewItems=null;
-                Func<Task>[] Tasks=null;
+                Task WaitForNewItems = null;
+                Func<Task>[] Tasks = null;
                 lock (this)
                 {
                     if (TaskQueue.Length > 0)
@@ -41,31 +35,30 @@ namespace Monsajem_Incs.Async
                         WaitForNewItems = DelegateActions.WaitForHandle(() => ref OnCommand);
                     }
                 }
-                if(WaitForNewItems==null)
+                if (WaitForNewItems == null)
                     await Async.Task_EX.StartTryWaitAsQueue(Tasks);
                 else
                     await WaitForNewItems;
             }
         }
 
-        public Task AddToQueue(Func<Task> Action)=>
+        public Task AddToQueue(Func<Task> Action) =>
             AddToQueue<object>(async () =>
             {
                 await Action();
                 return null;
             });
-        
+
 
         public Task<t> AddToQueue<t>(Func<Task<t>> Action)
         {
             t Result = default;
             Exception TaskEx = null;
-            var Done = new Task<t>(() => {
-                if (TaskEx != null)
-                    throw TaskEx;
-                return Result;
+            var Done = new Task<t>(() =>
+            {
+                return TaskEx != null ? throw TaskEx : Result;
             });
-            Func<Task> Waiter = async () =>
+            async Task Waiter()
             {
                 try
                 {
@@ -77,7 +70,7 @@ namespace Monsajem_Incs.Async
                     TaskEx = ex;
                     Done.Start();
                 }
-            };
+            }
             lock (this)
             {
                 TaskQueue.Insert(Waiter);

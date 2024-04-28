@@ -1,16 +1,6 @@
 ﻿
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using static Monsajem_Incs.Collection.Array.Extentions;
-using Monsajem_Incs.Resources.Base.Html;
 using WebAssembly.Browser.DOM;
-using Monsajem_Incs.DynamicAssembly;
-using Monsajem_Incs.Collection.Array;
 
 namespace Monsajem_Incs.Views.Maker.ValueTypes
 {
@@ -18,19 +8,19 @@ namespace Monsajem_Incs.Views.Maker.ValueTypes
     {
         public static ViewType MakeView<ValueType, ViewType>(
             this ValueType obj,
-            Action OnEdit=null,
-            Action OnDelete=null)
+            Action OnEdit = null,
+            Action OnDelete = null)
             where ViewType : new()
-            => ViewItemMaker<ValueType, ViewType>.Default.MakeView(obj,OnEdit,OnDelete);
+            => ViewItemMaker<ValueType, ViewType>.Default.MakeView(obj, OnEdit, OnDelete);
 
         public static HTMLElement MakeView<ValueType>(
             this ValueType obj,
             Action OnEdit = null,
             Action OnDelete = null) =>
-            ViewItemMaker<ValueType>.Default.MakeHtmlView(obj,OnEdit,OnDelete);
-        
+            ViewItemMaker<ValueType>.Default.MakeHtmlView(obj, OnEdit, OnDelete);
+
         public static void SetView<ValueType, ViewType>(
-            Action<Options<ValueType,ViewType>> Maker = null)
+            Action<Options<ValueType, ViewType>> Maker = null)
             where ViewType : new()
         {
             var ViewItemMaker = ViewItemMaker<ValueType, ViewType>.Default;
@@ -44,7 +34,7 @@ namespace Monsajem_Incs.Views.Maker.ValueTypes
                 ViewItemMaker.RegisterEdit = Options.RegisterEdit;
             if (Options.RegisterDelete != null)
                 ViewItemMaker.RegisterDelete = Options.RegisterDelete;
-            if(Options.GetMain !=null)
+            if (Options.GetMain != null)
                 ViewItemMaker.GetMain = Options.GetMain;
         }
 
@@ -69,7 +59,7 @@ namespace Monsajem_Incs.Views.Maker.ValueTypes
                 var Holder = MakeHolder(Info.Holder);
 
                 foreach (var View in Info.Views)
-                    Holder.AppendChild(View);
+                    _ = Holder.AppendChild(View);
 
                 return Holder;
             };

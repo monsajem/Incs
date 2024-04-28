@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using Microsoft.JSInterop;
+using System;
 using System.Threading.Tasks;
-using System.Runtime.InteropServices.JavaScript;
-using Microsoft.JSInterop.Implementation;
-using Microsoft.JSInterop;
 using WebAssembly.Browser.MonsajemDomHelpers;
 
 namespace WebAssembly.Browser.DOM
@@ -14,26 +9,26 @@ namespace WebAssembly.Browser.DOM
     [Export("indexedDB", typeof(IJSInProcessObjectReference))]
     public static class IndexedDB
     {
-        private static IJSInProcessObjectReference Obj = ((Func<IJSInProcessObjectReference>)(() => 
+        private static IJSInProcessObjectReference Obj = ((Func<IJSInProcessObjectReference>)(() =>
         {
             return js.JsGetValue("indexedDB");
         }))();
 
         [Export("open")]
         public async static Task<IDBDatabase> Open(
-            string Name,int Version,Func<IDBDatabase,Task> OnUpgradeNeeded)
+            string Name, int Version, Func<IDBDatabase, Task> OnUpgradeNeeded)
         {
-            IDBDatabase Result=null;
-            var RQ = new IDBRequest((IJSInProcessObjectReference)Obj.Invoke<object>("open", Name,Version));
+            IDBDatabase Result = null;
+            var RQ = new IDBRequest((IJSInProcessObjectReference)Obj.Invoke<object>("open", Name, Version));
             var UpgradeNeeded = new Task(() => { });
-            Action<IJSInProcessObjectReference> _OnUpgradeNeeded = async (c) =>
+            async void _OnUpgradeNeeded(IJSInProcessObjectReference c)
             {
                 Result = new IDBDatabase((IJSInProcessObjectReference)RQ.Result);
                 await OnUpgradeNeeded(Result);
                 UpgradeNeeded.Start();
-            };
+            }
             RQ.OnUpgradeNeeded += _OnUpgradeNeeded;
-            await RQ.MakeTask();
+            _ = await RQ.MakeTask();
             Result = new IDBDatabase((IJSInProcessObjectReference)RQ.Result);
             if (Result.Version != Version)
                 await UpgradeNeeded;
@@ -43,14 +38,14 @@ namespace WebAssembly.Browser.DOM
 
         public static Task DeleteDatabase(string Name)
         {
-            return new IDBRequest((IJSInProcessObjectReference)Obj.Invoke<Task>("deleteDatabase",Name)).MakeTask();
+            return new IDBRequest((IJSInProcessObjectReference)Obj.Invoke<Task>("deleteDatabase", Name)).MakeTask();
         }
     }
 
     [Export("IDBDatabase", typeof(IJSInProcessObjectReference))]
-    public class IDBDatabase:DOMObject
+    public class IDBDatabase : DOMObject
     {
-        public IDBDatabase(IJSInProcessObjectReference obj) :base(obj)
+        public IDBDatabase(IJSInProcessObjectReference obj) : base(obj)
         {
         }
 
@@ -61,24 +56,24 @@ namespace WebAssembly.Browser.DOM
         public int Version { get => GetProperty<int>("version"); }
 
         [Export("createObjectStore")]
-        public IDBObjectStore CreateObjectStore(string Name) => 
-            InvokeMethod<IDBObjectStore>("createObjectStore",Name);
+        public IDBObjectStore CreateObjectStore(string Name) =>
+            InvokeMethod<IDBObjectStore>("createObjectStore", Name);
 
         [Export("createObjectStore")]
-        public IDBObjectStore CreateObjectStore(string Name,object options) =>
-            InvokeMethod<IDBObjectStore>("createObjectStore", Name,options);
+        public IDBObjectStore CreateObjectStore(string Name, object options) =>
+            InvokeMethod<IDBObjectStore>("createObjectStore", Name, options);
 
         [Export("transaction")]
         public IDBTransaction Transaction(string storeName) =>
-            InvokeMethod<IDBTransaction>("transaction", storeName,"readwrite");
+            InvokeMethod<IDBTransaction>("transaction", storeName, "readwrite");
 
         [Export("transaction")]
         public IDBTransaction Transaction(string storeName, string mode) =>
             InvokeMethod<IDBTransaction>("transaction", storeName, mode);
 
         [Export("transaction")]
-        public IDBTransaction Transaction(string storeName,string mode, object options) =>
-            InvokeMethod<IDBTransaction>("transaction", storeName,mode, options);
+        public IDBTransaction Transaction(string storeName, string mode, object options) =>
+            InvokeMethod<IDBTransaction>("transaction", storeName, mode, options);
 
         [Export("close")]
         public void Close() => ManagedJSObject.InvokeVoid("close");
@@ -99,22 +94,22 @@ namespace WebAssembly.Browser.DOM
         public string Transaction { get => GetProperty<string>("transaction"); }
 
         [Export("add")]
-        public IDBRequest Add(object value, string Key) =>InvokeMethod<IDBRequest>("add", value, Key);
+        public IDBRequest Add(object value, string Key) => InvokeMethod<IDBRequest>("add", value, Key);
 
         [Export("add")]
-        public IDBRequest Add(object value) =>InvokeMethod<IDBRequest>("add", value);
+        public IDBRequest Add(object value) => InvokeMethod<IDBRequest>("add", value);
 
         [Export("clear")]
         public Task Clear() => InvokeMethod<IDBRequest>("clear").MakeTask();
 
         [Export("count")]
-        public async Task<int> Count() =>(int)(await InvokeMethod<IDBRequest>("count").MakeTask()).Result;
+        public async Task<int> Count() => (int)(await InvokeMethod<IDBRequest>("count").MakeTask()).Result;
 
         [Export("createIndex")]
-        public IDBIndex CreateIndex(string indexName,string keyPath) => InvokeMethod<IDBIndex>("createIndex", indexName,keyPath);
+        public IDBIndex CreateIndex(string indexName, string keyPath) => InvokeMethod<IDBIndex>("createIndex", indexName, keyPath);
 
         [Export("createIndex")]
-        public IDBIndex CreateIndex(string indexName, string keyPath,object objectParameters) => InvokeMethod<IDBIndex>("createIndex", indexName, keyPath, objectParameters);
+        public IDBIndex CreateIndex(string indexName, string keyPath, object objectParameters) => InvokeMethod<IDBIndex>("createIndex", indexName, keyPath, objectParameters);
 
         [Export("delete")]
         public Task Delete(object KeyRange) => InvokeMethod<IDBRequest>("delete", KeyRange).MakeTask();
@@ -126,7 +121,7 @@ namespace WebAssembly.Browser.DOM
         public async Task<object> Get(string key) => (await InvokeMethod<IDBRequest>("get", key).MakeTask()).Result;
 
         [Export("get")]
-        public async Task<t> Get<t>(string key) =>(t) await Get(key);
+        public async Task<t> Get<t>(string key) => (t)await Get(key);
 
         [Export("getKey")]
         public IDBRequest GetKey(string key) => InvokeMethod<IDBRequest>("getKey", key);
@@ -150,7 +145,7 @@ namespace WebAssembly.Browser.DOM
         public IDBRequest GetAllKeys(object query, int count) => InvokeMethod<IDBRequest>("getAllKeys", query, count);
 
         [Export("index")]
-        public IDBIndex Index(string name) => InvokeMethod<IDBIndex>("index",name);
+        public IDBIndex Index(string name) => InvokeMethod<IDBIndex>("index", name);
 
         [Export("openCursor")]
         public IDBRequest OpenCursor() => InvokeMethod<IDBRequest>("openCursor");
@@ -215,7 +210,7 @@ namespace WebAssembly.Browser.DOM
         public IDBRequest GetAll(object query) => InvokeMethod<IDBRequest>("getAll", query);
 
         [Export("getAll")]
-        public IDBRequest GetAll(object query,int count) => InvokeMethod<IDBRequest>("getAll", query, count);
+        public IDBRequest GetAll(object query, int count) => InvokeMethod<IDBRequest>("getAll", query, count);
 
         [Export("getAllKeys")]
         public IDBRequest GetAllKeys() => InvokeMethod<IDBRequest>("getAllKeys");
@@ -247,48 +242,45 @@ namespace WebAssembly.Browser.DOM
     }
 
     [Export("IDBRequest", typeof(IJSInProcessObjectReference))]
-    public class IDBRequest:EventTarget
+    public class IDBRequest : EventTarget
     {
         public IDBRequest(IJSInProcessObjectReference handle) : base(handle)
         {
-            SetProperty("onerror", (Action<IJSInProcessObjectReference>)onerror);
-            SetProperty("onsuccess", (Action<IJSInProcessObjectReference>)onsuccess);
-            SetProperty("onupgradeneeded", (Action<IJSInProcessObjectReference>)onupgradeneeded);
+            SetProperty("onerror", onerror);
+            SetProperty("onsuccess", onsuccess);
+            SetProperty("onupgradeneeded", onupgradeneeded);
         }
 
         public event Action<IJSInProcessObjectReference> OnError;
         public event Action<IJSInProcessObjectReference> OnSuccess;
         public event Action<IJSInProcessObjectReference> OnUpgradeNeeded;
-        private void onerror(IJSInProcessObjectReference e)=>OnError?.Invoke(e);
-        private void onsuccess(IJSInProcessObjectReference e)=>OnSuccess?.Invoke(e);
+        private void onerror(IJSInProcessObjectReference e) => OnError?.Invoke(e);
+        private void onsuccess(IJSInProcessObjectReference e) => OnSuccess?.Invoke(e);
         private void onupgradeneeded(IJSInProcessObjectReference e) => OnUpgradeNeeded?.Invoke(e);
 
         public async Task<IDBRequest> MakeTask()
         {
-            var Completed = new Task(()=> { });
+            var Completed = new Task(() => { });
             var Error = false;
-            Action<IJSInProcessObjectReference> OnError=null;
-            OnError= (c) =>
+            void OnError(IJSInProcessObjectReference c)
             {
                 this.OnError -= OnError;
-                Error =true;
+                Error = true;
                 Completed.Start();
-            };
+            }
+
             this.OnError += OnError;
 
-            Action<IJSInProcessObjectReference> OnSuccess = null;
-            OnSuccess = (c) =>
+            void OnSuccess(IJSInProcessObjectReference c)
             {
                 this.OnSuccess -= OnSuccess;
                 Completed.Start();
-            };
+            }
+
             this.OnSuccess += OnSuccess;
 
             await Completed;
-            if(Error)
-                throw new Exception("Error");
-
-            return this;
+            return Error ? throw new Exception("Error") : this;
         }
 
         public IJSInProcessObjectReference Error { get => GetProperty<IJSInProcessObjectReference>("error"); }
@@ -297,7 +289,7 @@ namespace WebAssembly.Browser.DOM
         public IJSInProcessObjectReference ReadyState { get => GetProperty<IJSInProcessObjectReference>("readyState"); }
         public IJSInProcessObjectReference Transaction { get => GetProperty<IJSInProcessObjectReference>("transaction"); }
 
-        public t GetResult<t>() => (t) Result;
+        public t GetResult<t>() => (t)Result;
 
     }
 
@@ -306,9 +298,9 @@ namespace WebAssembly.Browser.DOM
     {
         public IDBTransaction(IJSInProcessObjectReference handle) : base(handle)
         {
-            SetProperty("onabort", (Action<IJSInProcessObjectReference>)onabort);
-            SetProperty("oncomplete", (Action<IJSInProcessObjectReference>)oncomplete);
-            SetProperty("onerror", (Action<IJSInProcessObjectReference>)onerror);
+            SetProperty("onabort", onabort);
+            SetProperty("oncomplete", oncomplete);
+            SetProperty("onerror", onerror);
         }
 
         public event Action<IJSInProcessObjectReference> OnError;
@@ -318,46 +310,46 @@ namespace WebAssembly.Browser.DOM
         private void oncomplete(IJSInProcessObjectReference e) => OnComplete?.Invoke(e);
         private void onabort(IJSInProcessObjectReference e) => OnAbort?.Invoke(e);
 
-        public IDBObjectStore ObjectStore(string Name) => InvokeMethod<IDBObjectStore>("objectStore",Name);
+        public IDBObjectStore ObjectStore(string Name) => InvokeMethod<IDBObjectStore>("objectStore", Name);
         public void Abort() => ManagedJSObject.InvokeVoid("abort");
         public async Task Commit()
         {
             var Completed = new Task(() => { });
-            var Status =0;
-            Action<IJSInProcessObjectReference> OnError = null;
-            OnError = (c) =>
+            var Status = 0;
+            void OnError(IJSInProcessObjectReference c)
             {
                 this.OnError -= OnError;
                 Status = 0;
                 Completed?.Start();
                 Completed = null;
-            };
+            }
+
             this.OnError += OnError;
 
-            Action<IJSInProcessObjectReference> OnAbort = null;
-            OnAbort = (c) =>
+            void OnAbort(IJSInProcessObjectReference c)
             {
                 this.OnComplete -= OnAbort;
                 Status = 1;
                 Completed?.Start();
                 Completed = null;
-            };
+            }
+
             this.OnAbort += OnAbort;
 
-            Action<IJSInProcessObjectReference> OnComplete = null;
-            OnComplete = (c) =>
+            void OnComplete(IJSInProcessObjectReference c)
             {
                 this.OnComplete -= OnComplete;
                 Status = 2;
                 Completed?.Start();
                 Completed = null;
-            };
+            }
+
             this.OnComplete += OnComplete;
 
             await Completed;
-            if (Status==0)
+            if (Status == 0)
                 throw new Exception("Error");
-            if(Status == 1)
+            if (Status == 1)
                 throw new Exception("Aborted");
         }
 

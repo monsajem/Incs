@@ -1,11 +1,9 @@
-﻿using System;
-using System.Threading.Tasks;
-using System.Threading;
-using static Monsajem_Incs.Collection.Array.Extentions;
+﻿using Monsajem_Incs.Async;
 using Monsajem_Incs.Net.Base.Socket.Exceptions;
-using Monsajem_Incs.Async;
+using System;
 using System.Linq;
-using Monsajem_Incs.Async;
+using System.Threading.Tasks;
+using static Monsajem_Incs.Collection.Array.Extentions;
 
 namespace Monsajem_Incs.Net.Base.Socket
 {
@@ -51,12 +49,12 @@ namespace Monsajem_Incs.Net.Base.Socket
         IClientSocket
     {
 #if DEBUG
-        public (string Trace,object Info)[] DebugInfo = new (string Trace, object Info)[0];
+        public (string Trace, object Info)[] DebugInfo = new (string Trace, object Info)[0];
         public static int SendTimeOut = 3000;
         public static int ReciveTimeOut = 3000;
 
         internal void AddDebugInfo(string Trace) => AddDebugInfo((Trace, null));
-        internal void AddDebugInfo(string Trace, object Info)=> AddDebugInfo((Trace, Info));
+        internal void AddDebugInfo(string Trace, object Info) => AddDebugInfo((Trace, Info));
         internal void AddDebugInfo((string Trace, object Info) Trace)
         {
             lock (DebugInfo)
@@ -64,24 +62,24 @@ namespace Monsajem_Incs.Net.Base.Socket
         }
 #endif
 
-        private Locker<int> Sendings = new Locker<int>();
+        private Locker<int> Sendings = new();
         public event Action<Exception> OnError;
         private AddressType P_Address;
 
         public ClientSocket()
         {
-         
+
         }
         public virtual AddressType Address => P_Address;
 
-        private Locker<bool> P_IsConnected = new Locker<bool>();
+        private Locker<bool> P_IsConnected = new();
         public virtual bool IsConnected
         {
             get => P_IsConnected.LockedValue;
             internal set
             {
 #if DEBUG
-                AddDebugInfo("Connection Changed To " + value+ " in \n"+
+                AddDebugInfo("Connection Changed To " + value + " in \n" +
 
                         string.Concat(new System.Diagnostics.StackTrace(true).GetFrames().
                         Select((c) => "\nMethod> " + c.GetMethod().DeclaringType.ToString() + "." +
@@ -118,8 +116,8 @@ namespace Monsajem_Incs.Net.Base.Socket
                         OnError?.Invoke(Ex);
                         throw Ex;
                     }
-                    Tasks = new Task[] { 
-                        Inner_Send(Data), 
+                    Tasks = new Task[] {
+                        Inner_Send(Data),
                         P_IsConnected.WaitForChange()};
                 }
                 using (Sendings.Lock())
@@ -176,7 +174,7 @@ namespace Monsajem_Incs.Net.Base.Socket
                 {
                     if (P_IsConnected.Value == false)
                     {
-      
+
                         var ExMSG = "socket connection Changed in Recive(byte[] Buffer)";
                         var Ex = new SocketClosedExeption(ExMSG);
 #if DEBUG
@@ -208,11 +206,7 @@ namespace Monsajem_Incs.Net.Base.Socket
 #if TRACE_NET
                 Console.WriteLine($"Net:{Address} Recived " + R_Buffer.Length);
 #endif
-                var Position = 0;
-                if (Buffer.Length > R_Buffer.Length)
-                    Position = R_Buffer.Length - 1;
-                else
-                    Position = Buffer.Length - 1;
+                var Position = Buffer.Length > R_Buffer.Length ? R_Buffer.Length - 1 : Buffer.Length - 1;
                 var Recived = PopTo(ref R_Buffer, Position);
                 RecivedBuffer.Value = R_Buffer;
                 Recived.CopyTo(Buffer, 0);
@@ -239,7 +233,7 @@ namespace Monsajem_Incs.Net.Base.Socket
         public async Task Close()
         {
 #if DEBUG
-           AddDebugInfo ("Close Method invoked.");
+            AddDebugInfo("Close Method invoked.");
 #endif
 #if TRACE_NET
             Console.WriteLine($"Net:{Address} Disconnecting Close ...");
@@ -253,7 +247,7 @@ namespace Monsajem_Incs.Net.Base.Socket
             Console.WriteLine($"Net:{Address} Disconnected Close !");
 #endif
             IsConnected = false;
-            P_Address = default(AddressType);
+            P_Address = default;
         }
 
         public async Task Disconncet()
@@ -264,7 +258,7 @@ namespace Monsajem_Incs.Net.Base.Socket
 #if TRACE_NET
             Console.WriteLine($"Net:{Address} Disconnceting ");
 #endif
-            CheckSends:
+        CheckSends:
             Task WaitForSend = null;
             using (Sendings.Lock())
             {
@@ -371,7 +365,7 @@ namespace Monsajem_Incs.Net.Base.Socket
         protected virtual Task Inner_Disconnect() => throw new NotImplementedException("Inner_Disconnect Not Implemented");
         protected virtual Task Inner_Send(byte[] Data) => throw new NotImplementedException("Inner_Send Not Implemented");
 
-        private Locker<byte[]> RecivedBuffer = new Locker<byte[]>() { Value = new byte[0] };
+        private Locker<byte[]> RecivedBuffer = new() { Value = new byte[0] };
         protected void Recived(byte[] Buffer)
         {
 #if DEBUG
@@ -386,9 +380,9 @@ namespace Monsajem_Incs.Net.Base.Socket
                 }
 #if DEBUG
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                AddDebugInfo("exception thrown at Recived method.\n"+ex.Message,
+                AddDebugInfo("exception thrown at Recived method.\n" + ex.Message,
                     new Exception("exception thrown at Recived method.", ex));
             }
 #endif

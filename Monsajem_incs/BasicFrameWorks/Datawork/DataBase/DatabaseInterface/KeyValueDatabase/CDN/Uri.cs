@@ -1,13 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Monsajem_Incs.Net.Base.Service;
-using Monsajem_Incs.Database;
-using System.Linq;
-using Monsajem_Incs.Collection.Array.TreeBased;
-using System.Linq.Expressions;
-using Monsajem_Incs.Serialization;
 using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace Monsajem_Incs.Database.Base
 {
@@ -24,7 +17,7 @@ namespace Monsajem_Incs.Database.Base
             {
                 var WebClient = new HttpClient();
                 return await WebClient.GetByteArrayAsync($"{CDN}{c}");
-            }, Table, MakeingUpdate,null);
+            }, Table, MakeingUpdate, null);
         }
 
         public static Task<bool> GetUpdate<ValueType_RLN, KeyType_RLN, ValueType, KeyType>(
@@ -40,7 +33,7 @@ namespace Monsajem_Incs.Database.Base
             {
                 var WebClient = new HttpClient();
                 return await WebClient.GetByteArrayAsync($"{CDN}{c}");
-            }, RLNTable,RLNKey,GetRelation, MakeingUpdate,null);
+            }, RLNTable, RLNKey, GetRelation, MakeingUpdate, null);
         }
     }
 }

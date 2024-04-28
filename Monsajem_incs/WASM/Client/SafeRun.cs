@@ -1,17 +1,6 @@
-﻿using System;
-using static MonsajemData.DataBase;
-using MonsajemData;
-using Monsajem_Incs.Database.Base;
-using Monsajem_Incs.Database.KeyValue;
-using Monsajem_Incs.Resources;
-using Monsajem_Incs.Net.Web;
-using Monsajem_Incs.Net.Base.Service;
-using WebAssembly.Browser.DOM;
-using System.Reflection;
+﻿using Monsajem_Incs.UserControler;
+using System;
 using System.Threading.Tasks;
-using static WASM_Global.Publisher;
-using Monsajem_Incs.Resources.Base.Partials;
-using Monsajem_Incs.UserControler;
 
 namespace Monsajem_Incs.WasmClient
 {
@@ -56,7 +45,7 @@ namespace Monsajem_Incs.WasmClient
                         OnException(Message);
                 }
                 catch { }
-                
+
                 Console.WriteLine(Message);
                 Console.WriteLine(ex.StackTrace);
                 throw;

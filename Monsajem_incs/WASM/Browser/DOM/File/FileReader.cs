@@ -1,7 +1,4 @@
-using System;
-using System.IO;
-using System.Threading.Tasks;
-using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
+using Microsoft.JSInterop;
 using WebAssembly.Browser.MonsajemDomHelpers;
 
 namespace WebAssembly.Browser.DOM
@@ -11,27 +8,27 @@ namespace WebAssembly.Browser.DOM
     {
         internal FileReader(IJSInProcessObjectReference handle) : base(handle) { }
 
-        public FileReader() : this(js.JsNewObject("FileReader")){ }
+        public FileReader() : this(js.JsNewObject("FileReader")) { }
 
         [Export("readAsDataURL")]
         public void ReadAsDataURL(Blob selectors)
         {
-            InvokeMethod<object>("readAsDataURL", selectors);
+            _ = InvokeMethod<object>("readAsDataURL", selectors);
         }
         [Export("readAsArrayBuffer")]
         public void ReadAsArrayBuffer(Blob selectors)
         {
-            InvokeMethod<object>("readAsArrayBuffer", selectors);
+            _ = InvokeMethod<object>("readAsArrayBuffer", selectors);
         }
         [Export("readAsText")]
         public void ReadAsText(Blob selectors)
         {
-            InvokeMethod<object>("readAsText", selectors);
+            _ = InvokeMethod<object>("readAsText", selectors);
         }
         [Export("abort")]
         public void Abort()
         {
-            InvokeMethod<object>("abort");
+            _ = InvokeMethod<object>("abort");
         }
 
         public object[] Result { get => GetProperty<object[]>("result"); }

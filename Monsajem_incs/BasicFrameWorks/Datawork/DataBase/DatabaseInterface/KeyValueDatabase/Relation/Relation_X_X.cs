@@ -1,11 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
-using static Monsajem_Incs.Collection.Array.Extentions;
-using static Monsajem_Incs.Collection.Array.Extentions;
-using static Monsajem_Incs.DynamicAssembly.DelegatesExtentions;
 using static Monsajem_Incs.Database.Base.Runer;
 
 namespace Monsajem_Incs.Database.Base
@@ -61,7 +54,7 @@ namespace Monsajem_Incs.Database.Base
 #if TRACE
                     Console.WriteLine("@ " + this.GetType().Namespace + this.GetType().Name + " _AddRelation_X_X >> Accepted");
 #endif
-                    using (this.IgnoreUpdateAble.UseBlock())
+                    using (IgnoreUpdateAble.UseBlock())
                     {
                         PartTable.SaveToParent();
                     }
@@ -79,7 +72,7 @@ namespace Monsajem_Incs.Database.Base
 #if TRACE
                     Console.WriteLine("@ " + this.GetType().Namespace + this.GetType().Name + " _AddRelation_X_X >> Ignored");
 #endif
-                    using (this.IgnoreUpdateAble.UseBlock())
+                    using (IgnoreUpdateAble.UseBlock())
                     {
                         PartTable.SaveToParent();
                     }
@@ -88,12 +81,12 @@ namespace Monsajem_Incs.Database.Base
                     using (ThisRelation.LinkArray.IgnoreUpdateAble.UseBlock())
                     {
                         ThisRelation.LinkArray.Update(IgnoredKey,
-                             (c) => (ThatRelation.Field.Value(c)).Ignore(Key));
+                             (c) => ThatRelation.Field.Value(c).Ignore(Key));
                     }
 
                 });
 
-            this.KeyChanged += (info) =>
+            KeyChanged += (info) =>
             {
 #if TRACE
                 Console.WriteLine("@ " + this.GetType().Namespace + this.GetType().Name + " _AddRelation_X_X >> KeyChanged");
@@ -115,7 +108,7 @@ namespace Monsajem_Incs.Database.Base
                 }
             };
 
-            this.Events.Deleted += (info) =>
+            Events.Deleted += (info) =>
             {
 #if TRACE
                 Console.WriteLine("@ " + this.GetType().Namespace + this.GetType().Name + " _AddRelation_X_X >> Deleted");
@@ -135,12 +128,12 @@ namespace Monsajem_Incs.Database.Base
             var RelationName_Update = "U" + ThisRelation.Link.ToString() + RelationName;
             if (ThisRelation.IsUpdateAble)
             {
-                this.Events.Updated += (info) =>
+                Events.Updated += (info) =>
                 {
 #if TRACE
                     Console.WriteLine("@ " + this.GetType().Namespace + this.GetType().Name + " _AddRelation_X_X >> Updated");
 #endif
-                    if (this.IgnoreUpdateAble.BlockLengths == 0)
+                    if (IgnoreUpdateAble.BlockLengths == 0)
                         if (Run.Use(RelationName_Update))
                         {
                             using (ThisRelation.LinkArray.IgnoreUpdateAble.UseBlock())
@@ -152,7 +145,7 @@ namespace Monsajem_Incs.Database.Base
                                     {
                                         var MyInfo = info.Info[KeyPos];
                                         ThatRelation.Field.Value(c).UpdateAble.Changed(
-                                            (KeyType)MyInfo.OldKey,(KeyType)MyInfo.OldKey);
+                                            (KeyType)MyInfo.OldKey, (KeyType)MyInfo.OldKey);
                                     });
                                 }
                             }
@@ -160,7 +153,7 @@ namespace Monsajem_Incs.Database.Base
                 };
             }
             if (ThisRelation.ClearRelationOnSendUpdate)
-                this._ClearRelation(ThisRelation.Link);
+                _ClearRelation(ThisRelation.Link);
             if (ThatRelation.ClearRelationOnSendUpdate)
                 ThisRelation.LinkArray._ClearRelation(ThatRelation.Link);
         }

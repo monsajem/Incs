@@ -1,12 +1,4 @@
-﻿using Monsajem_Incs.Collection.Array.ArrayBased.DynamicSize;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using static Monsajem_Incs.Collection.Array.Extentions;
-using static System.Runtime.Serialization.FormatterServices;
-using static System.Text.Encoding;
+﻿using System;
 
 namespace Monsajem_Incs.Serialization
 {
@@ -38,11 +30,11 @@ namespace Monsajem_Incs.Serialization
                     throw new Exception($"Type isn't match\nSR: {SR_Type.MidName()}\nDR: {Type.MidName()}");
             }
 
-            private static void Tracer(Data Data,string On)
+            private static void Tracer(Data Data, string On)
             {
                 Data.Traced += "\n >> " + On;
             }
-            private static void UnTracer(Data Data,string On)
+            private static void UnTracer(Data Data, string On)
             {
                 var Traced = Data.Traced;
                 Traced = Traced.Substring(0, Traced.Length - (On.Length + "\n >> ".Length));

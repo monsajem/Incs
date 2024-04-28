@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
+﻿using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM.Events
 {
@@ -34,14 +32,14 @@ namespace WebAssembly.Browser.DOM.Events
         [Export("getCurrentPoint")]
         public void GetCurrentPoint(Element element)
         {
-            InvokeMethod<object>("getCurrentPoint", element);
+            _ = InvokeMethod<object>("getCurrentPoint", element);
         }
         //[Export("initWheelEvent")]
         //public void InitWheelEvent(string typeArg, bool canBubbleArg, bool cancelableArg, Window viewArg, double detailArg, double screenXArg, double screenYArg, double clientXArg, double clientYArg, double buttonArg, EventTarget relatedTargetArg, string modifiersListArg, double deltaXArg, double deltaYArg, double deltaZArg, double deltaMode)
         //{
         //    InvokeMethod<object>("initWheelEvent", typeArg, canBubbleArg, cancelableArg, viewArg, detailArg, screenXArg, screenYArg, clientXArg, clientYArg, buttonArg, relatedTargetArg, modifiersListArg, deltaXArg, deltaYArg, deltaZArg, deltaMode);
         //}
-        
+
     }
 
 }

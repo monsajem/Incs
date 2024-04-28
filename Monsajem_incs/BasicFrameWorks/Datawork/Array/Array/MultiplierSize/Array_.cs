@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Monsajem_Incs.Collection.Array.ArrayBased.MultiplierSize
 {
@@ -14,12 +9,12 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.MultiplierSize
         public int MinLen;
         public int MaxLen;
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         public Array()
         {
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         public Array(ArrayType[] ar)
         {
             Length = ar.Length;
@@ -32,7 +27,7 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.MultiplierSize
             set { }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         public override void DeleteFrom(int from)
         {
             Length = from;
@@ -45,10 +40,10 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.MultiplierSize
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         internal override void AddLength(int Count)
         {
-            Length = Length + Count;
+            Length += Count;
             Count = Length + 1000;
             if (Length > MaxLen)
             {
@@ -58,7 +53,7 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.MultiplierSize
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         public new Array<t> Browse<t>(Func<ArrayType, t> Selector)
         {
             var Result = new Array<t>();
@@ -66,7 +61,7 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.MultiplierSize
             return Result;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         public new Array<ArrayType> Browse(Func<ArrayType, bool> Selector)
         {
             var Result = new Array<ArrayType>();
@@ -74,7 +69,7 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.MultiplierSize
             return Result;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         public static implicit operator ArrayType[](Array<ArrayType> ar)
         {
             var NewAr = new ArrayType[ar.Length];
@@ -82,7 +77,7 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.MultiplierSize
             return NewAr;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         protected override Array<ArrayType> MakeSameNew()
         {
             return new Array<ArrayType>();

@@ -1,5 +1,5 @@
-﻿using System;
-using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
+﻿using Microsoft.JSInterop;
+using System;
 
 namespace WebAssembly.Browser.DOM
 {
@@ -60,17 +60,17 @@ namespace WebAssembly.Browser.DOM
         [Export("select")]
         public void Select()
         {
-            InvokeMethod<object>("select");
+            _ = InvokeMethod<object>("select");
         }
         [Export("setCustomValidity")]
         public void SetCustomValidity(string error)
         {
-            InvokeMethod<object>("setCustomValidity", error);
+            _ = InvokeMethod<object>("setCustomValidity", error);
         }
         [Export("setSelectionRange")]
         public void SetSelectionRange(double start, double end, object direction)
         {
-            InvokeMethod<object>("setSelectionRange", start, end, direction);
+            _ = InvokeMethod<object>("setSelectionRange", start, end, direction);
         }
     }
 }

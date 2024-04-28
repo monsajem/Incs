@@ -1,16 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.IO;
-using System.Collections;
-using Monsajem_Incs.Collection.Array;
 using static Monsajem_Incs.Database.Base.Runer;
 using static System.Runtime.Serialization.FormatterServices;
 namespace Monsajem_Incs.Database.Base
 {
     public static partial class Extentions
     {
-        
+
     }
 }
 
@@ -32,7 +28,7 @@ namespace Monsajem_Incs.Database.Base
 
         private void IDelete(ValueType Value, KeyType Key, int Pos)
         {
-            lock(this)
+            lock (this)
             {
                 using (Run.UseBlock())
                 {
@@ -80,7 +76,7 @@ namespace Monsajem_Incs.Database.Base
         {
             foreach (var Value in Values)
                 Delete(GetKey(Value.Value));
-        } 
+        }
 
         public void Delete(IEnumerable<ValueType> Values)
         {
@@ -104,7 +100,7 @@ namespace Monsajem_Incs.Database.Base
             else
             {
 
-                foreach (var Key in this.KeysInfo.Keys)
+                foreach (var Key in KeysInfo.Keys)
                 {
                     var Info = GetItem(Key);
                     IDelete(Info.Value, Key, Info.Pos);

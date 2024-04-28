@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Monsajem_Incs.Net.Base.Service;
-using Monsajem_Incs.Database;
+﻿using Monsajem_Incs.Net.Base.Service;
+using System;
 using System.Linq;
-using Monsajem_Incs.Collection.Array.TreeBased;
-using System.Linq.Expressions;
-using static Monsajem_Incs.Collection.Array.Extentions;
+using System.Threading.Tasks;
 
 namespace Monsajem_Incs.Database.Base
 {
@@ -44,7 +39,7 @@ namespace Monsajem_Incs.Database.Base
                 GetUpdateCodeAtPos = async (c) => UpdateCodes[c].UpdateCode;
                 IsExistAtParent = async (c) => ParentTable.IsExist(c);
 
-                Func<UpdateAble<KeyType>[], Task> SendUpdate = async (MyUpCodes) =>
+                async Task SendUpdate(UpdateAble<KeyType>[] MyUpCodes)
                 {
                     var IsPartOfTable = this.IsPartOfTable;
                     var len = MyUpCodes.Length;
@@ -53,15 +48,15 @@ namespace Monsajem_Incs.Database.Base
                     {
                         var MyUpCode = MyUpCodes[i];
                         await Client.SendData(MyUpCode.UpdateCode);
-                        if(IsPartOfTable)
+                        if (IsPartOfTable)
                             await Client.SendData(ParentTable.UpdateAble[MyUpCode.Key].UpdateCode);
                     }
                     for (int i = 0; i < len; i++)
                     {
-                        if(await Client.GetData<bool>())
+                        if (await Client.GetData<bool>())
                             await Client.SendData(await GetItem(MyUpCodes[i].Key));
                     }
-                };
+                }
 
                 UpdateFromPosToUpCode = async (Pos, ClientUpCode) =>
                 {
@@ -91,7 +86,7 @@ namespace Monsajem_Incs.Database.Base
             protected Func<KeyType, Task<bool>> IsExistAtParent;
 
             [Syncable]
-            protected Func<int,ulong, Task> UpdateFromPosToUpCode;
+            protected Func<int, ulong, Task> UpdateFromPosToUpCode;
             [Syncable]
             protected Func<int, Task> UpdateFromPosToEnd;
 
@@ -111,12 +106,12 @@ namespace Monsajem_Incs.Database.Base
                    where KeyType : IComparable<KeyType>
         {
             var LastUpdateCode = await Client.GetData<ulong>();//1
-            await Client.SendData(Table.UpdateAble.UpdateCode.Value);//2
+            _ = await Client.SendData(Table.UpdateAble.UpdateCode.Value);//2
             if (Table.UpdateAble.UpdateCode < LastUpdateCode)
                 LastUpdateCode = 0;
             if (Table.UpdateAble.UpdateCode != LastUpdateCode)
             {
-                await Client.SendData(Table.UpdateAble.UpdateCodes.Length);//3
+                _ = await Client.SendData(Table.UpdateAble.UpdateCodes.Length);//3
                 var Remote = new IRemoteUpdateSender<ValueType, KeyType>(
                                     Client, Table, UpdateCodes, GetItem, IsPartOfTable);
                 await Client.Remote(Remote);

@@ -1,31 +1,26 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Threading;
 using System.Runtime.CompilerServices;
-using Monsajem_Incs.Async;
+using System.Threading.Tasks;
 
 namespace Monsajem_Incs.Async
 {
-    public class AsyncLocker<ResourceType>:IDisposable
+    public class AsyncLocker<ResourceType> : IDisposable
     {
         public ResourceType Value;
         public event Action OnChanged;
         private event Action OnCommand;
 
         private Collection.Array.ArrayBased.DynamicSize.Array<Task>
-            ChangedQueue = new Collection.Array.ArrayBased.DynamicSize.Array<Task>(50);
+            ChangedQueue = new(50);
 
         private Collection.Array.ArrayBased.DynamicSize.Array<Func<Task>>
-            ReadQueue = new Collection.Array.ArrayBased.DynamicSize.Array<Func<Task>>(50);
+            ReadQueue = new(50);
         private Collection.Array.ArrayBased.DynamicSize.Array<Func<Task>>
-            WriteQueue = new Collection.Array.ArrayBased.DynamicSize.Array<Func<Task>>(50);
-       
+            WriteQueue = new(50);
+
         private async void Start()
         {
-            while(true)
+            while (true)
             {
                 Task Wait;
                 lock (this)
@@ -57,13 +52,13 @@ namespace Monsajem_Incs.Async
         public AsyncLocker()
 
         {
-            OnChanged = ()=>
+            OnChanged = () =>
             {
                 lock (this)
                 {
                     if (ChangedQueue.Length > 0)
                         ChangedQueue.Pop().Start();
-                }    
+                }
             };
             Start();
         }
@@ -71,7 +66,7 @@ namespace Monsajem_Incs.Async
         public async Task LockRead(Func<Task> Action)
         {
             var Done = AsyncTaskMethodBuilder.Create();
-            Func<Task> Waiter = async () =>
+            async Task Waiter()
             {
                 try
                 {
@@ -81,7 +76,7 @@ namespace Monsajem_Incs.Async
                 {
                     Done.SetResult();
                 }
-            };
+            }
             lock (this)
             {
                 ReadQueue.Insert(Waiter);
@@ -93,7 +88,7 @@ namespace Monsajem_Incs.Async
         public async Task LockWrite(Func<Task> Action)
         {
             var Done = AsyncTaskMethodBuilder.Create();
-            Func<Task> Waiter = async () =>
+            async Task Waiter()
             {
                 try
                 {
@@ -103,7 +98,7 @@ namespace Monsajem_Incs.Async
                 {
                     Done.SetResult();
                 }
-            };
+            }
             lock (this)
             {
                 WriteQueue.Insert(Waiter);
@@ -129,7 +124,7 @@ namespace Monsajem_Incs.Async
 
         public void Action(Action AC)
         {
-            lock(this)
+            lock (this)
             {
                 AC();
             }
@@ -138,7 +133,7 @@ namespace Monsajem_Incs.Async
         private bool Disposed;
         public void Dispose()
         {
-            lock(this)
+            lock (this)
             {
                 if (Disposed == false)
                 {

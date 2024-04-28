@@ -1,6 +1,4 @@
-﻿using System;
-using System.Net;
-using System.Threading;
+﻿using System.Net;
 using System.Threading.Tasks;
 
 namespace Monsajem_Incs.Net.Tcp.Socket
@@ -20,7 +18,7 @@ namespace Monsajem_Incs.Net.Tcp.Socket
 
         protected override async Task Inner_Connect(EndPoint Address)
         {
-            this.ClientSocket = new System.Net.Sockets.Socket(
+            ClientSocket = new System.Net.Sockets.Socket(
             System.Net.Sockets.AddressFamily.InterNetwork,
             System.Net.Sockets.SocketType.Stream,
             System.Net.Sockets.ProtocolType.Tcp);
@@ -34,7 +32,7 @@ namespace Monsajem_Incs.Net.Tcp.Socket
 
         protected override async Task Inner_Send(byte[] Data)
         {
-            ClientSocket.Send(Data);
+            _ = ClientSocket.Send(Data);
         }
 
         public override async Task<int> Recive(byte[] Buffer)
@@ -43,7 +41,7 @@ namespace Monsajem_Incs.Net.Tcp.Socket
             if (Recived == 0)
             {
                 ClientSocket.Close();
-                ClientSocket.Receive(Buffer);
+                _ = ClientSocket.Receive(Buffer);
             }
             return Recived;
         }

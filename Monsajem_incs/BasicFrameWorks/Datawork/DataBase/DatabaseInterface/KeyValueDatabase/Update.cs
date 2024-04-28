@@ -1,9 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.IO;
-using static Monsajem_Incs.Collection.Array.Extentions;
-using Monsajem_Incs.Serialization;
 using static Monsajem_Incs.Database.Base.Runer;
 using static System.Runtime.Serialization.FormatterServices;
 
@@ -50,11 +45,11 @@ namespace Monsajem_Incs.Database.Base
 
         private ValueType I_Update(KeyType OldKey, Func<ValueType, ValueType> NewValueMaker)
         {
-            lock(this)
+            lock (this)
             {
                 using (Run.UseBlock())
                 {
-                    var NewValue = GetItem(OldKey,true);
+                    var NewValue = GetItem(OldKey, true);
                     AutoFillRelations?.Invoke(NewValue.Value);
                     var KeysLen = BasicActions.Keys;
                     var Info = (NewValue, new Events<ValueType>.UpdateInfo[KeysLen]);
@@ -70,36 +65,36 @@ namespace Monsajem_Incs.Database.Base
                     Events.Updated?.Invoke(Info);
                     return NewValue;
                 }
-            }           
+            }
         }
 
 
         public void Update(int Position, ValueType NewValue)
         {
-            I_Update(KeysInfo.Keys[Position], (c) => NewValue);
+            _ = I_Update(KeysInfo.Keys[Position], (c) => NewValue);
         }
         public void Update(int Position, Func<ValueType, ValueType> NewValueCreator)
         {
-            I_Update(KeysInfo.Keys[Position], NewValueCreator);
+            _ = I_Update(KeysInfo.Keys[Position], NewValueCreator);
         }
         public void Update(int Position, Action<ValueType> NewValueCreator)
         {
-            I_Update(KeysInfo.Keys[Position],(c)=> { NewValueCreator(c); return c; });
+            _ = I_Update(KeysInfo.Keys[Position], (c) => { NewValueCreator(c); return c; });
         }
 
         public void Update(ValueType OldValue)
         {
-            I_Update(GetKey(OldValue), (c) => OldValue);
+            _ = I_Update(GetKey(OldValue), (c) => OldValue);
         }
 
         public void Update(KeyType OldKey, ValueType NewValue)
         {
-            I_Update(OldKey, (c) => NewValue);
+            _ = I_Update(OldKey, (c) => NewValue);
         }
 
         public void Update(ValueType OldValue, ValueType NewValue)
         {
-            I_Update(GetKey(OldValue), (c) => NewValue);
+            _ = I_Update(GetKey(OldValue), (c) => NewValue);
         }
         public ValueType Update(ValueType OldValue, Func<ValueType, ValueType> NewValueCreator)
         {
@@ -139,15 +134,15 @@ namespace Monsajem_Incs.Database.Base
 
         public void Update(Action<ValueType> NewValueCreator)
         {
-            foreach (var OldKey in this.KeysInfo.Keys)
-                I_Update(OldKey, (c) => { NewValueCreator(c); return c; });
+            foreach (var OldKey in KeysInfo.Keys)
+                _ = I_Update(OldKey, (c) => { NewValueCreator(c); return c; });
         }
 
         public void Update(Table<ValueType, KeyType> Values, Action<ValueType> NewValueCreator)
         {
             foreach (var Key in Values.KeysInfo.Keys)
             {
-                I_Update(Key, (c) => { NewValueCreator(c); return c; });
+                _ = I_Update(Key, (c) => { NewValueCreator(c); return c; });
             }
         }
 

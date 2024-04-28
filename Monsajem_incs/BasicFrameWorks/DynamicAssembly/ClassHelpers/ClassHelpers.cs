@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Reflection.Emit;
 using System.Linq;
-using System.Runtime.CompilerServices;
+using System.Reflection;
 using static Monsajem_Incs.Collection.Array.Extentions;
 
 namespace Monsajem_Incs.DynamicAssembly
@@ -33,9 +30,9 @@ namespace Monsajem_Incs.DynamicAssembly
             var Methods = GetMothods(typeof(t)).
                 Where((c) => c.CustomAttributes.Where((a) => a.AttributeType == typeof(AutoRun)).Count() > 0);
 
-            foreach(var method in Methods)
+            foreach (var method in Methods)
             {
-                method.Invoke(Class, null);
+                _ = method.Invoke(Class, null);
             }
         }
 

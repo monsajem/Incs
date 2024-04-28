@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Monsajem_Incs.Net.Base
 {
@@ -69,10 +66,7 @@ namespace Monsajem_Incs.Net.Base
             public bool MoveNext()
             {
                 P_MoveNext?.Invoke();
-                if (P_IsEnd == null)
-                    return true;
-                else
-                    return P_IsEnd();
+                return P_IsEnd == null ? true : P_IsEnd();
             }
 
             public void Reset()

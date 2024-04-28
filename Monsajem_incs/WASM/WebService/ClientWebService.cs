@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.WebSockets;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using static Monsajem_Incs.Collection.Array.Extentions;
 
 namespace Monsajem_Incs.Net.Web
 {
@@ -27,7 +23,7 @@ namespace Monsajem_Incs.Net.Web
             {
                 Socket = new System.Net.WebSockets.ClientWebSocket();
                 await Socket.ConnectAsync(
-                        new Uri("ws://" + Address.IpAddress + ":" + Address.Port.ToString() + "/"), 
+                        new Uri("ws://" + Address.IpAddress + ":" + Address.Port.ToString() + "/"),
                         CancellationToken.None);
             }
 
@@ -44,7 +40,7 @@ namespace Monsajem_Incs.Net.Web
             {
                 if (Socket.State != WebSocketState.Open)
                     return;
-                await Socket.CloseAsync(WebSocketCloseStatus.NormalClosure,"", CancellationToken.None);
+                await Socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
             }
 
             protected override async Task Inner_Send(byte[] Data)

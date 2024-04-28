@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Monsajem_Incs.Net.Base.Service;
+using System;
 using System.Linq;
-using System.IO;
-using System.Collections;
-using Monsajem_Incs.Serialization;
-using static System.Runtime.Serialization.FormatterServices;
-using Monsajem_Incs.Net.Base.Service;
-using System.Threading;
 
 namespace Monsajem_Incs.Database.Base
 {
@@ -30,8 +24,7 @@ namespace Monsajem_Incs.Database.Base
         {
             get
             {
-                if (_Run == null)
-                    _Run = new Monsajem_Incs.DynamicAssembly.RunOnceInBlock();
+                _Run ??= new Monsajem_Incs.DynamicAssembly.RunOnceInBlock();
                 return _Run;
             }
         }
@@ -44,7 +37,7 @@ namespace Monsajem_Incs.Database.Base
         [Remotable]
         [Serialization.NonSerialized]
         public Func<ValueType, KeyType> GetKey;
-        public KeyInfo KeysInfo = new KeyInfo();
+        public KeyInfo KeysInfo = new();
 
         [Serialization.NonSerialized]
         public BasicActions<ValueType> BasicActions;
@@ -59,21 +52,21 @@ namespace Monsajem_Incs.Database.Base
         private string _TableName;
         internal string TableName
         {
-            get => _TableName; 
-            set 
+            get => _TableName;
+            set
             {
                 var Done = false;
                 var OldName = _TableName;
                 try
                 {
                     _TableName = value;
-                    if(this.GetType()!= typeof(PartOfTable<ValueType,KeyType>))
+                    if (GetType() != typeof(PartOfTable<ValueType, KeyType>))
                         TableFinder.AddTable(this);
                     Done = true;
                 }
                 finally
                 {
-                    if(Done==false)
+                    if (Done == false)
                         _TableName = OldName;
                 }
             }
@@ -92,10 +85,10 @@ namespace Monsajem_Incs.Database.Base
             this.BasicActions = BasicActions;
             this.KeyPos = KeyPos;
 
-            this.KeysInfo.Keys = new Collection.Array.TreeBased.Array<KeyType>(XNewKeys);
+            KeysInfo.Keys = new Collection.Array.TreeBased.Array<KeyType>(XNewKeys);
 
-            this.SecurityEvents = new SecurityEvents<ValueType>();
-            this.Events = new Events<ValueType>();
+            SecurityEvents = new SecurityEvents<ValueType>();
+            Events = new Events<ValueType>();
 
             SecurityEvents.MakeKeys += (uf) =>
             {
@@ -117,7 +110,7 @@ namespace Monsajem_Incs.Database.Base
                         NewPos = KeysInfo.Keys.BinarySearch(NewKey).Index;
                         if (NewPos > -1)
                             throw new InvalidOperationException("Value be exist!");
-                        NewPos = NewPos * -1;
+                        NewPos *= -1;
                         NewPos -= 1;
                         KeyChanging?.Invoke(new KeyChangeInfo()
                         {
@@ -148,7 +141,7 @@ namespace Monsajem_Incs.Database.Base
                         NewPos = KeysInfo.Keys.BinarySearch(NewKey).Index;
                         if (NewPos < 0)
                         {
-                            NewPos = NewPos * -1;
+                            NewPos *= -1;
                             NewPos -= 1;
                         }
                         KeyChanging?.Invoke(new KeyChangeInfo()
@@ -182,15 +175,15 @@ namespace Monsajem_Incs.Database.Base
                         NewPos -= 1;
                     }
 
-                    if(OldPos!=NewPos)
+                    if (OldPos != NewPos)
                     {
                         var OldValue = this.BasicActions.Items.Pop(OldPos);
-                        this.BasicActions.Items.Insert((MyValue,OldValue.UpdateCode), NewPos);
+                        this.BasicActions.Items.Insert((MyValue, OldValue.UpdateCode), NewPos);
                     }
                     else
                     {
                         var OldValue = this.BasicActions.Items[OldPos];
-                        this.BasicActions.Items[OldPos]= (MyValue,OldValue.UpdateCode);
+                        this.BasicActions.Items[OldPos] = (MyValue, OldValue.UpdateCode);
                     }
 
                     if (OldKey.CompareTo(NewKey) != 0)
@@ -241,7 +234,7 @@ namespace Monsajem_Incs.Database.Base
                     var NewPos = KeysInfo.Keys.BinarySearch(NewKey).Index;
                     if (NewPos > -1)
                         throw new InvalidOperationException("Value be exist!");
-                    NewPos = NewPos * -1;
+                    NewPos *= -1;
                     NewPos -= 1;
                     var MyInfo = info.Info[KeyPos];
                     MyInfo.Key = NewKey;
@@ -256,7 +249,7 @@ namespace Monsajem_Incs.Database.Base
                     var NewPos = KeysInfo.Keys.BinarySearch(NewKey).Index;
                     if (NewPos < 0)
                     {
-                        NewPos = NewPos * -1;
+                        NewPos *= -1;
                         NewPos -= 1;
                     }
                     var MyInfo = info.Info[KeyPos];
@@ -272,7 +265,7 @@ namespace Monsajem_Incs.Database.Base
                     var MyInfo = info.Info[KeyPos];
                     var Pos = MyInfo.Pos;
                     KeysInfo.Keys.Insert((KeyType)MyInfo.Key, Pos);
-                    this.BasicActions.Items.Insert((info.Value,0), Pos);
+                    this.BasicActions.Items.Insert((info.Value, 0), Pos);
                 };
             }
             else
@@ -318,11 +311,11 @@ namespace Monsajem_Incs.Database.Base
             if (typeof(ValueType).GetInterfaces().Where((c) =>
                 c == typeof(IFactualyData)).Count() > 0)
             {
-                this.Events.loading += (NewValue) =>
+                Events.loading += (NewValue) =>
                 {
                     ((IFactualyData)NewValue).Parent = this;
                 };
-                this.Events.Saving += (NewValue) =>
+                Events.Saving += (NewValue) =>
                 {
                     ((IFactualyData)NewValue).Parent = null;
                 };
@@ -331,8 +324,8 @@ namespace Monsajem_Incs.Database.Base
             if (IsUpdateAble)
             {
                 ReadyForUpdateAble();
-                this.UpdateAble = new UpdateAbles<KeyType>(BasicActions.UpdateCode,BasicActions.Items.Select((c)=>(GetKey(c.Value),c.UpdateCode)));
-                this.UpdateAble.OnChanged += (c) =>
+                UpdateAble = new UpdateAbles<KeyType>(BasicActions.UpdateCode, BasicActions.Items.Select((c) => (GetKey(c.Value), c.UpdateCode)));
+                UpdateAble.OnChanged += (c) =>
                 {
                     var Pos = GetPosition(c.Key);
                     var Info = BasicActions.Items[Pos];
@@ -345,10 +338,7 @@ namespace Monsajem_Incs.Database.Base
 
             IUpdateOrInsert = (OldKey, NewCreator) =>
             {
-                if (PositionOf(OldKey) > -1)
-                    return Update(OldKey,NewCreator);
-                else
-                    return Insert(NewCreator).value;
+                return PositionOf(OldKey) > -1 ? Update(OldKey, NewCreator) : Insert(NewCreator).value;
             };
         }
 
@@ -361,7 +351,7 @@ namespace Monsajem_Incs.Database.Base
             bool IsUpdateAble) :
             this(new BasicActions<ValueType>()
             {
-                Items=Items,
+                Items = Items,
                 UpdateCode = UpdateCodeRegister,
             }, GetKey, new KeyType[0], 0, true, IsUpdateAble)
         { }
@@ -369,7 +359,7 @@ namespace Monsajem_Incs.Database.Base
 
         public override string ToString()
         {
-            return "Table "+ typeof(ValueType).ToString();
+            return "Table " + typeof(ValueType).ToString();
         }
 
     }

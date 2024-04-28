@@ -1,16 +1,11 @@
-﻿using System;
-using Monsajem_Incs.Net.Base.Socket;
+﻿using Monsajem_Incs.Net.Base.Socket;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Monsajem_Incs.Serialization;
-using System.Reflection;
-using static Monsajem_Incs.Collection.Array.Extentions;
-using static System.Runtime.Serialization.FormatterServices;
 
 namespace Monsajem_Incs.Net.Base.Service
 {
-    public interface ISyncOprations:
+    public interface ISyncOprations :
         IAsyncOprations
     {
         public new void SendData<t>(t Data) =>
@@ -41,7 +36,7 @@ namespace Monsajem_Incs.Net.Base.Service
         public void RunRecivedAction() =>
             (this as IAsyncOprations).RunRecivedAction().GetAwaiter().GetResult();
 
-        public new void RunOnOtherSide(Func<IAsyncOprations, Task> Action)=>
+        public new void RunOnOtherSide(Func<IAsyncOprations, Task> Action) =>
             (this as IAsyncOprations).RunOnOtherSide(Action).GetAwaiter().GetResult();
 
         public new void RunOnOtherSide<Data>(Func<IAsyncOprations, Data, Task> Action) =>
@@ -84,8 +79,9 @@ namespace Monsajem_Incs.Net.Base.Service
         ISyncOprations
     {
         public SyncOprations(
-            ClientSocket<AddressType> Client, bool IsServer):
-            base(Client, IsServer){}        
+            ClientSocket<AddressType> Client, bool IsServer) :
+            base(Client, IsServer)
+        { }
         public new void Stop() =>
             base.Stop().Wait();
     }

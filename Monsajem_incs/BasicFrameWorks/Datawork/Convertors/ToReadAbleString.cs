@@ -1,10 +1,7 @@
-﻿using System;
+﻿using Monsajem_Incs.Serialization;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
-using Monsajem_Incs.Serialization;
 
 namespace Monsajem_Incs.Convertors
 {
@@ -28,17 +25,17 @@ namespace Monsajem_Incs.Convertors
             public override int GetHashCode() => HashCode;
         }
 
-        internal static HashSet<ExactConvertor> ExactConvertors = new HashSet<ExactConvertor>();
+        internal static HashSet<ExactConvertor> ExactConvertors = [];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         internal static ExactConvertor GetConvertor(Type Type)
         {
-            Again:
+        Again:
             var Key = new ExactConvertor()
             { HashCode = Type.GetHashCode(), Type = Type };
             if (ExactConvertors.TryGetValue(Key, out var Result) == false)
             {
-                typeof(ConvertorToString<>).MakeGenericType(Type).
+                _ = typeof(ConvertorToString<>).MakeGenericType(Type).
                     GetMethod("Safe").Invoke(null, null);
                 goto Again;
             }
@@ -53,11 +50,11 @@ namespace Monsajem_Incs.Convertors
             GetStringConvertors(this Type Type)
         {
             var Result = GetConvertor(Type);
-            return (Result.ConvertorFromString, Result.ConvertorToString,Result.IsReadableConvertor);
+            return (Result.ConvertorFromString, Result.ConvertorToString, Result.IsReadableConvertor);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static string ConvertToString(this object Value,Type Type) => 
+        public static string ConvertToString(this object Value, Type Type) =>
             GetConvertor(Type).ConvertorToString(Value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -65,14 +62,14 @@ namespace Monsajem_Incs.Convertors
             GetConvertor(Value.GetType()).ConvertorToString(Value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static object ConvertFromString<t>(this string Value, Type Type) => 
+        public static object ConvertFromString<t>(this string Value, Type Type) =>
             GetConvertor(Type).ConvertorFromString(Value);
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static string ConvertToString<t>(this t Value) => ConvertorToString<t>.ToString(Value);
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static t ConvertFromString<t>(this string Value)=>ConvertorToString<t>.FromString(Value);
+        public static t ConvertFromString<t>(this string Value) => ConvertorToString<t>.FromString(Value);
     }
 
     internal static class ConvertorToString<t>
@@ -80,9 +77,9 @@ namespace Monsajem_Incs.Convertors
         public static void Safe() { }
         static ConvertorToString()
         {
-            lock(ConvertorToString.ExactConvertors)
+            lock (ConvertorToString.ExactConvertors)
             {
-                ConvertorToString.ExactConvertors.Add(
+                _ = ConvertorToString.ExactConvertors.Add(
                     new ConvertorToString.ExactConvertor()
                     {
                         ConvertorFromString = Obj_ConvertorFromString,
@@ -175,12 +172,9 @@ namespace Monsajem_Incs.Convertors
                 return Value.ToString();
             else if (t == typeof(long))
                 return Value.ToString();
-            else if (t == typeof(float))
-                return Value.ToString();
-            else if (t == typeof(decimal))
-                return Value.ToString();
-            else
-                return System.Convert.ToBase64String(Value.Serialize<t>());
+            else return t == typeof(float)
+                ? Value.ToString()
+                : t == typeof(decimal) ? Value.ToString() : System.Convert.ToBase64String(Value.Serialize<t>());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -203,12 +197,7 @@ namespace Monsajem_Incs.Convertors
                 return true;
             else if (t == typeof(long))
                 return true;
-            else if (t == typeof(float))
-                return true;
-            else if (t == typeof(decimal))
-                return true;
-            else
-                return false;
+            else return t == typeof(float) ? true : t == typeof(decimal);
         }
     }
 }

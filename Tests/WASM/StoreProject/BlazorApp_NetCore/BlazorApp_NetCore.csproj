@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
 
 	<!--sdasd-->
@@ -83,10 +83,6 @@
   <ItemGroup>
     <Reference Include="Monsajem_incs">
       <HintPath>..\..\..\..\Monsajem_incs\bin\Release\net5.0\Monsajem_incs.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Private.Runtime.InteropServices.JavaScript">
-      <HintPath>C:\Users\xtron\Desktop\saffronshop_Site\System.Private.Runtime.InteropServices.JavaScript.dll</HintPath>
-      <SpecificVersion>false</SpecificVersion>
     </Reference>
   </ItemGroup>
 

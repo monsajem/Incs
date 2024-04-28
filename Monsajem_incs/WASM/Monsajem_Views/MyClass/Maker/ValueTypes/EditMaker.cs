@@ -1,20 +1,10 @@
 ﻿
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using static Monsajem_Incs.Collection.Array.Extentions;
-using Monsajem_Incs.Resources.Base.Html;
-using WebAssembly.Browser.DOM;
-using Monsajem_Incs.DynamicAssembly;
-using Monsajem_Incs.Collection.Array;
-using System.Runtime.Serialization;
-using Monsajem_Incs.Serialization;
-using Monsajem_Incs;
 using Monsajem_Incs.Convertors;
+using Monsajem_Incs.DynamicAssembly;
+using Monsajem_Incs.Serialization;
+using System;
+using System.Linq;
+using WebAssembly.Browser.DOM;
 using static System.Runtime.Serialization.FormatterServices;
 
 namespace Monsajem_Incs.Views.Maker.ValueTypes
@@ -22,10 +12,10 @@ namespace Monsajem_Incs.Views.Maker.ValueTypes
     internal static class EditItemMaker<ValueType, ViewType>
         where ViewType : new()
     {
-        public static Action<(ViewType View, ValueType Value)> 
+        public static Action<(ViewType View, ValueType Value)>
             Default_FillViewByValue;
 
-        public static Func<(ViewType View, ValueType OldValue),ValueType>
+        public static Func<(ViewType View, ValueType OldValue), ValueType>
             Default_MakeValueFromView;
 
         public static Action<(ViewType View, ValueType Value)>
@@ -38,7 +28,7 @@ namespace Monsajem_Incs.Views.Maker.ValueTypes
             GetMainElementFromView;
 
         public static Func<(ViewType View, ValueType OldValue), ValueType>
-            MakeValueFromView=(c)=>c.OldValue;
+            MakeValueFromView = (c) => c.OldValue;
 
         static EditItemMaker()
         {
@@ -49,16 +39,16 @@ namespace Monsajem_Incs.Views.Maker.ValueTypes
                 var BtnDoneField = FieldControler.Make(
                     ShowNames.Where((c) => c.Name.ToLower() == "done").First());
                 RegisterOnEditedToView = (c) =>
-                    BtnDoneField.GetValueAs<HTMLElement>(c.View).OnClick+=(q,e)=>c.Edited();
+                    BtnDoneField.GetValueAs<HTMLElement>(c.View).OnClick += (q, e) => c.Edited();
             }
             catch
             {
                 RegisterOnEditedToView = (c) =>
                 {
-                     var ViewType = typeof(ViewType);
-                     throw new MissingMemberException("Done button not found at " +
-                        System.Environment.NewLine +
-                        ViewType.FullName.Substring(14));
+                    var ViewType = typeof(ViewType);
+                    throw new MissingMemberException("Done button not found at " +
+                       System.Environment.NewLine +
+                       ViewType.FullName.Substring(14));
                 };
             }
             try
@@ -84,8 +74,8 @@ namespace Monsajem_Incs.Views.Maker.ValueTypes
                 FieldsNames.Where((q) => q.Name == c.Name).FirstOrDefault() != null).
                             OrderBy((c) => c.Name).ToArray();
             var ValueFields = FieldControler.Make(FieldsNames).
-                                Select((c)=>(Field:c,
-                                             Convertor:ConvertorToString.GetConvertor(c.Info.FieldType))).
+                                Select((c) => (Field: c,
+                                             Convertor: ConvertorToString.GetConvertor(c.Info.FieldType))).
                                 ToArray();
             var ViewFields = FieldControler.Make(ShowNames);
 
@@ -95,12 +85,12 @@ namespace Monsajem_Incs.Views.Maker.ValueTypes
                 {
                     var ValueField = ValueFields[i];
                     var ViewField = ViewFields[i];
-                    if(ValueField.Convertor.IsReadableConvertor &&
+                    if (ValueField.Convertor.IsReadableConvertor &&
                        c.Value != null)
                     {
                         var NodeValue = ValueField.Field.GetValue(c.Value);
                         if (NodeValue != null)
-                            ((HTMLElement)ViewField.GetValue(c.View)).Value = 
+                            ((HTMLElement)ViewField.GetValue(c.View)).Value =
                                 ValueField.Convertor.ConvertorToString(NodeValue);
                     }
                 }
@@ -110,7 +100,7 @@ namespace Monsajem_Incs.Views.Maker.ValueTypes
             {
                 var NewValue = c.OldValue.Serialize().Deserialize(c.OldValue);
                 if (c.OldValue == null)
-                    NewValue = (ValueType) GetUninitializedObject(typeof(ValueType));
+                    NewValue = (ValueType)GetUninitializedObject(typeof(ValueType));
                 for (int i = 0; i < FieldsNames.Length; i++)
                 {
                     var ValueField = ValueFields[i];
@@ -144,7 +134,8 @@ namespace Monsajem_Incs.Views.Maker.ValueTypes
                 var NewValue = Default_MakeValueFromView((View, OldValue));
                 NewValue = MakeValueFromView((View, NewValue));
                 Edited.Invoke((OldValue, NewValue));
-            }));
+            }
+            ));
             return View;
         }
     }

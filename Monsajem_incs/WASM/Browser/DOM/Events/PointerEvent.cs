@@ -1,5 +1,5 @@
-﻿using System;
-using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
+﻿using Microsoft.JSInterop;
+using System;
 
 namespace WebAssembly.Browser.DOM.Events
 {
@@ -37,17 +37,17 @@ namespace WebAssembly.Browser.DOM.Events
         [Export("getCurrentPoint")]
         public void GetCurrentPoint(Element element)
         {
-            InvokeMethod<object>("getCurrentPoint", element);
+            _ = InvokeMethod<object>("getCurrentPoint", element);
         }
         [Export("getIntermediatePoints")]
         public void GetIntermediatePoints(Element element)
         {
-            InvokeMethod<object>("getIntermediatePoints", element);
+            _ = InvokeMethod<object>("getIntermediatePoints", element);
         }
         [Export("initPointerEvent")]
         public void InitPointerEvent(string typeArg, bool canBubbleArg, bool cancelableArg, Window viewArg, double detailArg, double screenXArg, double screenYArg, double clientXArg, double clientYArg, bool ctrlKeyArg, bool altKeyArg, bool shiftKeyArg, bool metaKeyArg, double buttonArg, EventTarget relatedTargetArg, double offsetXArg, double offsetYArg, double widthArg, double heightArg, double pressure, double rotation, double tiltX, double tiltY, double pointerIdArg, Object pointerType, double hwTimestampArg, bool isPrimary)
         {
-            InvokeMethod<object>("initPointerEvent", typeArg, canBubbleArg, cancelableArg, viewArg, detailArg, screenXArg, screenYArg, clientXArg, clientYArg, ctrlKeyArg, altKeyArg, shiftKeyArg, metaKeyArg, buttonArg, relatedTargetArg, offsetXArg, offsetYArg, widthArg, heightArg, pressure, rotation, tiltX, tiltY, pointerIdArg, pointerType, hwTimestampArg, isPrimary);
+            _ = InvokeMethod<object>("initPointerEvent", typeArg, canBubbleArg, cancelableArg, viewArg, detailArg, screenXArg, screenYArg, clientXArg, clientYArg, ctrlKeyArg, altKeyArg, shiftKeyArg, metaKeyArg, buttonArg, relatedTargetArg, offsetXArg, offsetYArg, widthArg, heightArg, pressure, rotation, tiltX, tiltY, pointerIdArg, pointerType, hwTimestampArg, isPrimary);
         }
     }
 }

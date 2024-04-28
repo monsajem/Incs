@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Monsajem_Incs.Collection.Array.Base
 {
@@ -15,13 +10,13 @@ namespace Monsajem_Incs.Collection.Array.Base
         public Func<int, ArrayType> _GetItem;
         public Action<int, ArrayType> _SetItem;
         public Action<int> _DeleteByPosition;
-        public Action<ArrayType,int> _insert;
+        public Action<ArrayType, int> _insert;
         public DynamicArray()
         {
 
         }
 
-        public new int Length { get =>base.Length;set => base.Length = value; }
+        public new int Length { get => base.Length; set => base.Length = value; }
 
         public override ArrayType this[int Pos] { get => _GetItem(Pos); set => _SetItem(Pos, value); }
 
@@ -32,7 +27,7 @@ namespace Monsajem_Incs.Collection.Array.Base
 
         public override void Insert(ArrayType Value, int Position)
         {
-            _insert(Value,Position);
+            _insert(Value, Position);
         }
     }
 }

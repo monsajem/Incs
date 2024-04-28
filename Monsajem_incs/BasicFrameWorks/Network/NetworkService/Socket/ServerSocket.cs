@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 
 namespace Monsajem_Incs.Net.Base.Socket
 {
@@ -11,9 +10,9 @@ namespace Monsajem_Incs.Net.Base.Socket
         private Func<ClientSocket<Address>> P_WaitForAccept;
 
         public ServerSocket(
-            Action<Address> BeginService=null,
-            Action Disconnect=null,
-            Func<ClientSocket<Address>> WaitForAccept=null)
+            Action<Address> BeginService = null,
+            Action Disconnect = null,
+            Func<ClientSocket<Address>> WaitForAccept = null)
         {
             P_BeginService = BeginService;
             P_Disconnect = Disconnect;
@@ -25,8 +24,8 @@ namespace Monsajem_Incs.Net.Base.Socket
         public void Disconnect() => OnDisconnect();
         public ClientSocket<Address> WaitForAccept() => OnWaitForAccep();
 
-        protected virtual void OnBeginService(Address Address)=> P_BeginService(Address);
-        protected virtual void OnDisconnect()=> P_Disconnect();
-        protected virtual ClientSocket<Address> OnWaitForAccep()=> P_WaitForAccept();
+        protected virtual void OnBeginService(Address Address) => P_BeginService(Address);
+        protected virtual void OnDisconnect() => P_Disconnect();
+        protected virtual ClientSocket<Address> OnWaitForAccep() => P_WaitForAccept();
     }
 }

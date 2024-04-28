@@ -1,10 +1,10 @@
-using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
+using Microsoft.JSInterop;
 namespace WebAssembly.Browser.DOM
 {
     /// <summary>
     /// A BlobPropertyBag object that provides the properties for the new Blob object.
     /// </summary>
-    
+
     [Export("Object", typeof(IJSInProcessObjectReference))]
     public class BlobPropertyBag
     {

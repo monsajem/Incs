@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Microsoft.JSInterop;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
@@ -46,11 +46,9 @@ namespace WebAssembly.Browser.DOM
             {
                 get
                 {
-                    if (this.nodeListCollection == null)
-                    {
-                        throw new ObjectDisposedException("NodeListEnumerator is disposed");
-                    }
-                    return this.nodeListCollection[this.nodeListIndex];
+                    return nodeListCollection == null
+                        ? throw new ObjectDisposedException("NodeListEnumerator is disposed")
+                        : nodeListCollection[nodeListIndex];
                 }
             }
 
@@ -58,7 +56,7 @@ namespace WebAssembly.Browser.DOM
             {
                 get
                 {
-                    return this.Current;
+                    return Current;
                 }
             }
 
@@ -66,31 +64,31 @@ namespace WebAssembly.Browser.DOM
             {
                 get
                 {
-                    return this.Current;
+                    return Current;
                 }
             }
 
             public NodeEnumerator(NodeList collection)
             {
-                this.nodeListCollection = collection;
-                this.nodeListCount = this.nodeListCollection.Length;
-                this.nodeListIndex = -1;
+                nodeListCollection = collection;
+                nodeListCount = nodeListCollection.Length;
+                nodeListIndex = -1;
             }
 
             void IDisposable.Dispose()
             {
-                this.nodeListCollection = null;
+                nodeListCollection = null;
             }
 
             bool IEnumerator.MoveNext()
             {
-                this.nodeListIndex++;
-                return this.nodeListIndex < this.nodeListCount;
+                nodeListIndex++;
+                return nodeListIndex < nodeListCount;
             }
 
             void IEnumerator.Reset()
             {
-                this.nodeListIndex = -1;
+                nodeListIndex = -1;
             }
         }
 

@@ -1,15 +1,10 @@
-﻿using System;
-using System.IO;
-using System.Linq.Expressions;
-using Monsajem_Incs.Collection;
+﻿using Monsajem_Incs.DynamicAssembly;
 using Monsajem_Incs.Serialization;
-using Monsajem_Incs.Database.Base;
-using Monsajem_Incs.DynamicAssembly;
-using System.Threading.Tasks;
+using System;
 
 namespace Monsajem_Incs.Database.Register.Base
 {
-    public abstract class Register<ValueType>:ISerializable<ValueType>
+    public abstract class Register<ValueType> : ISerializable<ValueType>
     {
         public ValueType Value;
         private BlocksCounter RunInBlocks;
@@ -17,7 +12,7 @@ namespace Monsajem_Incs.Database.Register.Base
         public Register()
         {
             RunInBlocks = new BlocksCounter();
-            RunInBlocks.OnClosedAllBlocks += () => this.Save();
+            RunInBlocks.OnClosedAllBlocks += () => Save();
         }
 
         protected abstract void SaveData(ValueType Value);
@@ -48,7 +43,7 @@ namespace Monsajem_Incs.Database.Register.Base
             return RunInBlocks.UseBlock();
         }
 
-        public static implicit operator ValueType (Register <ValueType> Register)=> Register.Value;
+        public static implicit operator ValueType(Register<ValueType> Register) => Register.Value;
 
         public override string ToString()
         {

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
+﻿using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
@@ -47,7 +46,7 @@ namespace WebAssembly.Browser.DOM
         [Export("formTarget")]
         public string FormTarget { get => GetProperty<string>("formTarget"); set => SetProperty<string>("formTarget", value); }
         [Export("files")]
-        public FileList Files { get => GetProperty<FileList>("files");}
+        public FileList Files { get => GetProperty<FileList>("files"); }
         [Export("height")]
         public string Height { get => GetProperty<string>("height"); set => SetProperty<string>("height", value); }
         [Export("hspace")]
@@ -120,27 +119,27 @@ namespace WebAssembly.Browser.DOM
         [Export("select")]
         public void Select()
         {
-            InvokeMethod<object>("select");
+            _ = InvokeMethod<object>("select");
         }
         [Export("setCustomValidity")]
         public void SetCustomValidity(string error)
         {
-            InvokeMethod<object>("setCustomValidity", error);
+            _ = InvokeMethod<object>("setCustomValidity", error);
         }
         [Export("setSelectionRange")]
         public void SetSelectionRange(double start, double end, object direction)
         {
-            InvokeMethod<object>("setSelectionRange", start, end, direction);
+            _ = InvokeMethod<object>("setSelectionRange", start, end, direction);
         }
         [Export("stepDown")]
         public void StepDown(double n)
         {
-            InvokeMethod<object>("stepDown", n);
+            _ = InvokeMethod<object>("stepDown", n);
         }
         [Export("stepUp")]
         public void StepUp(double n)
         {
-            InvokeMethod<object>("stepUp", n);
+            _ = InvokeMethod<object>("stepUp", n);
         }
     }
 }

@@ -1,12 +1,9 @@
-﻿using System;
+﻿using Monsajem_Incs.Database.Base;
+using Monsajem_Incs.Views.Maker.ValueTypes;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using WebAssembly.Browser.DOM;
-using Monsajem_Incs.Collection.Array;
-using Monsajem_Incs.Database.Base;
-using Monsajem_Incs.Views.Maker.ValueTypes;
-using static Monsajem_Incs.WasmClient.SafeRun;
 using static Monsajem_Incs.WasmClient.Network;
 
 namespace Monsajem_Incs.Views.Maker.Database
@@ -34,11 +31,11 @@ namespace Monsajem_Incs.Views.Maker.Database
                             },
                             async (c) =>
                             {
-                                await c.SendData((
+                                _ = await c.SendData((
                                             (string)PartTable.HolderTable.Table.TableName,
                                             PartTable.HolderTable.Key,
                                             PartTable.TableName));
-                                await c.GetUpdate(Table);
+                                _ = await c.GetUpdate(Table);
                             });
                     break;
 
@@ -51,8 +48,8 @@ namespace Monsajem_Incs.Views.Maker.Database
                             },
                             async (c) =>
                             {
-                                await c.SendData(Table.TableName);
-                                await c.GetUpdate(Table);
+                                _ = await c.SendData(Table.TableName);
+                                _ = await c.GetUpdate(Table);
                             });
                     break;
             }
@@ -80,7 +77,7 @@ namespace Monsajem_Incs.Views.Maker.Database
         {
             var PartTable = Table as PartOfTable<ValueType, KeyType>;
 
-            if(PartTable == null)
+            if (PartTable == null)
             {
                 var TableInfo = TableFinder.FindTable(Table.TableName);
                 return (Table, Value: default(ValueType)).MakeEditView(
@@ -239,7 +236,7 @@ namespace Monsajem_Incs.Views.Maker.Database
             }
 
             public void SetSelector(
-                Func<(IEnumerable<ValueType> Values, string Query),IEnumerable<ValueType>> SelectorItems)
+                Func<(IEnumerable<ValueType> Values, string Query), IEnumerable<ValueType>> SelectorItems)
             {
                 TableFinder.FindTable(Table, Table.TableName).SelectorItems = SelectorItems;
             }

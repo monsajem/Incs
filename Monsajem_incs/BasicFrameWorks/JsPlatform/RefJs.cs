@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Linq;
 using System.Text;
-using WebAssembly.Browser.MonsajemDomHelpers;
-using WebAssembly.Browser.DOM;
-using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
-using Microsoft.JSInterop;
 
 namespace Monsajem_Incs.JsPlatform
 {
@@ -17,15 +12,15 @@ namespace Monsajem_Incs.JsPlatform
     {
         private static UInt32 IDs;
         private string ID;
-        public void InvokeMethod(string Method,params RefJs[] Values)
+        public void InvokeMethod(string Method, params RefJs[] Values)
         {
-            var len = Values.Length-1;
+            var len = Values.Length - 1;
             var js = new StringBuilder();
-            js.Append($"{ID}.{Method}(");
+            _ = js.Append($"{ID}.{Method}(");
             for (int i = 0; i < len; i++)
-                js.Append($"{Values[i].ID},");
-            if(len>-1)
-                js.Append($"{Values[len].ID});");
+                _ = js.Append($"{Values[i].ID},");
+            if (len > -1)
+                _ = js.Append($"{Values[len].ID});");
             JsRumtime.RunJs(js.ToString());
         }
 
@@ -33,11 +28,11 @@ namespace Monsajem_Incs.JsPlatform
         {
             var len = Values.Length - 1;
             var js = new StringBuilder();
-            js.Append($"{ID}.{Method}(");
+            _ = js.Append($"{ID}.{Method}(");
             for (int i = 0; i < len; i++)
-                js.Append($"{Values[i].ID},");
+                _ = js.Append($"{Values[i].ID},");
             if (len > -1)
-                js.Append($"{Values[len].ID});");
+                _ = js.Append($"{Values[len].ID});");
             return JsRumtime.ResultJs(js.ToString());
         }
 

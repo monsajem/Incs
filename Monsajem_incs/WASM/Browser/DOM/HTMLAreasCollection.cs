@@ -1,11 +1,8 @@
-﻿using System;
-using System.Runtime.CompilerServices;
-
+﻿using Microsoft.JSInterop;
+using System;
 using System.Collections;
 using System.Collections.Generic;
-
-
-using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
+using System.Runtime.CompilerServices;
 
 namespace WebAssembly.Browser.DOM
 {
@@ -49,11 +46,9 @@ namespace WebAssembly.Browser.DOM
             {
                 get
                 {
-                    if (this.areasCollection == null)
-                    {
-                        throw new ObjectDisposedException("HTMLAreasCollectionEnumerator is disposed");
-                    }
-                    return this.areasCollection[this.areaCollectionIndex];
+                    return areasCollection == null
+                        ? throw new ObjectDisposedException("HTMLAreasCollectionEnumerator is disposed")
+                        : areasCollection[areaCollectionIndex];
                 }
             }
 
@@ -61,7 +56,7 @@ namespace WebAssembly.Browser.DOM
             {
                 get
                 {
-                    return this.Current;
+                    return Current;
                 }
             }
 
@@ -69,31 +64,31 @@ namespace WebAssembly.Browser.DOM
             {
                 get
                 {
-                    return this.Current;
+                    return Current;
                 }
             }
 
             public AreaEnumerator(HTMLAreasCollection collection)
             {
-                this.areasCollection = collection;
-                this.areaCollectionCount = this.areasCollection.Length;
-                this.areaCollectionIndex = -1;
+                areasCollection = collection;
+                areaCollectionCount = areasCollection.Length;
+                areaCollectionIndex = -1;
             }
 
             void IDisposable.Dispose()
             {
-                this.areasCollection = null;
+                areasCollection = null;
             }
 
             bool IEnumerator.MoveNext()
             {
-                this.areaCollectionIndex++;
-                return this.areaCollectionIndex < this.areaCollectionCount;
+                areaCollectionIndex++;
+                return areaCollectionIndex < areaCollectionCount;
             }
 
             void IEnumerator.Reset()
             {
-                this.areaCollectionIndex = -1;
+                areaCollectionIndex = -1;
             }
         }
     }

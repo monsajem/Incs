@@ -1,14 +1,9 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Monsajem_Incs.Serialization;
-using static Monsajem_Incs.Collection.Array.Extentions;
-using Monsajem_Incs.Net.Base.Service;
-using Monsajem_Incs.DynamicAssembly;
-using System.Collections.Generic;
-using Monsajem_Incs.Net.Base;
+﻿using Monsajem_Incs.Async;
 using Monsajem_Incs.Collection.Array.ArrayBased.DynamicSize;
-using Monsajem_Incs.Async;
+using Monsajem_Incs.Net.Base;
+using Monsajem_Incs.Net.Base.Service;
+using System;
+using System.Threading.Tasks;
 
 namespace Monsajem_Incs.Net.Virtual
 {
@@ -17,11 +12,11 @@ namespace Monsajem_Incs.Net.Virtual
     {
         public readonly Socket OtherSide;
         private AsyncLocker<Array<object>> Data =
-            new AsyncLocker<Array<object>>() { Value = new Array<object>(10) };
+            new() { Value = new Array<object>(10) };
 
         public Socket()
         {
-            this.OtherSide = new Socket(this);
+            OtherSide = new Socket(this);
         }
         private Socket(Socket OtherSide)
         {
@@ -40,7 +35,7 @@ namespace Monsajem_Incs.Net.Virtual
 
         public async Task<object> Recive()
         {
-            while(true)
+            while (true)
             {
                 object Result = null;
                 Task Wait = null;
@@ -53,7 +48,7 @@ namespace Monsajem_Incs.Net.Virtual
                     else
                         Wait = Data.WaitForChangeQuque();
                 });
-                if (Wait==null)
+                if (Wait == null)
                     return Result;
                 await Wait;
                 Wait = null;

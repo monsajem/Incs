@@ -1,14 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using WebAssembly.Browser.DOM;
-using Monsajem_Incs.Collection.Array;
-using Monsajem_Incs.Database.Base;
-using Monsajem_Incs.Views.Maker.ValueTypes;
-using static Monsajem_Incs.WasmClient.SafeRun;
-using static Monsajem_Incs.WasmClient.Network;
-using Monsajem_Incs.Views.Maker.Database;
+﻿using Monsajem_Incs.Database.Base;
+using System;
 
 namespace Monsajem_Incs.Views.Shower.Database
 {
@@ -27,7 +18,7 @@ namespace Monsajem_Incs.Views.Shower.Database
             string Query = null)
             where KeyType : IComparable<KeyType>
         {
-            new ShowPage().Show(Table,Query);
+            new ShowPage().Show(Table, Query);
         }
 
         public static void ShowInsert<ValueType, KeyType>(
@@ -42,12 +33,12 @@ namespace Monsajem_Incs.Views.Shower.Database
         }
 
         public static void ShowUpdate<ValueType, KeyType>(
-            this Table<ValueType, KeyType> Table,KeyType Key)
+            this Table<ValueType, KeyType> Table, KeyType Key)
             where KeyType : IComparable<KeyType>
         {
             if (Table is PartOfTable<ValueType, KeyType>)
                 Table = (Table as PartOfTable<ValueType, KeyType>).Parent;
-              new UpdatePage().Show(Table,Key);
+            new UpdatePage().Show(Table, Key);
         }
     }
 }

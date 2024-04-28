@@ -1,13 +1,6 @@
-﻿using Monsajem_Incs.Collection.Array.ArrayBased.DynamicSize;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static Monsajem_Incs.Collection.Array.Extentions;
-using static System.Runtime.Serialization.FormatterServices;
-using static System.Text.Encoding;
 
 namespace Monsajem_Incs.Serialization
 {
@@ -18,7 +11,7 @@ namespace Monsajem_Incs.Serialization
         {
             public LoadedFunc(object Obj)
             {
-                this.HashCode = Obj.GetHashCode();
+                HashCode = Obj.GetHashCode();
                 this.Obj = Obj;
             }
             private object Obj;
@@ -28,13 +21,13 @@ namespace Monsajem_Incs.Serialization
             public byte[] NameAsByte;
             public SerializeInfo SerializerTarget;
 
-            [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
             public bool Equals(LoadedFunc other)
             {
-                return object.Equals(Obj,other.Obj);
+                return object.Equals(Obj, other.Obj);
             }
 
-            [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
             public override int GetHashCode()
             {
                 return HashCode;

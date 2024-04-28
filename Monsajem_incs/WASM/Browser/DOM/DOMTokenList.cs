@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Microsoft.JSInterop;
+using System;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
@@ -15,7 +15,7 @@ namespace WebAssembly.Browser.DOM
         [Export("add")]
         public void Add(params string[] token)
         {
-            InvokeMethod<object>("add", token);
+            _ = InvokeMethod<object>("add", token);
         }
         [Export("contains")]
         public bool Contains(string token)
@@ -30,7 +30,7 @@ namespace WebAssembly.Browser.DOM
         [Export("remove")]
         public void Remove(params string[] token)
         {
-            InvokeMethod<object>("remove", token);
+            _ = InvokeMethod<object>("remove", token);
         }
         [Export("toggle")]
         public bool Toggle(string token, bool force)

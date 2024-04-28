@@ -1,7 +1,6 @@
-﻿using System;
+﻿using Microsoft.JSInterop;
+using System;
 using System.Runtime.CompilerServices;
-using WebAssembly;
-using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
@@ -57,12 +56,12 @@ namespace WebAssembly.Browser.DOM
         [Export("reset")]
         public void Reset()
         {
-            InvokeMethod<object>("reset");
+            _ = InvokeMethod<object>("reset");
         }
         [Export("submit")]
         public void Submit()
         {
-            InvokeMethod<object>("submit");
+            _ = InvokeMethod<object>("submit");
         }
         [Export("reportValidity")]
         public bool ReportValidity()

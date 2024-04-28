@@ -1,25 +1,18 @@
-﻿using Monsajem_Incs.Collection.Array.ArrayBased.DynamicSize;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
 using System.Runtime.CompilerServices;
-using static Monsajem_Incs.Collection.Array.Extentions;
-using static System.Runtime.Serialization.FormatterServices;
-using static System.Text.Encoding;
 
 namespace Monsajem_Incs.Serialization
 {
     public partial class Serialization
     {
 
-        private abstract class SerializeInfo:
+        private abstract class SerializeInfo :
             IEquatable<SerializeInfo>
         {
             public Type Type;
             public int TypeHashCode;
-            public Func<DeserializeData,object> Deserializer;
+            public Func<DeserializeData, object> Deserializer;
             public Action<SerializeData, object> Serializer;
             public byte[] NameAsByte;
             public bool CanStoreInVisit;
@@ -30,14 +23,14 @@ namespace Monsajem_Incs.Serialization
             public abstract void Make();
 
             public abstract void ArraySerializer(SerializeData Data, System.Array ar);
-            public abstract void ArrayDeserializer (DeserializeData Data, System.Array ar);
+            public abstract void ArrayDeserializer(DeserializeData Data, System.Array ar);
 
 
             private class ExactSerializer
             {
                 public int HashCode;
                 public SerializeInfo Serializer;
-                [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+                [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
                 public override int GetHashCode()
                 {
                     return HashCode;
@@ -45,10 +38,10 @@ namespace Monsajem_Incs.Serialization
             }
 
             private class ExactSerializerByType :
-                ExactSerializer,IEquatable<ExactSerializerByType>
+                ExactSerializer, IEquatable<ExactSerializerByType>
             {
                 public Type Type;
-                [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+                [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
                 public bool Equals(ExactSerializerByType other)
                 {
                     return Type.IsEquivalentTo(other.Type);
@@ -56,10 +49,10 @@ namespace Monsajem_Incs.Serialization
             }
 
             private class ExactSerializerByTypeName :
-                ExactSerializer,IEquatable<ExactSerializerByTypeName>
+                ExactSerializer, IEquatable<ExactSerializerByTypeName>
             {
                 public string TypeName;
-                [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+                [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
                 public bool Equals(ExactSerializerByTypeName other)
                 {
                     return TypeName == other.TypeName;
@@ -67,20 +60,20 @@ namespace Monsajem_Incs.Serialization
             }
 
             private static HashSet<ExactSerializerByType>
-                SerializersByHashCode = new HashSet<ExactSerializerByType>();
+                SerializersByHashCode = [];
             private static HashSet<ExactSerializerByTypeName>
-                SerializersByNameCode = new HashSet<ExactSerializerByTypeName>();
+                SerializersByNameCode = [];
 
-            [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
             public static SerializeInfo GetSerialize(Type Type)
             {
-                Again:
+            Again:
                 SerializeInfo SR;
                 var Key = new ExactSerializerByType()
-                                { HashCode = Type.GetHashCode(), Type = Type };
-                if (SerializersByHashCode.TryGetValue(Key,out var Result)==false)
+                { HashCode = Type.GetHashCode(), Type = Type };
+                if (SerializersByHashCode.TryGetValue(Key, out var Result) == false)
                 {
-                    lock(SerializersByHashCode)
+                    lock (SerializersByHashCode)
                     {
                         if (SerializersByHashCode.TryGetValue(Key, out Result))
                             goto Again;
@@ -101,17 +94,17 @@ namespace Monsajem_Incs.Serialization
                 return SR;
             }
 
-            [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
             public static SerializeInfo GetSerialize(string TypeName)
             {
-                Again:
+            Again:
                 SerializeInfo SR;
                 var HashCode = TypeName.GetHashCode();
-                var Key = new ExactSerializerByTypeName() 
-                                { HashCode = HashCode ,TypeName =TypeName};
-                if (SerializersByNameCode.TryGetValue(Key,out var Result) == false)
+                var Key = new ExactSerializerByTypeName()
+                { HashCode = HashCode, TypeName = TypeName };
+                if (SerializersByNameCode.TryGetValue(Key, out var Result) == false)
                 {
-                    lock(SerializersByNameCode)
+                    lock (SerializersByNameCode)
                     {
                         if (SerializersByNameCode.TryGetValue(Key, out Result))
                             goto Again;
@@ -132,13 +125,13 @@ namespace Monsajem_Incs.Serialization
                 return SR;
             }
 
-            [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
             public bool Equals(SerializeInfo other)
             {
                 return Type.IsEquivalentTo(other.Type);
             }
 
-            [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
             public override int GetHashCode()
             {
                 return Type.GetHashCode();

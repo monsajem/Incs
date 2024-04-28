@@ -1,12 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
-using static Monsajem_Incs.Collection.Array.Extentions;
-using static Monsajem_Incs.Collection.Array.Extentions;
-using Monsajem_Incs.Serialization;
-using static Monsajem_Incs.DynamicAssembly.DelegatesExtentions;
 
 namespace Monsajem_Incs.Database.Base
 {

@@ -1,9 +1,6 @@
-﻿using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
+﻿using Microsoft.JSInterop;
 using System;
-using System.Runtime.InteropServices.JavaScript;
-using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 using WebAssembly.Browser.MonsajemDomHelpers;
-using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
@@ -17,7 +14,7 @@ namespace WebAssembly.Browser.DOM
 
         public static Document Parse(string Html)
         {
-            return new Document((IJSInProcessObjectReference) js.JsNewObject("DOMParser").Invoke<object>("parseFromString",Html, "text/html"));
+            return new Document(js.JsNewObject("DOMParser").InvokeJs<IJSInProcessObjectReference>("parseFromString", Html, "text/html"));
         }
 
         [Export("activeElement")]
@@ -625,7 +622,7 @@ namespace WebAssembly.Browser.DOM
         [Export("captureEvents")]
         public void CaptureEvents()
         {
-            InvokeMethod<object>("captureEvents");
+            _ = InvokeMethod<object>("captureEvents");
         }
         // [Export("caretRangeFromPoint")]
         // public Range CaretRangeFromPoint(double x, double y)
@@ -635,12 +632,12 @@ namespace WebAssembly.Browser.DOM
         [Export("clear")]
         public void Clear()
         {
-            InvokeMethod<object>("clear");
+            _ = InvokeMethod<object>("clear");
         }
         [Export("close")]
         public void Close()
         {
-            InvokeMethod<object>("close");
+            _ = InvokeMethod<object>("close");
         }
         [Export("createAttribute")]
         public Attr CreateAttribute(string name)
@@ -741,17 +738,17 @@ namespace WebAssembly.Browser.DOM
         [Export("exitFullscreen")]
         public void ExitFullscreen()
         {
-            InvokeMethod<object>("exitFullscreen");
+            _ = InvokeMethod<object>("exitFullscreen");
         }
         [Export("exitPointerLock")]
         public void ExitPointerLock()
         {
-            InvokeMethod<object>("exitPointerLock");
+            _ = InvokeMethod<object>("exitPointerLock");
         }
         [Export("focus")]
         public void Focus()
         {
-            InvokeMethod<object>("focus");
+            _ = InvokeMethod<object>("focus");
         }
         [Export("getElementById")]
         public HTMLElementType GetElementById<HTMLElementType>(string elementId)
@@ -872,32 +869,32 @@ namespace WebAssembly.Browser.DOM
         [Export("releaseEvents")]
         public void ReleaseEvents()
         {
-            InvokeMethod<object>("releaseEvents");
+            _ = InvokeMethod<object>("releaseEvents");
         }
         [Export("updateSettings")]
         public void UpdateSettings()
         {
-            InvokeMethod<object>("updateSettings");
+            _ = InvokeMethod<object>("updateSettings");
         }
         [Export("webkitCancelFullScreen")]
         public void WebkitCancelFullScreen()
         {
-            InvokeMethod<object>("webkitCancelFullScreen");
+            _ = InvokeMethod<object>("webkitCancelFullScreen");
         }
         [Export("webkitExitFullscreen")]
         public void WebkitExitFullscreen()
         {
-            InvokeMethod<object>("webkitExitFullscreen");
+            _ = InvokeMethod<object>("webkitExitFullscreen");
         }
         [Export("write")]
         public void Write(params string[] content)
         {
-            InvokeMethod<object>("write", content);
+            _ = InvokeMethod<object>("write", content);
         }
         [Export("writeln")]
         public void Writeln(params string[] content)
         {
-            InvokeMethod<object>("writeln", content);
+            _ = InvokeMethod<object>("writeln", content);
         }
         [Export("elementsFromPoint")]
         public Element[] ElementsFromPoint(double x, double y)

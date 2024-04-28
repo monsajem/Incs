@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.IO;
-using System.Collections;
-using Monsajem_Incs.Collection.Array.TreeBased;
+﻿using Monsajem_Incs.Serialization;
+using System;
 using static Monsajem_Incs.Database.Base.Runer;
 using static System.Runtime.Serialization.FormatterServices;
-using Monsajem_Incs.Serialization;
 
 namespace Monsajem_Incs.Database.Base
 {
@@ -44,7 +39,7 @@ namespace Monsajem_Incs.Database.Base
             get => GetItem(Key);
         }
 
-        public ValueInfo GetItem(int Position,bool MakeCopy = false)
+        public ValueInfo GetItem(int Position, bool MakeCopy = false)
         {
             lock (this)
             {
@@ -71,7 +66,7 @@ namespace Monsajem_Incs.Database.Base
             {
                 using (Run.UseBlock())
                 {
-                    return GetItem(GetPosition(Key),MakeCopy);
+                    return GetItem(GetPosition(Key), MakeCopy);
                 }
             }
         }
@@ -83,10 +78,7 @@ namespace Monsajem_Incs.Database.Base
                 using (Run.UseBlock())
                 {
                     var Pos = KeysInfo.Keys.BinarySearch(Key).Index;
-                    if (Pos > -1)
-                        return Pos;
-                    else
-                        throw new ArgumentOutOfRangeException("Key", Key, "Key Not Exist");
+                    return Pos > -1 ? Pos : throw new ArgumentOutOfRangeException("Key", Key, "Key Not Exist");
                 }
             }
         }
@@ -99,12 +91,12 @@ namespace Monsajem_Incs.Database.Base
 
         public ValueInfo GetEqualOrNextItem(KeyType Key)
         {
-            lock(this)
+            lock (this)
             {
                 var position = KeysInfo.Keys.BinarySearch(Key).Index;
                 if (position < 0)
                 {
-                    position = position * -1;
+                    position *= -1;
                     if (position > KeysInfo.Keys.Length)
                         throw new Exception("NotFound");
                     else
@@ -116,12 +108,12 @@ namespace Monsajem_Incs.Database.Base
 
         public ValueInfo GetEqualOrBeforeItem(KeyType Key)
         {
-            lock(this)
+            lock (this)
             {
                 var position = KeysInfo.Keys.BinarySearch(Key).Index;
                 if (position < 0)
                 {
-                    position = position * -1;
+                    position *= -1;
                     if (position == 1)
                         throw new Exception("NotFound");
                     else
@@ -138,17 +130,12 @@ namespace Monsajem_Incs.Database.Base
 
         public ValueInfo GetItemOrDefaultItem(KeyType Key)
         {
-            lock(this)
+            lock (this)
             {
                 ValueInfo Result = null;
 
                 var Position = KeysInfo.Keys.BinarySearch(Key).Index;
-                if (Position > -1)
-                {
-                    Result = GetItem(Position);
-                }
-                else
-                    Result = null;
+                Result = Position > -1 ? GetItem(Position) : null;
 
                 return Result;
             }
@@ -162,7 +149,7 @@ namespace Monsajem_Incs.Database.Base
 
         public PartOfTable<ValueType, KeyType> GetElseItems(KeyType[] Keys)
         {
-            var NewKeys = this.KeysInfo.Keys.MakeSameNew();
+            var NewKeys = KeysInfo.Keys.MakeSameNew();
             NewKeys.BinaryDelete(Keys);
 
             return new PartOfTable<ValueType, KeyType>
@@ -176,20 +163,20 @@ namespace Monsajem_Incs.Database.Base
 
         public ValueType GetOrInserItem(ValueType Value)
         {
-            lock(this)
+            lock (this)
             {
-                ValueType Result = default(ValueType);
+                ValueType Result = default;
 
 
                 var Key = GetKey(Value);
                 var Position = KeysInfo.Keys.BinarySearch(Key).Index;
                 if (Position > -1)
                 {
-                    Result = this.GetItem(Position).Value;
+                    Result = GetItem(Position).Value;
                 }
                 else
                 {
-                    Insert(Value);
+                    _ = Insert(Value);
                     Result = this[Value].Value;
                 }
 

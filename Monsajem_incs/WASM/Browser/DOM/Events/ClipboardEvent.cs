@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
+﻿using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM.Events
 {
@@ -18,8 +16,7 @@ namespace WebAssembly.Browser.DOM.Events
         {
             get
             {
-                if (clipboardData == null)
-                    clipboardData = GetProperty<DataTransfer>("clipboardData");
+                clipboardData ??= GetProperty<DataTransfer>("clipboardData");
                 return clipboardData;
             }
             set => SetProperty<DataTransfer>("clipboardData", value);

@@ -1,6 +1,4 @@
-﻿using System;
-
-using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
+﻿using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
@@ -37,16 +35,16 @@ namespace WebAssembly.Browser.DOM
         [Export("setDragImage")]
         public void SetDragImage(Element image, double x, double y)
         {
-            InvokeMethod<object>("setDragImage", image, x, y);
+            _ = InvokeMethod<object>("setDragImage", image, x, y);
         }
 
-		//protected override void Dispose(bool disposing)
-		//{
-  //          if (JSHandle < 0)
-  //              return;
+        //protected override void Dispose(bool disposing)
+        //{
+        //          if (JSHandle < 0)
+        //              return;
 
-  //          base.Dispose(disposing);
+        //          base.Dispose(disposing);
 
-		//}
-	}
+        //}
+    }
 }

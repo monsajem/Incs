@@ -1,9 +1,8 @@
 ﻿using Monsajem_Incs.Database.Base;
 using Monsajem_Incs.Views.Maker.ValueTypes;
 using System;
-using WebAssembly.Browser.DOM;
 using System.Linq;
-using System.Collections.Generic;
+using WebAssembly.Browser.DOM;
 using static Monsajem_Incs.Collection.Array.Extentions;
 
 namespace Monsajem_Incs.Views.Maker.Database
@@ -21,19 +20,16 @@ namespace Monsajem_Incs.Views.Maker.Database
             HTMLElement[] Views = new HTMLElement[0];
             string TableName;
             var PartTable = Table as PartOfTable<ValueType, KeyType>;
-            if (PartTable != null)
-                TableName = PartTable.Parent.TableName;
-            else
-                TableName = Table.TableName;
+            TableName = PartTable != null ? PartTable.Parent.TableName : Table.TableName;
 
-            var TableInfo = TableFinder.FindTable(Table,TableName);
-            foreach (var Value in TableInfo.SelectorItems((Table.Select((c)=>c.Value), Query)))
+            var TableInfo = TableFinder.FindTable(Table, TableName);
+            foreach (var Value in TableInfo.SelectorItems((Table.Select((c) => c.Value), Query)))
             {
                 var Key = Table.GetKey(Value);
                 var View = (Table, Value).MakeView(
                 () => OnUpdate?.Invoke((TableInfo, Key)),
                 () => OnDelete?.Invoke((TableInfo, Key)));
-                Insert(ref Views,View);
+                Insert(ref Views, View);
             }
             return HolderViewItemMaker<Table<ValueType, KeyType>>.FillHolder((Table, Views));
         }

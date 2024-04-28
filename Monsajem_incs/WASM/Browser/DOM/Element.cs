@@ -1,6 +1,6 @@
-﻿using System;
-using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
-namespace WebAssembly.Browser.DOM 
+﻿using Microsoft.JSInterop;
+using System;
+namespace WebAssembly.Browser.DOM
 {
 
     [Export("Element", typeof(IJSInProcessObjectReference))]
@@ -306,12 +306,12 @@ namespace WebAssembly.Browser.DOM
         [Export("msReleasePointerCapture")]
         public void MsReleasePointerCapture(double pointerId)
         {
-            InvokeMethod<object>("msReleasePointerCapture", pointerId);
+            _ = InvokeMethod<object>("msReleasePointerCapture", pointerId);
         }
         [Export("msSetPointerCapture")]
         public void MsSetPointerCapture(double pointerId)
         {
-            InvokeMethod<object>("msSetPointerCapture", pointerId);
+            _ = InvokeMethod<object>("msSetPointerCapture", pointerId);
         }
         //[Export("msZoomTo")]
         //public void MsZoomTo(MsZoomToOptions args)
@@ -321,7 +321,7 @@ namespace WebAssembly.Browser.DOM
         [Export("releasePointerCapture")]
         public void ReleasePointerCapture(double pointerId)
         {
-            InvokeMethod<object>("releasePointerCapture", pointerId);
+            _ = InvokeMethod<object>("releasePointerCapture", pointerId);
         }
         [Export("removeAttributeNode")]
         public Attr RemoveAttributeNode(Attr oldAttr)
@@ -331,17 +331,17 @@ namespace WebAssembly.Browser.DOM
         [Export("removeAttributeNS")]
         public void RemoveAttributeNs(string namespaceURI, string localName)
         {
-            InvokeMethod<object>("removeAttributeNS", namespaceURI, localName);
+            _ = InvokeMethod<object>("removeAttributeNS", namespaceURI, localName);
         }
         [Export("requestFullscreen")]
         public void RequestFullscreen()
         {
-            InvokeMethod<object>("requestFullscreen");
+            _ = InvokeMethod<object>("requestFullscreen");
         }
         [Export("requestPointerLock")]
         public void RequestPointerLock()
         {
-            InvokeMethod<object>("requestPointerLock");
+            _ = InvokeMethod<object>("requestPointerLock");
         }
         [Export("setAttributeNode")]
         public Attr SetAttributeNode(Attr newAttr)
@@ -356,12 +356,12 @@ namespace WebAssembly.Browser.DOM
         [Export("setAttributeNS")]
         public void SetAttributeNs(string namespaceURI, string qualifiedName, string value)
         {
-            InvokeMethod<object>("setAttributeNS", namespaceURI, qualifiedName, value);
+            _ = InvokeMethod<object>("setAttributeNS", namespaceURI, qualifiedName, value);
         }
         [Export("setPointerCapture")]
         public void SetPointerCapture(double pointerId)
         {
-            InvokeMethod<object>("setPointerCapture", pointerId);
+            _ = InvokeMethod<object>("setPointerCapture", pointerId);
         }
         [Export("webkitMatchesSelector")]
         public bool WebkitMatchesSelector(string selectors)
@@ -371,12 +371,12 @@ namespace WebAssembly.Browser.DOM
         [Export("webkitRequestFullscreen")]
         public void WebkitRequestFullscreen()
         {
-            InvokeMethod<object>("webkitRequestFullscreen");
+            _ = InvokeMethod<object>("webkitRequestFullscreen");
         }
         [Export("webkitRequestFullScreen")]
         public void WebkitRequestFullScreen()
         {
-            InvokeMethod<object>("webkitRequestFullScreen");
+            _ = InvokeMethod<object>("webkitRequestFullScreen");
         }
         [Export("getElementsByClassName")]
         public NodeListOf<Element> GetElementsByClassName(string classNames)
@@ -416,17 +416,17 @@ namespace WebAssembly.Browser.DOM
         [Export("scroll")]
         public void Scroll(double x, double y)
         {
-            InvokeMethod<object>("scroll", x, y);
+            _ = InvokeMethod<object>("scroll", x, y);
         }
         [Export("scrollBy")]
         public void ScrollBy(double x, double y)
         {
-            InvokeMethod<object>("scrollBy", x, y);
+            _ = InvokeMethod<object>("scrollBy", x, y);
         }
         [Export("scrollTo")]
         public void ScrollTo(double x, double y)
         {
-            InvokeMethod<object>("scrollTo", x, y);
+            _ = InvokeMethod<object>("scrollTo", x, y);
         }
         [Export("insertAdjacentElement")]
         public Element InsertAdjacentElement(InsertPosition position, Element insertedElement)
@@ -436,12 +436,12 @@ namespace WebAssembly.Browser.DOM
         [Export("insertAdjacentHTML")]
         public void InsertAdjacentHtml(InsertPosition where, string html)
         {
-            InvokeMethod<object>("insertAdjacentHTML", where, html);
+            _ = InvokeMethod<object>("insertAdjacentHTML", where, html);
         }
         [Export("insertAdjacentText")]
         public void InsertAdjacentText(InsertPosition where, string text)
         {
-            InvokeMethod<object>("insertAdjacentText", where, text);
+            _ = InvokeMethod<object>("insertAdjacentText", where, text);
         }
         //[Export("attachShadow")]
         //public ShadowRoot AttachShadow(ShadowRootInit shadowRootInitDict)
@@ -451,7 +451,7 @@ namespace WebAssembly.Browser.DOM
         [Export("remove")]
         public void Remove()
         {
-            InvokeMethod<object>("remove");
+            _ = InvokeMethod<object>("remove");
         }
 
     }

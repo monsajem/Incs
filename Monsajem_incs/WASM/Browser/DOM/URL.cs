@@ -1,5 +1,5 @@
-﻿using System;
-using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
+﻿using Microsoft.JSInterop;
+using System;
 
 namespace WebAssembly.Browser.DOM
 {
@@ -42,7 +42,7 @@ namespace WebAssembly.Browser.DOM
         }
         public static string CreateDataUrl(byte[] Data)
         {
-            return "data:;base64,"+Convert.ToBase64String(Data);
+            return "data:;base64," + Convert.ToBase64String(Data);
         }
         [Export("revokeObjectURL")]
         public static void RevokeObjectUrl(string url)

@@ -11,14 +11,16 @@
 
         public static Window Window
         {
-            get {
+            get
+            {
                 return new Window();
             }
         }
 
         public static Document Document
         {
-            get {
+            get
+            {
                 return new Document();
             }
         }

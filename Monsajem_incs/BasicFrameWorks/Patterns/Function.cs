@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Monsajem_Incs.Collection.Array;
+using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static Monsajem_Incs.Collection.Array.Extentions;
-using Monsajem_Incs.Collection.Array;
 
 namespace Monsajem_Incs.Pattern
 {
@@ -17,27 +14,20 @@ namespace Monsajem_Incs.Pattern
         public Function(Func<t[], int, bool> IsInRange) :
             this((c, p) =>
             {
-                if (IsInRange(c, p))
-                    return (true, 1);
-                else
-                    return (false, 0);
+                return IsInRange(c, p) ? ((bool InRange, int PutLen))(true, 1) : ((bool InRange, int PutLen))(false, 0);
             })
         { }
 
         public Function(bool IsMatch, params t[] Keys) :
             this((c, p) =>
             {
-                if (IsMatch == Keys.Contains(c[p]))
-                    return (true, 1);
-                return (false, 0);
+                return IsMatch == Keys.Contains(c[p]) ? ((bool InRange, int PutLen))(true, 1) : ((bool InRange, int PutLen))(false, 0);
             })
         { }
         public Function(int AlwaysPut, bool IsMatch, params t[] Keys) :
             this((c, p) =>
             {
-                if (IsMatch == Keys.Contains(c[p]))
-                    return (true, 1);
-                return (false, 0);
+                return IsMatch == Keys.Contains(c[p]) ? ((bool InRange, int PutLen))(true, 1) : ((bool InRange, int PutLen))(false, 0);
             })
         { }
 

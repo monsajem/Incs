@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
+﻿using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
@@ -12,13 +11,13 @@ namespace WebAssembly.Browser.DOM
         internal DOMImplementation(IJSInProcessObjectReference handle) : base(handle) { }
 
         [Export("createDocument")]
-        public Document CreateDocument(string namespaceURI,string qualifiedName,DocumentType doctype)
+        public Document CreateDocument(string namespaceURI, string qualifiedName, DocumentType doctype)
         {
-            return InvokeMethod<Document>("createDocument", namespaceURI,qualifiedName, doctype);
+            return InvokeMethod<Document>("createDocument", namespaceURI, qualifiedName, doctype);
         }
 
         [Export("createDocumentType")]
-        public DocumentType CreateDocumentType(string qualifiedName,string publicId,string systemId)
+        public DocumentType CreateDocumentType(string qualifiedName, string publicId, string systemId)
         {
             return InvokeMethod<DocumentType>("createDocumentType", qualifiedName, publicId, systemId);
         }

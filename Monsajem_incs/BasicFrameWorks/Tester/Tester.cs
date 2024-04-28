@@ -1,42 +1,38 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Monsajem_Incs.Serialization;
+using System;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Monsajem_Incs.Serialization;
-using static Monsajem_Incs.Collection.Array.Extentions;
 namespace Monsajem_Incs.TimeingTester
 {
     public static class Timing
     {
         public static TimeSpan run(Action Somthing)
         {
-            Action InnerAction=()=>{};
-            Stopwatch HaveLate = new Stopwatch();
+            static void InnerAction() { }
+            Stopwatch HaveLate = new();
             HaveLate.Start();
             InnerAction();
             HaveLate.Stop();
 
 
-            Stopwatch stopWatch = new Stopwatch();
+            Stopwatch stopWatch = new();
             stopWatch.Start();
             Somthing();
-            stopWatch.Stop();           
+            stopWatch.Stop();
 
             return stopWatch.Elapsed - HaveLate.Elapsed;
         }
 
         public static async Task<TimeSpan> run(Func<Task> Somthing)
         {
-            Func<Task> InnerAction = async () => { };
-            Stopwatch HaveLate = new Stopwatch();
+            static async Task InnerAction() { }
+            Stopwatch HaveLate = new();
             HaveLate.Start();
             await InnerAction();
             HaveLate.Stop();
 
 
-            Stopwatch stopWatch = new Stopwatch();
+            Stopwatch stopWatch = new();
             stopWatch.Start();
             await Somthing();
             stopWatch.Stop();
@@ -64,9 +60,9 @@ namespace Monsajem_Incs.TimeingTester
                 }
             }
         }
-        private static int MaxLen=1000;
-        private static int MinLen=-1000;
-        private static int minCount=1000;
+        private static int MaxLen = 1000;
+        private static int MinLen = -1000;
+        private static int minCount = 1000;
         private static int ActionsCount;
         public static void run(Action Action)
         {
@@ -74,15 +70,15 @@ namespace Monsajem_Incs.TimeingTester
             {
                 bool IsDone = false;
                 var ActionByte = Action.Serialize();
-                Action Save = () =>
+                void Save()
                 {
-                    if(ActionsCount==0)
+                    if (ActionsCount == 0)
                         StreamLen += 4;
                     ActionsCount += 1;
-                    Stream.Seek(0, System.IO.SeekOrigin.Begin);
+                    _ = Stream.Seek(0, System.IO.SeekOrigin.Begin);
                     Stream.Write(BitConverter.GetBytes(ActionsCount), 0, 4);
 
-                    Stream.Seek(StreamLen, System.IO.SeekOrigin.Begin);
+                    _ = Stream.Seek(StreamLen, System.IO.SeekOrigin.Begin);
                     StreamLen += ActionByte.Length + 5;
                     if (IsDone)
                         Stream.Write(new byte[] { 1 }, 0, 1);
@@ -91,7 +87,7 @@ namespace Monsajem_Incs.TimeingTester
                     Stream.Write(BitConverter.GetBytes(ActionByte.Length), 0, 4);
                     Stream.Write(ActionByte, 0, ActionByte.Length);
                     Stream.Flush();
-                };
+                }
                 try
                 {
                     Action();
@@ -100,7 +96,7 @@ namespace Monsajem_Incs.TimeingTester
                 }
                 finally
                 {
-                    if(IsDone==false)
+                    if (IsDone == false)
                         Save();
                 }
             }
@@ -110,9 +106,9 @@ namespace Monsajem_Incs.TimeingTester
         {
             var data = new byte[Count];
             var Pos = 0;
-            while(Count>0)
+            while (Count > 0)
             {
-               var C= Stream.Read(data, Pos, Count);
+                var C = Stream.Read(data, Pos, Count);
                 if (C == 0)
                     throw new Exception("Stream Error");
                 Count -= C;
@@ -122,10 +118,10 @@ namespace Monsajem_Incs.TimeingTester
         }
         public static void DebugStream(Action<(Action Action, bool IsSafe)> Action)
         {
-            Stream.Seek(0, System.IO.SeekOrigin.Begin);
+            _ = Stream.Seek(0, System.IO.SeekOrigin.Begin);
             var data = Read(4);
             ActionsCount = BitConverter.ToInt32(data, 0);
-            for(int i=0;i<ActionsCount;i++)
+            for (int i = 0; i < ActionsCount; i++)
             {
                 data = Read(1);
                 bool IsSafe = data[0] == 1;

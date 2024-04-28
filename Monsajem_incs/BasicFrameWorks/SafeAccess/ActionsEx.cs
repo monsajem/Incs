@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace Monsajem_Incs.Async
@@ -14,35 +11,36 @@ namespace Monsajem_Incs.Async
         public static void ex<t>(this t dg)
             where t : System.MulticastDelegate
         {
-            
+
         }
 
         public static Task WaitForHandle(GetRef<Action> Action)
         {
             var Runned = false;
-            var Waiter = new Task(()=> { });
-            Action MyAction = null;
-            MyAction = () => {
-                lock(Waiter)
+            var Waiter = new Task(() => { });
+            void MyAction()
+            {
+                lock (Waiter)
                 {
-                    if(Runned==false)
+                    if (Runned == false)
                     {
                         Action() -= MyAction;
                         Runned = true;
                         Waiter.Start();
                     }
                 }
-            };
+            }
+
             Action() += MyAction;
             return Waiter;
         }
 
-        public static void WaitForHandle(GetRef<Action> Action,Action Handle)
+        public static void WaitForHandle(GetRef<Action> Action, Action Handle)
         {
             var Locker = new object();
             var Runned = false;
-            Action MyAction = null;
-            MyAction = () => {
+            void MyAction()
+            {
 
                 lock (Locker)
                 {
@@ -53,7 +51,8 @@ namespace Monsajem_Incs.Async
                         Handle();
                     }
                 }
-            };
+            }
+
             Action() += MyAction;
         }
 
@@ -67,18 +66,18 @@ namespace Monsajem_Incs.Async
         public static void RunOnNewThreade(IEnumerable<Action> Actions)
         {
             foreach (var Action in Actions)
-                new System.Threading.Thread(() =>Action()).Start();
+                new System.Threading.Thread(() => Action()).Start();
         }
     }
     public static class Extentions
     {
-        public static Task WaitForHandle(this GetRef<Action> Action)=>
+        public static Task WaitForHandle(this GetRef<Action> Action) =>
            DelegateActions.WaitForHandle(Action);
 
-        public static void RunOnNewThreade<t>(this Action Action)=>
+        public static void RunOnNewThreade<t>(this Action Action) =>
             DelegateActions.RunOnNewThreade(Action);
 
-        public static void RunOnNewThreade(this IEnumerable<Action> actions)=>
+        public static void RunOnNewThreade(this IEnumerable<Action> actions) =>
             DelegateActions.RunOnNewThreade(actions);
     }
 }

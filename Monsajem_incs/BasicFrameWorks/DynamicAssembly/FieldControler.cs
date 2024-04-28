@@ -1,29 +1,27 @@
 ﻿using System;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Linq;
-using System.Security.Policy;
-using System.Security;
-using static Monsajem_Incs.Collection.Array.Extentions;
 using System.Runtime.CompilerServices;
+using static Monsajem_Incs.Collection.Array.Extentions;
 
 namespace Monsajem_Incs.DynamicAssembly
 {
     public class FieldControler
     {
-        public FieldControler(FieldInfo Field):this(
+        public FieldControler(FieldInfo Field) : this(
             Field,
             TypeController.SetValue(Field),
              TypeController.GetValue(Field))
-        {}
+        { }
 
         public FieldControler(
             FieldInfo Field,
-            Action<object, object> SetValue, 
+            Action<object, object> SetValue,
             Func<object, object> GetValue)
         {
-            this.Info = Field;
+            Info = Field;
             this.SetValue = SetValue;
             this.GetValue = GetValue;
         }
@@ -33,15 +31,15 @@ namespace Monsajem_Incs.DynamicAssembly
         public readonly Func<object, object> GetValue;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public ValueType GetValueAs<ValueType>(object Parent)=>(ValueType)GetValue(Parent);
+        public ValueType GetValueAs<ValueType>(object Parent) => (ValueType)GetValue(Parent);
 
         public object this[object obj]
         {
             get => GetValue(obj);
         }
-        public object this[object obj,object Value]
+        public object this[object obj, object Value]
         {
-            set => SetValue(obj,Value);
+            set => SetValue(obj, Value);
         }
 
         public static FieldControler<ParentType, FieldType>
@@ -93,9 +91,9 @@ namespace Monsajem_Incs.DynamicAssembly
         public FieldControler(Expression<Func<ParentType, FieldType>> Field)
         {
             this.Field = typeof(ParentType).GetField(((MemberExpression)Field.Body).Member.Name);
-            this.RefValue = _GetValueRef(this.Field);
-            this.GetValue = _GetValue(this.Field);
-            this.SetValue = TypeController.SetValue(typeof(ParentType).GetField(((MemberExpression)Field.Body).Member.Name));
+            RefValue = _GetValueRef(this.Field);
+            GetValue = _GetValue(this.Field);
+            SetValue = TypeController.SetValue(typeof(ParentType).GetField(((MemberExpression)Field.Body).Member.Name));
         }
 
         public ref FieldType Value(ref ParentType Parent)
@@ -103,14 +101,14 @@ namespace Monsajem_Incs.DynamicAssembly
             return ref RefValue(ref Parent);
         }
 
-        public FieldType Value(ParentType Parent,Func<FieldType> Get)
+        public FieldType Value(ParentType Parent, Func<FieldType> Get)
         {
             var Val = Get();
-            SetValue(Parent,Val);
+            SetValue(Parent, Val);
             return Val;
         }
 
-        public FieldType Value(ParentType Parent, Func<FieldType,FieldType> Get)
+        public FieldType Value(ParentType Parent, Func<FieldType, FieldType> Get)
         {
             var Val = Get(GetValue(Parent));
             SetValue(Parent, Val);
@@ -146,7 +144,7 @@ namespace Monsajem_Incs.DynamicAssembly
         private static Func<ParentType, FieldType> _GetValue(FieldInfo Field)
         {
             var methodName = "GetValue_";
-            var dynMethod = new DynamicMethod(methodName, typeof(FieldType), new Type[] { typeof(ParentType) },restrictedSkipVisibility: true);
+            var dynMethod = new DynamicMethod(methodName, typeof(FieldType), new Type[] { typeof(ParentType) }, restrictedSkipVisibility: true);
             ILGenerator il = dynMethod.GetILGenerator();
             il.Emit(OpCodes.Ldarg_0);
             il.Emit(OpCodes.Ldfld, Field);
@@ -157,7 +155,7 @@ namespace Monsajem_Incs.DynamicAssembly
         public override string ToString()
         {
             var Str = typeof(ParentType).Name;
-            if(typeof(ParentType).IsGenericType)
+            if (typeof(ParentType).IsGenericType)
             {
                 Str += "[";
                 foreach (var Arg in typeof(ParentType).GenericTypeArguments)
@@ -167,7 +165,7 @@ namespace Monsajem_Incs.DynamicAssembly
                 Str += "]";
             }
 
-            Str +=" >> " + typeof(FieldType).Name;
+            Str += " >> " + typeof(FieldType).Name;
             if (typeof(FieldType).IsGenericType)
             {
                 Str += "[";

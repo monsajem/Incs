@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Microsoft.JSInterop;
+using System;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 using WebAssembly.Browser.DOM.Events;
 
 namespace WebAssembly.Browser.DOM
@@ -42,7 +42,7 @@ namespace WebAssembly.Browser.DOM
         Attr SetNamedItem(Attr arg);
         [Export("setNamedItemNS")]
         Attr SetNamedItemNs(Attr arg);
-        [IndexerName("TheItem")]  
+        [IndexerName("TheItem")]
         Attr this[double index] { get; set; }
     }
 
@@ -526,10 +526,10 @@ namespace WebAssembly.Browser.DOM
         Document Import { get; set; }
         [Export("integrity")]
         string Integrity { get; set; }
-    //    [Export("addEventListener")]
-    //    void AddEventListener(string type, DOMEventHandler listener, object options);
-    //    [Export("removeEventListener")]
-    //    void RemoveEventListener(string type, DOMEventHandler listener, object options);
+        //    [Export("addEventListener")]
+        //    void AddEventListener(string type, DOMEventHandler listener, object options);
+        //    [Export("removeEventListener")]
+        //    void RemoveEventListener(string type, DOMEventHandler listener, object options);
     }
 
     public interface IHTMLTemplateElement : IHTMLElement
@@ -1617,7 +1617,7 @@ namespace WebAssembly.Browser.DOM
         HTMLTableDataCellElement InsertCell(double index);
     }
 
-    public interface IHTMLTableHeaderCellElement : IHTMLTableCellElement 
+    public interface IHTMLTableHeaderCellElement : IHTMLTableCellElement
     {
         //[Export("scope")]
         //string Scope { get; set; }

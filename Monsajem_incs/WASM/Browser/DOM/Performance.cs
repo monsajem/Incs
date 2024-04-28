@@ -1,5 +1,5 @@
-﻿using System;
-using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
+﻿using Microsoft.JSInterop;
+using System;
 
 namespace WebAssembly.Browser.DOM
 {
@@ -18,17 +18,17 @@ namespace WebAssembly.Browser.DOM
         [Export("clearMarks")]
         public void ClearMarks(string markName)
         {
-            InvokeMethod<object>("clearMarks", markName);
+            _ = InvokeMethod<object>("clearMarks", markName);
         }
         [Export("clearMeasures")]
         public void ClearMeasures(string measureName)
         {
-            InvokeMethod<object>("clearMeasures", measureName);
+            _ = InvokeMethod<object>("clearMeasures", measureName);
         }
         [Export("clearResourceTimings")]
         public void ClearResourceTimings()
         {
-            InvokeMethod<object>("clearResourceTimings");
+            _ = InvokeMethod<object>("clearResourceTimings");
         }
         [Export("getEntries")]
         public Object GetEntries()
@@ -58,12 +58,12 @@ namespace WebAssembly.Browser.DOM
         [Export("mark")]
         public void Mark(string markName)
         {
-            InvokeMethod<object>("mark", markName);
+            _ = InvokeMethod<object>("mark", markName);
         }
         [Export("measure")]
         public void Measure(string measureName, string startMarkName, string endMarkName)
         {
-            InvokeMethod<object>("measure", measureName, startMarkName, endMarkName);
+            _ = InvokeMethod<object>("measure", measureName, startMarkName, endMarkName);
         }
         [Export("now")]
         public double Now()
@@ -73,7 +73,7 @@ namespace WebAssembly.Browser.DOM
         [Export("setResourceTimingBufferSize")]
         public void SetResourceTimingBufferSize(double maxSize)
         {
-            InvokeMethod<object>("setResourceTimingBufferSize", maxSize);
+            _ = InvokeMethod<object>("setResourceTimingBufferSize", maxSize);
         }
         [Export("toJSON")]
         public string ToJson()

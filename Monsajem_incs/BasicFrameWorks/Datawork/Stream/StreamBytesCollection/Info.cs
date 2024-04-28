@@ -1,12 +1,8 @@
-﻿using System;
+﻿using Monsajem_Incs.Collection.Array.TreeBased;
+using Monsajem_Incs.Serialization;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading;
-using Monsajem_Incs.Database.Base;
-using Monsajem_Incs.Serialization;
-using Monsajem_Incs.Database;
-using Monsajem_Incs.Collection.Array.TreeBased;
 
 namespace Monsajem_Incs.Collection
 {
@@ -128,9 +124,9 @@ namespace Monsajem_Incs.Collection
 
         internal void InsertGap(Data Gap)
         {
-            GapsByFrom.BinaryInsert(new DataByForm() { Data = Gap });
-            GapsByLen.BinaryInsert(new DataByLen() { Data = Gap });
-            GapsByTo.BinaryInsert(new DataByTo() { Data = Gap });
+            _ = GapsByFrom.BinaryInsert(new DataByForm() { Data = Gap });
+            _ = GapsByLen.BinaryInsert(new DataByLen() { Data = Gap });
+            _ = GapsByTo.BinaryInsert(new DataByTo() { Data = Gap });
         }
         internal void DeleteGap(Data Gap)
         {
@@ -200,7 +196,7 @@ namespace Monsajem_Incs.Collection
                     if (Keys[i].From != NextPos)
                         throw new Exception();
 
-                    Stream.Seek(NextPos, System.IO.SeekOrigin.Begin);
+                    _ = Stream.Seek(NextPos, System.IO.SeekOrigin.Begin);
                     var Header = Stream.Read(HeadSize).Deserialize<DataHeader>();
 
                     if (Keys[i].Len != Header.DataLen)
@@ -220,7 +216,7 @@ namespace Monsajem_Incs.Collection
             var Key = Keys[i];
             if (Key.Data.To >= Stream.Length)
                 throw new Exception();
-            if (Key.Data.Len != (Key.Data.To - Key.Data.From) + 1)
+            if (Key.Data.Len != Key.Data.To - Key.Data.From + 1)
                 throw new Exception();
             if (Keys.Length > i + 1)
             {

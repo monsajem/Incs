@@ -1,19 +1,17 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-using static Monsajem_Incs.Collection.Array.Extentions;
-using static System.Text.Encoding;
 
 namespace Monsajem_Incs.Serialization
 {
     public partial class Serialization
     {
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         private void VisitedSerialize(
             SerializeData Data,
             object obj,
             SerializeInfo serializer)
         {
-            if (serializer.ConstantSize>-1)
+            if (serializer.ConstantSize > -1)
             {
                 serializer.Serializer(Data, obj);
                 return;
@@ -27,7 +25,7 @@ namespace Monsajem_Incs.Serialization
             if (serializer.CanStoreInVisit == false)
             {
                 BytesData.Write(Byte_Int_N_1, 0, 4);
-                serializer.Serializer(Data,obj);
+                serializer.Serializer(Data, obj);
                 return;
             }
             var Key = new ObjectContainer()
@@ -36,7 +34,7 @@ namespace Monsajem_Incs.Serialization
                 obj = obj
             };
             var Visitor = Data.Visitor;
-            if (Visitor.TryGetValue(Key, out var VisitedObj)== false)
+            if (Visitor.TryGetValue(Key, out var VisitedObj) == false)
             {
                 Visitor.Add(Key);
 #if DEBUG
@@ -44,7 +42,7 @@ namespace Monsajem_Incs.Serialization
 #endif
                 Key.FromPos = (int)BytesData.Position;
                 BytesData.Write(Byte_Int_N_1, 0, 4);
-                serializer.Serializer(Data,obj);
+                serializer.Serializer(Data, obj);
             }
             else
             {
@@ -58,13 +56,13 @@ namespace Monsajem_Incs.Serialization
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         private void VisitedDeserialize(
             DeserializeData Data,
             Action<object> Set,
             SerializeInfo deserializer)
         {
-            if (deserializer.ConstantSize>-1)
+            if (deserializer.ConstantSize > -1)
             {
                 Set(deserializer.Deserializer(Data));
                 return;
@@ -88,7 +86,7 @@ namespace Monsajem_Incs.Serialization
                         HashCode = LastFrom,
                         IsUniqueHashCode = true
                     };
-                    Data.Visitor.Add(VisitedObj);
+                    _ = Data.Visitor.Add(VisitedObj);
                     VisitedObj.obj = deserializer.Deserializer(Data);
                     Set(VisitedObj.obj);
                     return;
@@ -100,14 +98,14 @@ namespace Monsajem_Incs.Serialization
                 HashCode = Fr,
                 IsUniqueHashCode = true
             };
-            Data.Visitor.TryGetValue(VisitedObj, out VisitedObj);
+            _ = Data.Visitor.TryGetValue(VisitedObj, out VisitedObj);
             if (VisitedObj.obj == null)
                 Data.AtLast += () => Set(VisitedObj.obj);
             else
                 Set(VisitedObj.obj);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         private t VisitedInfoSerialize<t>(
             SerializeData S_Data,
             object obj,
@@ -118,13 +116,13 @@ namespace Monsajem_Incs.Serialization
                 HashCode = obj.GetHashCode(),
                 obj = obj
             };
-            if (S_Data.Visitor_info.TryGetValue(Key, out var VisitedObj)== false)
+            if (S_Data.Visitor_info.TryGetValue(Key, out var VisitedObj) == false)
             {
-                S_Data.Visitor_info.Add(Key);
+                _ = S_Data.Visitor_info.Add(Key);
                 Key.FromPos = (int)S_Data.Data.Position;
                 var Data = GetData();
                 var DataBytes = Data.Bytes;
-                Key.Data =(DataBytes, Data.Obj);
+                Key.Data = (DataBytes, Data.Obj);
                 S_Data.Data.Write(Byte_Int_N_1, 0, 4);
                 S_Data.Data.Write(DataBytes, 0, DataBytes.Length);
                 return Data.Obj;
@@ -136,7 +134,7 @@ namespace Monsajem_Incs.Serialization
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         private t VisitedInfoDeserialize<t>(
             DeserializeData Data,
             Func<t> Get)
@@ -153,7 +151,7 @@ namespace Monsajem_Incs.Serialization
                     IsUniqueHashCode = true,
                     obj = Get()
                 };
-                Data.Visitor_info.Add(VisitedObj);
+                _ = Data.Visitor_info.Add(VisitedObj);
                 return (t)VisitedObj.obj;
             }
             VisitedObj = new ObjectContainer()
@@ -161,7 +159,7 @@ namespace Monsajem_Incs.Serialization
                 HashCode = Fr,
                 IsUniqueHashCode = true
             };
-            Data.Visitor_info.TryGetValue(VisitedObj, out VisitedObj);
+            _ = Data.Visitor_info.TryGetValue(VisitedObj, out VisitedObj);
             return (t)VisitedObj.obj;
         }
     }

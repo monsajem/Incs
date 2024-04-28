@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using static Monsajem_Incs.Collection.Array.Extentions;
 using static Monsajem_Incs.Database.Base.Runer;
 using static System.Runtime.Serialization.FormatterServices;
 
@@ -24,8 +23,10 @@ namespace Monsajem_Incs.Database.Base
         {
             using (Run.UseBlock())
             {
-                var KeyInfo = new TableExtras.KeyInfo();
-                KeyInfo.Key = Key;
+                var KeyInfo = new TableExtras.KeyInfo
+                {
+                    Key = Key
+                };
                 Extras.Accepting?.Invoke(KeyInfo);
                 KeyInfo.Pos = KeysInfo.Keys.BinaryInsert(Key);
                 Extras.Accepted?.Invoke(KeyInfo);
@@ -42,14 +43,14 @@ namespace Monsajem_Incs.Database.Base
 
         public void Accept(ValueType Value)
         {
-            var Key =base.GetKey(Value);
-            Accept(Key);
+            var Key = base.GetKey(Value);
+            _ = Accept(Key);
         }
 
-        public void Accept(Table<ValueType,KeyType> Values)
+        public void Accept(Table<ValueType, KeyType> Values)
         {
             foreach (var Key in Values.KeysInfo.Keys)
-                Accept(Key);
+                _ = Accept(Key);
         }
 
         public void Accept(IEnumerable<ValueType> Values)
@@ -60,7 +61,7 @@ namespace Monsajem_Incs.Database.Base
         public void Accept(IEnumerable<KeyType> Keys)
         {
             foreach (var Key in Keys)
-                Accept(Key);
+                _ = Accept(Key);
         }
 
     }

@@ -1,5 +1,5 @@
-﻿using System;
-using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
+﻿using Microsoft.JSInterop;
+using System;
 
 namespace WebAssembly.Browser.DOM
 {
@@ -59,12 +59,12 @@ namespace WebAssembly.Browser.DOM
         [Export("addCue")]
         public void AddCue(TextTrackCue cue)
         {
-            InvokeMethod<object>("addCue", cue);
+            _ = InvokeMethod<object>("addCue", cue);
         }
         [Export("removeCue")]
         public void RemoveCue(TextTrackCue cue)
         {
-            InvokeMethod<object>("removeCue", cue);
+            _ = InvokeMethod<object>("removeCue", cue);
         }
     }
 }

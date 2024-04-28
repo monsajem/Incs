@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Runtime.CompilerServices;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace Monsajem_Incs.Convertors
 {
@@ -18,8 +15,8 @@ namespace Monsajem_Incs.Convertors
             {
                 this.FromType = FromType;
                 this.ToType = ToType;
-                this.HashCode = FromType.GetHashCode() + ToType.GetHashCode();
-                this.Convertor = null;
+                HashCode = FromType.GetHashCode() + ToType.GetHashCode();
+                Convertor = null;
             }
 
             public int HashCode;
@@ -37,10 +34,10 @@ namespace Monsajem_Incs.Convertors
             public override int GetHashCode() => HashCode;
         }
 
-        internal static HashSet<ExactConvertor> ExactConvertors = new HashSet<ExactConvertor>();
+        internal static HashSet<ExactConvertor> ExactConvertors = [];
 
         internal static SortedDictionary<Type, MethodInfo> GenericConvertor =
-            new SortedDictionary<Type, MethodInfo>(
+            new(
                     Comparer<Type>.Create((c1, c2) => c1.FullName.CompareTo(c2.FullName)));
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -52,7 +49,7 @@ namespace Monsajem_Incs.Convertors
             if (ExactConvertors.TryGetValue(Key, out var Result) == false)
             {
                 var ConvertorType = typeof(Convertor<,>).MakeGenericType(FromType, ToType);
-                ConvertorType.GetMethod("Safe").Invoke(null, null);
+                _ = ConvertorType.GetMethod("Safe").Invoke(null, null);
                 goto Again;
             }
             else
@@ -90,11 +87,11 @@ namespace Monsajem_Incs.Convertors
                 throw new Exception($"{nameof(FromGenericType)} is null.");
             if (GenericMethod == null)
                 throw new Exception($"{nameof(GenericMethod)} is null.");
-            if (FromGenericType.IsGenericTypeDefinition == false&&FromGenericType.IsArray==false)
+            if (FromGenericType.IsGenericTypeDefinition == false && FromGenericType.IsArray == false)
                 throw new Exception($"{nameof(FromGenericType)} must be a generic type definition or array of object.");
             if (FromGenericType.IsArray == true && FromGenericType.GetElementType() != typeof(object))
                 throw new Exception($"{nameof(FromGenericType)} must be a generic type definition or array of object.");
-            
+
             GenericConvertor.Add(FromGenericType, GenericMethod);
         }
     }
@@ -116,10 +113,10 @@ namespace Monsajem_Incs.Convertors
                                            CreateDelegate<Func<FromType, ToType>>();
                 }
             }
-            else if(FromType.IsArray)
+            else if (FromType.IsArray)
             {
                 var GenericArgument = FromType.GetElementType();
-                FromType = Array.CreateInstance(typeof(object),new int[FromType.GetArrayRank()]).GetType();
+                FromType = Array.CreateInstance(typeof(object), new int[FromType.GetArrayRank()]).GetType();
                 if (ConvertorFromTo.GenericConvertor.ContainsKey(FromType))
                 {
                     var Convertor = ConvertorFromTo.GenericConvertor[FromType];
@@ -129,7 +126,7 @@ namespace Monsajem_Incs.Convertors
             }
             lock (ConvertorFromTo.ExactConvertors)
             {
-                ConvertorFromTo.ExactConvertors.Add(
+                _ = ConvertorFromTo.ExactConvertors.Add(
                     new ConvertorFromTo.ExactConvertor(typeof(FromType), typeof(ToType))
                     {
                         Convertor = Obj_Convertor
@@ -137,7 +134,7 @@ namespace Monsajem_Incs.Convertors
             }
             lock (ConvertorTo<ToType>.ExactConvertors)
             {
-                ConvertorTo<ToType>.ExactConvertors.Add(
+                _ = ConvertorTo<ToType>.ExactConvertors.Add(
                     new ConvertorTo<ToType>.ExactConvertor(typeof(FromType))
                     {
                         Convertor = To_Convertor
@@ -165,8 +162,8 @@ namespace Monsajem_Incs.Convertors
             public ExactConvertor(Type FromType)
             {
                 this.FromType = FromType;
-                this.HashCode = FromType.GetHashCode();
-                this.Convertor = null;
+                HashCode = FromType.GetHashCode();
+                Convertor = null;
             }
 
             public int HashCode;
@@ -181,7 +178,7 @@ namespace Monsajem_Incs.Convertors
             public override int GetHashCode() => FromType.GetHashCode();
         }
 
-        internal static HashSet<ExactConvertor> ExactConvertors = new HashSet<ExactConvertor>();
+        internal static HashSet<ExactConvertor> ExactConvertors = [];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         internal static ExactConvertor _GetConvertor(Type FromType)
@@ -191,7 +188,7 @@ namespace Monsajem_Incs.Convertors
             if (ExactConvertors.TryGetValue(Key, out var Result) == false)
             {
                 var ConvertorType = typeof(Convertor<,>).MakeGenericType(FromType, typeof(ToType));
-                ConvertorType.GetMethod("Safe").Invoke(null, null);
+                _ = ConvertorType.GetMethod("Safe").Invoke(null, null);
                 goto Again;
             }
             else

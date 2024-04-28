@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Monsajem_Incs.Calculator
 {
-    public class DirectCalculator<Input,Result>
-        where Result:unmanaged
-        where Input: unmanaged
+    public class DirectCalculator<Input, Result>
+        where Result : unmanaged
+        where Input : unmanaged
     {
         public DirectCalculator(Result[] Results)
         {
@@ -35,16 +31,16 @@ namespace Monsajem_Incs.Calculator
                 while (ResultIndex < Count)
                 {
                     var Index = CalcPos(*(RefBuffer + InputIndex));
-                    for(int X=0;X<BufferX;X++)
+                    for (int X = 0; X < BufferX; X++)
                     {
-                        *(RefResult + ResultIndex + X) = *(RefAllResults + Index+X);
+                        *(RefResult + ResultIndex + X) = *(RefAllResults + Index + X);
                     }
                     ResultIndex += ResultSize_inMemory;
                     InputIndex += InputSize_inMemory;
                 }
             return Result;
         }
-       
+
         public Func<Input, int> CalcPos;
     }
 

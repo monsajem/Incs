@@ -1,13 +1,6 @@
-﻿using Monsajem_Incs.Collection.Array.ArrayBased.DynamicSize;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using static Monsajem_Incs.Collection.Array.Extentions;
-using static System.Runtime.Serialization.FormatterServices;
 using static System.Text.Encoding;
-using System.Runtime.CompilerServices;
 
 namespace Monsajem_Incs.Serialization
 {
@@ -17,11 +10,11 @@ namespace Monsajem_Incs.Serialization
         public Serialization()
         {
             Serializere = this;
-            SerializeInfo<object>.InsertSerializer(
+            _ = SerializeInfo<object>.InsertSerializer(
             (Data, obj) => { },
             (Data) => new object(), false);
 
-            SerializeInfo<DateTime>.InsertSerializer(
+            _ = SerializeInfo<DateTime>.InsertSerializer(
             (Data, obj) =>
             {
                 Data.Data.Write(BitConverter.GetBytes(((DateTime)obj).Ticks), 0, 8);
@@ -32,7 +25,7 @@ namespace Monsajem_Incs.Serialization
                 return DateTime.FromBinary(BitConverter.ToInt64(Data.Data, Position));
             }, true);
 
-            SerializeInfo<string>.InsertSerializer(
+            _ = SerializeInfo<string>.InsertSerializer(
             (Data, obj) =>
             {
                 if (obj == null)
@@ -56,7 +49,7 @@ namespace Monsajem_Incs.Serialization
                 return UTF8.GetString(Data.Data, Position, StrSize);
             }, true);
 
-            SerializeInfo<Type>.InsertSerializer(
+            _ = SerializeInfo<Type>.InsertSerializer(
             (Data, obj) =>
             {
                 var Name = Write((obj as Type).MidName());
@@ -69,7 +62,7 @@ namespace Monsajem_Incs.Serialization
 
             {
                 var SR = SerializeInfo<object>.GetSerialize();
-                SerializeInfo<System.Runtime.InteropServices.GCHandle>.InsertSerializer(
+                _ = SerializeInfo<System.Runtime.InteropServices.GCHandle>.InsertSerializer(
                     (Data, obj) =>
                     {
                         var GC = (System.Runtime.InteropServices.GCHandle)obj;
@@ -81,7 +74,7 @@ namespace Monsajem_Incs.Serialization
                     }, true);
             }
 
-            SerializeInfo<IEqualityComparer<string>>.InsertSerializer(
+            _ = SerializeInfo<IEqualityComparer<string>>.InsertSerializer(
                 (Data, obj) =>
                 {
                     if (obj == null)
@@ -91,10 +84,7 @@ namespace Monsajem_Incs.Serialization
                 },
                 (Data) =>
                 {
-                    if (Data.Data[Data.From++] == 0)
-                        return null;
-                    else
-                        return EqualityComparer<string>.Default;
+                    return Data.Data[Data.From++] == 0 ? null : (object)EqualityComparer<string>.Default;
                 }, true);
         }
     }

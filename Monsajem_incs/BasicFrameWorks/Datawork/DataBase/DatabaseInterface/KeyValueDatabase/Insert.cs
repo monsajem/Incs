@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.IO;
-using System.Collections;
-using Monsajem_Incs.Collection.Array.TreeBased;
 using static Monsajem_Incs.Database.Base.Runer;
 using static System.Runtime.Serialization.FormatterServices;
 
@@ -55,17 +51,17 @@ namespace Monsajem_Incs.Database.Base
             return Insert(Value);
         }
 
-        public (int Pos,ValueType value) Insert(Func<ValueType,ValueType> ValueAction)
+        public (int Pos, ValueType value) Insert(Func<ValueType, ValueType> ValueAction)
         {
             var Value = (ValueType)GetUninitializedObject(typeof(ValueType));
             Value = ValueAction(Value);
-            return (Insert(Value),Value);
+            return (Insert(Value), Value);
         }
 
         public void Insert(IEnumerable<ValueType> Values)
         {
             foreach (var Value in Values)
-                Insert(Value);
+                _ = Insert(Value);
         }
     }
 }

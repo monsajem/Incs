@@ -1,18 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Monsajem_Incs.Serialization;
 
 namespace Monsajem_Incs.Collection
 {
     public partial class StreamCollection
     {
-        public byte[] ReadBytes(int From , int Len)
+        public byte[] ReadBytes(int From, int Len)
         {
             var DataAsByte = new byte[Len];
-            Stream.Seek(From, System.IO.SeekOrigin.Begin);
+            _ = Stream.Seek(From, System.IO.SeekOrigin.Begin);
             var Pos = 0;
             while (Len > 0)
             {
@@ -33,7 +28,7 @@ namespace Monsajem_Incs.Collection
             return ReadBytes(DataLoc.From + HeadSize, DataLoc.Len - HeadSize);
         }
 
-        public void SetItem(int Pos,byte[] Data)
+        public void SetItem(int Pos, byte[] Data)
         {
 #if DEBUG
             Debug(this);
@@ -45,7 +40,8 @@ namespace Monsajem_Incs.Collection
 #endif
         }
 
-        public override byte[] this[int Pos] { 
+        public override byte[] this[int Pos]
+        {
             get => GetItem(Pos);
             set => SetItem(Pos, value);
         }

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Monsajem_Incs.Net.Base
+﻿namespace Monsajem_Incs.Net.Base
 {
 #if DEBUG
     public enum OprationType

@@ -1,12 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using Monsajem_Incs.Database.Base;
-using Monsajem_Incs.Serialization;
-using Monsajem_Incs.Database;
-using Monsajem_Incs.Collection.Array.TreeBased;
 using System.IO;
 
 namespace Monsajem_Incs.DataWork
@@ -25,7 +17,7 @@ namespace Monsajem_Incs.DataWork
         {
             this.Stream = Stream;
             this.HeaderSize = HeaderSize;
-            this.minCount = MinLen;
+            minCount = MinLen;
             if (Stream.Length < HeaderSize)
                 Stream.SetLength(HeaderSize);
             SetLength(Stream.Length - HeaderSize);
@@ -76,10 +68,9 @@ namespace Monsajem_Incs.DataWork
 
         public override long Seek(long offset, SeekOrigin origin)
         {
-            if (origin == SeekOrigin.Begin)
-                return Stream.Seek(offset + HeaderSize, SeekOrigin.Begin) - HeaderSize;
-            else
-                return Stream.Seek(offset, origin) - HeaderSize;
+            return origin == SeekOrigin.Begin
+                ? Stream.Seek(offset + HeaderSize, SeekOrigin.Begin) - HeaderSize
+                : Stream.Seek(offset, origin) - HeaderSize;
         }
 
         public override void SetLength(long value)
@@ -116,7 +107,7 @@ namespace Monsajem_Incs.DataWork
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            var NewLen = (Position + count) - Length;
+            var NewLen = Position + count - Length;
             if (NewLen > 0)
                 AddLen(NewLen);
             Stream.Write(buffer, offset, count);

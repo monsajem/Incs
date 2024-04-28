@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.IO;
-using System.Collections;
-using System.Runtime.Serialization;
-using Monsajem_Incs.Collection.Array.TreeBased;
-using Monsajem_Incs.Serialization;
+﻿using Monsajem_Incs.Collection.Array.TreeBased;
+using System;
 
 namespace Monsajem_Incs.Database.Base
 {
@@ -61,8 +55,8 @@ namespace Monsajem_Incs.Database.Base
                 var NewKey = (KeyType)inf.Info[KeyPos].Key;
                 if (OldKey.CompareTo(NewKey) != 0)
                 {
-                    this.KeysInfo.Keys.BinaryDelete(OldKey);
-                    this.KeysInfo.Keys.BinaryInsert(NewKey);
+                    _ = KeysInfo.Keys.BinaryDelete(OldKey);
+                    _ = KeysInfo.Keys.BinaryInsert(NewKey);
                 }
                 Parent.Events.Updated?.Invoke(inf);
             };
@@ -77,21 +71,21 @@ namespace Monsajem_Incs.Database.Base
 
             base.Events.Inserted += (inf) =>
             {
-                Accept(GetKey(inf.Value));
+                _ = Accept(GetKey(inf.Value));
             };
 
             base.Events.Deleted += (info) =>
             {
-                Ignore(GetKey(info.Value));
+                _ = Ignore(GetKey(info.Value));
             };
 
-            this.Extras = new TableExtras();
+            Extras = new TableExtras();
 
             Extras.Accepting += (Key) =>
             {
                 if (KeysInfo.Keys.BinarySearch(Key.Key).Index > -1)
                     throw new InvalidOperationException("Value be exist!");
-                if(Parent.IsExist(Key.Key)==false)
+                if (Parent.IsExist(Key.Key) == false)
                     throw new InvalidOperationException("Value not exist at Parent!");
             };
 
@@ -110,7 +104,7 @@ namespace Monsajem_Incs.Database.Base
                     return Result;
                 }
                 else
-                   return Parent.IUpdateOrInsert(OldKey, NewCreator);
+                    return Parent.IUpdateOrInsert(OldKey, NewCreator);
             };
         }
 
@@ -118,7 +112,7 @@ namespace Monsajem_Incs.Database.Base
         {
             Extras.Accepting += (TableExtras.KeyInfo info) =>
             {
-                     _UpdateAble.Insert(info.Key);
+                _UpdateAble.Insert(info.Key);
             };
 
             Extras.Ignoring += (TableExtras.KeyInfo info) =>

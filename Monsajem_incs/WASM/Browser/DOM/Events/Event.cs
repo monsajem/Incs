@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
+﻿using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM.Events
 {
@@ -50,17 +48,17 @@ namespace WebAssembly.Browser.DOM.Events
         [Export("preventDefault")]
         public void PreventDefault()
         {
-            InvokeMethod<object>("preventDefault");
+            _ = InvokeMethod<object>("preventDefault");
         }
         [Export("stopImmediatePropagation")]
         public void StopImmediatePropagation()
         {
-            InvokeMethod<object>("stopImmediatePropagation");
+            _ = InvokeMethod<object>("stopImmediatePropagation");
         }
         [Export("stopPropagation")]
         public void StopPropagation()
         {
-            InvokeMethod<object>("stopPropagation");
+            _ = InvokeMethod<object>("stopPropagation");
         }
         [Export("deepPath")]
         public EventTarget[] DeepPath()

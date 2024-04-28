@@ -11,8 +11,6 @@ using Microsoft.JSInterop;
 using Monsajem_Incs.Views.Maker.ValueTypes;
 using Monsajem_Incs.Views.Shower.Database;
 
-using static Monsajem_Client.Network;
-
 namespace Monsajem_Client
 {
     public class App
@@ -22,7 +20,7 @@ namespace Monsajem_Client
 
         public static async Task Main_Run()
         {
-            js.IJSUnmarshalledRuntime = (IJSUnmarshalledRuntime)WASM_Global.Publisher.jSRuntime;
+            js.Start((JSInProcessRuntime)WASM_Global.Publisher.jSRuntime);
             js.Document.Body.AppendChild(BasePage_html.HtmlText);
             BasePage_html = new BasePage_html(true);
             Monsajem_Incs.Views.Page.SubmitPage(MainElement);

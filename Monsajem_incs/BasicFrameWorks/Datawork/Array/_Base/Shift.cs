@@ -1,75 +1,70 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Monsajem_Incs.Collection.Array.Base
 {
     public abstract partial class IArray<ArrayType>
     {
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         public void shiftEnd(int Count) =>
             shiftEnd(0, Length - 1, Count);
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         public void shiftBegin(int Count) =>
             shiftBegin(0, Length - 1, Count);
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         public void shiftRollEnd(int Count) =>
             shiftRollEnd(0, Length - 1, Count);
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         public void shiftRollBegin(int Count) =>
             shiftRollBegin(0, Length - 1, Count);
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         public ArrayType[] shiftExtraEnd(int Count) =>
             shiftExtraEnd(0, Length - 1, Count);
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         public ArrayType[] shiftExtraBegin(int Count) =>
             shiftExtraBegin(0, Length - 1, Count);
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         public void shiftEndFrom(int From, int Count) =>
             shiftEnd(From, Length - 1, Count);
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         public void shiftBeginFrom(int From, int Count) =>
             shiftBegin(From, Length - 1, Count);
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         public void shiftRollEndFrom(int From, int Count) =>
             shiftRollEnd(From, Length - 1, Count);
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         public void shiftRollBeginFrom(int From, int Count) =>
             shiftRollBegin(From, Length - 1, Count);
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         public ArrayType[] shiftExtraEndFrom(int From, int Count) =>
             shiftExtraEnd(From, Length - 1, Count);
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         public ArrayType[] shiftExtraBeginFrom(int From, int Count) =>
             shiftExtraBegin(From, Length - 1, Count);
 
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         public void shiftEnd(int From, int To, int Count)
         {
-            var ArLen = (To - From) + 1;
+            var ArLen = To - From + 1;
             if (Count == ArLen)
                 return;
             _shiftEnd(From, Count, ArLen);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         private void _shiftEnd(int From, int Count, int ArLen)
         {
             if (Count < 1)
@@ -83,16 +78,16 @@ namespace Monsajem_Incs.Collection.Array.Base
             Copy(this, From, this, From + Count, ArLen - Count);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         public void shiftBegin(int From, int To, int Count)
         {
-            var ArLen = (To - From) + 1;
+            var ArLen = To - From + 1;
             if (Count == ArLen)
                 return;
             _shiftBegin(From, Count, ArLen);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         private void _shiftBegin(int From, int Count, int ArLen)
         {
             if (Count < 1)
@@ -106,10 +101,10 @@ namespace Monsajem_Incs.Collection.Array.Base
             Copy(this, From + Count, this, From, ArLen - Count);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         public ArrayType[] shiftExtraEnd(int From, int To, int Count)
         {
-            var ArLen = (To - From) + 1;
+            var ArLen = To - From + 1;
             if (Count == ArLen)
             {
                 var Roll = new ArrayType[Count];
@@ -119,7 +114,7 @@ namespace Monsajem_Incs.Collection.Array.Base
             return _shiftExtraEnd(From, To, Count, ArLen);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         private ArrayType[] _shiftExtraEnd(int From, int To, int Count, int ArLen)
         {
             if (Count < 1)
@@ -136,10 +131,10 @@ namespace Monsajem_Incs.Collection.Array.Base
             return Roll;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         public ArrayType[] shiftExtraBegin(int From, int To, int Count)
         {
-            var ArLen = (To - From) + 1;
+            var ArLen = To - From + 1;
             if (Count == ArLen)
             {
                 var Roll = new ArrayType[Count];
@@ -149,7 +144,7 @@ namespace Monsajem_Incs.Collection.Array.Base
             return _shiftExtraBegin(From, To, Count, ArLen);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         private ArrayType[] _shiftExtraBegin(int From, int To, int Count, int ArLen)
         {
             if (Count < 1)
@@ -166,7 +161,7 @@ namespace Monsajem_Incs.Collection.Array.Base
             return Roll;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         public void shiftRollEnd(int From, int To, int Count)
         {
             if (Count < 1)
@@ -177,14 +172,14 @@ namespace Monsajem_Incs.Collection.Array.Base
 #endif
                 return;
             }
-            var ArLen = (To - From) + 1;
+            var ArLen = To - From + 1;
             if (Count == ArLen)
                 return;
             var Roll = _shiftExtraEnd(From, To, Count, ArLen);
             Copy(Roll, 0, this, From, Count);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         public void shiftRollBegin(int From, int To, int Count)
         {
             if (Count < 1)
@@ -195,7 +190,7 @@ namespace Monsajem_Incs.Collection.Array.Base
 #endif
                 return;
             }
-            var ArLen = (To - From) + 1;
+            var ArLen = To - From + 1;
             if (Count == ArLen)
                 return;
             var Roll = _shiftExtraBegin(From, To, Count, ArLen);

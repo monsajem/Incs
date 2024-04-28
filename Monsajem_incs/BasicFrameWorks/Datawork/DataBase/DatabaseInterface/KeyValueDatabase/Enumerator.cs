@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace Monsajem_Incs.Database.Base
 {
     public partial class Table<ValueType, KeyType> :
-        IEnumerable<Table<ValueType,KeyType>.ValueInfo>
+        IEnumerable<Table<ValueType, KeyType>.ValueInfo>
     {
         public IEnumerator<ValueInfo> GetEnumerator()
         {
@@ -19,13 +19,13 @@ namespace Monsajem_Incs.Database.Base
         private class Enumerator :
             IEnumerator<ValueInfo>
         {
-            public Enumerator(Table<ValueType,KeyType> parent)
+            public Enumerator(Table<ValueType, KeyType> parent)
             {
-                this.Parent = parent;
-                this.Keys = parent.KeysInfo.Keys.ToArray();
+                Parent = parent;
+                Keys = parent.KeysInfo.Keys.ToArray();
             }
 
-            private Table<ValueType,KeyType> Parent;
+            private Table<ValueType, KeyType> Parent;
             private KeyType[] Keys;
             private int Position = -1;
 

@@ -1,9 +1,6 @@
-﻿using System;
+﻿using Microsoft.JSInterop;
 using System.Collections.Generic;
-using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 using WebAssembly.Browser.DOM.Events;
-using Monsajem_Incs.Serialization;
-using System.Linq;
 
 
 namespace WebAssembly.Browser.DOM
@@ -24,7 +21,7 @@ namespace WebAssembly.Browser.DOM
 
         }
 
-        internal Dictionary<string, DOMEventHandler> eventHandlers = new Dictionary<string, DOMEventHandler>();
+        internal Dictionary<string, DOMEventHandler> eventHandlers = [];
 
 
         [Export("addEventListener")]
@@ -89,7 +86,6 @@ namespace WebAssembly.Browser.DOM
             eventArgs.EventObject?.Dispose();
             eventArgs.EventObject = null;
             eventArgs.Source = null;
-            eventArgs = null;
             return 0;
         }
 

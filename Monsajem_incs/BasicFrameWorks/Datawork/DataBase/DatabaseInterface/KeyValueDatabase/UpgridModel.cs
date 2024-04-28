@@ -1,10 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.IO;
-using System.Collections;
-using static System.Runtime.Serialization.FormatterServices;
 using System.Reflection;
+using static System.Runtime.Serialization.FormatterServices;
 namespace Monsajem_Incs.Database.Base
 {
     public partial class DatabaseUpgrider
@@ -27,7 +24,7 @@ namespace Monsajem_Incs.Database.Base
             object NewDatabase)
         {
             var Fields = new (FieldInfo OldField, FieldInfo NewField)[0];
-            
+
             {
 
                 static bool IsAssignableToGenericType(Type givenType, Type genericType)
@@ -44,9 +41,7 @@ namespace Monsajem_Incs.Database.Base
                         return true;
 
                     Type baseType = givenType.BaseType;
-                    if (baseType == null) return false;
-
-                    return IsAssignableToGenericType(baseType, genericType);
+                    return baseType == null ? false : IsAssignableToGenericType(baseType, genericType);
                 }
 
                 var OldFields = GetFields(OldDataBase.GetType());
@@ -54,8 +49,8 @@ namespace Monsajem_Incs.Database.Base
                 foreach (var OldField in OldFields)
                 {
                     var NewField = NewFields.Where((c) => c.Name == OldField.Name)
-                                            .Where((c)=>c.FieldType.IsGenericType==true)
-                                            .Where((c)=>c.FieldType.GetGenericTypeDefinition() == typeof(Table<,>))
+                                            .Where((c) => c.FieldType.IsGenericType == true)
+                                            .Where((c) => c.FieldType.GetGenericTypeDefinition() == typeof(Table<,>))
                                             .FirstOrDefault();
                     if (NewField != null)
                     {
@@ -80,7 +75,7 @@ namespace Monsajem_Incs.Database.Base
                             FieldInfo.OldField.FieldType.GetGenericArguments()[0],
                             FieldInfo.OldField.FieldType.GetGenericArguments()[1],
                             FieldInfo.NewField.FieldType.GetGenericArguments()[0]);
-                Upgrader.Invoke(null,
+                _ = Upgrader.Invoke(null,
                     new object[]{
                         FieldInfo.OldField.GetValue(OldDataBase),
                         FieldInfo.NewField.GetValue(NewDatabase),null});
@@ -93,21 +88,21 @@ namespace Monsajem_Incs.Database.Base
                             FieldInfo.OldField.FieldType.GetGenericArguments()[0],
                             FieldInfo.OldField.FieldType.GetGenericArguments()[1],
                             FieldInfo.NewField.FieldType.GetGenericArguments()[0]);
-                Upgrader.Invoke(null,
+                _ = Upgrader.Invoke(null,
                     new object[]{
                         FieldInfo.OldField.GetValue(OldDataBase),
                         FieldInfo.NewField.GetValue(NewDatabase),null});
             }
         }
 
-        public static void UpgridTableValues<ValueType, KeyType,NewValueType>(
-            Table<ValueType,KeyType> Oldtbl,
+        public static void UpgridTableValues<ValueType, KeyType, NewValueType>(
+            Table<ValueType, KeyType> Oldtbl,
             Table<NewValueType, KeyType> NewTbl,
-            Action<(ValueType Old, NewValueType New)> Upgrid=null)
-            where KeyType:IComparable<KeyType>
+            Action<(ValueType Old, NewValueType New)> Upgrid = null)
+            where KeyType : IComparable<KeyType>
         {
-            var Fields=new (FieldInfo OldField, FieldInfo NewField)[0];
-            
+            var Fields = new (FieldInfo OldField, FieldInfo NewField)[0];
+
             {
 
                 static bool IsAssignableToGenericType(Type givenType, Type genericType)
@@ -124,35 +119,33 @@ namespace Monsajem_Incs.Database.Base
                         return true;
 
                     Type baseType = givenType.BaseType;
-                    if (baseType == null) return false;
-
-                    return IsAssignableToGenericType(baseType, genericType);
+                    return baseType == null ? false : IsAssignableToGenericType(baseType, genericType);
                 }
 
                 var OldFields = GetFields(typeof(ValueType));
                 var NewFields = GetFields(typeof(NewValueType));
-                foreach(var OldField in OldFields)
+                foreach (var OldField in OldFields)
                 {
                     var NewField = NewFields.Where((c) => c.Name == OldField.Name).FirstOrDefault();
-                    if (NewField != null&&
-                       IsAssignableToGenericType(NewField.FieldType, typeof(Table<,>)) == false&&
+                    if (NewField != null &&
+                       IsAssignableToGenericType(NewField.FieldType, typeof(Table<,>)) == false &&
                        IsAssignableToGenericType(NewField.FieldType, typeof(Table<,>.RelationItem)) == false)
                     {
-                        if(OldField.FieldType==NewField.FieldType)
-                            Collection.Array.Extentions.Insert(ref Fields,(OldField,NewField));
+                        if (OldField.FieldType == NewField.FieldType)
+                            Collection.Array.Extentions.Insert(ref Fields, (OldField, NewField));
                     }
                 }
             }
-            for (int i=0;i<Oldtbl.KeysInfo.Keys.Length;i++)
+            for (int i = 0; i < Oldtbl.KeysInfo.Keys.Length; i++)
             {
                 var Item = Oldtbl.BasicActions.Items[i].Value;
                 var NewItem = (NewValueType)GetUninitializedObject(typeof(NewValueType));
-                foreach(var Field in Fields)
+                foreach (var Field in Fields)
                 {
-                    Field.NewField.SetValue(NewItem,Field.OldField.GetValue(Item));
+                    Field.NewField.SetValue(NewItem, Field.OldField.GetValue(Item));
                 }
                 Upgrid?.Invoke((Item, NewItem));
-                NewTbl.Insert(NewItem);
+                _ = NewTbl.Insert(NewItem);
             }
         }
 
@@ -162,7 +155,7 @@ namespace Monsajem_Incs.Database.Base
             Action<(ValueType Old, NewValueType New)> Upgrid = null)
             where KeyType : IComparable<KeyType>
         {
-            var Fields = new Action<(object OldValue,object NewValue)>[0];
+            var Fields = new Action<(object OldValue, object NewValue)>[0];
 
             {
                 var OldFields = GetFields(typeof(ValueType));
@@ -185,9 +178,9 @@ namespace Monsajem_Incs.Database.Base
                             {
                                 Collection.Array.Extentions.Insert(ref Fields, (c) =>
                                 {
-                                    var NewItemPartTable = ((dynamic)NewField.GetValue(c.NewValue));
-                                    var OldItemPartTable = ((dynamic)OldField.GetValue(c.OldValue));
-                                    if(OldItemPartTable!=null)
+                                    var NewItemPartTable = (dynamic)NewField.GetValue(c.NewValue);
+                                    var OldItemPartTable = (dynamic)OldField.GetValue(c.OldValue);
+                                    if (OldItemPartTable != null)
                                         NewItemPartTable.KeysInfo.Keys = OldItemPartTable.KeysInfo.Keys;
                                 });
                             }
@@ -198,8 +191,8 @@ namespace Monsajem_Incs.Database.Base
                             {
                                 Collection.Array.Extentions.Insert(ref Fields, (c) =>
                                 {
-                                    var NewItem = ((dynamic)NewField.GetValue(c.NewValue));
-                                    var OldItem = ((dynamic)OldField.GetValue(c.OldValue));
+                                    var NewItem = (dynamic)NewField.GetValue(c.NewValue);
+                                    var OldItem = (dynamic)OldField.GetValue(c.OldValue);
                                     NewItem.Key = OldItem.Key;
                                 });
                             }
@@ -213,7 +206,7 @@ namespace Monsajem_Incs.Database.Base
                 var NewItem = NewTbl[Oldtbl.GetKey(Item)].Value;
                 foreach (var Field in Fields)
                 {
-                    Field((Item,NewItem));
+                    Field((Item, NewItem));
                 }
                 Upgrid?.Invoke((Item, NewItem));
                 NewTbl.Update(NewItem);

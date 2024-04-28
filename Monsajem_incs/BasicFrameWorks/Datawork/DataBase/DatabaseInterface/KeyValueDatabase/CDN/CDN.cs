@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Monsajem_Incs.Serialization;
+using System;
 using System.Threading.Tasks;
-using Monsajem_Incs.Net.Base.Service;
-using Monsajem_Incs.Database;
-using System.Linq;
-using Monsajem_Incs.Collection.Array.TreeBased;
-using System.Linq.Expressions;
-using Monsajem_Incs.Serialization;
 
 namespace Monsajem_Incs.Database.Base
 {
@@ -25,7 +19,7 @@ namespace Monsajem_Incs.Database.Base
             if (Table.TableName == null)
                 throw new Exception("Table Name not found!");
             var OldCDN = CDN;
-            CDN =async (c)=> await OldCDN($"/{Table.TableName}/{c}");
+            CDN = async (c) => await OldCDN($"/{Table.TableName}/{c}");
             var Socket = new Net.Virtual.Socket();
             var Server = new Net.Virtual.AsyncOprations(Socket);
             var Client = new Net.Virtual.AsyncOprations(Socket.OtherSide);
@@ -36,7 +30,7 @@ namespace Monsajem_Incs.Database.Base
             if (ServerTable.UpdateAble == null)
                 throw new Exception("UpdateAble at Server Not Found!");
 
-            var ServerTask = 
+            var ServerTask =
                 Server.I_SendUpdate(ServerTable, ServerTable.UpdateAble.UpdateCodes,
                 async (key) =>
                 {
@@ -45,9 +39,9 @@ namespace Monsajem_Incs.Database.Base
                 }, false);
 
             var ClientTask = Client.I_GetUpdate(Table, MakeingUpdate,
-                (key) =>Deleted?.Invoke("V/"+Convert.ToBase64String(key.Serialize())), false);
+                (key) => Deleted?.Invoke("V/" + Convert.ToBase64String(key.Serialize())), false);
 
-             await Async.Task_EX.CheckAll(ServerTask, ClientTask);
+            await Async.Task_EX.CheckAll(ServerTask, ClientTask);
 
             return await ClientTask;
         }
@@ -63,11 +57,9 @@ namespace Monsajem_Incs.Database.Base
             where KeyType_RLN : IComparable<KeyType_RLN>
         {
             var PartTable = GetRelation(RLNTable[RLNKey]);
-            Func<string, Task<byte[]>> RootCDN =
-                async (c)=>await CDN($"/{PartTable.Parent.TableName}{c}");
-            Func<string, Task<byte[]>> RelationCDN =
-                async (c)=>await CDN($"/{RLNTable.TableName}{c}");
-            return GetUpdate(RootCDN, RelationCDN, RLNTable, RLNKey, GetRelation, MakeingUpdate,Deleted);
+            async Task<byte[]> RootCDN(string c) => await CDN($"/{PartTable.Parent.TableName}{c}");
+            async Task<byte[]> RelationCDN(string c) => await CDN($"/{RLNTable.TableName}{c}");
+            return GetUpdate(RootCDN, RelationCDN, RLNTable, RLNKey, GetRelation, MakeingUpdate, Deleted);
         }
 
         private static async Task<bool> GetUpdate<ValueType_RLN, KeyType_RLN, ValueType, KeyType>(
@@ -118,7 +110,7 @@ namespace Monsajem_Incs.Database.Base
                 }, true);
 
             var ClientTask = Client.I_GetUpdate(ClientTable, MakeingUpdate,
-                (key)=>Deleted?.Invoke("/V/" +Convert.ToBase64String(key.Serialize())), true);
+                (key) => Deleted?.Invoke("/V/" + Convert.ToBase64String(key.Serialize())), true);
 
             await Async.Task_EX.CheckAll(ServerTask, ClientTask);
 

@@ -1,17 +1,12 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Monsajem_Incs.Collection.Array.ArrayBased.FixedSize
 {
-    public class Array<ArrayType>:
+    public class Array<ArrayType> :
         OneArrayBase.Array<ArrayType, Array<ArrayType>>
     {
         private int MaxLen;
-        public Array(int Count):base(new ArrayType[Count])
+        public Array(int Count) : base(new ArrayType[Count])
         {
             MaxLen = Count;
         }
@@ -22,13 +17,14 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.FixedSize
             MaxLen = ar.Length;
         }
 
-        public Array(ArrayType[] Ar,int Length) : base(Ar)
+        public Array(ArrayType[] Ar, int Length) : base(Ar)
         {
             this.Length = Length;
             MaxLen = Length;
         }
 
-        public override object MyOptions { 
+        public override object MyOptions
+        {
             get => null;
             set { }
         }
@@ -41,7 +37,7 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.FixedSize
         {
             if (Length >= MaxLen)
                 throw new OverflowException($"Max size is {MaxLen}!");
-            Length = Length + Count;
+            Length += Count;
         }
 
         public bool IsFull { get => Length == MaxLen; }

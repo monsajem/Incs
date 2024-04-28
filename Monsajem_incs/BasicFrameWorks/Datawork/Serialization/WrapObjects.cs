@@ -1,11 +1,8 @@
-﻿using System;
+﻿using Monsajem_Incs.Collection.Array;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using static Monsajem_Incs.Collection.Array.Extentions;
-using Monsajem_Incs.Collection.Array;
-using static System.Runtime.Serialization.FormatterServices;
-using Monsajem_Incs.Collection.Array.ArrayBased.DynamicSize;
 
 namespace Monsajem_Incs.Serialization
 {
@@ -19,17 +16,17 @@ namespace Monsajem_Incs.Serialization
             if (originalObject == null)
                 return (new (Action<object> Set, Func<object> Get)[0], () => null);
             var Pos = InternalCopy(originalObject.GetType());
-            visited = new HashSet<ObjectContainer>();
+            visited = [];
             InternalCopys[Pos](originalObject);
             Clone((obj) => originalObject = obj,
                   () => originalObject);
-            return (visited.Select((c) => (c.Set, c.Get)).ToArray(),()=>originalObject);
+            return (visited.Select((c) => (c.Set, c.Get)).ToArray(), () => originalObject);
         }
 
         private static void Clone(
             Action<object> Set,
             Func<object> Get,
-            Action<object> Copy=null)
+            Action<object> Copy = null)
         {
 #if DEBUG
             if (Set == null)
@@ -45,7 +42,7 @@ namespace Monsajem_Incs.Serialization
                 HashCode = originalObject.GetHashCode(),
                 obj = originalObject
             };
-            if (visited.TryGetValue(Key, out var VisitedObj)==false)
+            if (visited.TryGetValue(Key, out var VisitedObj) == false)
             {
                 visited.Add(Key);
                 Key.obj = originalObject;
@@ -73,7 +70,7 @@ namespace Monsajem_Incs.Serialization
                 Insert(ref CopyPoss, pos, BinaryInsert(ref TypeCodes, typeToReflect.GetHashCode()));
                 Action<object> MyInternalCopy;
 
-                if (Type.GetTypeCode(typeToReflect) != TypeCode.Object||
+                if (Type.GetTypeCode(typeToReflect) != TypeCode.Object ||
                     typeof(IntPtr) == typeToReflect ||
                     typeof(UIntPtr) == typeToReflect)
                 {
@@ -82,8 +79,7 @@ namespace Monsajem_Incs.Serialization
                 else if (typeToReflect.IsArray | typeToReflect == typeof(System.Array))
                 {
                     Func<object, (Type ElementType, int Rank, Action<object> Copy)> GetInfo = null;
-                    Action<object>
-                        MyInternalCopy_ArrDelegate = (originalObject) => { };
+                    void MyInternalCopy_ArrDelegate(object originalObject) { }
                     Action<object> MyInternalCopy_Arr;
                     {
                         MyInternalCopy_Arr = (originalObject) =>
@@ -123,14 +119,7 @@ namespace Monsajem_Incs.Serialization
                         var ICPos = InternalCopy(typeToReflect.GetElementType());
                         var ArrayInternalCopy = InternalCopys[ICPos];
                         GetInfo = (ar) => (ElementType, Rank, ArrayInternalCopy);
-                        if (typeof(Delegate).IsAssignableFrom(typeToReflect))
-                        {
-                            MyInternalCopy = MyInternalCopy_ArrDelegate;
-                        }
-                        else
-                        {
-                            MyInternalCopy = MyInternalCopy_Arr;
-                        }
+                        MyInternalCopy = typeof(Delegate).IsAssignableFrom(typeToReflect) ? MyInternalCopy_ArrDelegate : MyInternalCopy_Arr;
                     }
                 }
                 else

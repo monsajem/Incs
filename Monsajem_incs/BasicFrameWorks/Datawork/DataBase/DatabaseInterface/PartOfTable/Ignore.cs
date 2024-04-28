@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static Monsajem_Incs.Collection.Array.Extentions;
 using static Monsajem_Incs.Database.Base.Runer;
 using static System.Runtime.Serialization.FormatterServices;
 
@@ -21,8 +17,10 @@ namespace Monsajem_Incs.Database.Base
         {
             using (Run.UseBlock())
             {
-                var Keyinfo = new TableExtras.KeyInfo();
-                Keyinfo.Key = Key;
+                var Keyinfo = new TableExtras.KeyInfo
+                {
+                    Key = Key
+                };
                 Extras.Ignoring?.Invoke(Keyinfo);
                 Keyinfo.Pos = KeysInfo.Keys.BinaryDelete(Key).Index;
                 Extras.Ignored?.Invoke(Keyinfo);
@@ -39,14 +37,14 @@ namespace Monsajem_Incs.Database.Base
 
         public void Ignore(ValueType Value)
         {
-            var Key =base.GetKey(Value);
-            Ignore(Key);
+            var Key = base.GetKey(Value);
+            _ = Ignore(Key);
         }
 
         public void Ignore(Table<ValueType, KeyType> Values)
         {
             foreach (var Key in Values.KeysInfo.Keys)
-                Ignore(Key);
+                _ = Ignore(Key);
         }
 
         public void Ignore(IEnumerable<ValueType> Values)
@@ -57,13 +55,13 @@ namespace Monsajem_Incs.Database.Base
         public void Ignore(IEnumerable<KeyType> Keys)
         {
             foreach (var Key in Keys)
-                Ignore(Key);
+                _ = Ignore(Key);
         }
 
         public void Ignore()
         {
             foreach (var Key in KeysInfo.Keys.ToArray())
-                Ignore(Key);
+                _ = Ignore(Key);
         }
     }
 }

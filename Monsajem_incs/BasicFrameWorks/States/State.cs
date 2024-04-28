@@ -1,10 +1,8 @@
-﻿using System;
-
-namespace States
+﻿namespace States
 {
     public abstract class State
     {
-        public bool BackLock=false;
+        public bool BackLock = false;
         public bool NextLock = false;
         State NextState;
         State BackState;

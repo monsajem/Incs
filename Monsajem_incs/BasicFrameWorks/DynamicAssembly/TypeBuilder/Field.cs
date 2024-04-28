@@ -8,11 +8,11 @@ namespace Monsajem_Incs.DynamicAssembly
     {
 
         public FieldBuilder DeclareField(
-            FieldAttributes FieldAttribute,string Name, Type Type) =>
+            FieldAttributes FieldAttribute, string Name, Type Type) =>
             myTypeBuilder.DefineField(Name, Type, FieldAttribute);
 
         public FieldBuilder DeclareField<t>(
-            FieldAttributes FieldAttribute,string Name)=>
-            DeclareField(FieldAttribute,Name, typeof(t));
+            FieldAttributes FieldAttribute, string Name) =>
+            DeclareField(FieldAttribute, Name, typeof(t));
     }
 }

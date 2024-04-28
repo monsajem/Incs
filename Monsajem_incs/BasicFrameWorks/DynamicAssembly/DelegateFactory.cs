@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
-using Monsajem_Incs.Collection.Array.TreeBased;
 namespace Monsajem_Incs.DynamicAssembly
 {
     public class DelegateTypeFactory
@@ -42,7 +38,7 @@ namespace Monsajem_Incs.DynamicAssembly
             for (int i = 0; i < parameters.Length; i++)
             {
                 var parameter = parameters[i];
-                invokeMethod.DefineParameter(i + 1, ParameterAttributes.None, parameter.Name);
+                _ = invokeMethod.DefineParameter(i + 1, ParameterAttributes.None, parameter.Name);
             }
 
             return typeBuilder.CreateType();

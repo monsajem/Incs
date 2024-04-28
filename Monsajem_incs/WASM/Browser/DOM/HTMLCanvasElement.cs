@@ -1,5 +1,5 @@
-﻿using System;
-using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
+﻿using Microsoft.JSInterop;
+using System;
 namespace WebAssembly.Browser.DOM
 {
     [Export("HTMLCanvasElement", typeof(IJSInProcessObjectReference))]
@@ -34,7 +34,7 @@ namespace WebAssembly.Browser.DOM
         [Export("toBlob")]
         public void ToBlob(Action callback, string type, params Object[] arguments)
         {
-            InvokeMethod<object>("toBlob", callback, type, arguments);
+            _ = InvokeMethod<object>("toBlob", callback, type, arguments);
         }
         [Export("toDataURL")]
         public string ToDataUrl(string type, params Object[] args)

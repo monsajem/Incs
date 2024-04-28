@@ -1,117 +1,116 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Reflection;
 using System.Reflection.Emit;
 
 namespace SDILReader
 {
-        //public enum AssemblyType
-        //{
-        //    None,
-        //    Console,
-        //    Application,
-        //    Library
-        //}
+    //public enum AssemblyType
+    //{
+    //    None,
+    //    Console,
+    //    Application,
+    //    Library
+    //}
 
-        //public enum BinaryOperator
-        //{
-        //    Add,
-        //    Subtract,
-        //    Multiply,
-        //    Divide,
-        //    Modulus,
-        //    ShiftLeft,
-        //    ShiftRight,
-        //    IdentityEquality,
-        //    IdentityInequality,
-        //    ValueEquality,
-        //    ValueInequality,
-        //    BitwiseOr,
-        //    BitwiseAnd,
-        //    BitwiseExclusiveOr,
-        //    BooleanOr,
-        //    BooleanAnd,
-        //    LessThan,
-        //    LessThanOrEqual,
-        //    GreaterThan,
-        //    GreaterThanOrEqual
-        //}
+    //public enum BinaryOperator
+    //{
+    //    Add,
+    //    Subtract,
+    //    Multiply,
+    //    Divide,
+    //    Modulus,
+    //    ShiftLeft,
+    //    ShiftRight,
+    //    IdentityEquality,
+    //    IdentityInequality,
+    //    ValueEquality,
+    //    ValueInequality,
+    //    BitwiseOr,
+    //    BitwiseAnd,
+    //    BitwiseExclusiveOr,
+    //    BooleanOr,
+    //    BooleanAnd,
+    //    LessThan,
+    //    LessThanOrEqual,
+    //    GreaterThan,
+    //    GreaterThanOrEqual
+    //}
 
-        //public enum ExceptionHandlerType
-        //{
-        //    Finally,
-        //    Catch,
-        //    Filter,
-        //    Fault
-        //}
+    //public enum ExceptionHandlerType
+    //{
+    //    Finally,
+    //    Catch,
+    //    Filter,
+    //    Fault
+    //}
 
-        //public enum FieldVisibility
-        //{
-        //    Private,
-        //    Public,
-        //    Internal,
-        //    Protected,
-        //}
+    //public enum FieldVisibility
+    //{
+    //    Private,
+    //    Public,
+    //    Internal,
+    //    Protected,
+    //}
 
-        //public enum MethodVisibility
-        //{
-        //    Private,
-        //    Public,
-        //    Internal,
-        //    External,
-        //    Protected,
-        //}
-        //public enum MethodModifier
-        //{
-        //    Static,
-        //    Override,
-        //    Abstract,
-        //    Virtual,
-        //    Final,
-        //    None,
-        //}
+    //public enum MethodVisibility
+    //{
+    //    Private,
+    //    Public,
+    //    Internal,
+    //    External,
+    //    Protected,
+    //}
+    //public enum MethodModifier
+    //{
+    //    Static,
+    //    Override,
+    //    Abstract,
+    //    Virtual,
+    //    Final,
+    //    None,
+    //}
 
 
-        //public enum ResourceVisibility
-        //{
-        //    Public,
-        //    Private
-        //}
+    //public enum ResourceVisibility
+    //{
+    //    Public,
+    //    Private
+    //}
 
-        //public enum TypeVisibility
-        //{
-        //    vPublic,
-        //    vProtected,
-        //    vInternal,
-        //    vProtectedInternal,
-        //    vPrivate
-        //}
+    //public enum TypeVisibility
+    //{
+    //    vPublic,
+    //    vProtected,
+    //    vInternal,
+    //    vProtectedInternal,
+    //    vPrivate
+    //}
 
-        //public enum ClassModifiers
-        //{
-        //    mAbstract,
-        //    mSealed,
-        //    mStatic,
-        //    mNone,
-        //}
+    //public enum ClassModifiers
+    //{
+    //    mAbstract,
+    //    mSealed,
+    //    mStatic,
+    //    mNone,
+    //}
 
-        //public enum UnaryOperator
-        //{
-        //    Negate,
-        //    BooleanNot,
-        //    BitwiseNot,
-        //    PreIncrement,
-        //    PreDecrement,
-        //    PostIncrement,
-        //    PostDecrement
-        //}
+    //public enum UnaryOperator
+    //{
+    //    Negate,
+    //    BooleanNot,
+    //    BitwiseNot,
+    //    PreIncrement,
+    //    PreDecrement,
+    //    PostIncrement,
+    //    PostDecrement
+    //}
 
 
 
     public static class Globals
     {
-        public static Dictionary<int, object> Cache = new Dictionary<int, object>();
+        public static Dictionary<int, object> Cache = [];
 
         public static OpCode[] multiByteOpCodes;
         public static OpCode[] singleByteOpCodes;
@@ -131,7 +130,7 @@ namespace SDILReader
                     ushort num2 = (ushort)code1.Value;
                     if (num2 < 0x100)
                     {
-                        singleByteOpCodes[(int)num2] = code1;
+                        singleByteOpCodes[num2] = code1;
                     }
                     else
                     {

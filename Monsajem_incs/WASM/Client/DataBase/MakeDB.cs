@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Monsajem_Incs.Database.Base;
-using WebAssembly.Browser.DOM;
-using Monsajem_Incs.Collection.Array.ArrayBased.DynamicSize;
+﻿using Monsajem_Incs.Database.Base;
+using System;
 
 namespace MonsajemData
 {
@@ -18,7 +12,7 @@ namespace MonsajemData
     {
 
         protected void MakeDB<ValueType, KeyType>
-            (ref Table<ValueType, KeyType> TBL,string Name, Func<ValueType, KeyType> GetKey)
+            (ref Table<ValueType, KeyType> TBL, string Name, Func<ValueType, KeyType> GetKey)
             where KeyType : IComparable<KeyType>
         {
             var Result = tableMaker.MakeDB(Name, GetKey);

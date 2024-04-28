@@ -1,17 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using static Monsajem_Incs.Collection.Array.Extentions;
-using Monsajem_Incs.Resources.Base.Html;
-using WebAssembly.Browser.DOM;
+﻿using Monsajem_Incs.Convertors;
 using Monsajem_Incs.DynamicAssembly;
-using Monsajem_Incs.Collection.Array;
-using Monsajem_Incs.Database.Base;
-using Monsajem_Incs.Convertors;
+using System;
+using System.Linq;
+using WebAssembly.Browser.DOM;
 
 namespace Monsajem_Incs.Views.Maker.ValueTypes
 {
@@ -22,23 +13,21 @@ namespace Monsajem_Incs.Views.Maker.ValueTypes
         {
             get
             {
-                if(_Default==null)
-                    throw new Exception("Default of Show View Missing in " + typeof(ValueType).FullName);
-                return _Default;
+                return _Default ?? throw new Exception("Default of Show View Missing in " + typeof(ValueType).FullName);
             }
             set => _Default = value;
         }
 
-        public abstract HTMLElement MakeHtmlView(ValueType Value, Action Edit=null, Action Delete=null);
+        public abstract HTMLElement MakeHtmlView(ValueType Value, Action Edit = null, Action Delete = null);
     }
 
-    public class ViewItemMaker<ValueType, ViewType> : 
+    public class ViewItemMaker<ValueType, ViewType> :
         ViewItemMaker<ValueType>
         where ViewType : new()
     {
         public static new ViewItemMaker<ValueType, ViewType> Default
         {
-            get => ViewItemMaker<ValueType>.Default as ViewItemMaker<ValueType, ViewType> ;
+            get => ViewItemMaker<ValueType>.Default as ViewItemMaker<ValueType, ViewType>;
             set => ViewItemMaker<ValueType>.Default = value;
         }
 
@@ -110,7 +99,7 @@ namespace Monsajem_Incs.Views.Maker.ValueTypes
             var ValueFields = FieldControler.Make(FieldsNames);
             var ViewFields = FieldControler.Make(ShowNames);
 
-            Default_FillView +=(c)=>{};
+            Default_FillView += (c) => { };
 
             for (int i = 0; i < ValueFields.Length; i++)
             {
@@ -144,7 +133,7 @@ namespace Monsajem_Incs.Views.Maker.ValueTypes
             return View;
         }
 
-        public override HTMLElement MakeHtmlView(ValueType Value, Action Edit=null, Action Delete=null)
+        public override HTMLElement MakeHtmlView(ValueType Value, Action Edit = null, Action Delete = null)
         {
             return GetMain(MakeView(Value, Edit, Delete));
         }

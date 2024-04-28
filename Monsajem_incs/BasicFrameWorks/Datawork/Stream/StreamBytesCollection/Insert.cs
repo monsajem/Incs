@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Monsajem_Incs.Serialization;
-using static Monsajem_Incs.Collection.Array.Extentions;
+﻿using Monsajem_Incs.Serialization;
 
 namespace Monsajem_Incs.Collection
 {
@@ -18,7 +12,7 @@ namespace Monsajem_Incs.Collection
             Debug(this);
 #endif
             var Info = InsertInfo(DataAsByte.Length, Position);
-            
+
             Stream.Seek(Info.Info.From, System.IO.SeekOrigin.Begin);
             Stream.Write(Info.Header.Serialize(), 0, HeadSize);
             Stream.Write(DataAsByte, 0, DataAsByte.Length);
@@ -55,8 +49,8 @@ namespace Monsajem_Incs.Collection
                 };
                 if (Gap.Len > TotalLen)
                 {
-                    Gap.Len = Gap.Len - TotalLen;
-                    Gap.From = Gap.From + TotalLen;
+                    Gap.Len -= TotalLen;
+                    Gap.From += TotalLen;
                     var NextGap = Gap;
                     if (PopNextGap(ref NextGap))
                     {
@@ -67,13 +61,12 @@ namespace Monsajem_Incs.Collection
                 }
             }
 
-            var Header = new DataHeader();
-            Header.DataLen = Data.Len;
+            var Header = new DataHeader
+            {
+                DataLen = Data.Len
+            };
             Keys.Insert(Data, Pos);
-            if (Keys.Length == Pos + 1)
-                Header.NextData = -1;
-            else
-                Header.NextData = Keys[Pos + 1].From;
+            Header.NextData = Keys.Length == Pos + 1 ? -1 : Keys[Pos + 1].From;
 
             return (Header, Data);
         }

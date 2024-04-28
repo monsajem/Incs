@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Threading;
-using Monsajem_Incs.Async;
+using System.Threading.Tasks;
 
 namespace Monsajem_Incs.Async
 {
-    public class Locked:IDisposable
+    public class Locked : IDisposable
     {
         internal Locked()
         { }
@@ -36,11 +32,11 @@ namespace Monsajem_Incs.Async
         public event Action OnChanged;
         public bool IgnoreChangeEvents;
         private Collection.Array.ArrayBased.DynamicSize.Array<Task>
-            ChangedQueue = new Collection.Array.ArrayBased.DynamicSize.Array<Task>(50);
+            ChangedQueue = new(50);
 
         public Locker()
         {
-            OnChanged = ()=>
+            OnChanged = () =>
             {
                 if (ChangedQueue.Length > 0)
                     ChangedQueue.Pop().Start();
@@ -57,7 +53,7 @@ namespace Monsajem_Incs.Async
             set
             {
                 _Value = value;
-                if(IgnoreChangeEvents==false)
+                if (IgnoreChangeEvents == false)
                     OnChanged?.Invoke();
             }
         }
@@ -65,12 +61,12 @@ namespace Monsajem_Incs.Async
         {
             get
             {
-                using (this.Lock())
+                using (Lock())
                     return _Value;
             }
             set
             {
-                using (this.Lock())
+                using (Lock())
                     _Value = value;
                 if (IgnoreChangeEvents == false)
                     OnChanged?.Invoke();
@@ -85,7 +81,7 @@ namespace Monsajem_Incs.Async
         public Task WaitForChangeQuque() => WaitForChangeQuque(() => { });
         public Task WaitForChangeQuque(Action action)
         {
-            var task = new Task(()=>
+            var task = new Task(() =>
             {
                 IgnoreChangeEvents = true;
                 action();
@@ -108,7 +104,7 @@ namespace Monsajem_Incs.Async
 
         public void Action(Action AC)
         {
-            lock(this)
+            lock (this)
             {
                 AC();
             }

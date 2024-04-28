@@ -1,7 +1,5 @@
-﻿using System;
-using System.Runtime.InteropServices.JavaScript;
-using Microsoft.JSInterop;
-using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
+﻿using Microsoft.JSInterop;
+using System;
 
 namespace WebAssembly.Browser.DOM
 {
@@ -11,7 +9,7 @@ namespace WebAssembly.Browser.DOM
     public class Node : EventTarget, IEventTarget
     {
         public Node(IJSInProcessObjectReference handle) : base(handle) { }
-        
+
         protected Node(string globalName) : base(globalName) { }
 
         //public Node() { }
@@ -86,9 +84,7 @@ namespace WebAssembly.Browser.DOM
         [Export("appendChild")]
         public T AppendChild<T>(T newChild) where T : Node
         {
-            if (newChild == null)
-                throw new Exception("newChild is null!");
-            return InvokeMethod<T>("appendChild", newChild);
+            return newChild == null ? throw new Exception("newChild is null!") : InvokeMethod<T>("appendChild", newChild);
         }
         [Export("cloneNode")]
         public Node CloneNode(bool deep)
@@ -150,7 +146,7 @@ namespace WebAssembly.Browser.DOM
         [Export("normalize")]
         public void Normalize()
         {
-            InvokeMethod<object>("normalize");
+            _ = InvokeMethod<object>("normalize");
         }
 
         [Export("removeChild")]

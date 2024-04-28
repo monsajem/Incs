@@ -1,11 +1,10 @@
 ﻿using Monsajem_Incs.Net.Base.Socket;
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Monsajem_Incs.Net.Base.Service
 {
-    public class Client<AddressType> 
+    public class Client<AddressType>
     {
         internal ClientSocket<AddressType> ClientSocket;
         public Client(
@@ -15,10 +14,10 @@ namespace Monsajem_Incs.Net.Base.Service
         }
 
         public async Task Connect(AddressType Address,
-            Func<IAsyncOprations,Task> Requestor)
+            Func<IAsyncOprations, Task> Requestor)
         {
             await ClientSocket.Connect(Address);
-            using (var rq = new AsyncOprations<AddressType>(ClientSocket,false))
+            using (var rq = new AsyncOprations<AddressType>(ClientSocket, false))
             {
                 await Requestor(rq);
             }

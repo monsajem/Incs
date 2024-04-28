@@ -1,5 +1,5 @@
-﻿using System;
-using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
+﻿using Microsoft.JSInterop;
+using System;
 
 namespace WebAssembly.Browser.DOM
 {
@@ -36,7 +36,7 @@ namespace WebAssembly.Browser.DOM
         [Export("reload")]
         public void Reload(bool forcedReload)
         {
-            InvokeMethod<object>("reload", forcedReload);
+            _ = InvokeMethod<object>("reload", forcedReload);
         }
         [Export("replace")]
         public void Replace(string url)
@@ -49,5 +49,5 @@ namespace WebAssembly.Browser.DOM
             return InvokeMethod<string>("toString");
         }
     }
-    
+
 }

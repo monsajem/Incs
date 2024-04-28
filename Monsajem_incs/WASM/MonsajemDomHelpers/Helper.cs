@@ -1,16 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using static Monsajem_Incs.Collection.Array.Extentions;
-using WebAssembly.Browser.DOM;
-using System.Threading.Tasks;
-using System.Net.Http;
-using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
-using Microsoft.JSInterop;
-using Microsoft.JSInterop;
-using System.IO;
+﻿using Microsoft.JSInterop;
 using Monsajem_Incs.Serialization;
-using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
+using System;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Linq;
+using System.Net.Http;
+using System.Runtime.Serialization;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using WebAssembly.Browser.DOM;
+using static Monsajem_Incs.Collection.Array.Extentions;
 
 namespace WebAssembly.Browser.MonsajemDomHelpers
 {
@@ -54,12 +54,42 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
         public static void Start(JSInProcessRuntime JSR)
         {
             JsRuntime = JSR;
-            var Doc = JsRuntime.Invoke<IJSInProcessObjectReference>("eval", "document");
-            var Win = JsRuntime.Invoke<IJSInProcessObjectReference>("eval", "window");
+            _ = JsRuntime.Invoke<IJSInProcessObjectReference>("eval", "document");
+            _ = JsRuntime.Invoke<IJSInProcessObjectReference>("eval", "window");
             CreateJsInfo();
             Document = new Document();
         }
 
+        public static T InvokeJs<T>(this IJSInProcessObjectReference obj, string identifier, params object?[]? args)
+        {
+            var type = typeof(T);
+            if (args != null && args.Length > 0)
+            {
+                for (int a = 0; a < args.Length; a++)
+                {
+                    Type argType = args[a].GetType();
+                    if (argType.IsSubclassOf(typeof(DOMObject)) || argType == typeof(DOMObject))
+                    {
+                        args[a] = ((DOMObject)args[a]).ManagedJSObject;
+                    }
+                }
+            }
+            if (type.IsSubclassOf(typeof(DOMObject)) || type == typeof(DOMObject))
+            {
+                var Result_JsObj = obj.Invoke<IJSInProcessObjectReference>(identifier, args);
+                var Result = (DOMObject)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(type);
+                Result.ManagedJSObject = Result_JsObj;
+                return (T)(object) Result;
+            }
+            else
+            {
+                return obj.Invoke<T>(identifier, args);
+            }
+        }
+        public static object InvokeJs(this IJSInProcessObjectReference obj, Type type, string identifier, params object?[]? args)
+        {
+            return typeof(js).GetMethods().Where((c)=>c.Name== "InvokeJs" && c.IsGenericMethod).First().MakeGenericMethod(type).Invoke(null,new object[] { obj, identifier, args });
+        }
         public static t JsGetValue<t>(this string Name)
         {
             CreateJsInfo();
@@ -83,16 +113,20 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
         public static t JsGetValue<t>(this IJSInProcessObjectReference obj, string Name)
         {
             CreateJsInfo();
-            return JsInfo.Invoke<t>("GetValue_obj", obj, Name);
+            return JsInfo.InvokeJs<t>("GetValue_obj", obj, Name);
         }
         public static IJSInProcessObjectReference JsGetValue(this IJSInProcessObjectReference obj, string Name)
         {
             CreateJsInfo();
             return JsGetValue<IJSInProcessObjectReference>(obj, Name);
         }
+        public static IJSInProcessObjectReference JsGetStaticValue(this string Name)
+        {
+            return new JsObjectOfType(Name);
+        }
         public static void JsSetValue(this IJSInProcessObjectReference obj, string Name, object Value)
         {
-            if(Value!=null &&
+            if (Value != null &&
                typeof(Delegate).IsAssignableFrom(Value.GetType()))
             {
                 JsSetEvent(obj, Name, (Delegate)Value);
@@ -132,23 +166,23 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
                 ParamsInput = ParamsInput + "," + ParamsFunc;
             }
             JsInfo = JsRuntime.Invoke<IJSInProcessObjectReference>("eval", @"({
-  CreateNewObj: function ("+ ParamsInput + @") {
-        return new window[name]("+ ParamsFunc + @");
+  CreateNewObj: function (" + ParamsInput + @") {
+        return new window[name](" + ParamsFunc + @");
   }
 })");
-           return JsInfo.Invoke<IJSInProcessObjectReference>("CreateNewObj",TypeName, Params);
+            return JsInfo.Invoke<IJSInProcessObjectReference>("CreateNewObj", TypeName, Params);
         }
 
         private static void MakeState()
         {
-            if (MyHistorySates==null)
+            if (MyHistorySates == null)
             {
-                MyHistorySates=new Action[0];
+                MyHistorySates = new Action[0];
                 Window.window.OnPopState += (c1, c2) => OnPopState();
             }
             OnPopState = () =>
             {
-                if(MyHistorySates.Length>0)
+                if (MyHistorySates.Length > 0)
                     Pop(ref MyHistorySates)();
             };
         }
@@ -160,20 +194,20 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
         public static void PushState(Action Onpop)
         {
             MakeState();
-            Insert(ref MyHistorySates,Onpop);
-            Window.window.History.PushState("", "",Window.window.Location.Href);
+            Insert(ref MyHistorySates, Onpop);
+            Window.window.History.PushState("", "", Window.window.Location.Href);
         }
 
         public static void LockBack()
         {
-            Action Lock =null;
-            Lock = () =>
+            static void Lock()
             {
-                js.JsEval("alert('1');");
+                _ = js.JsEval("alert('1');");
                 Window.window.History.Go(1);
                 PushState(Lock);
-                js.JsEval("alert('1');");
-            };
+                _ = js.JsEval("alert('1');");
+            }
+
             PushState(Lock);
         }
 
@@ -186,7 +220,7 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
 
         public static void UnLockBack()
         {
-            Pop(ref MyHistorySates);
+            _ = Pop(ref MyHistorySates);
         }
 
         public static void Redirect(string Path)
@@ -197,9 +231,7 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
 
         public static string ToJsValue(bool Value)
         {
-            if (Value == true)
-                return "true";
-            return "false";
+            return Value == true ? "true" : "false";
         }
         public static string ToJsValue(int Value)
         {
@@ -207,10 +239,7 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
         }
         public static string ToJsValue(string Value)
         {
-            if (Value == null)
-                return"''";
-            else
-                return $"decodeURIComponent(escape(atob('{Convert.ToBase64String(Encoding.UTF8.GetBytes(Value))}')))";
+            return Value == null ? "''" : $"decodeURIComponent(escape(atob('{Convert.ToBase64String(Encoding.UTF8.GetBytes(Value))}')))";
         }
 
         public static string JsEval(this string js)
@@ -219,7 +248,7 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
             {
                 return JsRuntime.Invoke<string>(js);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new Exception("Eval >> " + js, ex);
             }
@@ -232,8 +261,8 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
 
         public static async Task<byte[]> ReadBytes(this Blob File)
         {
-            using (var WebClient = new HttpClient())
-                return await WebClient.GetByteArrayAsync(URL.CreateObjectUrl(File));
+            using var WebClient = new HttpClient();
+            return await WebClient.GetByteArrayAsync(URL.CreateObjectUrl(File));
         }
 
         public static string ToDataUrl(this byte[] Data)
@@ -276,7 +305,7 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
             return URL.CreateObjectUrl(File);
         }
 
-        public static byte[] GetImageBytes(this HTMLImageElement img,double quality=1)
+        public static byte[] GetImageBytes(this HTMLImageElement img, double quality = 1)
         {
             if (quality > 1)
                 throw new ArgumentOutOfRangeException("quality should be equal or less than 1.");
@@ -294,12 +323,12 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
                   canvas.height = height;
                   var ctx = canvas.getContext('2d');
                   ctx.drawImage(document.getElementById('" + img.Id + @"'),0,0, width, height);
-                  return canvas.toDataURL('image/jpeg',"+quality.ToString("#.############", System.Globalization.CultureInfo.InvariantCulture) +");}).call(null);");
+                  return canvas.toDataURL('image/jpeg'," + quality.ToString("#.############", System.Globalization.CultureInfo.InvariantCulture) + ");}).call(null);");
             img.Id = imgID;
             return System.Convert.FromBase64String(URL.Substring(23));
         }
 
-        public static async Task<byte[]> GetImageBytesFast(this HTMLImageElement img, double quality=1)
+        public static async Task<byte[]> GetImageBytesFast(this HTMLImageElement img, double quality = 1)
         {
             if (quality > 1)
                 throw new ArgumentOutOfRangeException("quality should be equal or less than 1.");
@@ -319,14 +348,14 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
                   ctx.drawImage(document.getElementById('" + img.Id + @"'),0,0,width,height);
                   return URL.createObjectURL(canvas.toBlob('image/jpeg'," + quality.ToString("#.############") + "));}).call(null);");
             img.Id = imgID;
-            using (var WebClient = new HttpClient())
-                return await WebClient.GetByteArrayAsync(URL);
+            using var WebClient = new HttpClient();
+            return await WebClient.GetByteArrayAsync(URL);
         }
 
         public static async Task<byte[]> LoadBytesFromURL(string URL)
         {
-            using (var WebClient = new HttpClient())
-                return await WebClient.GetByteArrayAsync(URL);
+            using var WebClient = new HttpClient();
+            return await WebClient.GetByteArrayAsync(URL);
         }
 
         public static Task<byte[]> LoadBytesFromBaseURL(string URL) =>
@@ -334,12 +363,43 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
 
         public static async Task<string> LoadStringFromURL(string URL)
         {
-            using (var WebClient = new HttpClient())
-                return await WebClient.GetStringAsync(URL);
+            using var WebClient = new HttpClient();
+            return await WebClient.GetStringAsync(URL);
         }
 
         public static Task<string> LoadStringFromBaseURL(string URL) =>
             LoadStringFromURL(WASM_Global.Publisher.NavigationManager.ToAbsoluteUri("/") + URL);
+
+        private class JsObjectOfType : IJSInProcessObjectReference
+        {
+            private string TypeAddress;
+            public JsObjectOfType(string TypeAddress)
+            {
+                this.TypeAddress = TypeAddress;
+            }
+            public void Dispose()
+            {
+            }
+
+            public async ValueTask DisposeAsync()
+            {
+            }
+
+            public TValue Invoke<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.PublicProperties)] TValue>(string identifier, params object[] args)
+            {
+                return js.JsRuntime.Invoke<TValue>(TypeAddress + "." + identifier, args);
+            }
+
+            public ValueTask<TValue> InvokeAsync<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.PublicProperties)] TValue>(string identifier, object[] args)
+            {
+                return js.JsRuntime.InvokeAsync<TValue>(TypeAddress + "." + identifier, args);
+            }
+
+            public ValueTask<TValue> InvokeAsync<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.PublicProperties)] TValue>(string identifier, CancellationToken cancellationToken, object[] args)
+            {
+                return js.JsRuntime.InvokeAsync<TValue>(TypeAddress + "." + identifier,cancellationToken, args);
+            }
+        }
 
         private class InvokableDelegate
         {
@@ -356,7 +416,7 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
                     var methodParam = MethodParams[i];
                     Params[i] = Js.GetType().GetMethod("Invoke").MakeGenericMethod(methodParam.ParameterType).Invoke(Js, new object[] { "eval", new object[] { "p" + i } });
                 }
-                DG.DynamicInvoke(Params);
+                _ = DG.DynamicInvoke(Params);
             }
 
             public void Bind(IJSInProcessObjectReference obj, string Property)
@@ -371,12 +431,12 @@ obj[property] = function ( ";
                     JsFunc = JsFunc + "p" + i + ",";
                 }
                 JsFunc = JsFunc.Substring(0, JsFunc.Length - 1);
-                JsFunc = JsFunc + "){";
+                JsFunc += "){";
                 for (int i = 0; i < MethodParams.Length; i++)
                 {
                     JsFunc = JsFunc + "self.p" + i + " = p" + i + ";";
                 }
-                JsFunc = JsFunc + "Invoker.invokeMethod('Invoke');}; },})";
+                JsFunc += "Invoker.invokeMethod('Invoke');}; },})";
                 var PropertyInfo = Js.Invoke<IJSInProcessObjectReference>("eval", JsFunc);
                 var Invoker = Js.Invoke<IJSInProcessObjectReference>("eval", DotNetObjectReference.Create(this));
                 PropertyInfo.InvokeVoid("Binder", Invoker, obj, Property);
@@ -386,14 +446,13 @@ obj[property] = function ( ";
 
     public class WebProcess
     {
-        private readonly static string WebWorkerJs = ((Func<string>)(() => {
+        private readonly static string WebWorkerJs = ((Func<string>)(() =>
+        {
             var assembly = typeof(WebWorker).Assembly;
             var resourceName = "Monsajem_incs.WASM.MonsajemDomHelpers.WebWorker.js";
-            using (Stream stream = assembly.GetManifestResourceStream(resourceName))
-            using (StreamReader reader = new StreamReader(stream))
-            {
-                return reader.ReadToEnd();
-            }
+            using Stream stream = assembly.GetManifestResourceStream(resourceName);
+            using StreamReader reader = new(stream);
+            return reader.ReadToEnd();
         }))();
         private WebWorkerClient Worker;
         public readonly Task IsReady;
@@ -406,9 +465,9 @@ obj[property] = function ( ";
                 Monsajem_Incs.Assembly.Assembly.TryLoadAssembely(AssemblyFilename);
             if (js.JsRuntime == null)
                 Console.WriteLine("No Runtime");
-            js.JsEval("postMessage('');");
+            _ = js.JsEval("postMessage('');");
         }
-        
+
         public WebProcess()
         {
             if (IsInWorker)
@@ -431,13 +490,13 @@ obj[property] = function ( ";
             var Ready = Worker.GetMessage();
             await Worker.Run(WebWorkerJs);
             Console.WriteLine("x3");
-            await Ready;
+            _ = await Ready;
             Console.WriteLine("x4");
         }
 
         public async Task Run(Action Action)
         {
-            await Run(async () =>
+            _ = await Run(async () =>
             {
                 Action();
                 return null;
@@ -452,7 +511,7 @@ obj[property] = function ( ";
         }
         public async Task Run(Func<Task> Action)
         {
-            await Run(async () =>
+            _ = await Run(async () =>
             {
                 await Action();
                 return null;
@@ -461,13 +520,11 @@ obj[property] = function ( ";
         public async Task<object> Run(Func<Task<object>> Func)
         {
             await IsReady;
-            Worker.PostMessage("MNData",Func.Serialize());
+            Worker.PostMessage("MNData", Func.Serialize());
             var Message = Worker.GetMessage();
             await Worker.Run($"self.MN.RunFunctionTaskResult()");
             var Result = (await Message).GetData<byte[]>();
-            if (Result.Length == 0)
-                throw new Exception("Error On Proccess");
-            return Result.Deserialize<object>();
+            return Result.Length == 0 ? throw new Exception("Error On Proccess") : Result.Deserialize<object>();
         }
         private static async void RunFunctionTaskResult()
         {

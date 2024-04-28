@@ -1,9 +1,6 @@
-﻿using System;
+﻿using Microsoft.JSInterop;
+using System;
 using System.Runtime.CompilerServices;
-using System.Collections;
-using System.Collections.Generic;
-
-using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM
 {
@@ -23,7 +20,7 @@ namespace WebAssembly.Browser.DOM
         [Export("clear")]
         public void Clear()
         {
-            InvokeMethod<object>("clear");
+            _ = InvokeMethod<object>("clear");
         }
         [Export("item")]
         public DataTransferItem Item(double index)
@@ -33,8 +30,9 @@ namespace WebAssembly.Browser.DOM
         [Export("remove")]
         public void Remove(double index)
         {
-            InvokeMethod<object>("remove", index);
+            _ = InvokeMethod<object>("remove", index);
         }
         [IndexerName("TheItem")]
         public DataTransferItem this[double index] { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-    }}
+    }
+}

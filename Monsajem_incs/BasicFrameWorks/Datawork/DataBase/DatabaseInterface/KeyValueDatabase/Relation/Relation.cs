@@ -1,12 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
-using static Monsajem_Incs.Collection.Array.Extentions;
-using static Monsajem_Incs.Collection.Array.Extentions;
-using Monsajem_Incs.Serialization;
-using static Monsajem_Incs.DynamicAssembly.DelegatesExtentions;
 using static Monsajem_Incs.Database.Base.Runer;
 
 namespace Monsajem_Incs.Database.Base
@@ -61,7 +54,7 @@ namespace Monsajem_Incs.Database.Base
                 get => P_Array;
                 set
                 {
-                    this.P_Array = value;
+                    P_Array = value;
                     if (P_GetValue != null)
                     {
                         Value = P_GetValue();
@@ -79,7 +72,7 @@ namespace Monsajem_Incs.Database.Base
                 get => Array.GetItem((KeyType)Key).Value;
                 set
                 {
-                    Key = ((Table<ValueType, KeyType>)Array).GetKey(value);
+                    Key = Array.GetKey(value);
                 }
             }
 
@@ -106,14 +99,7 @@ namespace Monsajem_Incs.Database.Base
 
         private static int Compare(object k1, object k2)
         {
-            if (k1 == null)
-                if (k2 == null)
-                    return 0;
-                else
-                    return int.MinValue;
-            if (k2 == null)
-                return int.MaxValue;
-            return ((KeyType)k1).CompareTo((KeyType)k2);
+            return k1 == null ? k2 == null ? 0 : int.MinValue : k2 == null ? int.MaxValue : ((KeyType)k1).CompareTo((KeyType)k2);
         }
 
         [Serialization.NonSerialized]
@@ -126,13 +112,13 @@ namespace Monsajem_Incs.Database.Base
             where ToKeyType : IComparable<ToKeyType>
         {
             var Fild = DynamicAssembly.FieldControler.Make(RelationLink);
-            this.ClearRelations += (ValueInfo info) =>
+            ClearRelations += (ValueInfo info) =>
             {
-                Fild.Value(info.Value,()=> null);
+                _ = Fild.Value(info.Value, () => null);
             };
-            this.MoveRelations += (ValueType Frominfo, ValueType Toinfo) =>
+            MoveRelations += (ValueType Frominfo, ValueType Toinfo) =>
             {
-                Fild.Value(Toinfo,()=>Fild.Value(Frominfo));
+                _ = Fild.Value(Toinfo, () => Fild.Value(Frominfo));
             };
         }
 
@@ -141,13 +127,13 @@ namespace Monsajem_Incs.Database.Base
             where ToKeyType : IComparable<ToKeyType>
         {
             var Fild = DynamicAssembly.FieldControler.Make(RelationLink);
-            this.ClearRelations += (ValueInfo info) =>
+            ClearRelations += (ValueInfo info) =>
             {
-                Fild.Value(info.Value, (c) => { c.Key = null; return c; });
+                _ = Fild.Value(info.Value, (c) => { c.Key = null; return c; });
             };
-            this.MoveRelations += (ValueType Frominfo, ValueType Toinfo) =>
+            MoveRelations += (ValueType Frominfo, ValueType Toinfo) =>
             {
-                Fild.Value(Toinfo,()=>Fild.Value(Frominfo));
+                _ = Fild.Value(Toinfo, () => Fild.Value(Frominfo));
             };
         }
 
@@ -156,9 +142,10 @@ namespace Monsajem_Incs.Database.Base
             where ToKeyType : IComparable<ToKeyType>
         {
             var Fild = DynamicAssembly.FieldControler.Make(RelationLink);
-            this.MoveRelations += (ValueType Frominfo, ValueType Toinfo) =>
+            MoveRelations += (ValueType Frominfo, ValueType Toinfo) =>
             {
-                Fild.Value(Toinfo,(ToField)=>{
+                _ = Fild.Value(Toinfo, (ToField) =>
+                {
                     var FromField = Fild.Value(Frominfo);
                     if (ToField.Key == null)
                     {
@@ -176,82 +163,81 @@ namespace Monsajem_Incs.Database.Base
         private void _AddRelationForLoading<To, ToKeyType>(
             string RelationName,
             RelationTableInfo<To, ToKeyType> Relation,
-            Action<KeyType, ToKeyType, PartOfTable<To,ToKeyType>> Accepted,
+            Action<KeyType, ToKeyType, PartOfTable<To, ToKeyType>> Accepted,
             Action<KeyType, ToKeyType, PartOfTable<To, ToKeyType>> Ignored,
             Action<(
                 ValueType LoadedValue,
-                To NewValue)> MakeNew=null)
+                To NewValue)> MakeNew = null)
             where ToKeyType : IComparable<ToKeyType>
         {
             var Fild = DynamicAssembly.FieldControler.Make(Relation.Link);
 
-            this.Events.loading += (Value) =>
+            Events.loading += (Value) =>
             {
-               Fild.Value(Value,(ThisRelation)=>
-               {
-                   var Key = this.GetKey(Value);
+                _ = Fild.Value(Value, (ThisRelation) =>
+                {
+                    var Key = GetKey(Value);
 
-                   if (ThisRelation == null)
-                   {
-                       ThisRelation = new PartOfTable<To, ToKeyType>(new ToKeyType[0], Relation.LinkArray)
-                       {
-                           AutoFillRelations = (c) =>
-                           {
-                               Relation.LinkArray.AutoFillRelations?.Invoke(c);
-                               MakeNew?.Invoke((Value, c));
-                           }
-                       };
-                       ThisRelation.TableName = Fild.Field.Name;
-                   }
-                   else if (ThisRelation.Extras == null)
-                   {
-                       ThisRelation = new PartOfTable<To, ToKeyType>(ThisRelation.KeysInfo.Keys, Relation.LinkArray)
-                       {
-                           _UpdateAble = ThisRelation._UpdateAble,
-                           AutoFillRelations = (c) =>
-                           {
-                               Relation.LinkArray.AutoFillRelations?.Invoke(c);
-                               MakeNew?.Invoke((Value, c));
-                           }
-                       };
-                       ThisRelation.TableName = Fild.Field.Name;
-                       if (Relation.IsUpdateAble)
-                           ThisRelation.ReadyForUpdateAble();
-                   }
-                   else
-                       return ThisRelation;
+                    if (ThisRelation == null)
+                    {
+                        ThisRelation = new PartOfTable<To, ToKeyType>(new ToKeyType[0], Relation.LinkArray)
+                        {
+                            AutoFillRelations = (c) =>
+                                                   {
+                                                       Relation.LinkArray.AutoFillRelations?.Invoke(c);
+                                                       MakeNew?.Invoke((Value, c));
+                                                   },
+                            TableName = Fild.Field.Name
+                        };
+                    }
+                    else if (ThisRelation.Extras == null)
+                    {
+                        ThisRelation = new PartOfTable<To, ToKeyType>(ThisRelation.KeysInfo.Keys, Relation.LinkArray)
+                        {
+                            _UpdateAble = ThisRelation._UpdateAble,
+                            AutoFillRelations = (c) =>
+                            {
+                                Relation.LinkArray.AutoFillRelations?.Invoke(c);
+                                MakeNew?.Invoke((Value, c));
+                            },
+                            TableName = Fild.Field.Name
+                        };
+                        if (Relation.IsUpdateAble)
+                            ThisRelation.ReadyForUpdateAble();
+                    }
+                    else
+                        return ThisRelation;
 
-                   ThisRelation.SaveToParent = () =>
-                        this.Update(Key, (c) => Relation.Field.Value(c, (f) => ThisRelation));
+                    ThisRelation.SaveToParent = () =>
+                         Update(Key, (c) => Relation.Field.Value(c, (f) => ThisRelation));
 
-                   ThisRelation.HolderTable = (this, this.GetKey(Value));
+                    ThisRelation.HolderTable = (this, GetKey(Value));
 
-                   ThisRelation.Extras.Accepted += (PartOfTable<To, ToKeyType>.TableExtras.KeyInfo Info) =>
-                   {
-                       if (Run.Use(RelationName))
-                       {
-                           Accepted(Key, Info.Key,ThisRelation);
-                       }
-                   };
+                    ThisRelation.Extras.Accepted += (PartOfTable<To, ToKeyType>.TableExtras.KeyInfo Info) =>
+                    {
+                        if (Run.Use(RelationName))
+                        {
+                            Accepted(Key, Info.Key, ThisRelation);
+                        }
+                    };
 
-                   ThisRelation.Extras.Ignored += (PartOfTable<To, ToKeyType>.TableExtras.KeyInfo Info) =>
-                   {
-                       if (Run.Use(RelationName))
-                       {
-                           Ignored(Key, Info.Key, ThisRelation);
-                       }
-                   };
+                    ThisRelation.Extras.Ignored += (PartOfTable<To, ToKeyType>.TableExtras.KeyInfo Info) =>
+                    {
+                        if (Run.Use(RelationName))
+                        {
+                            Ignored(Key, Info.Key, ThisRelation);
+                        }
+                    };
 
-                   if (Relation.IsUpdateAble)
-                       if (ThisRelation.UpdateAble == null)
-                           ThisRelation.UpdateAble = new UpdateAbles<ToKeyType>(new Register.MemoryRegister<ulong>());
-                   return ThisRelation;
-               });
+                    if (Relation.IsUpdateAble)
+                        ThisRelation.UpdateAble ??= new UpdateAbles<ToKeyType>(new Register.MemoryRegister<ulong>());
+                    return ThisRelation;
+                });
             };
 
-            if(TableName!=null)
+            if (TableName != null)
             {
-               TableFinder.FindTable(TableName).AddRelation(this,Relation);
+                TableFinder.FindTable(TableName).AddRelation(this, Relation);
             }
         }
 
@@ -262,17 +248,17 @@ namespace Monsajem_Incs.Database.Base
         {
             var Fild = DynamicAssembly.FieldControler.Make(Relation.Link);
 
-            this.Events.loading += (Value) =>
+            Events.loading += (Value) =>
             {
-                    Fild.Value(Value,(ThisRelation)=>
+                _ = Fild.Value(Value, (ThisRelation) =>
+                {
+                    if (ThisRelation.Array == null)
                     {
-                        if (ThisRelation.Array == null)
-                        {
-                            ThisRelation.Array = Relation.LinkArray;
-                            ThisRelation.OldKey = (ToKeyType)ThisRelation.Key;
-                        }
-                        return ThisRelation;
-                    });
+                        ThisRelation.Array = Relation.LinkArray;
+                        ThisRelation.OldKey = (ToKeyType)ThisRelation.Key;
+                    }
+                    return ThisRelation;
+                });
             };
         }
     }

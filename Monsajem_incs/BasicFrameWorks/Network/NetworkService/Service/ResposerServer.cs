@@ -1,8 +1,6 @@
-﻿using System;
+﻿using Monsajem_Incs.Net.Base.Socket;
+using System;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using Monsajem_Incs.Net.Base.Socket;
 
 namespace Monsajem_Incs.Net.Base.Service
 {
@@ -20,22 +18,22 @@ namespace Monsajem_Incs.Net.Base.Service
             AddressType Address,
             Action<ISyncOprations> Service)
         {
-           new Thread(() =>
-           {
-               ServerSocket.BeginService(Address);
-               while (true)
-               {
-                   var Client = ServerSocket.WaitForAccept();
-                   new Thread(() =>
-                   {
-                       Service(new SyncOprations<AddressType>(Client, true));
+            new Thread(() =>
+            {
+                ServerSocket.BeginService(Address);
+                while (true)
+                {
+                    var Client = ServerSocket.WaitForAccept();
+                    new Thread(() =>
+                    {
+                        Service(new SyncOprations<AddressType>(Client, true));
 #if DEBUG
-                       Client.AddDebugInfo("end.");
+                        Client.AddDebugInfo("end.");
 #endif
-                       Client.Disconncet().Wait();
-                   }).Start();
-               }
-           }).Start();
+                        Client.Disconncet().Wait();
+                    }).Start();
+                }
+            }).Start();
         }
     }
 }

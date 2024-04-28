@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.IO;
-using System.Collections;
-
-
-namespace Monsajem_Incs.Database.Base
+﻿namespace Monsajem_Incs.Database.Base
 {
 
     public partial class Table<ValueType, KeyType>
@@ -18,7 +11,7 @@ namespace Monsajem_Incs.Database.Base
 
         public int PositionOf(KeyType Key)
         {
-            lock(this)
+            lock (this)
             {
                 int Result = 0;
 
@@ -30,18 +23,18 @@ namespace Monsajem_Incs.Database.Base
 
         public int PositionOfEqualOrAfter(KeyType Key)
         {
-            lock(this)
+            lock (this)
             {
                 int Pos = 0;
 
                 Pos = KeysInfo.Keys.BinarySearch(Key).Index;
                 if (Pos < 0)
                 {
-                    Pos = Pos * -1;
+                    Pos *= -1;
                     if (Pos > KeysInfo.Keys.Length)
                         Pos = -1;
                     else
-                        Pos = Pos - 1;
+                        Pos--;
                 }
 
                 return Pos;
@@ -50,25 +43,21 @@ namespace Monsajem_Incs.Database.Base
 
         public int PositionOfAfter(KeyType Key)
         {
-            lock(this)
+            lock (this)
             {
                 var Pos = KeysInfo.Keys.BinarySearch(Key).Index;
                 if (Pos < 0)
                 {
-                    Pos = Pos * -1;
-                    if (Pos > KeysInfo.Keys.Length)
-                        return -1;
-                    return Pos;
+                    Pos *= -1;
+                    return Pos > KeysInfo.Keys.Length ? -1 : Pos;
                 }
-                if (Pos == KeysInfo.Keys.Length - 1)
-                    return -1;
-                return Pos + 1;
+                return Pos == KeysInfo.Keys.Length - 1 ? -1 : Pos + 1;
             }
         }
 
         public int PositionOfEqualOrBefore(KeyType Key)
         {
-            lock(this)
+            lock (this)
             {
                 var Pos = KeysInfo.Keys.BinarySearch(Key).Index;
                 if (Pos < 0)

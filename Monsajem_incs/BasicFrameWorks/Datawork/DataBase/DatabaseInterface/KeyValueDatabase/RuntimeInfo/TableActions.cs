@@ -1,13 +1,7 @@
 ﻿using Monsajem_Incs.Net.Base.Service;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using WebAssembly.Browser.DOM;
-using Monsajem_Incs.Views.Maker.Database;
-using static Monsajem_Incs.WasmClient.Network;
-using Monsajem_Incs.Convertors;
 
 namespace Monsajem_Incs.Database.Base
 {

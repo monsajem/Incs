@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WebAssembly.Browser.MonsajemDomHelpers;
-using Monsajem_Incs.Resources;
-using Monsajem_Incs.Resources.Base.Partials;
-using WebAssembly.Browser.DOM;
-using static Monsajem_Incs.Collection.Array.Extentions;
+﻿using Monsajem_Incs.Resources.Base.Partials;
 using Monsajem_Incs.WasmClient;
+using System;
+using System.Threading.Tasks;
+using WebAssembly.Browser.DOM;
+using WebAssembly.Browser.MonsajemDomHelpers;
+using static Monsajem_Incs.Collection.Array.Extentions;
 
 namespace Monsajem_Incs.UserControler
 {
@@ -21,15 +17,15 @@ namespace Monsajem_Incs.UserControler
 
         public static void PushState(Action Action) =>
             PushState(async () => Action());
-        
+
         private static void OnPopState()
         {
             if (States.Length > 1)
             {
                 try
                 {
-                    Pop(ref States);
-                    SafeRun.Safe(()=>States[States.Length - 1]());
+                    _ = Pop(ref States);
+                    _ = SafeRun.Safe(() => States[States.Length - 1]());
                 }
                 finally { }
 
@@ -42,7 +38,7 @@ namespace Monsajem_Incs.UserControler
         {
             try
             {
-                await SafeRun.Safe(()=> Action.Invoke());
+                await SafeRun.Safe(() => Action.Invoke());
                 js.PushState(OnPopState);
                 Insert(ref States, Action);
             }
@@ -52,7 +48,7 @@ namespace Monsajem_Incs.UserControler
         public static async Task Back()
         {
             await Task.Delay(1);
-            js.GoBack();
+            _ = js.GoBack();
             await Task.Delay(1);
         }
 
@@ -67,7 +63,7 @@ namespace Monsajem_Incs.UserControler
             int Delay,
             bool AllowDissmiss)
         {
-            js.JsEval(@"$.notify(" +
+            _ = js.JsEval(@"$.notify(" +
                 js.ToJsValue(Message) + @", {
                 allow_dismiss: " + AllowDissmiss.ToString().ToLower() + @",
                 delay:" + Delay + @",
@@ -119,7 +115,7 @@ namespace Monsajem_Incs.UserControler
             {
                 Result = "<b style='color:chocolate;'>,</b style='color:black;'><b>" + Value.Substring(i - 2, 3) + "</b>" + Result;
             }
-            var LastPos = (Value.Length) % 3;
+            var LastPos = Value.Length % 3;
             if (LastPos == 0)
                 LastPos = 3;
             Result = "<div style='flex-wrap:nowrap'><b>" + Value.Substring(0, LastPos) + "</b>" + Result + "</div>";
@@ -129,15 +125,15 @@ namespace Monsajem_Incs.UserControler
         public static void ShowModal(HTMLElement Element, Action OnBack = null)
         {
             var Modal = new Modal_html();
-            Modal.body.AppendChild(Element);
-            js.Document.Body.AppendChild(Modal.myModal);
-            Modal.myModal.SetStyleAttribute("display","block");
-            Modal.Btn_Close.OnClick+=(c1,c2)=>
+            _ = Modal.body.AppendChild(Element);
+            _ = js.Document.Body.AppendChild(Modal.myModal);
+            Modal.myModal.SetStyleAttribute("display", "block");
+            Modal.Btn_Close.OnClick += (c1, c2) =>
             {
-                js.GoBack();
+                _ = js.GoBack();
             };
             js.PushState(() =>
-            { 
+            {
                 OnBack?.Invoke();
                 Modal.myModal.Remove();
             });

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Monsajem_Incs.Collection.Array
 {
@@ -26,7 +24,7 @@ namespace Monsajem_Incs.Collection.Array
         }
         public static t[] To<t>(this t[] ar, int to)
         {
-            var Result = new t[to+1];
+            var Result = new t[to + 1];
             System.Array.Copy(ar, 0, Result, 0, Result.Length);
             return Result;
         }
@@ -34,7 +32,7 @@ namespace Monsajem_Incs.Collection.Array
         public static t[] DeleteByPosition<t>(this t[] ar, int Position)
         {
             System.Array.Copy(ar, 0, ar, 0, Position);
-            System.Array.Copy(ar, Position + 1, ar, Position, (ar.Length - Position) - 1);
+            System.Array.Copy(ar, Position + 1, ar, Position, ar.Length - Position - 1);
             System.Array.Resize(ref ar, ar.Length - 1);
             return ar;
         }
@@ -43,44 +41,44 @@ namespace Monsajem_Incs.Collection.Array
             System.Array.Resize(ref ar, from);
             return ar;
         }
-        public static t[] DeleteFromTo<t>(this t[] ar, int from,int To)
+        public static t[] DeleteFromTo<t>(this t[] ar, int from, int To)
         {
-            System.Array.Copy(ar, To+1, ar, from, ar.Length-(To + 1));
+            System.Array.Copy(ar, To + 1, ar, from, ar.Length - (To + 1));
             System.Array.Resize(ref ar, ar.Length - (To - from + 1));
             return ar;
         }
         public static t[] DeleteTo<t>(this t[] ar, int To)
         {
-            System.Array.Copy(ar, To+1, ar, 0, ar.Length - (To + 1));
+            System.Array.Copy(ar, To + 1, ar, 0, ar.Length - (To + 1));
             System.Array.Resize(ref ar, ar.Length - (To + 1));
             return ar;
         }
 
-        public static (t Poped,t[] Array) Pop<t>(this t[] ar)
+        public static (t Poped, t[] Array) Pop<t>(this t[] ar)
         {
             var Item = ar[ar.Length - 1];
             System.Array.Resize(ref ar, ar.Length - 1);
-            return (Item,ar);
+            return (Item, ar);
         }
         public static (t[] Poped, t[] Array) PopFrom<t>(this t[] ar, int From)
         {
             var Result = ar.From(From);
-            ar =ar.DeleteFrom(From);
-            return (Result,ar);
+            ar = ar.DeleteFrom(From);
+            return (Result, ar);
         }
         public static (t[] Poped, t[] Array) PopTo<t>(this t[] ar, int to)
         {
             var Result = ar.To(to);
-            ar=ar.DeleteTo(to);
-            return (Result,ar);
+            ar = ar.DeleteTo(to);
+            return (Result, ar);
         }
 
         public static t[] BinaryDelete<t>(this t[] ar, t Value)
         {
             var Place = System.Array.BinarySearch(ar, Value);
-            if(Place >= 0)
+            if (Place >= 0)
             {
-               ar=ar.DeleteByPosition(Place);
+                ar = ar.DeleteByPosition(Place);
             }
             return ar;
         }
@@ -88,7 +86,7 @@ namespace Monsajem_Incs.Collection.Array
         public static t[] BinaryDelete<t>(this t[] ar, IEnumerable<t> Values)
         {
             foreach (var Value in Values)
-               ar=ar.BinaryDelete(Value);
+                ar = ar.BinaryDelete(Value);
             return ar;
         }
 
@@ -97,12 +95,12 @@ namespace Monsajem_Incs.Collection.Array
             var Place = System.Array.BinarySearch(ar, Value);
             if (Place < 0)
                 Place = (Place * -1) - 1;
-            ar=ar.Insert(Value, Place);
+            ar = ar.Insert(Value, Place);
             return ar;
         }
         public static t[] BinaryInsert<t>(this t[] ar, IEnumerable<t> Values)
         {
-            foreach(var Value in Values)
+            foreach (var Value in Values)
             {
                 ar = ar.BinaryInsert(Value);
             }
@@ -116,7 +114,7 @@ namespace Monsajem_Incs.Collection.Array
             return ar;
         }
 
-        public static t[] Insert<t>(this t[] ar,params t[] Values)
+        public static t[] Insert<t>(this t[] ar, params t[] Values)
         {
             var From = ar.Length;
             System.Array.Resize(ref ar, ar.Length + Values.Length);
@@ -131,21 +129,21 @@ namespace Monsajem_Incs.Collection.Array
             var i = From;
             Count = ar.Length;
             var Reader = Values.GetEnumerator();
-            Reader.MoveNext();
-            while(i<Count)
+            _ = Reader.MoveNext();
+            while (i < Count)
             {
                 ar[i] = Reader.Current;
-                Reader.MoveNext();
+                _ = Reader.MoveNext();
                 i++;
             }
             Reader.Dispose();
             return ar;
         }
-        public static t[] Insert<t>(this t[] ar, t[] Values,int From)
+        public static t[] Insert<t>(this t[] ar, t[] Values, int From)
         {
             var ArLen = ar.Length;
             System.Array.Resize(ref ar, ar.Length + Values.Length);
-            System.Array.Copy(ar, From, ar, ArLen+1, ArLen - From);
+            System.Array.Copy(ar, From, ar, ArLen + 1, ArLen - From);
             System.Array.Copy(Values, 0, ar, From, Values.Length);
             return ar;
         }
@@ -154,15 +152,15 @@ namespace Monsajem_Incs.Collection.Array
             var ArLen = ar.Length;
             var Count = Values.Count();
             System.Array.Resize(ref ar, ar.Length + Count);
-            System.Array.Copy(ar, From, ar, ArLen+1, ArLen - From);
+            System.Array.Copy(ar, From, ar, ArLen + 1, ArLen - From);
             var i = From;
             Count = ar.Length;
             var Reader = Values.GetEnumerator();
-            Reader.MoveNext();
+            _ = Reader.MoveNext();
             while (i < Count)
             {
                 ar[i] = Reader.Current;
-                Reader.MoveNext();
+                _ = Reader.MoveNext();
                 i++;
             }
             Reader.Dispose();
@@ -187,11 +185,11 @@ namespace Monsajem_Incs.Collection.Array
         {
             if (From < To)
             {
-                System.Array.Copy(ar, From + 1, ar, From, (To - From));
+                System.Array.Copy(ar, From + 1, ar, From, To - From);
             }
             else if (From > To)
             {
-                System.Array.Copy(ar, To, ar, To + 1, (From - To));
+                System.Array.Copy(ar, To, ar, To + 1, From - To);
             }
             ar[To] = Value;
             return ar;
@@ -201,11 +199,11 @@ namespace Monsajem_Incs.Collection.Array
             var Value = ar[From];
             if (From < To)
             {
-                System.Array.Copy(ar, From + 1, ar, From, (To - From));
+                System.Array.Copy(ar, From + 1, ar, From, To - From);
             }
             else if (From > To)
             {
-                System.Array.Copy(ar, To, ar, To + 1, (From - To));
+                System.Array.Copy(ar, To, ar, To + 1, From - To);
             }
             ar[To] = Value;
             return ar;

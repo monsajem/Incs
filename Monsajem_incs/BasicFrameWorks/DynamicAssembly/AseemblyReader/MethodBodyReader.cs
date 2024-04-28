@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Threading;
 
 namespace SDILReader
 {
@@ -16,23 +14,23 @@ namespace SDILReader
         #region il read methods
         private int ReadInt16(byte[] _il, ref int position)
         {
-            return ((il[position++] | (il[position++] << 8)));
+            return il[position++] | (il[position++] << 8);
         }
         private ushort ReadUInt16(byte[] _il, ref int position)
         {
-            return (ushort)((il[position++] | (il[position++] << 8)));
+            return (ushort)(il[position++] | (il[position++] << 8));
         }
         private int ReadInt32(byte[] _il, ref int position)
         {
-            return (((il[position++] | (il[position++] << 8)) | (il[position++] << 0x10)) | (il[position++] << 0x18));
+            return il[position++] | (il[position++] << 8) | (il[position++] << 0x10) | (il[position++] << 0x18);
         }
         private ulong ReadInt64(byte[] _il, ref int position)
         {
-            return (ulong)(((il[position++] | (il[position++] << 8)) | (il[position++] << 0x10)) | (il[position++] << 0x18) | (il[position++] << 0x20) | (il[position++] << 0x28) | (il[position++] << 0x30) | (il[position++] << 0x38));
+            return (ulong)(il[position++] | (il[position++] << 8) | (il[position++] << 0x10) | (il[position++] << 0x18) | (il[position++] << 0x20) | (il[position++] << 0x28) | (il[position++] << 0x30) | (il[position++] << 0x38));
         }
         private double ReadDouble(byte[] _il, ref int position)
         {
-            return (((il[position++] | (il[position++] << 8)) | (il[position++] << 0x10)) | (il[position++] << 0x18) | (il[position++] << 0x20) | (il[position++] << 0x28) | (il[position++] << 0x30) | (il[position++] << 0x38));
+            return il[position++] | (il[position++] << 8) | (il[position++] << 0x10) | (il[position++] << 0x18) | (il[position++] << 0x20) | (il[position++] << 0x28) | (il[position++] << 0x30) | (il[position++] << 0x38);
         }
         private sbyte ReadSByte(byte[] _il, ref int position)
         {
@@ -40,11 +38,11 @@ namespace SDILReader
         }
         private byte ReadByte(byte[] _il, ref int position)
         {
-            return (byte)il[position++];
+            return il[position++];
         }
         private Single ReadSingle(byte[] _il, ref int position)
         {
-            return (Single)(((il[position++] | (il[position++] << 8)) | (il[position++] << 0x10)) | (il[position++] << 0x18));
+            return il[position++] | (il[position++] << 8) | (il[position++] << 0x10) | (il[position++] << 0x18);
         }
         #endregion
 
@@ -56,22 +54,22 @@ namespace SDILReader
         {
             byte[] il = this.il;
             int position = 0;
-            instructions = new List<ILInstruction>();
+            instructions = [];
             while (position < il.Length)
             {
-                ILInstruction instruction = new ILInstruction();
+                ILInstruction instruction = new();
 
                 // get the operation code of the current instruction
                 OpCode code = OpCodes.Nop;
                 ushort value = il[position++];
                 if (value != 0xfe)
                 {
-                    code = Globals.singleByteOpCodes[(int)value];
+                    code = Globals.singleByteOpCodes[value];
                 }
                 else
                 {
                     value = il[position++];
-                    code = Globals.multiByteOpCodes[(int)value];
+                    code = Globals.multiByteOpCodes[value];
                     value = (ushort)(value | 0xfe00);
                 }
                 instruction.Code = code;
@@ -120,10 +118,10 @@ namespace SDILReader
                         metadataToken = ReadInt32(il, ref position);
                         // now we call the ResolveType always using the generic attributes type in order
                         // to support decompilation of generic methods and classes
-                        
+
                         // thanks to the guys from code project who commented on this missing feature
 
-                        instruction.Operand = module.ResolveType(metadataToken, this.MethodInfo.DeclaringType.GetGenericArguments(), this.MethodInfo.GetGenericArguments());
+                        instruction.Operand = module.ResolveType(metadataToken, MethodInfo.DeclaringType.GetGenericArguments(), MethodInfo.GetGenericArguments());
                         break;
                     case OperandType.InlineI:
                         {
@@ -203,10 +201,10 @@ namespace SDILReader
         public object GetRefferencedOperand(Module module, int metadataToken)
         {
             AssemblyName[] assemblyNames = module.Assembly.GetReferencedAssemblies();
-            for (int i=0; i<assemblyNames.Length; i++)
+            for (int i = 0; i < assemblyNames.Length; i++)
             {
                 Module[] modules = Assembly.Load(assemblyNames[i]).GetModules();
-                for (int j=0; j<modules.Length; j++)
+                for (int j = 0; j < modules.Length; j++)
                 {
                     try
                     {
@@ -221,7 +219,7 @@ namespace SDILReader
                 }
             }
             return null;
-        //System.Reflection.Assembly.Load(module.Assembly.GetReferencedAssemblies()[3]).GetModules()[0].ResolveType(metadataToken)
+            //System.Reflection.Assembly.Load(module.Assembly.GetReferencedAssemblies()[3]).GetModules()[0].ResolveType(metadataToken)
 
         }
 
@@ -234,11 +232,11 @@ namespace SDILReader
         /// </param>
         public MethodBodyReader(MethodInfo mi)
         {
-            this.MethodInfo = mi;
+            MethodInfo = mi;
             if (mi.GetMethodBody() != null)
             {
                 var mb = mi.GetMethodBody();
-                il =mb.GetILAsByteArray();
+                il = mb.GetILAsByteArray();
                 ConstructInstructions(mi.Module);
             }
         }

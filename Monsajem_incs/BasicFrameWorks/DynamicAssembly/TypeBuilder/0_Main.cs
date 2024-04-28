@@ -7,7 +7,7 @@ namespace Monsajem_Incs.DynamicAssembly
     public partial class TypeBuilder
     {
         private AppDomain myDomain = System.Threading.Thread.GetDomain();
-        private AssemblyName myAsmName = new AssemblyName("MyDynamicAssembly");
+        private AssemblyName myAsmName = new("MyDynamicAssembly");
         private AssemblyBuilder myAsmBuilder;
 
         private ModuleBuilder myModBuilder;
@@ -19,8 +19,8 @@ namespace Monsajem_Incs.DynamicAssembly
             TypeAttributes TypeAttribute)
         {
             myAsmBuilder =
-                AssemblyBuilder.DefineDynamicAssembly(myAsmName,AssemblyBuilderAccess.Run);
-            myModBuilder=myAsmBuilder.DefineDynamicModule(myAsmName.Name);
+                AssemblyBuilder.DefineDynamicAssembly(myAsmName, AssemblyBuilderAccess.Run);
+            myModBuilder = myAsmBuilder.DefineDynamicModule(myAsmName.Name);
             myTypeBuilder = myModBuilder.DefineType(TypeName, TypeAttribute);
         }
 

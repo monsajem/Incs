@@ -1,7 +1,6 @@
-﻿using System;
-using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
+﻿using Microsoft.JSInterop;
 
-namespace WebAssembly.Browser.DOM 
+namespace WebAssembly.Browser.DOM
 {
 
     [Export("Text", typeof(IJSInProcessObjectReference))]

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
+﻿using Microsoft.JSInterop;
 
 namespace WebAssembly.Browser.DOM.Events
 {
@@ -13,28 +11,28 @@ namespace WebAssembly.Browser.DOM.Events
         //public DragEvent(object type, object dragEventInit) { }
         DataTransfer dataTransfer;
         [Export("dataTransfer")]
-        public DataTransfer DataTransfer { 
+        public DataTransfer DataTransfer
+        {
             get
             {
-                if (dataTransfer == null)
-                    dataTransfer = GetProperty<DataTransfer>("dataTransfer");
+                dataTransfer ??= GetProperty<DataTransfer>("dataTransfer");
                 return dataTransfer;
             }
-            set => SetProperty<DataTransfer>("dataTransfer", value); 
+            set => SetProperty<DataTransfer>("dataTransfer", value);
         }
-		//[Export("initDragEvent")]
-		//public void InitDragEvent(string typeArg, bool canBubbleArg, bool cancelableArg, Window viewArg, double detailArg, double screenXArg, double screenYArg, double clientXArg, double clientYArg, bool ctrlKeyArg, bool altKeyArg, bool shiftKeyArg, bool metaKeyArg, double buttonArg, EventTarget relatedTargetArg, IDataTransfer dataTransferArg)
-		//{
-		//    InvokeMethod<object>("initDragEvent", typeArg, canBubbleArg, cancelableArg, viewArg, detailArg, screenXArg, screenYArg, clientXArg, clientYArg, ctrlKeyArg, altKeyArg, shiftKeyArg, metaKeyArg, buttonArg, relatedTargetArg, dataTransferArg);
-		//}
-		//[Export("msConvertURL")]
-		//public void MsConvertUrl(File file, string targetType, string targetURL)
-		//{
-		//    InvokeMethod<object>("msConvertURL", file, targetType, targetURL);
-		//}
+        //[Export("initDragEvent")]
+        //public void InitDragEvent(string typeArg, bool canBubbleArg, bool cancelableArg, Window viewArg, double detailArg, double screenXArg, double screenYArg, double clientXArg, double clientYArg, bool ctrlKeyArg, bool altKeyArg, bool shiftKeyArg, bool metaKeyArg, double buttonArg, EventTarget relatedTargetArg, IDataTransfer dataTransferArg)
+        //{
+        //    InvokeMethod<object>("initDragEvent", typeArg, canBubbleArg, cancelableArg, viewArg, detailArg, screenXArg, screenYArg, clientXArg, clientYArg, ctrlKeyArg, altKeyArg, shiftKeyArg, metaKeyArg, buttonArg, relatedTargetArg, dataTransferArg);
+        //}
+        //[Export("msConvertURL")]
+        //public void MsConvertUrl(File file, string targetType, string targetURL)
+        //{
+        //    InvokeMethod<object>("msConvertURL", file, targetType, targetURL);
+        //}
 
-		protected override void Dispose(bool disposing)
-		{
+        protected override void Dispose(bool disposing)
+        {
             base.Dispose(disposing);
 
             // Drag Events have a DataTransfer associated.  This needs to be disposed as well.
@@ -42,10 +40,10 @@ namespace WebAssembly.Browser.DOM.Events
             {
                 if (dataTransfer != null)
                 {
-                    dataTransfer.Dispose();    
+                    dataTransfer.Dispose();
                 }
             }
 
-		}
-	}
+        }
+    }
 }

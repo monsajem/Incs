@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Microsoft.JSInterop;
+using System;
 using System.Text;
 using System.Threading.Tasks;
-using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
 using WebAssembly.Browser.MonsajemDomHelpers;
 
 namespace WebAssembly.Browser.DOM
@@ -14,7 +12,7 @@ namespace WebAssembly.Browser.DOM
         public MessageEvent(IJSInProcessObjectReference handle) : base(handle) { }
 
         [Export("data")]
-        public t GetData<t>()=> GetProperty<t>("data");
+        public t GetData<t>() => GetProperty<t>("data");
 
         [Export("origin")]
         public string origin { get => GetProperty<string>("origin"); }
@@ -24,38 +22,38 @@ namespace WebAssembly.Browser.DOM
     }
 
     [Export("Worker", typeof(IJSInProcessObjectReference))]
-    public class WebWorker: DOMObject
+    public class WebWorker : DOMObject
     {
         private static WebWorker _CurrentWebWorker;
-        public static WebWorker CurrentWebWorker { 
+        public static WebWorker CurrentWebWorker
+        {
             get
             {
                 if (MonsajemDomHelpers.WebProcess.IsInWorker == false)
                     throw new PlatformNotSupportedException("CurrentWebWorker just declared in WebWorker.");
-                if(_CurrentWebWorker==null)
-                    _CurrentWebWorker = new WebWorker(js.JsGetValue("self"));
+                _CurrentWebWorker ??= new WebWorker(js.JsGetValue("self"));
                 return _CurrentWebWorker;
             }
         }
 
-        public WebWorker(string js):
-            this(new Uri("data:text/javascript;base64," + 
+        public WebWorker(string js) :
+            this(new Uri("data:text/javascript;base64," +
                 Convert.ToBase64String(Encoding.UTF8.GetBytes(js))))
-        {}
+        { }
 
-        public WebWorker(System.Uri Uri) : 
-            this(js.JsNewObject("Worker",Uri.ToString()))
-        {}
+        public WebWorker(System.Uri Uri) :
+            this(js.JsNewObject("Worker", Uri.ToString()))
+        { }
 
-        public WebWorker(IJSInProcessObjectReference handle) : base(handle) 
+        public WebWorker(IJSInProcessObjectReference handle) : base(handle)
         {
-            SetProperty("onmessage",(Action<IJSInProcessObjectReference>)onmessage);
+            SetProperty("onmessage", onmessage);
         }
 
         [Export("postMessage")]
         public void PostMessage(object Message)
         {
-            InvokeMethod<object>("postMessage", Message);
+            _ = InvokeMethod<object>("postMessage", Message);
         }
 
         private void onmessage(IJSInProcessObjectReference msg)
@@ -83,10 +81,10 @@ namespace WebAssembly.Browser.DOM
             public MessageEvent Result;
         }
         private Monsajem_Incs.Collection.Array.ArrayBased.DynamicSize.Array<MessageEventHandle>
-            MessageQuque = new Monsajem_Incs.Collection.Array.ArrayBased.DynamicSize.Array<MessageEventHandle>(20);
+            MessageQuque = new(20);
         private void OnMessage(MessageEvent e)
-        { 
-            if(MessageQuque.Length>0)
+        {
+            if (MessageQuque.Length > 0)
             {
                 var msg = MessageQuque.Pop();
                 msg.Result = e;
@@ -95,18 +93,18 @@ namespace WebAssembly.Browser.DOM
         }
 
         public Task<MessageEvent> GetMessage() => GetMessage(false);
-        private async Task<MessageEvent> GetMessage(bool First=false)
+        private async Task<MessageEvent> GetMessage(bool First = false)
         {
-            var Handle = new MessageEventHandle(){Handle=new Task(()=>{})};
-            if(First)
-                MessageQuque.Insert(Handle,0);
+            var Handle = new MessageEventHandle() { Handle = new Task(() => { }) };
+            if (First)
+                MessageQuque.Insert(Handle, 0);
             else
                 MessageQuque.Insert(Handle);
             await Handle.Handle;
             return Handle.Result;
         }
 
-        public void PostMessage(string SaveAsName,object Message)
+        public void PostMessage(string SaveAsName, object Message)
         {
             worker.PostMessage($"self.onmessage=function(e){{self.{SaveAsName}=e.data;self.onmessage=function(q){{eval(q.data);}};}}");
             worker.PostMessage(Message);
@@ -116,7 +114,7 @@ namespace WebAssembly.Browser.DOM
         {
             var Compeleted = GetMessage(true);
             worker.PostMessage($"eval({MonsajemDomHelpers.js.ToJsValue(js)});postMessage('');");
-            await Compeleted;
+            _ = await Compeleted;
         }
 
         public async Task<t> Result<t>(string js)
@@ -136,7 +134,7 @@ namespace WebAssembly.Browser.DOM
                         postMessage(eval(xhttp.responseText));
                     }
                   };
-                  xhttp.open('GET', "+MonsajemDomHelpers.js.ToJsValue(URL)+@", true);
+                  xhttp.open('GET', " + MonsajemDomHelpers.js.ToJsValue(URL) + @", true);
                   xhttp.send();");
             return (await Compeleted).GetData<t>();
         }
@@ -154,7 +152,7 @@ namespace WebAssembly.Browser.DOM
                   };
                   xhttp.open('GET', " + MonsajemDomHelpers.js.ToJsValue(URL) + @", true);
                   xhttp.send();");
-            await Compeleted;
+            _ = await Compeleted;
         }
     }
 }

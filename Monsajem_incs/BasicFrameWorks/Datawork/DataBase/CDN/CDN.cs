@@ -1,11 +1,7 @@
-﻿using System;
-using System.IO;
-using System.Linq.Expressions;
-using Monsajem_Incs.Collection.Array.ArrayBased.DynamicSize;
-using Monsajem_Incs.Serialization;
+﻿using Monsajem_Incs.Collection.Array.Base;
 using Monsajem_Incs.Database.Base;
-using Monsajem_Incs.DynamicAssembly;
-using Monsajem_Incs.Collection.Array.Base;
+using Monsajem_Incs.Serialization;
+using System;
 
 namespace Monsajem_Incs.Database.CDN
 {
@@ -16,20 +12,19 @@ namespace Monsajem_Incs.Database.CDN
         public static bool AutoSave = true;
 
         private static bool IsLoaded;
-        internal static (UpdateCodeRegister Register, DynoArray<(t,ulong)> Array) 
+        internal static (UpdateCodeRegister Register, DynoArray<(t, ulong)> Array)
             GetData<t>(string Name)
         {
-            if(IsLoaded==false)
+            if (IsLoaded == false)
             {
                 if (Register == null)
                     throw new Exception("deafult register of object not set.");
                 Register.Load();
                 IsLoaded = true;
             }
-            if(Register.Value == null)
-                Register.Value = new DynoArray<(object Data, string Name)>();
+            Register.Value ??= new DynoArray<(object Data, string Name)>();
             var Datas = Register.Value as DynoArray<(object Data, string Name)>;
-            if (Datas.Comparer == System.Collections.Generic.Comparer<(object Data, string Name)>.Default||
+            if (Datas.Comparer == System.Collections.Generic.Comparer<(object Data, string Name)>.Default ||
                 Datas.Comparer == null)
                 Datas.Comparer = System.Collections.Generic.Comparer<(object Data, string Name)>.
                                     Create((c1, c2) =>
@@ -40,11 +35,11 @@ namespace Monsajem_Incs.Database.CDN
 
             var Pos = Datas.BinarySearch((default(object), Name));
             if (Pos.Index > -1)
-                return ((UpdateCodeRegister Register, DynoArray<(t,ulong)> Array)) Pos.Value.Data;
+                return ((UpdateCodeRegister Register, DynoArray<(t, ulong)> Array))Pos.Value.Data;
 
             var Value = (new UpdateCodeRegister(), new DynoArray<(t, ulong)>());
 
-            Datas.BinaryInsert((Value, Name));
+            _ = Datas.BinaryInsert((Value, Name));
 
             return Value;
         }
@@ -54,7 +49,7 @@ namespace Monsajem_Incs.Database.CDN
             [Serialization.NonSerialized]
 
             public UpdateCodeRegister()
-            {}
+            { }
 
             protected override ulong LoadData()
             {
@@ -63,13 +58,13 @@ namespace Monsajem_Incs.Database.CDN
 
             protected override void SaveData(ulong Value)
             {
-                if(DataRegister.AutoSave==true)
+                if (DataRegister.AutoSave == true)
                     DataRegister.Register.Save();
             }
         }
 
         internal class DynoArray<ArrayType> :
-            DynamicArray<ArrayType>,ISerializable<ArrayType[]>
+            DynamicArray<ArrayType>, ISerializable<ArrayType[]>
         {
             private ArrayType[] Ar = new ArrayType[0];
             public DynoArray()
@@ -105,11 +100,8 @@ namespace Monsajem_Incs.Database.CDN
 
             public override (int Index, ArrayType Value) BinarySearch(ArrayType key, int minNum, int maxNum)
             {
-                var Pos = Array.BinarySearch(Ar,minNum,maxNum,key,Comparer);
-                if(Pos>-1)
-                    return (Pos, Ar[Pos]);
-                else
-                    return (Pos, default);
+                var Pos = Array.BinarySearch(Ar, minNum, maxNum, key, Comparer);
+                return Pos > -1 ? ((int Index, ArrayType Value))(Pos, Ar[Pos]) : ((int Index, ArrayType Value))(Pos, default);
             }
 
             public ArrayType[] GetData() => Ar;
@@ -129,22 +121,23 @@ namespace Monsajem_Incs.Database.CDN
             string TableName,
             Func<ValueType, KeyType> GetKey,
             bool SubmitTableName = true) :
-            this(TableName,DataRegister.GetData<ValueType>(TableName),GetKey)
+            this(TableName, DataRegister.GetData<ValueType>(TableName), GetKey)
         {
             if (typeof(KeyType) == typeof(string))
             {
                 KeysInfo.Keys.Comparer = (System.Collections.Generic.IComparer<KeyType>)StringComparer.InvariantCulture;
             }
-            if(SubmitTableName)
+            if (SubmitTableName)
                 this.TableName = TableName;
-            foreach (var Value in this.BasicActions.Items)
-                KeysInfo.Keys.BinaryInsert(GetKey(Value.Value));
+            foreach (var Value in BasicActions.Items)
+                _ = KeysInfo.Keys.BinaryInsert(GetKey(Value.Value));
         }
 
         private CDNTable(string TableName,
-                         (DataRegister.UpdateCodeRegister Register, DataRegister.DynoArray<(ValueType,ulong)> Array) Info,
+                         (DataRegister.UpdateCodeRegister Register, DataRegister.DynoArray<(ValueType, ulong)> Array) Info,
                          Func<ValueType, KeyType> GetKey) :
-            base(Info.Array,Info.Register,GetKey,false){}
+            base(Info.Array, Info.Register, GetKey, false)
+        { }
 
     }
 }

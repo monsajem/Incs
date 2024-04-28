@@ -1,5 +1,5 @@
-﻿using System;
-using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
+﻿using Microsoft.JSInterop;
+using System;
 
 namespace WebAssembly.Browser.DOM
 {
@@ -58,22 +58,22 @@ namespace WebAssembly.Browser.DOM
         [Export("beginPath")]
         public void BeginPath()
         {
-            InvokeMethod<object>("beginPath");
+            _ = InvokeMethod<object>("beginPath");
         }
         [Export("clearRect")]
         public void ClearRect(double x, double y, double w, double h)
         {
-            InvokeMethod<object>("clearRect", x, y, w, h);
+            _ = InvokeMethod<object>("clearRect", x, y, w, h);
         }
         [Export("clip")]
         public void Clip(CanvasFillRule fillRule = CanvasFillRule.NonZero)
         {
-            InvokeMethod<object>("clip", fillRule);
+            _ = InvokeMethod<object>("clip", fillRule);
         }
         [Export("clip")]
         public void Clip(Path2D path, CanvasFillRule fillRule = CanvasFillRule.NonZero)
         {
-            InvokeMethod<object>("clip", path, fillRule);
+            _ = InvokeMethod<object>("clip", path, fillRule);
         }
         [Export("createImageData")]
         public ImageData CreateImageData(object imageDataOrSw, double sh)
@@ -98,50 +98,50 @@ namespace WebAssembly.Browser.DOM
         [Export("drawFocusIfNeeded")]
         public void DrawFocusIfNeeded(Element element)
         {
-            InvokeMethod<object>("drawFocusIfNeeded", element);
+            _ = InvokeMethod<object>("drawFocusIfNeeded", element);
         }
         [Export("drawFocusIfNeeded")]
         public void DrawFocusIfNeeded(Path2D path, Element element)
         {
-            InvokeMethod<object>("drawFocusIfNeeded", path, element);
+            _ = InvokeMethod<object>("drawFocusIfNeeded", path, element);
         }
         [Export("drawImage")]
         public void DrawImage(object image, double dstX, double dstY)
         {
-            InvokeMethod<object>("drawImage", image, dstX, dstY);
+            _ = InvokeMethod<object>("drawImage", image, dstX, dstY);
         }
         [Export("drawImage")]
         public void DrawImage(object image, double dstX, double dstY, double dstW, double dstH)
         {
-            InvokeMethod<object>("drawImage", image, dstX, dstY, dstW, dstH);
+            _ = InvokeMethod<object>("drawImage", image, dstX, dstY, dstW, dstH);
         }
         [Export("drawImage")]
         public void DrawImage(object image, double srcX, double srcY, double srcW, double srcH, double dstX, double dstY, double dstW, double dstH)
         {
-            InvokeMethod<object>("drawImage", image, srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH);
+            _ = InvokeMethod<object>("drawImage", image, srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH);
         }
 
 
         [Export("fill")]
         public void Fill(CanvasFillRule fillRule = CanvasFillRule.NonZero)
         {
-            InvokeMethod<object>("fill", fillRule = CanvasFillRule.NonZero);
+            _ = InvokeMethod<object>("fill", CanvasFillRule.NonZero);
         }
         [Export("fill")]
         public void Fill(Path2D path, CanvasFillRule fillRule = CanvasFillRule.NonZero)
         {
-            InvokeMethod<object>("fill", path, fillRule);
+            _ = InvokeMethod<object>("fill", path, fillRule);
         }
 
         [Export("fillRect")]
         public void FillRect(double x, double y, double w, double h)
         {
-            InvokeMethod<object>("fillRect", x, y, w, h);
+            _ = InvokeMethod<object>("fillRect", x, y, w, h);
         }
         [Export("fillText")]
         public void FillText(string text, double x, double y, double maxWidth = Double.MaxValue)
         {
-            InvokeMethod<object>("fillText", text, x, y, maxWidth);
+            _ = InvokeMethod<object>("fillText", text, x, y, maxWidth);
         }
         [Export("getImageData")]
         public ImageData GetImageData(double sx, double sy, double sw, double sh)
@@ -181,115 +181,112 @@ namespace WebAssembly.Browser.DOM
         [Export("putImageData")]
         public void PutImageData(ImageData imagedata, double dx, double dy, double dirtyX, double dirtyY, double dirtyWidth, double dirtyHeight)
         {
-            InvokeMethod<object>("putImageData", imagedata, dx, dy, dirtyX, dirtyY, dirtyWidth, dirtyHeight);
+            _ = InvokeMethod<object>("putImageData", imagedata, dx, dy, dirtyX, dirtyY, dirtyWidth, dirtyHeight);
         }
         [Export("restore")]
         public void Restore()
         {
-            InvokeMethod<object>("restore");
+            _ = InvokeMethod<object>("restore");
         }
         [Export("rotate")]
         public void Rotate(double angle)
         {
-            InvokeMethod<object>("rotate", angle);
+            _ = InvokeMethod<object>("rotate", angle);
         }
         [Export("save")]
         public void Save()
         {
-            InvokeMethod<object>("save");
+            _ = InvokeMethod<object>("save");
         }
         [Export("scale")]
         public void Scale(double x, double y)
         {
-            InvokeMethod<object>("scale", x, y);
+            _ = InvokeMethod<object>("scale", x, y);
         }
         [Export("setLineDash")]
         public void SetLineDash(double[] segments)
         {
-            InvokeMethod<object>("setLineDash", segments);
+            _ = InvokeMethod<object>("setLineDash", segments);
         }
         [Export("setTransform")]
         public void SetTransform(double m11, double m12, double m21, double m22, double dx, double dy)
         {
-            InvokeMethod<object>("setTransform", m11, m12, m21, m22, dx, dy);
+            _ = InvokeMethod<object>("setTransform", m11, m12, m21, m22, dx, dy);
         }
         [Export("stroke")]
         public void Stroke(Path2D path = null)
         {
-            if (path == null)
-                InvokeMethod<object>("stroke");
-            else
-                InvokeMethod<object>("stroke", path);
+            _ = path == null ? InvokeMethod<object>("stroke") : InvokeMethod<object>("stroke", path);
         }
         [Export("strokeRect")]
         public void StrokeRect(double x, double y, double w, double h)
         {
-            InvokeMethod<object>("strokeRect", x, y, w, h);
+            _ = InvokeMethod<object>("strokeRect", x, y, w, h);
         }
         [Export("strokeText")]
         public void StrokeText(string text, double x, double y, double maxWidth = Double.MaxValue)
         {
-            InvokeMethod<object>("strokeText", text, x, y, maxWidth);
+            _ = InvokeMethod<object>("strokeText", text, x, y, maxWidth);
         }
         [Export("transform")]
         public void Transform(double m11, double m12, double m21, double m22, double dx, double dy)
         {
-            InvokeMethod<object>("transform", m11, m12, m21, m22, dx, dy);
+            _ = InvokeMethod<object>("transform", m11, m12, m21, m22, dx, dy);
         }
         [Export("translate")]
         public void Translate(double x, double y)
         {
-            InvokeMethod<object>("translate", x, y);
+            _ = InvokeMethod<object>("translate", x, y);
         }
         [Export("arc")]
         public void Arc(double x, double y, double radius, double startAngle, double endAngle, bool anticlockwise = false)
         {
-            InvokeMethod<object>("arc", x, y, radius, startAngle, endAngle, anticlockwise);
+            _ = InvokeMethod<object>("arc", x, y, radius, startAngle, endAngle, anticlockwise);
         }
         [Export("arcTo")]
         public void ArcTo(double x1, double y1, double x2, double y2, double radius)
         {
-            InvokeMethod<object>("arcTo", x1, y1, x2, y2, radius);
+            _ = InvokeMethod<object>("arcTo", x1, y1, x2, y2, radius);
         }
         [Export("arcTo")]
         public void ArcTo(double x1, double y1, double x2, double y2, double radiusX, double radiusY, double rotation)
         {
-            InvokeMethod<object>("arcTo", x1, y1, x2, y2, radiusX, radiusY, rotation);
+            _ = InvokeMethod<object>("arcTo", x1, y1, x2, y2, radiusX, radiusY, rotation);
         }
         [Export("bezierCurveTo")]
         public void BezierCurveTo(double cp1x, double cp1y, double cp2x, double cp2y, double x, double y)
         {
-            InvokeMethod<object>("bezierCurveTo", cp1x, cp1y, cp2x, cp2y, x, y);
+            _ = InvokeMethod<object>("bezierCurveTo", cp1x, cp1y, cp2x, cp2y, x, y);
         }
         [Export("closePath")]
         public void ClosePath()
         {
-            InvokeMethod<object>("closePath");
+            _ = InvokeMethod<object>("closePath");
         }
         [Export("ellipse")]
         public void Ellipse(double x, double y, double radiusX, double radiusY, double rotation, double startAngle, double endAngle, bool anticlockwise = false)
         {
-            InvokeMethod<object>("ellipse", x, y, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise);
+            _ = InvokeMethod<object>("ellipse", x, y, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise);
         }
         [Export("lineTo")]
         public void LineTo(double x, double y)
         {
-            InvokeMethod<object>("lineTo", x, y);
+            _ = InvokeMethod<object>("lineTo", x, y);
         }
         [Export("moveTo")]
         public void MoveTo(double x, double y)
         {
-            InvokeMethod<object>("moveTo", x, y);
+            _ = InvokeMethod<object>("moveTo", x, y);
         }
         [Export("quadraticCurveTo")]
         public void QuadraticCurveTo(double cpx, double cpy, double x, double y)
         {
-            InvokeMethod<object>("quadraticCurveTo", cpx, cpy, x, y);
+            _ = InvokeMethod<object>("quadraticCurveTo", cpx, cpy, x, y);
         }
         [Export("rect")]
         public void Rect(double x, double y, double w, double h)
         {
-            InvokeMethod<object>("rect", x, y, w, h);
+            _ = InvokeMethod<object>("rect", x, y, w, h);
         }
     }
 

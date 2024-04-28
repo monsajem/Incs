@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Reflection.Emit;
 
 namespace SDILReader
@@ -58,19 +56,19 @@ namespace SDILReader
                 switch (code.OperandType)
                 {
                     case OperandType.InlineField:
-                        System.Reflection.FieldInfo fOperand = ((System.Reflection.FieldInfo)operand);
+                        System.Reflection.FieldInfo fOperand = (System.Reflection.FieldInfo)operand;
                         ilg.Emit(code, fOperand);
                         break;
                     case OperandType.InlineMethod:
-                        var OprandType = operand.GetType();
-                        ilg.Emit(code, (System.Reflection.MethodInfo)operand);                        
+                        _ = operand.GetType();
+                        ilg.Emit(code, (System.Reflection.MethodInfo)operand);
                         break;
                     case OperandType.ShortInlineBrTarget:
                     case OperandType.InlineBrTarget:
-                        ilg.Emit(code,PointTo.Label.Value);
+                        ilg.Emit(code, PointTo.Label.Value);
                         break;
                     case OperandType.InlineType:
-                        ilg.Emit(code,(Type)operand);
+                        ilg.Emit(code, (Type)operand);
                         break;
                     case OperandType.InlineString:
                         ilg.Emit(code, (string)operand);
@@ -83,7 +81,7 @@ namespace SDILReader
                     case OperandType.InlineR:
                     case OperandType.ShortInlineI:
                     case OperandType.ShortInlineR:
-                        ilg.Emit(code,(short)operand);
+                        ilg.Emit(code, (short)operand);
                         break;
                     case OperandType.InlineTok:
                         ilg.Emit(code, (Type)operand);

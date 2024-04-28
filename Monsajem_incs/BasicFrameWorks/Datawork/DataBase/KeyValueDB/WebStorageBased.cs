@@ -1,40 +1,37 @@
-﻿using System;
-using System.IO;
-using System.Linq.Expressions;
+﻿using Monsajem_Incs.Collection.Array.Base;
 using Monsajem_Incs.Serialization;
-using Monsajem_Incs.Database.Base;
-using Monsajem_Incs.Collection.Array.Base;
-using static System.Text.Encoding;
-using System.Threading.Tasks;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using WebAssembly.Browser.DOM;
+using static System.Text.Encoding;
 
 namespace Monsajem_Incs.Database.KeyValue.WebStorageBased
 {
     internal class MyUTF
     {
-        public static byte[] GetBytes(string str)=>
+        public static byte[] GetBytes(string str) =>
             System.Convert.FromBase64String(ASCII.GetString(Unicode.GetBytes(str)));
 
-        public static string GetString(byte[] bytes)=>
+        public static string GetString(byte[] bytes) =>
             Unicode.GetString(ASCII.GetBytes(System.Convert.ToBase64String(bytes)));
     }
 
-    public class StorageDictionary<KeyType, ValueType> : 
+    public class StorageDictionary<KeyType, ValueType> :
         Collection.IDictionary<KeyType, ValueType>
     {
         public Storage WebStorage;
         private string StorageKey;
-        public StorageDictionary(string Key,Storage WebStorage)
+        public StorageDictionary(string Key, Storage WebStorage)
         {
-            this.StorageKey = Key;
+            StorageKey = Key;
             this.WebStorage = WebStorage;
         }
 
         private string GetKey(KeyType Key) => StorageKey + MyUTF.GetString(Key.Serialize());
 
-        public ValueType this[KeyType Key] { 
+        public ValueType this[KeyType Key]
+        {
             get
             {
                 var Str_Key = WebStorage.GetItem(GetKey(Key));
@@ -42,7 +39,7 @@ namespace Monsajem_Incs.Database.KeyValue.WebStorageBased
             }
             set
             {
-                WebStorage.SetItem(GetKey(Key),MyUTF.GetString(value.Serialize()));
+                WebStorage.SetItem(GetKey(Key), MyUTF.GetString(value.Serialize()));
             }
         }
 
@@ -103,7 +100,7 @@ namespace Monsajem_Incs.Database.KeyValue.WebStorageBased
         where KeyType : IComparable<KeyType>
     {
         public Table(string TableName,
-            Func<ValueType, KeyType> GetKey, bool IsUpdatAble,Storage WebStorage) :
+            Func<ValueType, KeyType> GetKey, bool IsUpdatAble, Storage WebStorage) :
             base(
                  (b) =>
                  {
@@ -113,13 +110,11 @@ namespace Monsajem_Incs.Database.KeyValue.WebStorageBased
                  () =>
                  {
                      var KeyName = "K" + MyUTF.GetString(TableName.Serialize());
-                     if (WebStorage.GetItem(KeyName)!=null)
-                         return MyUTF.GetBytes(WebStorage.GetItem(KeyName));
-                     return null;
+                     return WebStorage.GetItem(KeyName) != null ? MyUTF.GetBytes(WebStorage.GetItem(KeyName)) : null;
                  },
-                 new StorageDictionary<KeyType,(ValueType,ulong)>("V" + TableName, WebStorage), GetKey, IsUpdatAble)
+                 new StorageDictionary<KeyType, (ValueType, ulong)>("V" + TableName, WebStorage), GetKey, IsUpdatAble)
         {
             this.TableName = TableName;
-        }        
+        }
     }
 }

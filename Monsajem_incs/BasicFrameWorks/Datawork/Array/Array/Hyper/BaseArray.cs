@@ -1,15 +1,10 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Monsajem_Incs.Collection.Array.ArrayBased.Hyper
 {
 
-    public class ArrayHuge<ArrayType> :Array<ArrayType>
+    public class ArrayHuge<ArrayType> : Array<ArrayType>
     {
         public ArrayHuge() : base(50000, 100, 500) { }
     }
@@ -20,7 +15,7 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.Hyper
         private Func<Base.IArray<ArrayType>> MakeInner;
         protected override Array<ArrayType> MakeSameNew()
         {
-            return new Array<ArrayType>(MinCount, Sub,MinSub);
+            return new Array<ArrayType>(MinCount, Sub, MinSub);
         }
 
         public class ArrayInstance :
@@ -30,7 +25,7 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.Hyper
             public Base.IArray<ArrayType> ar;
             public int CompareTo(ArrayInstance other)
             {
-                return this.FromPos - other.FromPos;
+                return FromPos - other.FromPos;
             }
         }
         public DynamicSize.Array<ArrayInstance> ar;
@@ -40,16 +35,16 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.Hyper
         private int MaxLen;
         private int MaxLen_Div2;
 
-        public Array() : this(500,0,0) { }
+        public Array() : this(500, 0, 0) { }
 
-        public Array(int MinCount,int Sub,int MinSub)
+        public Array(int MinCount, int Sub, int MinSub)
         {
             if (Sub == 0)
                 Sub = MinCount + 1;
-            this.MyOptions =(MinCount, Sub,MinSub);
+            MyOptions = (MinCount, Sub, MinSub);
         }
-        public Array(ArrayType[] ar, int MinCount = 500, int Sub=0,int MinSub=0) : 
-            this(MinCount, Sub,MinSub)
+        public Array(ArrayType[] ar, int MinCount = 500, int Sub = 0, int MinSub = 0) :
+            this(MinCount, Sub, MinSub)
         {
             Insert(ar);
         }
@@ -59,27 +54,24 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.Hyper
             get => (MinCount, Sub, MinSub);
             set
             {
-                var Option = ((int MinCount, int Sub,int MinSub))value;
-                this.Sub = Option.Sub;
-                this.MinCount = Option.MinCount;
-                this.MinSub = Option.MinSub;
-                var SubMinCount = this.MinCount / this.Sub;
+                var Option = ((int MinCount, int Sub, int MinSub))value;
+                Sub = Option.Sub;
+                MinCount = Option.MinCount;
+                MinSub = Option.MinSub;
+                var SubMinCount = MinCount / Sub;
                 if (MinSub > SubMinCount)
                     SubMinCount = 0;
 
-                if (SubMinCount == 0)
-                    this.MakeInner = () => new FixedSize.Array<ArrayType>(this.MinCount);
-                else
-                    this.MakeInner = () => new Array<ArrayType>(SubMinCount,Sub,MinSub);
-                this.MaxLen = MinCount - 1;
-                this.MaxLen_Div2 = MaxLen / 2;
+                MakeInner = SubMinCount == 0 ? (() => new FixedSize.Array<ArrayType>(MinCount)) : (() => new Array<ArrayType>(SubMinCount, Sub, MinSub));
+                MaxLen = MinCount - 1;
+                MaxLen_Div2 = MaxLen / 2;
 
-                if (this.ar == null)
+                if (ar == null)
                 {
-                    this.ar = new DynamicSize.Array<ArrayInstance>();
+                    ar = new DynamicSize.Array<ArrayInstance>();
                     ar.Insert(new ArrayInstance()
                     {
-                        ar = this.MakeInner(),
+                        ar = MakeInner(),
                         FromPos = 0
                     }, 0);
                 }
@@ -88,7 +80,7 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.Hyper
 
         public override ArrayType this[int Pos]
         {
-            [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
             get
             {
                 ArrayInstance Myar;
@@ -104,7 +96,7 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.Hyper
                 Myar = arInfo.Value;
                 return Myar.ar[Pos - Myar.FromPos];
             }
-            [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
             set
             {
                 ArrayInstance Myar;
@@ -124,7 +116,7 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.Hyper
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         private void Optimization(DynamicSize.Array<ArrayInstance> ar)
         {
             for (int i = 0; i < ar.Length; i++)
@@ -133,13 +125,13 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.Hyper
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         private int Optimization(DynamicSize.Array<ArrayInstance> ar, int Pos)
         {
             var OldAr = ar[Pos];
             if (OldAr.ar.Length > MaxLen)
             {
-                var NewAr =(Base.IArray<ArrayType>) OldAr.ar.PopFrom(MaxLen_Div2);
+                var NewAr = (Base.IArray<ArrayType>)OldAr.ar.PopFrom(MaxLen_Div2);
                 ar.Insert(new ArrayInstance()
                 {
                     FromPos = OldAr.FromPos + OldAr.ar.Length,
@@ -164,9 +156,9 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.Hyper
                     if (ar.Length > 1)
                     {
                         var NextAr = ar[1];
-                        if ((NextAr.ar.Length + OldAr.ar.Length) < (MaxLen_Div2))
+                        if ((NextAr.ar.Length + OldAr.ar.Length) < MaxLen_Div2)
                         {
-                            NextAr.ar.Insert(0,OldAr.ar.ToArray());
+                            NextAr.ar.Insert(0, OldAr.ar.ToArray());
                             NextAr.FromPos = 0;
                             ar.DeleteByPosition(0);
                             return -1;
@@ -176,7 +168,7 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.Hyper
                 else if (Pos == ar.Length - 1)
                 {
                     var BeforeAr = ar[Pos - 1];
-                    if ((BeforeAr.ar.Length + OldAr.ar.Length) < (MaxLen_Div2))
+                    if ((BeforeAr.ar.Length + OldAr.ar.Length) < MaxLen_Div2)
                     {
                         BeforeAr.ar.Insert(OldAr.ar.ToArray());
                         ar.DeleteByPosition(Pos);
@@ -186,9 +178,9 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.Hyper
                 else
                 {
                     var NextAr = ar[Pos + 1];
-                    if ((NextAr.ar.Length + OldAr.ar.Length) < (MaxLen_Div2))
+                    if ((NextAr.ar.Length + OldAr.ar.Length) < MaxLen_Div2)
                     {
-                        NextAr.ar.Insert(0,OldAr.ar.ToArray());
+                        NextAr.ar.Insert(0, OldAr.ar.ToArray());
                         NextAr.FromPos = OldAr.FromPos;
                         ar.DeleteByPosition(Pos);
                         return -1;
@@ -196,7 +188,7 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.Hyper
                     else
                     {
                         var BeforeAr = ar[Pos - 1];
-                        if ((BeforeAr.ar.Length + OldAr.ar.Length) < (MaxLen_Div2))
+                        if ((BeforeAr.ar.Length + OldAr.ar.Length) < MaxLen_Div2)
                         {
                             BeforeAr.ar.Insert(OldAr.ar.ToArray());
                             ar.DeleteByPosition(Pos);
@@ -208,7 +200,7 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.Hyper
             return 0;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         public override void Insert(ArrayType Value, int Position)
         {
 
@@ -220,9 +212,9 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.Hyper
                 arPos = (arPos * -1) - 2;
                 MyAr = ar[arPos];
 
-                if (MyAr.ar.Length==MinCount)
+                if (MyAr.ar.Length == MinCount)
                 {
-                    Position = Position - MyAr.FromPos;
+                    Position -= MyAr.FromPos;
                     if (Position == MyAr.ar.Length)
                     {
                         var InnerAr = MakeInner();
@@ -284,7 +276,7 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.Hyper
             MyAr.ar.DeleteByPosition(Position - MyAr.FromPos);
             for (int i = arPos + 1; i < ar.Length; i++)
                 ar[i].FromPos -= 1;
-            Optimization(ar, arPos);
+            _ = Optimization(ar, arPos);
             Length--;
         }
 
@@ -314,7 +306,7 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.Hyper
 
         internal override void AddFromTo(int From, System.Array Ar, int Ar_From, int Ar_Len)
         {
-            var arPos = this.ar.BinarySearch(new ArrayInstance() { FromPos = From }).Index;
+            var arPos = ar.BinarySearch(new ArrayInstance() { FromPos = From }).Index;
             if (arPos < 0)
             {
                 arPos = (arPos * -1) - 2;
@@ -340,15 +332,15 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.Hyper
             var Opt = new DynamicSize.Array<ArrayInstance>(10);
             Opt.Insert(Instance);
             Optimization(Opt);
-            ar.Insert(arPos,Opt.ToArray());
+            ar.Insert(arPos, Opt.ToArray());
             for (int i = arPos + Opt.Length; i < ar.Length; i++)
             {
                 ar[i].FromPos += Ar_Len;
             }
             var Pos = Optimization(ar, arPos);
-            Pos = (arPos + Opt.Length) + Pos;
-            Optimization(ar, Pos);
-            this.Length += Ar_Len;
+            Pos = arPos + Opt.Length + Pos;
+            _ = Optimization(ar, Pos);
+            Length += Ar_Len;
         }
 
         internal override System.Array GetArrayFrom(int From, out int Ar_From, out int Ar_Len)

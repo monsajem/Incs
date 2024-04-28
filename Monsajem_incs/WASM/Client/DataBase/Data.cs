@@ -1,14 +1,5 @@
-﻿using System;
-using MonsajemData;
-using Monsajem_Incs.Database.Base;
-using Monsajem_Incs.Database.KeyValue;
-using Monsajem_Incs.Resources;
-using Monsajem_Incs.Net.Web;
-using Monsajem_Incs.Net.Base.Service;
-using WebAssembly.Browser.DOM;
-using System.Reflection;
-using System.Threading.Tasks;
-using static WASM_Global.Publisher;
+﻿using Monsajem_Incs.Database.Base;
+using System;
 
 namespace MonsajemData
 {
@@ -34,22 +25,22 @@ namespace MonsajemData
     }
 
     public class Permitions<UserType>
-        where UserType:User<UserType>
+        where UserType : User<UserType>
     {
         public Table<UserType, string>.RelationItem User;
         public Permition[] Accept;
     }
 
-    public abstract class DataBase:DataBase<DataBase.User>
+    public abstract class DataBase : DataBase<DataBase.User>
     {
-        protected DataBase(TableMaker tableMaker):base(tableMaker)
-        {}
-        public class User:User<User>
-        {}
+        protected DataBase(TableMaker tableMaker) : base(tableMaker)
+        { }
+        public class User : User<User>
+        { }
     }
 
     public abstract partial class DataBase<UserType>
-        where UserType:User<UserType>
+        where UserType : User<UserType>
     {
         public readonly TableMaker tableMaker;
         private static DataBase<UserType> Data;

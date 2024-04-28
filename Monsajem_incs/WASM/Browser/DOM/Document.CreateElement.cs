@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
-
 namespace WebAssembly.Browser.DOM
 {
     public sealed partial class Document
     {
 
-        static Dictionary<Type, string> htmlElementTagNameMap = new Dictionary<Type, string>()
+        static Dictionary<Type, string> htmlElementTagNameMap = new()
         {
             {typeof(HTMLAnchorElement), "a"},
             {typeof(HTMLAreaElement), "area"},
@@ -79,7 +77,7 @@ namespace WebAssembly.Browser.DOM
         [Export("createElement")]
         public T CreateElement<T>()
         {
-            var tagName = string.Empty;
+            string tagName;
             if (!htmlElementTagNameMap.TryGetValue(typeof(T), out tagName))
                 throw new NotSupportedException($"Element of type {typeof(T)} is not supported.  Please use the method CreateElement(tagName).");
 
@@ -90,15 +88,14 @@ namespace WebAssembly.Browser.DOM
         [Export("createElement")]
         public HTMLElement CreateElement(string tagName)
         {
-            Type element = null;
-            if (!htmlTagNameElementMap.TryGetValue(tagName, out element))
-                return InvokeMethod<HTMLElement>("createElement", tagName);
-            else
-                return (HTMLElement)InvokeMethod(element, "createElement", tagName);
+            Type element;
+            return !htmlTagNameElementMap.TryGetValue(tagName, out element)
+                ? InvokeMethod<HTMLElement>("createElement", tagName)
+                : (HTMLElement)InvokeMethod(element, "createElement", tagName);
         }
 
 
-        static Dictionary<string, Type> htmlTagNameElementMap = new Dictionary<string, Type>()
+        static Dictionary<string, Type> htmlTagNameElementMap = new()
         {
             {"a", typeof(HTMLAnchorElement)},
             {"abbr", typeof(HTMLElement)},
@@ -227,5 +224,6 @@ namespace WebAssembly.Browser.DOM
             //{"x-ms-webview", typeof(MSHTMLWebViewElement)},
             {"xmp", typeof(HTMLPreElement)},
         };
+        public static Document document = new();
     }
 }

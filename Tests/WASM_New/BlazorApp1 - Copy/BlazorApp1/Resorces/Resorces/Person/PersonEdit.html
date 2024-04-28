@@ -1,0 +1,56 @@
+﻿<html>
+<body>
+
+    <div id="Main" style="background-color:rgba(255,255,255,0.7)">
+        <table>
+            <tr>
+                <td><img id="Image" style="width:80%" /></td>
+                <td><input type="file" id="ImageFile" /> </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="input-field">
+                        <input type="text" id="Name">
+                        <label for="Name">نام شخص</label>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="input-field">
+                        <input type="tel" id="Number" style="width:100%">
+                        <label for="Phone">تلفن شخص</label>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="input-field">
+                        <textarea id="Describe"></textarea>
+                        <label for="Describe">توضیحات</label>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td><input type="button" id="Done" value="ثبت" /></td>
+            </tr>
+        </table>
+    </div>
+    <script>
+        var img = document.getElementById("Image");
+        var ImageFile = document.getElementById("ImageFile");
+        ImageFile.onchange = () => {
+
+            if (ImageFile.files && ImageFile.files[0]) {
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    img.setAttribute('src', e.target.result);
+                };
+
+                reader.readAsDataURL(ImageFile.files[0]);
+            }
+        };
+    </script>
+</body>
+</html>

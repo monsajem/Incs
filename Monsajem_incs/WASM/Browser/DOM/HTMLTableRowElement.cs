@@ -1,5 +1,5 @@
-﻿using System;
-using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
+﻿using Microsoft.JSInterop;
+using System;
 
 namespace WebAssembly.Browser.DOM
 {
@@ -15,7 +15,7 @@ namespace WebAssembly.Browser.DOM
         [Export("bgColor")]
         public Object BgColor { get => GetProperty<Object>("bgColor"); set => SetProperty<Object>("bgColor", value); }
         [Export("cells")]
-        public HTMLCollectionOf<HTMLTableCellElement> Cells { get => GetProperty <HTMLCollectionOf<HTMLTableCellElement>> ("cells"); set => SetProperty <HTMLCollectionOf<HTMLTableCellElement>> ("cells", value); }
+        public HTMLCollectionOf<HTMLTableCellElement> Cells { get => GetProperty<HTMLCollectionOf<HTMLTableCellElement>>("cells"); set => SetProperty<HTMLCollectionOf<HTMLTableCellElement>>("cells", value); }
         [Export("height")]
         public Object Height { get => GetProperty<Object>("height"); set => SetProperty<Object>("height", value); }
         [Export("rowIndex")]
@@ -31,7 +31,7 @@ namespace WebAssembly.Browser.DOM
         [Export("deleteCell")]
         public void DeleteCell(double index)
         {
-            InvokeMethod<object>("deleteCell", index);
+            _ = InvokeMethod<object>("deleteCell", index);
         }
         [Export("insertCell")]
         public HTMLTableDataCellElement InsertCell(double index)

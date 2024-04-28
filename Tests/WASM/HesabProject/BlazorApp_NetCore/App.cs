@@ -116,7 +116,7 @@ namespace Monsajem_Client
 
         public static async Task Main_Run()
         {
-            js.IJSUnmarshalledRuntime = (IJSUnmarshalledRuntime)WASM_Global.Publisher.jSRuntime;
+            js.Start((JSInProcessRuntime)WASM_Global.Publisher.jSRuntime);
             js.Document.Title = "حسابداری";
             js.Document.GetElementById("AppPreload").Remove();
             js.Document.Body.AppendChild(BasePage_html.HtmlText);

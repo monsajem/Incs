@@ -1,5 +1,5 @@
-﻿using System;
-using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
+﻿using Microsoft.JSInterop;
+using System;
 
 namespace WebAssembly.Browser.DOM
 {
@@ -49,12 +49,12 @@ namespace WebAssembly.Browser.DOM
         [Export("start")]
         public void Start()
         {
-            InvokeMethod<object>("start");
+            _ = InvokeMethod<object>("start");
         }
         [Export("stop")]
         public void Stop()
         {
-            InvokeMethod<object>("stop");
+            _ = InvokeMethod<object>("stop");
         }
     }
 

@@ -1,14 +1,12 @@
-﻿using System;
+﻿using Monsajem_Incs.Data.StreamExtentions;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Threading.Tasks;
-using Monsajem_Incs.Data.StreamExtentions;
 
 namespace Monsajem_Incs.Net.Web.WebSocket.Server
 {
@@ -24,7 +22,7 @@ namespace Monsajem_Incs.Net.Web.WebSocket.Server
 
     public class WebSocketSession : IDisposable
     {
-        private static readonly Random Random = new Random();
+        private static readonly Random Random = new();
 
         private TcpClient Client { get; }
         private Stream ClientStream { get; }
@@ -51,7 +49,7 @@ namespace Monsajem_Incs.Net.Web.WebSocket.Server
 
         public void StartMessageLoop()
         {
-            ThreadPool.QueueUserWorkItem(_ =>
+            _ = ThreadPool.QueueUserWorkItem(_ =>
             {
                 MessageLoop();
             });
@@ -68,7 +66,7 @@ namespace Monsajem_Incs.Net.Web.WebSocket.Server
                 while (Client.Available > 0)
                 {
                     var buffer = new byte[Client.Available];
-                    ClientStream.Read(buffer, 0, buffer.Length);
+                    _ = ClientStream.Read(buffer, 0, buffer.Length);
                     handshakeBuffer.Write(buffer, 0, buffer.Length);
                 }
 
@@ -101,105 +99,105 @@ namespace Monsajem_Incs.Net.Web.WebSocket.Server
             var packet = new List<byte>();
 
             WebSocketOpCode messageOpcode = 0x0;
-            using (var messageBuffer = new MemoryStream())
-                while (client.Connected)
+            using var messageBuffer = new MemoryStream();
+            while (client.Connected)
+            {
+                packet.Clear();
+
+                var ab = client.Available;
+                if (ab == 0) continue;
+
+                packet.Add((byte)stream.ReadByte());
+                var fin = (packet[0] & (1 << 7)) != 0;
+                var rsv1 = (packet[0] & (1 << 6)) != 0;
+                var rsv2 = (packet[0] & (1 << 5)) != 0;
+                var rsv3 = (packet[0] & (1 << 4)) != 0;
+
+                var opcode = (WebSocketOpCode)(packet[0] & ((1 << 4) - 1));
+
+                switch (opcode)
                 {
-                    packet.Clear();
-
-                    var ab = client.Available;
-                    if (ab == 0) continue;
-
-                    packet.Add((byte)stream.ReadByte());
-                    var fin = (packet[0] & (1 << 7)) != 0;
-                    var rsv1 = (packet[0] & (1 << 6)) != 0;
-                    var rsv2 = (packet[0] & (1 << 5)) != 0;
-                    var rsv3 = (packet[0] & (1 << 4)) != 0;
-
-                    var opcode = (WebSocketOpCode)(packet[0] & ((1 << 4) - 1));
-
-                    switch (opcode)
-                    {
-                        case WebSocketOpCode.ContinuationFrame:
-                            break;
-                        case WebSocketOpCode.Text:
-                        case WebSocketOpCode.Binary:
-                        case WebSocketOpCode.ConnectionClose:
-                            messageOpcode = opcode;
-                            break;
-                        case WebSocketOpCode.Ping:
-                            continue;
-                        case WebSocketOpCode.Pong:
-                            continue;
-                        default:
-                            continue; // Reserved
-                    }
-
-                    packet.Add((byte)stream.ReadByte());
-                    var masked = (packet[1] & (1 << 7)) != 0;
-                    var pseudoLength = packet[1] - (masked ? 128 : 0);
-
-                    ulong actualLength = 0;
-                    if (pseudoLength > 0 && pseudoLength < 125) actualLength = (ulong)pseudoLength;
-                    else if (pseudoLength == 126)
-                    {
-                        var length = new byte[2];
-                        stream.Fill(length);
-                        packet.AddRange(length);
-                        Array.Reverse(length);
-                        actualLength = BitConverter.ToUInt16(length, 0);
-                    }
-                    else if (pseudoLength == 127)
-                    {
-                        var length = new byte[8];
-                        stream.Fill(length);
-                        packet.AddRange(length);
-                        Array.Reverse(length);
-                        actualLength = BitConverter.ToUInt64(length, 0);
-                    }
-
-                    var mask = new byte[4];
-                    if (masked)
-                    {
-                        stream.Fill(mask);
-                        packet.AddRange(mask);
-                    }
-
-                    if (actualLength > 0)
-                    {
-                        var data = new byte[actualLength];
-                        stream.Fill(data);
-                        packet.AddRange(data);
-
-                        if (masked)
-                            ApplyMask(data, mask);
-
-                        messageBuffer.Write(data, 0, data.Length);
-                    }
-
-
-                    if (!fin) continue;
-                    var message = messageBuffer.ToArray();
-
-                    switch (messageOpcode)
-                    {
-                        case WebSocketOpCode.Text:
-                            MessageReceived?.Invoke(message, WebSocketOpCode.Text);
-                            break;
-                        case WebSocketOpCode.Binary:
-                            MessageReceived?.Invoke(message, WebSocketOpCode.Binary);
-                            break;
-                        case WebSocketOpCode.ConnectionClose:
-                            Close();
-                            break;
-                        default:
-                            throw new Exception("Invalid opcode: " + messageOpcode);
-                    }
-
-                    messageBuffer.SetLength(0);
+                    case WebSocketOpCode.ContinuationFrame:
+                        break;
+                    case WebSocketOpCode.Text:
+                    case WebSocketOpCode.Binary:
+                    case WebSocketOpCode.ConnectionClose:
+                        messageOpcode = opcode;
+                        break;
+                    case WebSocketOpCode.Ping:
+                        continue;
+                    case WebSocketOpCode.Pong:
+                        continue;
+                    default:
+                        continue; // Reserved
                 }
+
+                packet.Add((byte)stream.ReadByte());
+                var masked = (packet[1] & (1 << 7)) != 0;
+                var pseudoLength = packet[1] - (masked ? 128 : 0);
+
+                ulong actualLength = 0;
+                if (pseudoLength > 0 && pseudoLength < 125) actualLength = (ulong)pseudoLength;
+                else if (pseudoLength == 126)
+                {
+                    var length = new byte[2];
+                    stream.Fill(length);
+                    packet.AddRange(length);
+                    Array.Reverse(length);
+                    actualLength = BitConverter.ToUInt16(length, 0);
+                }
+                else if (pseudoLength == 127)
+                {
+                    var length = new byte[8];
+                    stream.Fill(length);
+                    packet.AddRange(length);
+                    Array.Reverse(length);
+                    actualLength = BitConverter.ToUInt64(length, 0);
+                }
+
+                var mask = new byte[4];
+                if (masked)
+                {
+                    stream.Fill(mask);
+                    packet.AddRange(mask);
+                }
+
+                if (actualLength > 0)
+                {
+                    var data = new byte[actualLength];
+                    stream.Fill(data);
+                    packet.AddRange(data);
+
+                    if (masked)
+                        ApplyMask(data, mask);
+
+                    messageBuffer.Write(data, 0, data.Length);
+                }
+
+
+                if (!fin) continue;
+                var message = messageBuffer.ToArray();
+
+                switch (messageOpcode)
+                {
+                    case WebSocketOpCode.Text:
+                        MessageReceived?.Invoke(message, WebSocketOpCode.Text);
+                        break;
+                    case WebSocketOpCode.Binary:
+                        MessageReceived?.Invoke(message, WebSocketOpCode.Binary);
+                        break;
+                    case WebSocketOpCode.ConnectionClose:
+                        Close();
+                        break;
+                    default:
+                        throw new Exception("Invalid opcode: " + messageOpcode);
+                }
+
+                messageBuffer.SetLength(0);
+            }
         }
 
-        public void Close(bool Mask=false)
+        public void Close(bool Mask = false)
         {
             if (!Client.Connected) return;
 
@@ -227,66 +225,64 @@ namespace Monsajem_Incs.Net.Web.WebSocket.Server
         {
             var mask = new byte[4];
             if (masking) Random.NextBytes(mask);
-            Send(client, payload, isBinary ? WebSocketOpCode.Binary : WebSocketOpCode.Text , masking, mask);
+            Send(client, payload, isBinary ? WebSocketOpCode.Binary : WebSocketOpCode.Text, masking, mask);
         }
         static void Send(TcpClient client, byte[] payload, WebSocketOpCode opcode, bool masking, byte[] mask)
         {
             if (masking && mask == null) throw new ArgumentException(nameof(mask));
 
-            using (var packet = new MemoryStream())
+            using var packet = new MemoryStream();
+            byte firstbyte = 0b0_0_0_0_0000;
+
+            firstbyte |= 0b1_0_0_0_0000;
+
+            firstbyte += (byte)opcode;
+            packet.WriteByte(firstbyte);
+
+            byte secondbyte = 0b0_0000000;
+
+            if (masking)
+                secondbyte |= 0b1_0000000;
+
+            var payload_Length = payload.LongLength;
+
+            if (payload_Length <= 0b0_1111101) // 125
             {
-                byte firstbyte = 0b0_0_0_0_0000;
-
-                firstbyte |= 0b1_0_0_0_0000;
-
-                firstbyte += (byte)opcode;
-                packet.WriteByte(firstbyte);
-
-                byte secondbyte = 0b0_0000000;
-
-                if (masking)
-                    secondbyte |= 0b1_0000000;
-
-                var payload_Length = payload.LongLength;
-
-                if (payload_Length <= 0b0_1111101) // 125
-                {
-                    secondbyte |= (byte)payload_Length;
-                    packet.WriteByte(secondbyte);
-                }
-                else if (payload_Length <= UInt16.MaxValue) // If length takes 2 bytes
-                {
-                    secondbyte |= 0b0_1111110; // 126
-                    packet.WriteByte(secondbyte);
-
-                    var len = BitConverter.GetBytes(payload_Length);
-                    Array.Reverse(len, 0, 2);
-                    packet.Write(len, 0, 2);
-                }
-                else // if (payload.LongLength <= Int64.MaxValue) // If length takes 8 bytes
-                {
-                    secondbyte |= 0b0_1111111; // 127
-                    packet.WriteByte(secondbyte);
-
-                    var len = BitConverter.GetBytes(payload_Length);
-                    Array.Reverse(len, 0, 8);
-                    packet.Write(len, 0, 8);
-                }
-
-                if (masking)
-                {
-                    packet.Write(mask, 0, 4);
-                    ApplyMask(payload, mask);
-                }
-
-
-                var stream = client.GetStream();
-
-                var Head = packet.ToArray();
-                stream.Write(Head, 0, Head.Length);
-                stream.Write(payload, 0, payload.Length);
-                stream.Flush();
+                secondbyte |= (byte)payload_Length;
+                packet.WriteByte(secondbyte);
             }
+            else if (payload_Length <= UInt16.MaxValue) // If length takes 2 bytes
+            {
+                secondbyte |= 0b0_1111110; // 126
+                packet.WriteByte(secondbyte);
+
+                var len = BitConverter.GetBytes(payload_Length);
+                Array.Reverse(len, 0, 2);
+                packet.Write(len, 0, 2);
+            }
+            else // if (payload.LongLength <= Int64.MaxValue) // If length takes 8 bytes
+            {
+                secondbyte |= 0b0_1111111; // 127
+                packet.WriteByte(secondbyte);
+
+                var len = BitConverter.GetBytes(payload_Length);
+                Array.Reverse(len, 0, 8);
+                packet.Write(len, 0, 8);
+            }
+
+            if (masking)
+            {
+                packet.Write(mask, 0, 4);
+                ApplyMask(payload, mask);
+            }
+
+
+            var stream = client.GetStream();
+
+            var Head = packet.ToArray();
+            stream.Write(Head, 0, Head.Length);
+            stream.Write(payload, 0, payload.Length);
+            stream.Flush();
         }
 
         static void ApplyMask(byte[] msg, byte[] mask)

@@ -1,11 +1,9 @@
 ﻿using Monsajem_Incs.Pattern;
 using System;
-using System.Linq;
-using System.Reflection;
-using static Monsajem_Incs.Collection.Array.Extentions;
-using Monsajem_Incs.Collection.Array.ArrayBased.DynamicSize;
-using System.Runtime.CompilerServices;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using static Monsajem_Incs.Collection.Array.Extentions;
 
 namespace Monsajem_Incs
 {
@@ -18,7 +16,7 @@ namespace Monsajem_Incs
             {
                 AddAssembly(typeof(Assembly).Assembly);
                 AddAssembly(typeof(int).Assembly);
-                Action LasLoader = () =>
+                void LasLoader()
                 {
                     var Asms = LoadedAssemblies;
                     var IsFirst = true;
@@ -28,14 +26,14 @@ namespace Monsajem_Incs
                         foreach (var InnerAsm in InnerAsms)
                         {
                             var InnerAsm_Name = InnerAsm;
-                            Action Loader = () =>
+                            void Loader()
                             {
                                 try
                                 {
                                     AddAssembly(System.Reflection.Assembly.Load(InnerAsm_Name));
                                 }
                                 catch { }
-                            };
+                            }
                             if (IsFirst)
                             {
                                 Loader();
@@ -45,7 +43,7 @@ namespace Monsajem_Incs
                                 Insert(ref LoadAssemblies, Loader);
                         }
                     }
-                };
+                }
                 LoadAssemblies = new Action[]
                 {
                     () => AddAssembly(AppDomain.CurrentDomain.GetAssemblies()),
@@ -64,7 +62,7 @@ namespace Monsajem_Incs
                 {
                     if (AllAppAssembliesLoaded == false)
                     {
-                        while (LoadDeeperAssemblys()){}
+                        while (LoadDeeperAssemblys()) { }
                         LoadAssemblies = null;
                     }
                     return LoadedAssemblies;
@@ -118,14 +116,14 @@ namespace Monsajem_Incs
                 return false;
             }
 
-            private static HashSet<TypeHolder> Types = new HashSet<TypeHolder>();
+            private static HashSet<TypeHolder> Types = [];
             [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
             internal static Type GetType(string TypeName)
             {
-                static void AddType(Type Type,string TypeName)
+                static void AddType(Type Type, string TypeName)
                 {
                     if (Types.Contains(new TypeHolder(TypeName)) == false)
-                        Types.Add(new TypeHolder(Type,TypeName));
+                        Types.Add(new TypeHolder(Type, TypeName));
                     if (Types.Contains(new TypeHolder(Type.ToString())) == false)
                         Types.Add(new TypeHolder(Type, Type.ToString()));
                     if (Types.Contains(new TypeHolder(Type.FullName)) == false)
@@ -200,10 +198,7 @@ namespace Monsajem_Incs
                     if (Browsed.SubFunctions.Length > 2)
                     {
                         var Rank = Browsed[2].Compile.Length - 1;
-                        if (Rank == 1)
-                            Type = Type.MakeArrayType();
-                        else
-                            Type = Type.MakeArrayType(Rank);
+                        Type = Rank == 1 ? Type.MakeArrayType() : Type.MakeArrayType(Rank);
                     }
                 }
                 AddType(Type, FirstTypeName);
@@ -213,7 +208,7 @@ namespace Monsajem_Incs
             private class TypeHolder : IEquatable<TypeHolder>
             {
                 [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
-                public TypeHolder(Type Type,string TypeName) : this(TypeName)
+                public TypeHolder(Type Type, string TypeName) : this(TypeName)
                 {
                     this.Type = Type;
                 }
@@ -221,7 +216,7 @@ namespace Monsajem_Incs
                 public TypeHolder(string TypeName)
                 {
                     this.TypeName = TypeName;
-                    this.HashCode = TypeName.GetHashCode();
+                    HashCode = TypeName.GetHashCode();
                 }
 
                 public Type Type;

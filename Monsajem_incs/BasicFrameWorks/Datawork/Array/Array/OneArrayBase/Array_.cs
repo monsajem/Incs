@@ -1,25 +1,20 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Monsajem_Incs.Collection.Array.ArrayBased.OneArrayBase
 {
-    public abstract class Array<ArrayType,OwnerType> :
+    public abstract class Array<ArrayType, OwnerType> :
         Base.IArray<ArrayType, OwnerType>
-        where OwnerType: Array<ArrayType, OwnerType>
+        where OwnerType : Array<ArrayType, OwnerType>
     {
         public ArrayType[] ar;
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         public Array()
         {
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         public Array(ArrayType[] ar)
         {
             this.ar = ar;
@@ -27,9 +22,9 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.OneArrayBase
 
         public override ArrayType this[int Pos]
         {
-            [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
             get => ar[Pos];
-            [MethodImpl(MethodImplOptions.AggressiveOptimization|MethodImplOptions.AggressiveInlining)]
+            [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
             set => ar[Pos] = value;
         }
 
@@ -51,7 +46,7 @@ namespace Monsajem_Incs.Collection.Array.ArrayBased.OneArrayBase
 
         internal override void SetFromTo(int From, System.Array Ar, int Ar_From, int Ar_Len)
         {
-            System.Array.Copy(Ar, Ar_From, this.ar, From, Ar_Len);
+            System.Array.Copy(Ar, Ar_From, ar, From, Ar_Len);
         }
     }
 }

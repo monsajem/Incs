@@ -1,11 +1,10 @@
-﻿using System;
+﻿using Monsajem_Incs.Collection.Array;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using static Monsajem_Incs.Collection.Array.Extentions;
-using Monsajem_Incs.Collection.Array;
 using static System.Runtime.Serialization.FormatterServices;
-using Monsajem_Incs.Collection.Array.ArrayBased.DynamicSize;
 
 namespace Monsajem_Incs.Serialization
 {
@@ -25,10 +24,7 @@ namespace Monsajem_Incs.Serialization
 
         public bool Equals(ObjectContainer other)
         {
-            if (IsUniqueHashCode)
-                return HashCode == other.HashCode;
-            else
-                return object.Equals(obj,other.obj);
+            return IsUniqueHashCode ? HashCode == other.HashCode : object.Equals(obj, other.obj);
         }
 
         public override int GetHashCode()
@@ -46,8 +42,9 @@ namespace Monsajem_Incs.Serialization
         private static Action AtLast;
         public static bool IsPrimitive(this Type type)
         {
-            if (type == typeof(String)) return true;
-            return (type.IsValueType & type.IsPrimitive) |
+            return type == typeof(String)
+                ? true
+                : (type.IsValueType & type.IsPrimitive) |
                 type.IsEnum;
         }
 
@@ -55,7 +52,7 @@ namespace Monsajem_Incs.Serialization
         {
             ObjectExtensions.OrginalTargetForDelegates = OrginalTargetForDelegates;
             var Pos = InternalCopy(originalObject.GetType());
-            visited = new HashSet<ObjectContainer>();
+            visited = [];
             var Result = InternalCopys[Pos]
                 (originalObject);
             AtLast?.Invoke();
@@ -65,8 +62,9 @@ namespace Monsajem_Incs.Serialization
 
         public static T Copy<T>(this T original, bool OrginalTargetForDelegates = false)
         {
-            if (original == null) return default(T);
-            return (T)Copy(
+            return original == null
+                ? default
+                : (T)Copy(
                 originalObject: original,
                 OrginalTargetForDelegates: OrginalTargetForDelegates);
         }
@@ -74,7 +72,7 @@ namespace Monsajem_Incs.Serialization
         private static void Clone(
             object originalObject,
             Action<object> SetValue,
-            Func<object,object> Copy)
+            Func<object, object> Copy)
         {
             if (originalObject == null)
                 return;
@@ -89,7 +87,7 @@ namespace Monsajem_Incs.Serialization
             }
             else
             {
-                visited.Add(Key);
+                _ = visited.Add(Key);
                 var Obj = Copy(originalObject);
                 SetValue(Obj);
             }
@@ -108,18 +106,17 @@ namespace Monsajem_Incs.Serialization
                 Insert(ref InternalCopys, (Func<object, object>)null);
                 Insert(ref CopyPoss, pos, BinaryInsert(ref TypeCodes, typeToReflect.GetHashCode()));
 
-                Func<object,object> MyInternalCopy;
+                Func<object, object> MyInternalCopy;
 
                 if (IsPrimitive(typeToReflect))
                     MyInternalCopy = (originalObject) => originalObject;
                 else
                 {
-                    if(typeToReflect.IsArray| typeToReflect == typeof(System.Array))
+                    if (typeToReflect.IsArray | typeToReflect == typeof(System.Array))
                     {
-                        Func<object, (Type ElementType, int Rank, 
-                            Func<object, object> InternalCopy)> GetInfo=null;
-                        Func<object, object>
-                            MyInternalCopy_ArrDelegate = (originalObject) => null;
+                        Func<object, (Type ElementType, int Rank,
+                            Func<object, object> InternalCopy)> GetInfo = null;
+                        object MyInternalCopy_ArrDelegate(object originalObject) => null;
                         Func<object, object> MyInternalCopy_Arr;
                         {
                             MyInternalCopy_Arr = (originalObject) =>
@@ -135,7 +132,7 @@ namespace Monsajem_Incs.Serialization
 
                                 var cloneObject = System.Array.CreateInstance(Info.ElementType, lents);
 
-                                cloneObject.ForEach(lents,(indices) =>
+                                cloneObject.ForEach(lents, (indices) =>
                                 {
                                     var StandAloneCurrent = new int[Info.Rank];
                                     for (int i = 0; i < Info.Rank; i++)
@@ -144,7 +141,7 @@ namespace Monsajem_Incs.Serialization
                                         (obj) => cloneObject.SetValue(obj, StandAloneCurrent),
                                         Info.InternalCopy);
                                 });
-                                visited.Add(new ObjectContainer()
+                                _ = visited.Add(new ObjectContainer()
                                 {
                                     obj = cloneObject,
                                     HashCode = originalObject.GetHashCode()
@@ -168,9 +165,8 @@ namespace Monsajem_Incs.Serialization
                             var ICPos = InternalCopy(typeToReflect.GetElementType());
                             var ArrayInternalCopy = InternalCopys[ICPos];
                             GetInfo = (ar) => (ElementType, Rank, ArrayInternalCopy);
-                            if (IsPrimitive(typeToReflect.GetElementType()))
-                            {
-                                MyInternalCopy = (ar)=>
+                            MyInternalCopy = IsPrimitive(typeToReflect.GetElementType())
+                                ? ((ar) =>
                                 {
                                     var ArrayObject = (System.Array)ar;
                                     var lents = new int[Rank];
@@ -179,21 +175,10 @@ namespace Monsajem_Incs.Serialization
                                     var cloneObject = System.Array.CreateInstance(ElementType, lents);
                                     ArrayObject.CopyTo(cloneObject, 0);
                                     return cloneObject;
-                                };
-                            }
-                            else
-                            {
-                                if (typeof(Delegate).IsAssignableFrom(typeToReflect))
-                                {
-                                    MyInternalCopy = MyInternalCopy_ArrDelegate;
-                                }
-                                else
-                                {
-                                    MyInternalCopy = MyInternalCopy_Arr;
-                                }
-                            }
+                                })
+                                : typeof(Delegate).IsAssignableFrom(typeToReflect) ? MyInternalCopy_ArrDelegate : MyInternalCopy_Arr;
                         }
-                        
+
                     }
                     else
                     {
@@ -230,20 +215,20 @@ namespace Monsajem_Incs.Serialization
                         }
                         else
                         {
-                            var Fields = new DynamicAssembly.TypeFields(typeToReflect).Fields;                            
-                            var FieldIInfo =new
-                                (Func<(object cloneObject,object FieldValue),object> Copy,
+                            var Fields = new DynamicAssembly.TypeFields(typeToReflect).Fields;
+                            var FieldIInfo = new
+                                (Func<(object cloneObject, object FieldValue), object> Copy,
                                  DynamicAssembly.FieldControler Field)[Fields.Length];
                             for (int i = 0; i < Fields.Length; i++)
                             {
                                 var Field = Fields[i];
                                 if (Field.Info.GetCustomAttributes(typeof(CopyOrginalObject)).Count() > 0)
-                                    FieldIInfo[i] = ((c)=>
+                                    FieldIInfo[i] = ((c) =>
                                     {
                                         var Result = c.FieldValue;
-                                        Field.SetValue(c.cloneObject,Result);
+                                        Field.SetValue(c.cloneObject, Result);
                                         return Result;
-                                    },Field);
+                                    }, Field);
                                 else if (!IsPrimitive(Field.Info.FieldType))
                                     FieldIInfo[i] = ((c) =>
                                     {
@@ -251,7 +236,7 @@ namespace Monsajem_Incs.Serialization
                                         var clonedFieldValue = InternalCopys[FieldInternalCopy](c.FieldValue);
                                         Field.SetValue(c.cloneObject, clonedFieldValue);
                                         return clonedFieldValue;
-                                    },Field);
+                                    }, Field);
                                 else
                                 {
                                     var Pos = InternalCopy(Field.Info.FieldType);
@@ -261,7 +246,7 @@ namespace Monsajem_Incs.Serialization
                                         var clonedFieldValue = Copy(c.FieldValue);
                                         Field.SetValue(c.cloneObject, clonedFieldValue);
                                         return clonedFieldValue;
-                                    },Field);
+                                    }, Field);
                                 }
                             }
 
@@ -270,7 +255,7 @@ namespace Monsajem_Incs.Serialization
                             MyInternalCopy = (originalObject) =>
                             {
                                 var cloneObject = GetUninitializedObject(originalObject.GetType());
-                                visited.Add(new ObjectContainer
+                                _ = visited.Add(new ObjectContainer
                                 {
                                     HashCode = originalObject.GetHashCode(),
                                     obj = cloneObject
@@ -280,7 +265,7 @@ namespace Monsajem_Incs.Serialization
                                     var Info = FieldIInfo[i];
                                     Clone(Info.Field.GetValue(originalObject),
                                         (c) => Info.Field.SetValue(cloneObject, c),
-                                        (c)=> Info.Copy((cloneObject, c)));
+                                        (c) => Info.Copy((cloneObject, c)));
                                 }
                                 return cloneObject;
                             };

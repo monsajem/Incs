@@ -1,7 +1,6 @@
-﻿using System;
-using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
+﻿using Microsoft.JSInterop;
 
-namespace WebAssembly.Browser.DOM 
+namespace WebAssembly.Browser.DOM
 {
 
     [Export("DocumentType", typeof(IJSInProcessObjectReference))]
@@ -25,7 +24,7 @@ namespace WebAssembly.Browser.DOM
         [Export("remove")]
         public void Remove()
         {
-            InvokeMethod<object>("remove");
+            _ = InvokeMethod<object>("remove");
         }
     }
 }

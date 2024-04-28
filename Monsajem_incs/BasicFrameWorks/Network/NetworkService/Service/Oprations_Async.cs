@@ -1,12 +1,10 @@
-﻿using System;
-using Monsajem_Incs.Net.Base.Socket;
+﻿using Monsajem_Incs.Net.Base.Socket;
+using Monsajem_Incs.Serialization;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Monsajem_Incs.Serialization;
 using System.Reflection;
-using static Monsajem_Incs.Collection.Array.Extentions;
-using static System.Runtime.Serialization.FormatterServices;
+using System.Threading.Tasks;
 
 namespace Monsajem_Incs.Net.Base.Service
 {
@@ -24,10 +22,10 @@ namespace Monsajem_Incs.Net.Base.Service
         public async Task<t> GetData<t>(t SampleType) => await GetData<t>();
         public async Task SendArray<t>(IEnumerable<t> Datas, Action<t> DataSended = null)
         {
-            await SendData(Datas.Count());
+            _ = await SendData(Datas.Count());
             foreach (var data in Datas)
             {
-                await SendData(data);
+                _ = await SendData(data);
                 DataSended?.Invoke(data);
             }
         }
@@ -46,77 +44,77 @@ namespace Monsajem_Incs.Net.Base.Service
         //0
         public async Task RunOnOtherSide(Action<ISyncOprations> Action)
         {
-            await SendData<byte>(0);
-            await SendData(Action);
+            _ = await SendData<byte>(0);
+            _ = await SendData(Action);
         }
         //1
         public async Task RunOnOtherSide<Data>(Action<ISyncOprations, Data> Action)
         {
-            await SendData<byte>(1);
-            await SendData(Action);
+            _ = await SendData<byte>(1);
+            _ = await SendData(Action);
         }
         //2
         public async Task RunOnOtherSide(Action Action)
         {
-            await SendData<byte>(2);
-            await SendData(Action);
+            _ = await SendData<byte>(2);
+            _ = await SendData(Action);
         }
         //3
         public async Task RunOnOtherSide<Data>(Action<Data> Action)
         {
-            await SendData<byte>(3);
-            await SendData(Action);
+            _ = await SendData<byte>(3);
+            _ = await SendData(Action);
         }
         //4
         public async Task<Result> RunOnOtherSide<Result>(Func<Result> Func)
         {
-            await SendData<byte>(4);
-            await SendData<Delegate>(Func);
+            _ = await SendData<byte>(4);
+            _ = await SendData<Delegate>(Func);
             return (Result)await GetData<object>();
         }
         //5
         public async Task<Result> RunOnOtherSide<Result, Data>(Func<Data, Result> Func)
         {
-            await SendData<byte>(5);
-            await SendData<Delegate>(Func);
+            _ = await SendData<byte>(5);
+            _ = await SendData<Delegate>(Func);
             return (Result)await GetData<object>();
         }
         //6
         public async Task RunOnOtherSide(Func<IAsyncOprations, Task> Action)
         {
-            await SendData<byte>(6);
-            await SendData<object>(Action);
+            _ = await SendData<byte>(6);
+            _ = await SendData<object>(Action);
         }
         //7
         public async Task RunOnOtherSide<Data>(Func<IAsyncOprations, Data, Task> Action)
         {
-            await SendData<byte>(7);
-            await SendData(Action);
+            _ = await SendData<byte>(7);
+            _ = await SendData(Action);
         }
         //8
         public async Task RunOnOtherSide(Func<Task> Action)
         {
-            await SendData<byte>(8);
-            await SendData<object>(Action);
+            _ = await SendData<byte>(8);
+            _ = await SendData<object>(Action);
         }
         //9
         public async Task RunOnOtherSide<Data>(Func<Data, Task> Action)
         {
-            await SendData<byte>(9);
-            await SendData(Action);
+            _ = await SendData<byte>(9);
+            _ = await SendData(Action);
         }
         //10
         public async Task<Result> RunOnOtherSide<Result>(Func<Task<Result>> Func)
         {
-            await SendData<byte>(10);
-            await SendData<Delegate>(Func);
+            _ = await SendData<byte>(10);
+            _ = await SendData<Delegate>(Func);
             return await GetData<Result>();
         }
         //11
         public async Task<Result> RunOnOtherSide<Result, Data>(Func<Data, Task<Result>> Func)
         {
-            await SendData<byte>(11);
-            await SendData<Delegate>(Func);
+            _ = await SendData<byte>(11);
+            _ = await SendData<Delegate>(Func);
             return await GetData<Result>();
         }
         public Task RunRecivedAction(
@@ -158,13 +156,13 @@ namespace Monsajem_Incs.Net.Base.Service
                     {
                         var dg = await GetData<Delegate>();
                         Permition?.Invoke(dg);
-                        await SendData(dg.DynamicInvoke()); break;
+                        _ = await SendData(dg.DynamicInvoke()); break;
                     }
                 case 5:
                     {
                         var dg = await GetData<Delegate>();
                         Permition?.Invoke(dg);
-                        await SendData(dg.DynamicInvoke(Data)); break;
+                        _ = await SendData(dg.DynamicInvoke(Data)); break;
                     }
                 case 6:
                     {
@@ -196,7 +194,7 @@ namespace Monsajem_Incs.Net.Base.Service
                         Permition?.Invoke(dg);
                         var Result = (Task)dg.DynamicInvoke();
                         await Result;
-                        await SendData(Result.GetType().GetProperty("Result").GetValue(Result)); break;
+                        _ = await SendData(Result.GetType().GetProperty("Result").GetValue(Result)); break;
                     }
                 case 11:
                     {
@@ -204,7 +202,7 @@ namespace Monsajem_Incs.Net.Base.Service
                         Permition?.Invoke(dg);
                         var Result = (Task)dg.DynamicInvoke(Data);
                         await Result;
-                        await SendData(Result.GetType().GetProperty("Result").GetValue(Result)); break;
+                        _ = await SendData(Result.GetType().GetProperty("Result").GetValue(Result)); break;
                     }
                     throw new Exception();
             }
@@ -252,29 +250,29 @@ namespace Monsajem_Incs.Net.Base.Service
 
             Func<byte, object[], bool, Task<object>> Request = null;
             byte Address = 0;
-            Func<FieldInfo, Delegate> MakeDelegate = (Field) =>
-             {
-                 var LocAddress = Address++;
-                 var LocRequest = Request;
-                 var DG = DynamicAssembly.TypeController.CreateDelegateWrapper(Field.FieldType,
-                          (inputs) =>
-                          {
-                              LocRequest(LocAddress, inputs, false).Wait();
-                          },
-                          (inputs) =>
-                          {
-                              return LocRequest(LocAddress, inputs, true).GetAwaiter().GetResult();
-                          },
-                          async (inputs) =>
-                          {
-                              await LocRequest(LocAddress, inputs, false);
-                          },
-                          async (inputs) =>
-                          {
-                              return await LocRequest(LocAddress, inputs, true);
-                          });
-                 return DG;
-             };
+            Delegate MakeDelegate(FieldInfo Field)
+            {
+                var LocAddress = Address++;
+                var LocRequest = Request;
+                var DG = DynamicAssembly.TypeController.CreateDelegateWrapper(Field.FieldType,
+                         (inputs) =>
+                         {
+                             LocRequest(LocAddress, inputs, false).Wait();
+                         },
+                         (inputs) =>
+                         {
+                             return LocRequest(LocAddress, inputs, true).GetAwaiter().GetResult();
+                         },
+                         async (inputs) =>
+                         {
+                             _ = await LocRequest(LocAddress, inputs, false);
+                         },
+                         async (inputs) =>
+                         {
+                             return await LocRequest(LocAddress, inputs, true);
+                         });
+                return DG;
+            }
 
             {// Remote
                 Request =
@@ -289,15 +287,12 @@ namespace Monsajem_Incs.Net.Base.Service
                         SendTask = SendQueue.AddToQueue(async () =>
                         {
                             await Service.Request(Address);
-                            await SendData(inputs);
+                            _ = await SendData(inputs);
                         });
                         ReciveTask = ReciveQueue.AddToQueue(async () =>
                         {
                             await Sync();
-                            if (HaveResult)
-                                return await GetData<object>();
-                            else
-                                return null;
+                            return HaveResult ? await GetData<object>() : null;
                         });
                     }
                     await SendTask;
@@ -317,7 +312,7 @@ namespace Monsajem_Incs.Net.Base.Service
                    bool HaveResult) =>
                 {
                     await Service.Request(Address);
-                    await SendData(inputs);
+                    _ = await SendData(inputs);
                     return default;
                 };
                 for (int i = 0; i < Fields.SyncFields.Length; i++)
@@ -340,11 +335,11 @@ namespace Monsajem_Incs.Net.Base.Service
 
             var Fields = GetRemoteFields<t>();
 
-            Func<Func<object[], Task<object>>, bool, Task> Handle=null;
-            byte Address=0;
+            Func<Func<object[], Task<object>>, bool, Task> Handle = null;
+            byte Address = 0;
             var Service = new Service<byte>(this);
 
-            Action<FieldInfo> AddService = (Field) =>
+            void AddService(FieldInfo Field)
             {
                 var LocAddress = Address++;
                 var LocHandle = Handle;
@@ -385,12 +380,12 @@ namespace Monsajem_Incs.Net.Base.Service
                     {
                         await LocHandle(async (Params) =>
                         {
-                            ((Delegate)Field.GetValue(obj)).DynamicInvoke(Params);
+                            _ = ((Delegate)Field.GetValue(obj)).DynamicInvoke(Params);
                             return null;
                         }, false);
                     });
                 }
-            };
+            }
 
             {// Remote
                 Handle = async (ac, HaveResult) =>
@@ -411,7 +406,7 @@ namespace Monsajem_Incs.Net.Base.Service
                         }
                         await Sync(Ex);
                         if (HaveResult)
-                            await SendData(Result);
+                            _ = await SendData(Result);
                     });
                 };
                 for (int i = 0; i < Fields.RemoteFields.Length; i++)
@@ -422,7 +417,7 @@ namespace Monsajem_Incs.Net.Base.Service
                 Handle = async (ac, HaveResult) =>
                 {
                     var Params = await GetData<object[]>();
-                    await ac(Params);
+                    _ = await ac(Params);
                 };
                 for (int i = 0; i < Fields.SyncFields.Length; i++)
                     AddService(Fields.SyncFields[i]);
@@ -466,7 +461,7 @@ namespace Monsajem_Incs.Net.Base.Service
             if (await GetData<bool>())
             {
 #if DEBUG
-                Exception ex = new Exception("Other side net sync Error >> " +
+                Exception ex = new("Other side net sync Error >> " +
                     await GetData<string>() + "\n At >> " + await GetData<string>());
 #else
                 Exception ex = new Exception("Other side net sync Error >> " +
@@ -494,10 +489,7 @@ namespace Monsajem_Incs.Net.Base.Service
             this.Client = Client;
             this.IsServer = IsServer;
 #if DEBUG
-            if (IsServer)
-                Parity = ServerParity;
-            else
-                Parity = ClientParity;
+            Parity = IsServer ? ServerParity : ClientParity;
 #endif
         }
 
@@ -546,10 +538,7 @@ namespace Monsajem_Incs.Net.Base.Service
 #endif
             t Data = default;
             var DataSize = Data.SizeOf();
-            if (DataSize < 0)
-                Data = Deserialize<t>(await Client.RecivePacket());
-            else
-                Data = Deserialize<t>(await Client.Recive(DataSize));
+            Data = DataSize < 0 ? Deserialize<t>(await Client.RecivePacket()) : Deserialize<t>(await Client.Recive(DataSize));
             return Data;
         }
 

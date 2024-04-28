@@ -1,17 +1,12 @@
-﻿using Monsajem_Incs.Resources;
+﻿using Monsajem_Incs.Collection.Array.ArrayBased.DynamicSize;
+using Monsajem_Incs.Serialization;
+using Monsajem_Incs.UserControler;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WebAssembly.Browser.DOM;
-using static MonsajemData.DataBase;
-using static WASM_Global.Publisher;
-using Monsajem_Incs.Database.Base;
-using Monsajem_Incs.Serialization;
-using Monsajem_Incs.Collection.Array.ArrayBased.DynamicSize;
-using static Monsajem_Incs.WasmClient.SafeRun;
-using Monsajem_Incs.UserControler;
 using WebAssembly.Browser.MonsajemDomHelpers;
+using static Monsajem_Incs.WasmClient.SafeRun;
 
 namespace Monsajem_Incs.Views
 {
@@ -19,8 +14,9 @@ namespace Monsajem_Incs.Views
     {
         public static Microsoft.AspNetCore.Components.NavigationManager NavigationManager { get => WASM_Global.Publisher.NavigationManager; }
         public static readonly string DataUrlSperator = "&";
-        public static event Action<(Page Page,string CurrentUrl)> LoadingPage;
-        public static bool IsLocalUrl {
+        public static event Action<(Page Page, string CurrentUrl)> LoadingPage;
+        public static bool IsLocalUrl
+        {
             get
             {
                 var Url = new System.Uri(NavigationManager.BaseUri);
@@ -40,12 +36,12 @@ namespace Monsajem_Incs.Views
 
             }
         }
-        private static Array<Page> Pages = new Array<Page>(10);
+        private static Array<Page> Pages = new(10);
         public static string CurrentAddress { get; private set; }
         public static Page CurrentPage { get; private set; }
         public abstract string Address { get; }
         public HTMLDivElement MainElement;
-        public async Task Show(bool NewStateIfIsInPage=false)
+        public async Task Show(bool NewStateIfIsInPage = false)
         {
             await Task.Delay(1);
             var LastAddress = CurrentAddress;
@@ -69,7 +65,7 @@ namespace Monsajem_Incs.Views
         public static async Task Route(string Address)
         {
             if (Address.Contains('?') == false)
-                Address = Address + "?";
+                Address += "?";
             var FirstPos = Address.IndexOf('?');
             if (FirstPos > -1)
                 Address = Address.Substring(FirstPos + 1);

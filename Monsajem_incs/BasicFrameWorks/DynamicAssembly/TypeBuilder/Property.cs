@@ -13,8 +13,8 @@ namespace Monsajem_Incs.DynamicAssembly
             MethodBuilder GetMethod,
             MethodBuilder SetMethod)
         {
-            
-            var PropBldr = myTypeBuilder.DefineProperty(Name,attributes,Ouput,null);
+
+            var PropBldr = myTypeBuilder.DefineProperty(Name, attributes, Ouput, null);
             PropBldr.SetGetMethod(GetMethod);
             PropBldr.SetSetMethod(SetMethod);
             return PropBldr;
@@ -26,18 +26,18 @@ namespace Monsajem_Incs.DynamicAssembly
             PropertyAttributes attributes,
             (MethodAttributes Attributes,
              string Name,
-             Action<ILGenerator> ILGenerator)GetMethod,
+             Action<ILGenerator> ILGenerator) GetMethod,
             (MethodAttributes Attributes,
              string Name,
              Action<ILGenerator> ILGenerator) SetMethod)
         {
-            var GetPropMthdBldr = Method(GetMethod.Attributes,GetMethod.Name,
-                                         null,Ouput,
+            var GetPropMthdBldr = Method(GetMethod.Attributes, GetMethod.Name,
+                                         null, Ouput,
                                          GetMethod.ILGenerator);
-            var SetPropMthdBldr = Method(SetMethod.Attributes,SetMethod.Name,
-                                         new Type[] { Ouput },null,
+            var SetPropMthdBldr = Method(SetMethod.Attributes, SetMethod.Name,
+                                         new Type[] { Ouput }, null,
                                          SetMethod.ILGenerator);
-            return Property(Name,Ouput,attributes, GetPropMthdBldr, SetPropMthdBldr);
+            return Property(Name, Ouput, attributes, GetPropMthdBldr, SetPropMthdBldr);
         }
 
         public PropertyBuilder Property(
@@ -49,16 +49,17 @@ namespace Monsajem_Incs.DynamicAssembly
             (MethodAttributes Attributes,
              string Name) SetMethod)
         {
-            var FieldBldr = myTypeBuilder.DefineField(Name,Ouput,FieldAttributes.Private);
+            var FieldBldr = myTypeBuilder.DefineField(Name, Ouput, FieldAttributes.Private);
             return Property(Name, Ouput, attributes,
-                (GetMethod.Attributes,GetMethod.Name,
+                (GetMethod.Attributes, GetMethod.Name,
                 (GetIL) =>
                 {
                     GetIL.Emit(OpCodes.Ldarg_0);
                     GetIL.Emit(OpCodes.Ldfld, FieldBldr);
                     GetIL.Emit(OpCodes.Ret);
-                }),
-                (SetMethod.Attributes,SetMethod.Name,
+                }
+            ),
+                (SetMethod.Attributes, SetMethod.Name,
                 (SetIL) =>
                 {
                     SetIL.Emit(OpCodes.Ldarg_0);

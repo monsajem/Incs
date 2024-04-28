@@ -1,28 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using static Monsajem_Incs.Collection.Array.Extentions;
-using Monsajem_Incs.Resources.Base.Html;
+﻿using Monsajem_Incs.Resources.Base.Html;
+using System;
 using WebAssembly.Browser.DOM;
-using Monsajem_Incs.DynamicAssembly;
-using Monsajem_Incs.Collection.Array;
-using Monsajem_Incs.Database.Base;
 
 namespace Monsajem_Incs.Views
 {
     public class Html
     {
         internal HTMLElement Main;
-        
-        public HTMLElement Div(Action<HTMLElement> Edit=null)
+
+        public HTMLElement Div(Action<HTMLElement> Edit = null)
         {
             var Element = new Div_html().Main;
             Edit?.Invoke(Element);
-            Main.AppendChild(Element);
+            _ = Main.AppendChild(Element);
             return Element;
         }
 
@@ -30,7 +20,7 @@ namespace Monsajem_Incs.Views
         {
             var Element = new button_html().Main;
             Edit?.Invoke(Element);
-            Main.AppendChild(Element);
+            _ = Main.AppendChild(Element);
             return Element;
         }
     }

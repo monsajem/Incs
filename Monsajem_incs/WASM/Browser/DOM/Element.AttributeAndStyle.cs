@@ -1,10 +1,9 @@
-﻿using System;
-
-using System.Runtime.InteropServices.JavaScript;using Microsoft.JSInterop.Implementation;using Microsoft.JSInterop;
+﻿using Microsoft.JSInterop;
+using System;
 
 namespace WebAssembly.Browser.DOM
 {
-    public class ElementAttributes: DOMObject
+    public class ElementAttributes : DOMObject
     {
         public ElementAttributes(IJSInProcessObjectReference handle) : base(handle) { }
 
@@ -12,17 +11,16 @@ namespace WebAssembly.Browser.DOM
         {
             get
             {
-                if (string.IsNullOrEmpty(qualifiedName))
-                    throw new ArgumentNullException(nameof(qualifiedName));
-
-                return InvokeMethod<string>("getAttribute", qualifiedName);
+                return string.IsNullOrEmpty(qualifiedName)
+                    ? throw new ArgumentNullException(nameof(qualifiedName))
+                    : InvokeMethod<string>("getAttribute", qualifiedName);
             }
             set
             {
                 if (string.IsNullOrEmpty(qualifiedName))
                     throw new ArgumentNullException(nameof(qualifiedName));
 
-                InvokeMethod<string>("setAttribute", qualifiedName, value);
+                _ = InvokeMethod<string>("setAttribute", qualifiedName, value);
             }
         }
     }
@@ -32,10 +30,10 @@ namespace WebAssembly.Browser.DOM
         // Special Attribute and Style methods
         #region Attribute and Style methods
 
-        public ElementAttributes Attribute { get => new ElementAttributes(this.ManagedJSObject); }
+        public ElementAttributes Attribute { get => new(ManagedJSObject); }
 
         [Export("getAttribute")]
-        public string GetAttribute(string qualifiedName)=>
+        public string GetAttribute(string qualifiedName) =>
             Attribute[qualifiedName];
 
         [Export("setAttribute")]
@@ -49,7 +47,7 @@ namespace WebAssembly.Browser.DOM
             if (string.IsNullOrEmpty(qualifiedName))
                 throw new ArgumentNullException(nameof(qualifiedName));
 
-            InvokeMethod<string>("removeAttribute", qualifiedName);
+            _ = InvokeMethod<string>("removeAttribute", qualifiedName);
         }
 
         public void SetStyleAttribute(string qualifiedName, string value)
@@ -64,10 +62,9 @@ namespace WebAssembly.Browser.DOM
 
         public string GetStyleAttribute(string qualifiedName)
         {
-            if (string.IsNullOrEmpty(qualifiedName))
-                throw new ArgumentNullException(nameof(qualifiedName));
-
-            return GetJSStyleAttribute(qualifiedName).ToString();
+            return string.IsNullOrEmpty(qualifiedName)
+                ? throw new ArgumentNullException(nameof(qualifiedName))
+                : GetJSStyleAttribute(qualifiedName).ToString();
         }
 
 

@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Linq.Expressions;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using static Monsajem_Incs.Collection.Array.Extentions;
 using System.Threading.Tasks;
-using System.Collections.Generic;
+using static Monsajem_Incs.Collection.Array.Extentions;
 
 namespace Monsajem_Incs.DynamicAssembly
 {
@@ -40,7 +39,7 @@ namespace Monsajem_Incs.DynamicAssembly
             return DynamicMethodBuilder.Delegate<Func<T>>("CreateInstance_",
             (il) =>
             {
-                il.Emit(OpCodes.Ldc_I4_S,12);
+                il.Emit(OpCodes.Ldc_I4_S, 12);
                 il.Emit(OpCodes.Call, nativeGetUninitializedObject);
                 il.Emit(OpCodes.Castclass, t);
                 il.Emit(OpCodes.Ret);
@@ -192,18 +191,16 @@ namespace Monsajem_Incs.DynamicAssembly
             if (typeToReflect == null)
                 throw new NullReferenceException("typeToReflect is null!");
 #endif
-            if (bindingFlags == null)
-                bindingFlags = BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy;
+            bindingFlags ??= BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy;
             var Memebrs = GetMembers((typeToReflect, bindingFlags.Value));
             if (filter != null)
                 Memebrs = Memebrs.Where(filter).ToArray();
             if (typeToReflect.BaseType != null)
             {
                 var OldFilter = filter;
-                if (filter == null)
-                    filter = info => Memebrs.All((c) => c.MetadataToken != info.MetadataToken);
-                else
-                    filter = info => OldFilter(info) && Memebrs.All((c) => c.MetadataToken != info.MetadataToken);
+                filter = filter == null
+                    ? (info => Memebrs.All((c) => c.MetadataToken != info.MetadataToken))
+                    : (info => OldFilter(info) && Memebrs.All((c) => c.MetadataToken != info.MetadataToken));
                 Insert(ref Memebrs,
                        GetAll(typeToReflect.BaseType, GetMembers,
                               bindingFlags,
@@ -246,10 +243,9 @@ namespace Monsajem_Incs.DynamicAssembly
 
         public static Action<object, object> SetValue(FieldInfo Field)
         {
-            if (Field.IsInitOnly)
-                return (Target, Value) => Field.SetValue(Target, Value);
-
-            return DynamicMethodBuilder.Delegate<Action<object, object>>("SetValue_", (il) =>
+            return Field.IsInitOnly
+                ? ((Target, Value) => Field.SetValue(Target, Value))
+                : DynamicMethodBuilder.Delegate<Action<object, object>>("SetValue_", (il) =>
             {
                 il.Emit(OpCodes.Ldarg_0);
                 if (Field.ReflectedType.IsValueType)
@@ -387,11 +383,11 @@ namespace Monsajem_Incs.DynamicAssembly
         //        return dynMethod.CreateDelegate(DelegateType, Action);
         //}
 
-        public async static Task<T> Convert<T>(Task<object> task) => (T)(await task);
+        public async static Task<T> Convert<T>(Task<object> task) => (T)await task;
 
         private static SortedDictionary<Type, (int DGSelector, Func<object, Delegate> Wrapper)> DelegateWrappers =
-            new SortedDictionary<Type, (int DGSelector, Func<object, Delegate> Wrapper)>(
-                            Comparer<Type>.Create((c1,c2)=> c1.FullName.CompareTo(c2.FullName)));
+            new(
+                            Comparer<Type>.Create((c1, c2) => c1.FullName.CompareTo(c2.FullName)));
         public static Delegate CreateDelegateWrapper(
             Type DelegateType,
             Action<object[]> Action,
@@ -415,12 +411,7 @@ namespace Monsajem_Incs.DynamicAssembly
                         HaveResult = true;
                 if (HaveResult)
                 {
-                    if (Result == typeof(Task))
-                        DelegateWrapper.DGSelector = 3;
-                    else if (Result.IsAssignableTo(typeof(Task<string>).BaseType))
-                        DelegateWrapper.DGSelector = 4;
-                    else
-                        DelegateWrapper.DGSelector = 2;
+                    DelegateWrapper.DGSelector = Result == typeof(Task) ? 3 : Result.IsAssignableTo(typeof(Task<string>).BaseType) ? 4 : 2;
                 }
                 else
                 {
@@ -639,7 +630,7 @@ namespace Monsajem_Incs.DynamicAssembly
                     int* injSrc = (int*)(injInst + 1);
                     int* tarSrc = (int*)(tarInst + 1);
 
-                    *tarSrc = (((int)injInst + 5) + *injSrc) - ((int)tarInst + 5);
+                    *tarSrc = (int)injInst + 5 + *injSrc - ((int)tarInst + 5);
 #else
                     Console.WriteLine("\nVersion x86 Release\n");
                     *tar = *inj;
@@ -659,7 +650,7 @@ namespace Monsajem_Incs.DynamicAssembly
                     int* injSrc = (int*)(injInst + 1);
                     int* tarSrc = (int*)(tarInst + 1);
 
-                    *tarSrc = (((int)injInst + 5) + *injSrc) - ((int)tarInst + 5);
+                    *tarSrc = (int)injInst + 5 + *injSrc - ((int)tarInst + 5);
 #else
                     Console.WriteLine("\nVersion x64 Release\n");
                     *tar = *inj;
@@ -673,7 +664,7 @@ namespace Monsajem_Incs.DynamicAssembly
             TypeController.Inject(Target.Method, Inject.Method);
         }
         public static void Inject<t>(t Target, t Inject)
-            where t:MulticastDelegate
+            where t : MulticastDelegate
         {
             TypeController.Inject(Target.Method, Inject.Method);
         }
@@ -723,7 +714,7 @@ namespace Monsajem_Incs.DynamicAssembly
 
                 if (op.Code == OpCodes.Starg_S)
                 {
-                    var t = op.Operand.GetType();
+                    _ = op.Operand.GetType();
                     op.Operand = (byte)((byte)op.Operand + 1);
                 }
             }
@@ -736,7 +727,7 @@ namespace Monsajem_Incs.DynamicAssembly
             for (int mtd_i = 0; mtd_i < Methods.Length; mtd_i++)
             {
 
-                var Dg = ((Delegate)(object)Methods[mtd_i]);
+                var Dg = (Delegate)(object)Methods[mtd_i];
                 var MethodReader = new SDILReader.MethodBodyReader(Dg.Method);
                 ils[mtd_i] = MethodReader.instructions.ToArray();
 
@@ -769,12 +760,12 @@ namespace Monsajem_Incs.DynamicAssembly
             for (int mtd_i = 0; mtd_i < Methods.Length; mtd_i++)
             {
 
-                var Dg = ((Delegate)(object)Methods[mtd_i]);
+                var Dg = (Delegate)(object)Methods[mtd_i];
 
                 var mb = Dg.Method.GetMethodBody();
                 foreach (var lc in mb.LocalVariables)
                 {
-                    ilg.DeclareLocal(lc.LocalType);
+                    _ = ilg.DeclareLocal(lc.LocalType);
                 }
 
                 foreach (var op in ils[mtd_i])
@@ -805,8 +796,7 @@ namespace Monsajem_Incs.DynamicAssembly
         {
 
             var MethodReader = new SDILReader.MethodBodyReader(Method);
-            if (Methods == null)
-                Methods = new System.Collections.Generic.List<SDILReader.MethodBodyReader>();
+            Methods ??= [];
             Methods.Add(MethodReader);
             if (MethodReader.instructions != null)
             {
@@ -816,7 +806,7 @@ namespace Monsajem_Incs.DynamicAssembly
 
                 foreach (var Call in NewCalls)
                 {
-                    GetILs((MethodInfo)Call.Operand, Methods);
+                    _ = GetILs((MethodInfo)Call.Operand, Methods);
                 }
             }
 
@@ -827,7 +817,7 @@ namespace Monsajem_Incs.DynamicAssembly
         {
             var OutputDg = typeof(output);
             MethodInfo Methodinfo = OutputDg.GetMethod("Invoke");
-            var Dg = ((Delegate)(object)Method);
+            var Dg = (Delegate)(object)Method;
 
             var methodName = "Joined_";
             var dynMethod = new DynamicMethod(methodName, Methodinfo.ReturnType,
@@ -841,7 +831,7 @@ namespace Monsajem_Incs.DynamicAssembly
                 var mb = Dg.Method.GetMethodBody();
                 foreach (var lc in mb.LocalVariables)
                 {
-                    il.DeclareLocal(lc.LocalType);
+                    _ = il.DeclareLocal(lc.LocalType);
                 }
 
 
@@ -864,7 +854,7 @@ namespace Monsajem_Incs.DynamicAssembly
                 var mb = Dg.Method.GetMethodBody();
                 foreach (var lc in mb.LocalVariables)
                 {
-                    il.DeclareLocal(lc.LocalType);
+                    _ = il.DeclareLocal(lc.LocalType);
                 }
 
 
@@ -883,7 +873,7 @@ namespace Monsajem_Incs.DynamicAssembly
             {
                 if (op.Code != OpCodes.Ret)
                 {
-                    if (op.Code == OpCodes.Call && ((MethodInfo)op.Operand) == ((Delegate)(Action)Injected).Method)
+                    if (op.Code == OpCodes.Call && ((MethodInfo)op.Operand) == ((Action)Injected).Method)
                     {
                         foreach (var jop in jils)
                         {

@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Monsajem_Incs.Collection.Array.TreeBased;
 namespace Monsajem_Incs.DynamicAssembly
 {
     public static class DelegatesExtentions
@@ -64,11 +60,11 @@ namespace Monsajem_Incs.DynamicAssembly
         private HashSet<string> Used;
         private BlocksCounter Counter;
 
-        public RunOnceInBlock ()
+        public RunOnceInBlock()
         {
-            Used = new HashSet<string>();
+            Used = [];
             Counter = new BlocksCounter();
-            Counter.OnClosedAllBlocks += () => this.Used.Clear();
+            Counter.OnClosedAllBlocks += () => Used.Clear();
         }
 
         public int BlockLengths
@@ -78,9 +74,9 @@ namespace Monsajem_Incs.DynamicAssembly
 
         public bool Use(string Name)
         {
-            if (Used.Contains(Name)==false)
+            if (Used.Contains(Name) == false)
             {
-                Used.Add(Name);
+                _ = Used.Add(Name);
                 return true;
             }
             else
@@ -89,7 +85,7 @@ namespace Monsajem_Incs.DynamicAssembly
 
         public void EndUse(string Name)
         {
-            Used.Remove(Name);
+            _ = Used.Remove(Name);
         }
 
         public BlocksCounter.BlockContainer UseBlock()
