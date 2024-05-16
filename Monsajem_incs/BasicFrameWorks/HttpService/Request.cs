@@ -203,7 +203,7 @@ namespace Monsajem_Incs.HttpService
             FlushScript();
             MyContext.Response.OutputStream.Close();
             MyContext = null;
-            rq.Service.Wait();
+            Task.WaitAny(rq.Service, Task.Delay(10000));
             if (rq.Context == null)
             {
                 lock (FetchedRequests)
@@ -232,7 +232,7 @@ namespace Monsajem_Incs.HttpService
             FlushScript();
             MyContext.Response.OutputStream.Close();
             MyContext = null;
-            rq.Service.Wait();
+            Task.WaitAny(rq.Service, Task.Delay(10000));
             if (rq.Context == null)
             {
                 lock (FetchedRequests)
@@ -256,7 +256,7 @@ namespace Monsajem_Incs.HttpService
             FlushScript();
             MyContext.Response.OutputStream.Close();
             MyContext = null;
-            rq.Service.Wait();
+            Task.WaitAny(rq.Service, Task.Delay(10000));
             if (rq.Context == null)
             {
                 lock (FetchedRequests)
@@ -287,7 +287,7 @@ namespace Monsajem_Incs.HttpService
             FlushScript();
             MyContext.Response.OutputStream.Close();
             MyContext = null;
-            rq.Service.Wait();
+            Task.WaitAny(rq.Service,Task.Delay(10000));
             if (rq.Context == null)
             {
                 lock (FetchedRequests)

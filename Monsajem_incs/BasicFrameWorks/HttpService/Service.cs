@@ -80,7 +80,6 @@ namespace Monsajem_Incs.HttpService
             {
                 while (true)
                 {
-
                     var c = MyService.GetContext();
                     new System.Threading.Thread(() =>
                     {
@@ -91,6 +90,10 @@ namespace Monsajem_Incs.HttpService
                         }
                         catch(StopedTreadeException ex)
                         {}
+#if !DEBUG
+                        catch(Exception ex)
+                        {}
+#endif
                     }).Start();
                 }
             });

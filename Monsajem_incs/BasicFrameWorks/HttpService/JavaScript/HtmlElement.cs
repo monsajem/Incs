@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;using static Monsajem_Incs.Collection.Array.Extentions;using Monsajem_Incs.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using Monsajem_Incs.Collection.Array.Base;
 
 namespace Monsajem_Incs.HttpService.JavaScript
 {
@@ -114,6 +115,8 @@ namespace Monsajem_Incs.HttpService.JavaScript
             Result.HowGet="(function(){var Data='';function GetElementData(Element){while (Element != null){if (Element.getAttribute('name') != null){if (Data.length > 0)Data = Data + '&';Data = Data + Element.getAttribute('name') + '=' + encodeURI(Element.value);}if (Element.firstElementChild != null)GetElementData(Element.firstElementChild);Element = Element.nextElementSibling;}}GetElementData(" + HowGet + ".firstElementChild);return Data;}).call()";
             return Result;
         }
+
+        public void Remove()=> js.SendJS(HowGet + ".remove();");
 
         public void Append(String_js Data)
         {

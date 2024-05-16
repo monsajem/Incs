@@ -21,7 +21,7 @@ namespace TestOnIt
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            var Address = "http://127.0.0.1:8080/";
+            var Address = "http://*:8080/";
 
             var Service = new Monsajem_Incs.HttpService.Service(Address,
             () =>
@@ -61,7 +61,7 @@ namespace TestOnIt
 
             System.Diagnostics.Process.Start(new ProcessStartInfo
             {
-                FileName = Address,
+                FileName = "http://127.0.0.1:8080/",
                 UseShellExecute = true
             });
 
