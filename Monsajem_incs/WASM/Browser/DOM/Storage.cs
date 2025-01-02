@@ -19,12 +19,12 @@ namespace WebAssembly.Browser.DOM
                 : type == Type.SessionStorage ? "sessionStorage" : throw new System.Exception("Storage type is not valid!");
         }
 
-        public int Length { get => int.Parse(js.JsEval($"{MyType}.length;")); }
-        public string Key(int Position) => js.JsEval($"{MyType}.key({Position});");
+        public int Length { get => js.JsEval<int>($"{MyType}.length;"); }
+        public string Key(int Position) => js.JsEval<string>($"{MyType}.key({Position});");
         public string GetItem(string Key)
         {
             MonsajemDataTransport.SetJsVar("K", Key);
-            var Result = js.JsEval(
+            var Result = js.JsEval<string>(
                 $"{MyType}.getItem({MonsajemDataTransport.ObjectName}.K);");
             MonsajemDataTransport.SetJsVar("K", "");
             return Result;
@@ -33,7 +33,7 @@ namespace WebAssembly.Browser.DOM
         {
             MonsajemDataTransport.SetJsVar("K", Key);
             MonsajemDataTransport.SetJsVar("V", Value);
-            _ = js.JsEval(
+            _ = js.JsEval<string>(
                 $"{MyType}.setItem({MonsajemDataTransport.ObjectName}.K,{MonsajemDataTransport.ObjectName}.V);");
             MonsajemDataTransport.SetJsVar("K", "");
             MonsajemDataTransport.SetJsVar("V", "");
@@ -41,15 +41,15 @@ namespace WebAssembly.Browser.DOM
         public void RemoveItem(string Key)
         {
             MonsajemDataTransport.SetJsVar("K", Key);
-            _ = js.JsEval(
+            _ = js.JsEval<string>(
                 $"{MyType}.removeItem({MonsajemDataTransport.ObjectName}.K);");
             MonsajemDataTransport.SetJsVar("K", "");
         }
         public bool Contains(string Key)
         {
             MonsajemDataTransport.SetJsVar("K", Key);
-            var Result = js.JsEval(
-                $"{MyType}.hasOwnProperty({MonsajemDataTransport.ObjectName}.K);") == "true";
+            var Result = js.JsEval<bool>(
+                $"{MyType}.hasOwnProperty({MonsajemDataTransport.ObjectName}.K);") == true;
             MonsajemDataTransport.SetJsVar("K", "");
             return Result;
         }

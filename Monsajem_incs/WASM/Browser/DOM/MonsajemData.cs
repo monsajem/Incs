@@ -9,7 +9,7 @@ namespace WebAssembly.Browser.DOM
     {
         public static IJSInProcessObjectReference JsObj = ((Func<IJSInProcessObjectReference>)(() =>
         {
-            _ = js.JsEval("self.MonsajemDT = {};");
+            js.JsEvalGlobal("self.MonsajemDT = {};");
             return js.JsGetValue("MonsajemDT");
         }))();
 

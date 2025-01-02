@@ -5,64 +5,37 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Runtime;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using WebAssembly.Browser.DOM;
 using static Monsajem_Incs.Collection.Array.Extentions;
 
 namespace WebAssembly.Browser.MonsajemDomHelpers
 {
-    public static class js
+    public static partial class js
     {
         public static Document Document;
         public static JSInProcessRuntime JsRuntime;
+        public static IJSUnmarshalledRuntime JsRuntime_unmarshal;
         private static Action OnPopState;
         private static Action[] MyHistorySates;
-        private static IJSInProcessObjectReference JsInfo;
 
-        private static void CreateJsInfo()
-        {
-            JsInfo = JsRuntime.Invoke<IJSInProcessObjectReference>("eval", @"({
-  GetValue_obj: function (obj,name) {
-        return obj[name];
-  },
-  GetValue_name: function (name) {
-        return self[name];
-  },
-  SetValue_obj: function (obj,name,val) {
-        obj[name]=val;
-  },
-  SetValue_name: function (name,val) {
-        self[name]=val;
-  },
-  HaveValue_obj: function (obj,name) {
-        return obj[name] !== undefined;
-  },
-  HaveValue_name: function (name) {
-        return self[name] !== undefined;
-  },
-  GetTypeName_obj: function (obj) {
-        return obj.constructor.name;
-  },
-  GetTypeName_name: function (name) {
-        return self[name].constructor.name;
-  },
-})");
-        }
         public static void Start(JSInProcessRuntime JSR)
         {
             JsRuntime = JSR;
             _ = JsRuntime.Invoke<IJSInProcessObjectReference>("eval", "document");
             _ = JsRuntime.Invoke<IJSInProcessObjectReference>("eval", "window");
-            CreateJsInfo();
             Document = new Document();
         }
 
-        public static T InvokeJs<T>(this IJSInProcessObjectReference obj, string identifier, params object?[]? args)
+        public static T InvokeJs<T>(this IJSInProcessObjectReference obj, string identifier, params object[] args)
         {
             var type = typeof(T);
+            var UseUnmarshal= true;
             if (args != null && args.Length > 0)
             {
                 for (int a = 0; a < args.Length; a++)
@@ -70,20 +43,70 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
                     Type argType = args[a].GetType();
                     if (argType.IsSubclassOf(typeof(DOMObject)) || argType == typeof(DOMObject))
                     {
-                        args[a] = ((DOMObject)args[a]).ManagedJSObject;
+                        var jsObj = (DOMObject)args[a];
+                        if (jsObj.ManagedJSObject == null)
+                            throw new Exception("managed Object is lost at " + jsObj.GetType());
+                        args[a] =jsObj .ManagedJSObject;
+                    }
+                    if (argType == typeof(string))
+                    {
+                        UseUnmarshal=true;
                     }
                 }
             }
-            if (type.IsSubclassOf(typeof(DOMObject)) || type == typeof(DOMObject))
+            if(UseUnmarshal)
             {
-                var Result_JsObj = obj.Invoke<IJSInProcessObjectReference>(identifier, args);
-                var Result = (DOMObject)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(type);
-                Result.ManagedJSObject = Result_JsObj;
-                return (T)(object) Result;
+                for (int a = 0; a < args.Length; a++)
+                {
+                    if (args[a] == null)
+                    {
+                        JsInfo.SubmitToSelf("p" + a, args[a]);
+                    }
+                    else
+                    {
+                        var argType = args[a].GetType();
+                        if (argType == typeof(string))
+                        {
+                            JsInfo.SubmitStringToSelf("p" + a, (string)args[a]);
+                        }
+                        else
+                        {
+                            JsInfo.SubmitToSelf("p" + a, args[a]);
+                        }
+                    }
+                }
+                JsInfo.InvokeFunc(obj, identifier, "p", args.Length, "res");
+                if (JsHaveValue("res") == false)
+                    return default;
+                if (type.IsSubclassOf(typeof(DOMObject)) || type == typeof(DOMObject))
+                {
+                    var Result_JsObj = JsGetValue<IJSInProcessObjectReference>("res");
+                    if (Result_JsObj == null)
+                        return default;
+                    var Result = (DOMObject)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(type);
+                    Result.ManagedJSObject = Result_JsObj;
+                    return (T)(object)Result;
+                }
+                else
+                {
+                    return JsGetValue<T>("res");
+                }
             }
             else
             {
-                return obj.Invoke<T>(identifier, args);
+                if (type.IsSubclassOf(typeof(DOMObject)) || type == typeof(DOMObject))
+                {
+                    var Result_JsObj = obj.Invoke<IJSInProcessObjectReference>(identifier, args);
+                    if (Result_JsObj == null)
+                        return default;
+                    var Result = (DOMObject)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(type);
+                    Result.ManagedJSObject = Result_JsObj;
+                    return (T)(object)Result;
+                }
+                else
+                {
+                    return obj.Invoke<T>(identifier, args);
+                }
             }
         }
         public static object InvokeJs(this IJSInProcessObjectReference obj, Type type, string identifier, params object?[]? args)
@@ -92,86 +115,50 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
         }
         public static t JsGetValue<t>(this string Name)
         {
-            CreateJsInfo();
-            return JsInfo.Invoke<t>("GetValue_name", Name);
-        }
-        public static IJSInProcessObjectReference JsGetValue(this string Name)
-        {
-            CreateJsInfo();
-            return JsGetValue<IJSInProcessObjectReference>(Name);
-        }
-        public static void JsSetValue(this string Name, object Value)
-        {
-            CreateJsInfo();
-            JsInfo.InvokeVoid("SetValue_name", Name, Value);
-        }
-        public static bool JsHaveValue(this string Name)
-        {
-            CreateJsInfo();
-            return JsInfo.Invoke<bool>("HaveValue_name", Name);
-        }
-        public static t JsGetValue<t>(this IJSInProcessObjectReference obj, string Name)
-        {
-            CreateJsInfo();
-            return JsInfo.InvokeJs<t>("GetValue_obj", obj, Name);
-        }
-        public static IJSInProcessObjectReference JsGetValue(this IJSInProcessObjectReference obj, string Name)
-        {
-            CreateJsInfo();
-            return JsGetValue<IJSInProcessObjectReference>(obj, Name);
-        }
-        public static IJSInProcessObjectReference JsGetStaticValue(this string Name)
-        {
-            return new JsObjectOfType(Name);
-        }
-        public static void JsSetValue(this IJSInProcessObjectReference obj, string Name, object Value)
-        {
-            if (Value != null &&
-               typeof(Delegate).IsAssignableFrom(Value.GetType()))
+            var type = typeof(t);
+            if (type.IsSubclassOf(typeof(DOMObject)) || type == typeof(DOMObject))
             {
-                JsSetEvent(obj, Name, (Delegate)Value);
+                var Result_JsObj = JsInfo.JsGetValue<IJSInProcessObjectReference>(Name);
+                if (Result_JsObj == null)
+                    return default;
+                var Result = (DOMObject)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(type);
+                Result.ManagedJSObject = Result_JsObj;
+                return (t)(object)Result;
             }
             else
             {
-                CreateJsInfo();
-                JsInfo.InvokeVoid("SetValue_obj", obj, Name, Value);
-            }
+                return JsInfo.JsGetValue<t>(Name);
+            }            
         }
-        public static bool JsHaveValue(this IJSInProcessObjectReference obj, string Name)
+        public static IJSInProcessObjectReference JsGetValue(this string Name) => JsInfo.JsGetValue(Name);
+        public static void JsSetValue(this string Name, object Value)=>JsInfo.JsSetValue(Name, Value);
+        public static bool JsHaveValue(this string Name)=>JsInfo.JsHaveValue(Name);
+        public static t JsGetValue<t>(this IJSInProcessObjectReference obj, string Name)
         {
-            CreateJsInfo();
-            return JsInfo.Invoke<bool>("HaveValue_obj", obj, Name);
-        }
-        public static void JsSetEvent(this IJSInProcessObjectReference obj, string Name, Delegate Value)
-        {
-            var Binder = new InvokableDelegate() { DG = Value, Js = JsRuntime };
-            Binder.Bind(obj, Name);
-        }
-
-        public static IJSInProcessObjectReference JsConvert(this object obj)
-        {
-            CreateJsInfo();
-            return JsRuntime.Invoke<IJSInProcessObjectReference>("eval", obj);
-        }
-
-        public static IJSInProcessObjectReference JsNewObject(this string TypeName, params object[] Params)
-        {
-            var ParamsInput = "name";
-            var ParamsFunc = "";
-            if (Params != null && Params.Length > 0)
+            var type = typeof(t);
+            if (type.IsSubclassOf(typeof(DOMObject)) || type == typeof(DOMObject))
             {
-                for (int i = 0; i < Params.Length; i++)
-                    ParamsFunc += "P" + i.ToString() + ",";
-                ParamsFunc = ParamsFunc.Substring(0, ParamsFunc.Length - 1);
-                ParamsInput = ParamsInput + "," + ParamsFunc;
+                var Result_JsObj = JsInfo.JsGetValue<IJSInProcessObjectReference>(obj, Name);
+                if (Result_JsObj == null)
+                    return default;
+                var Result = (DOMObject)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(type);
+                Result.ManagedJSObject = Result_JsObj;
+                return (t)(object)Result;
             }
-            JsInfo = JsRuntime.Invoke<IJSInProcessObjectReference>("eval", @"({
-  CreateNewObj: function (" + ParamsInput + @") {
-        return new window[name](" + ParamsFunc + @");
-  }
-})");
-            return JsInfo.Invoke<IJSInProcessObjectReference>("CreateNewObj", TypeName, Params);
+            else
+            {
+                return JsInfo.JsGetValue<t>(obj, Name);
+            }
         }
+        public static IJSInProcessObjectReference JsGetValue(this IJSInProcessObjectReference obj, string Name) => JsInfo.JsGetValue(obj, Name);
+        public static IJSInProcessObjectReference JsGetStaticValue(this string Name)=>JsInfo.JsGetStaticValue(Name);    
+        public static void JsSetValue(this IJSInProcessObjectReference obj, string Name, object Value)=> JsInfo.JsSetValue(obj, Name, Value);
+        public static bool JsHaveValue(this IJSInProcessObjectReference obj, string Name)=> JsInfo.JsHaveValue(obj, Name);  
+        public static void JsSetEvent(this IJSInProcessObjectReference obj, string Name, Delegate Value)=> JsInfo.JsSetValue(obj, Name, Value);
+
+        public static IJSInProcessObjectReference JsConvert(this object obj)=>JsInfo.JsConvert(obj);
+
+        public static IJSInProcessObjectReference JsNewObject(this string TypeName, params object[] Params)=>JsInfo.JsNewObject(TypeName, Params);
 
         private static void MakeState()
         {
@@ -202,10 +189,8 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
         {
             static void Lock()
             {
-                _ = js.JsEval("alert('1');");
                 Window.window.History.Go(1);
                 PushState(Lock);
-                _ = js.JsEval("alert('1');");
             }
 
             PushState(Lock);
@@ -242,21 +227,32 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
             return Value == null ? "''" : $"decodeURIComponent(escape(atob('{Convert.ToBase64String(Encoding.UTF8.GetBytes(Value))}')))";
         }
 
-        public static string JsEval(this string js)
+        public static t JsEval<t>(this string js)
         {
             try
             {
-                return JsRuntime.Invoke<string>(js);
+                return JsRuntime.Invoke<t>("eval",js);
             }
             catch (Exception ex)
             {
-                throw new Exception("Eval >> " + js, ex);
+                throw new Exception("Error at Eval >> " + js+"\n\r"+ex.Message, ex);
+            }
+        }
+        public static void JsEval(this string js)
+        {
+            try
+            {
+                JsRuntime.InvokeVoid("eval", js);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error at Eval >> " + js + "\n\r" + ex.Message, ex);
             }
         }
 
         public static void JsEvalGlobal(this string js)
         {
-            JsRuntime.InvokeVoid($"var s=document.createElement('script');s.innerHTML={ToJsValue(js)};document.body.appendChild(s);");
+            JsRuntime.InvokeVoid("eval",$"var s=document.createElement('script');s.innerHTML={ToJsValue(js)};document.body.appendChild(s);");
         }
 
         public static async Task<byte[]> ReadBytes(this Blob File)
@@ -311,7 +307,7 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
                 throw new ArgumentOutOfRangeException("quality should be equal or less than 1.");
             var imgID = img.Id;
             img.Id = "imgMN";
-            string URL = JsEval(
+            string URL = JsEval<string>(
                 @"(function(){
                   var MAX_WIDTH = 500;
                   var width = " + img.NaturalWidth + @";
@@ -334,7 +330,7 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
                 throw new ArgumentOutOfRangeException("quality should be equal or less than 1.");
             var imgID = img.Id;
             img.Id = "imgMN";
-            string URL = JsEval(
+            string URL = JsEval<string>(
                 @"(function(){
                   var MAX_WIDTH = 500;
                   var width = " + img.NaturalWidth + @";
@@ -465,7 +461,7 @@ obj[property] = function ( ";
                 Monsajem_Incs.Assembly.Assembly.TryLoadAssembely(AssemblyFilename);
             if (js.JsRuntime == null)
                 Console.WriteLine("No Runtime");
-            _ = js.JsEval("postMessage('');");
+            js.JsEval("postMessage('');");
         }
 
         public WebProcess()

@@ -1,12 +1,29 @@
 ﻿using Monsajem_Incs.Serialization;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.Intrinsics.X86;
 using System.Threading.Tasks;
 namespace Monsajem_Incs.TimeingTester
 {
     public static class Timing
     {
-        public static TimeSpan run(Action Somthing)
+
+        public class TimeOfMethod:IComparable<TimeOfMethod>
+        {
+            public string MethodAddress;
+            public TimeSpan TotalTime = TimeSpan.Zero;
+            public UInt64 TotalTimeCount = 0;
+
+            public int CompareTo(TimeOfMethod other)
+            {
+                return MethodAddress.CompareTo(other.MethodAddress);
+            }
+        }
+
+        private static SortedList<string,TimeOfMethod> TimesOfMethods = new SortedList<string, TimeOfMethod> ();
+
+        public static TimeSpan run(Action Somthing,string MethodName = null)
         {
             static void InnerAction() { }
             Stopwatch HaveLate = new();
@@ -20,7 +37,20 @@ namespace Monsajem_Incs.TimeingTester
             Somthing();
             stopWatch.Stop();
 
-            return stopWatch.Elapsed - HaveLate.Elapsed;
+            var Result = stopWatch.Elapsed - HaveLate.Elapsed;
+            if(MethodName==null)
+                MethodName = Environment.StackTrace; // Somthing.Method.DeclaringType.FullName + "." + Somthing.Method.Name;
+            TimeOfMethod TimeMethodInfo;
+            var IsExistTime = TimesOfMethods.TryGetValue(MethodName, out TimeMethodInfo);
+            if (IsExistTime==false)
+            {
+                TimeMethodInfo = new TimeOfMethod();
+                TimesOfMethods.Add(MethodName,TimeMethodInfo);
+            }
+            TimeMethodInfo.TotalTime += Result; 
+            TimeMethodInfo.TotalTimeCount += 1;
+            TimeMethodInfo.MethodAddress = MethodName;
+            return Result;
         }
 
         public static async Task<TimeSpan> run(Func<Task> Somthing)
@@ -37,7 +67,33 @@ namespace Monsajem_Incs.TimeingTester
             await Somthing();
             stopWatch.Stop();
 
-            return stopWatch.Elapsed - HaveLate.Elapsed;
+            var Result = stopWatch.Elapsed - HaveLate.Elapsed;
+
+            var MethodName = Somthing.Method.DeclaringType.FullName + "." + Somthing.Method.Name;
+            TimeOfMethod TimeMethodInfo;
+            var IsExistTime = TimesOfMethods.TryGetValue(MethodName, out TimeMethodInfo);
+            if (IsExistTime == false)
+            {
+                TimeMethodInfo = new TimeOfMethod();
+                TimesOfMethods.Add(MethodName, TimeMethodInfo);
+            }
+            TimeMethodInfo.TotalTime += Result;
+            TimeMethodInfo.TotalTimeCount += 1;
+            return Result;
+        }
+
+        public static string GetInfos()
+        {
+            var Res = "";
+            foreach(var Info in TimesOfMethods)
+            {
+                Res += "\r\n";
+                Res += "\r\n" + "Method : " + Info.Value.MethodAddress;
+                Res += "\r\n" + "Total Time : " + Info.Value.TotalTime;
+                Res += "\r\n" + "AVG Total Time : " + Info.Value.TotalTime/Info.Value.TotalTimeCount;
+                Res += "\r\n" + "Total Count : " + Info.Value.TotalTimeCount;
+            }
+            return Res;
         }
     }
 

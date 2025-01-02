@@ -63,7 +63,7 @@ namespace Monsajem_Incs.UserControler
             int Delay,
             bool AllowDissmiss)
         {
-            _ = js.JsEval(@"$.notify(" +
+            js.JsEval(@"$.notify(" +
                 js.ToJsValue(Message) + @", {
                 allow_dismiss: " + AllowDissmiss.ToString().ToLower() + @",
                 delay:" + Delay + @",

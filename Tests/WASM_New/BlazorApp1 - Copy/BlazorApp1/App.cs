@@ -120,7 +120,6 @@ namespace Monsajem_Client
             js.Document.GetElementById("AppPreload").Remove();
             js.Document.Body.AppendChild(BasePage_html.HtmlText);
             BasePage_html = new BasePage_html(true);
-
             var MaxTryLoadDB = 2;
             _CachedUri = "?" + DateTime.UtcNow.ToShortDateString() + DateTime.UtcNow.ToShortTimeString();
             Monsajem_Incs.Assembly.Assembly.AddAssembly(typeof(App).Assembly);

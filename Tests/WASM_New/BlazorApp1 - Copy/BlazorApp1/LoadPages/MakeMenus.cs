@@ -33,6 +33,7 @@ namespace Monsajem_Client
         public static void MakeMenus()
         {
 
+            Console.WriteLine(BasePage_html.img_Search == null);
             BasePage_html.img_Search.OnClick += (c1, c2) =>
             {
                 var Message = "";
