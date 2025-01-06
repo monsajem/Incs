@@ -88,6 +88,7 @@ namespace WebAssembly.Browser.DOM
         {
 
             ManagedJSObject.JsGetValue("style").JsSetValue(qualifiedName, value);
+
         }
 
         protected string GetJSStyleAttribute(string qualifiedName)
