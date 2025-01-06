@@ -34,84 +34,46 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
 
         public static T InvokeJs<T>(this IJSInProcessObjectReference obj, string identifier, params object[] args)
         {
-            var type = typeof(T);
-            var UseUnmarshal= true;
-            if (args != null && args.Length > 0)
-            {
-                for (int a = 0; a < args.Length; a++)
-                {
-                    Type argType = args[a].GetType();
-                    if (argType.IsSubclassOf(typeof(DOMObject)) || argType == typeof(DOMObject))
-                    {
-                        var jsObj = (DOMObject)args[a];
-                        if (jsObj.ManagedJSObject == null)
-                            throw new Exception("managed Object is lost at " + jsObj.GetType());
-                        args[a] =jsObj .ManagedJSObject;
-                    }
-                    if (argType == typeof(string))
-                    {
-                        UseUnmarshal=true;
-                    }
-                }
-            }
-            if(UseUnmarshal)
-            {
-                for (int a = 0; a < args.Length; a++)
-                {
-                    if (args[a] == null)
-                    {
-                        JsInfo.SubmitToSelf("p" + a, args[a]);
-                    }
-                    else
-                    {
-                        var argType = args[a].GetType();
-                        if (argType == typeof(string))
-                        {
-                            JsInfo.SubmitStringToSelf("p" + a, (string)args[a]);
-                        }
-                        else
-                        {
-                            JsInfo.SubmitToSelf("p" + a, args[a]);
-                        }
-                    }
-                }
-                JsInfo.InvokeFunc(obj, identifier, "p", args.Length, "res");
-                if (JsHaveValue("res") == false)
-                    return default;
-                if (type.IsSubclassOf(typeof(DOMObject)) || type == typeof(DOMObject))
-                {
-                    var Result_JsObj = JsGetValue<IJSInProcessObjectReference>("res");
-                    if (Result_JsObj == null)
-                        return default;
-                    var Result = (DOMObject)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(type);
-                    Result.ManagedJSObject = Result_JsObj;
-                    return (T)(object)Result;
-                }
-                else
-                {
-                    return JsGetValue<T>("res");
-                }
-            }
-            else
-            {
-                if (type.IsSubclassOf(typeof(DOMObject)) || type == typeof(DOMObject))
-                {
-                    var Result_JsObj = obj.Invoke<IJSInProcessObjectReference>(identifier, args);
-                    if (Result_JsObj == null)
-                        return default;
-                    var Result = (DOMObject)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(type);
-                    Result.ManagedJSObject = Result_JsObj;
-                    return (T)(object)Result;
-                }
-                else
-                {
-                    return obj.Invoke<T>(identifier, args);
-                }
-            }
+           return JsInfo.InvokeJs<T>(obj, identifier, args);
         }
-        public static object InvokeJs(this IJSInProcessObjectReference obj, Type type, string identifier, params object?[]? args)
+        public static object InvokeJs(this IJSInProcessObjectReference obj, Type ResultType, string identifier, params object[] args)
         {
-            return typeof(js).GetMethods().Where((c)=>c.Name== "InvokeJs" && c.IsGenericMethod).First().MakeGenericMethod(type).Invoke(null,new object[] { obj, identifier, args });
+            return typeof(js).GetMethods().Where((c) => c.Name == "InvokeJs" && c.IsGenericMethod).First().MakeGenericMethod(ResultType).Invoke(null, new object[] { obj, identifier, args });
+        }
+        private static object InvokeUnmarshalJs(this IJSInProcessObjectReference obj, string identifier, Type ResultType, params object[] args)
+        {
+            var TypeArguments = new Type[args.Length+1];
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (args[i] == null)
+                    TypeArguments[i] = typeof(object);
+                else
+                    TypeArguments[i] = args[i].GetType();
+            }
+            if (ResultType == null)
+                TypeArguments[TypeArguments.Length-1] = typeof(object);
+            else
+                TypeArguments[TypeArguments.Length - 1] = ResultType;
+
+            var NewArgs = new object[TypeArguments.Length];
+            NewArgs[0] = identifier;
+            for (int i = 0; i < args.Length; i++)
+                NewArgs[i + 1] = args[i];
+
+            Console.WriteLine("\n\r");
+            for (int i = 0; i < NewArgs.Length; i++)
+            {
+                Console.WriteLine(NewArgs[i]);
+                Console.WriteLine(NewArgs[i].GetType().ToString());
+            }
+            var x =(IJSUnmarshalledObjectReference) obj;
+            return x.InvokeUnmarshalled<string, object>(identifier, (string)args[0]);
+            
+            var Method = typeof(IJSUnmarshalledObjectReference).GetMethods().
+                Where((c) => c.Name == "InvokeUnmarshalled" && c.IsGenericMethod && c.GetGenericArguments().Length == TypeArguments.Length).First().
+                MakeGenericMethod(TypeArguments);
+            Console.WriteLine(Method.ToString());
+            return Method.Invoke(obj, NewArgs );
         }
         public static t JsGetValue<t>(this string Name)
         {
@@ -128,11 +90,11 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
             else
             {
                 return JsInfo.JsGetValue<t>(Name);
-            }            
+            }
         }
         public static IJSInProcessObjectReference JsGetValue(this string Name) => JsInfo.JsGetValue(Name);
-        public static void JsSetValue(this string Name, object Value)=>JsInfo.JsSetValue(Name, Value);
-        public static bool JsHaveValue(this string Name)=>JsInfo.JsHaveValue(Name);
+        public static void JsSetValue(this string Name, object Value) => JsInfo.JsSetValue(Name, Value);
+        public static bool JsHaveValue(this string Name) => JsInfo.JsHaveValue(Name);
         public static t JsGetValue<t>(this IJSInProcessObjectReference obj, string Name)
         {
             var type = typeof(t);
@@ -151,14 +113,14 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
             }
         }
         public static IJSInProcessObjectReference JsGetValue(this IJSInProcessObjectReference obj, string Name) => JsInfo.JsGetValue(obj, Name);
-        public static IJSInProcessObjectReference JsGetStaticValue(this string Name)=>JsInfo.JsGetStaticValue(Name);    
-        public static void JsSetValue(this IJSInProcessObjectReference obj, string Name, object Value)=> JsInfo.JsSetValue(obj, Name, Value);
-        public static bool JsHaveValue(this IJSInProcessObjectReference obj, string Name)=> JsInfo.JsHaveValue(obj, Name);  
-        public static void JsSetEvent(this IJSInProcessObjectReference obj, string Name, Delegate Value)=> JsInfo.JsSetValue(obj, Name, Value);
+        public static IJSInProcessObjectReference JsGetStaticValue(this string Name) => JsInfo.JsGetStaticValue(Name);
+        public static void JsSetValue(this IJSInProcessObjectReference obj, string Name, object Value) => JsInfo.JsSetValue(obj, Name, Value);
+        public static bool JsHaveValue(this IJSInProcessObjectReference obj, string Name) => JsInfo.JsHaveValue(obj, Name);
+        public static void JsSetEvent(this IJSInProcessObjectReference obj, string Name, Delegate Value) => JsInfo.JsSetValue(obj, Name, Value);
 
-        public static IJSInProcessObjectReference JsConvert(this object obj)=>JsInfo.JsConvert(obj);
+        public static IJSInProcessObjectReference JsConvert(this object obj) => JsInfo.JsConvert(obj);
 
-        public static IJSInProcessObjectReference JsNewObject(this string TypeName, params object[] Params)=>JsInfo.JsNewObject(TypeName, Params);
+        public static IJSInProcessObjectReference JsNewObject(this string TypeName, params object[] Params) => JsInfo.JsNewObject(TypeName, Params);
 
         private static void MakeState()
         {
@@ -231,11 +193,11 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
         {
             try
             {
-                return JsRuntime.Invoke<t>("eval",js);
+                return JsRuntime.Invoke<t>("eval", js);
             }
             catch (Exception ex)
             {
-                throw new Exception("Error at Eval >> " + js+"\n\r"+ex.Message, ex);
+                throw new Exception("Error at Eval >> " + js + "\n\r" + ex.Message, ex);
             }
         }
         public static void JsEval(this string js)
@@ -252,7 +214,7 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
 
         public static void JsEvalGlobal(this string js)
         {
-            JsRuntime.InvokeVoid("eval",$"var s=document.createElement('script');s.innerHTML={ToJsValue(js)};document.body.appendChild(s);");
+            JsRuntime.InvokeVoid("eval", $"var s=document.createElement('script');s.innerHTML={ToJsValue(js)};document.body.appendChild(s);");
         }
 
         public static async Task<byte[]> ReadBytes(this Blob File)
@@ -393,7 +355,7 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
 
             public ValueTask<TValue> InvokeAsync<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.PublicProperties)] TValue>(string identifier, CancellationToken cancellationToken, object[] args)
             {
-                return js.JsRuntime.InvokeAsync<TValue>(TypeAddress + "." + identifier,cancellationToken, args);
+                return js.JsRuntime.InvokeAsync<TValue>(TypeAddress + "." + identifier, cancellationToken, args);
             }
         }
 
