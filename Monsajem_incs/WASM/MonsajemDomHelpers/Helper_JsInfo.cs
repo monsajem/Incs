@@ -49,6 +49,18 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
   SetValue_name: function (name,val) {
         self[name]=val;
   },
+  GetStringValue_obj: function (obj,name) {
+        return new TextEncoder().encode(obj[name]);
+  },
+  GetStringValue_name: function (name) {
+        return new TextEncoder().encode(self[name]);
+  },
+  SetStringValue_obj: function (obj,name,val) {
+        obj[name]=new TextDecoder().decode(val);
+  },
+  SetStringValue_name: function (name,val) {
+        self[name]=new TextDecoder().decode(val);
+  },
   HaveValue_obj: function (obj,name) {
         return (obj!== null && obj[name] !== undefined && obj[name] !== null);
   },
@@ -68,7 +80,7 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
 //console.log(obj);
   },
   SubmitStringToSelf: function (name,obj) {
-        self[new TextDecoder().decode(name)]=new TextDecoder().decode(obj);
+        self[name]=new TextDecoder().decode(obj);
   },
   InvokeFunc: function (obj,name,ParamPreName,ParamLen,SaveTo) {
     
@@ -90,22 +102,31 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
 
             }
 
-            //static TimeSpan TotalTime = TimeSpan.Zero;
-            //static int TotalTimeCount = 0;
+            static TimeSpan TotalTime = TimeSpan.Zero;
+            static int TotalTimeCount = 0;
             private static void TryingAction(Action ac,string MethodName)
             {
-                //CreateJsInfo();
+                ac();
+                return;
                 var Time = Monsajem_Incs.TimeingTester.Timing.run(ac,MethodName);
-                //TotalTime = TotalTime + Time;
-                //TotalTimeCount++;
-                //if(TotalTimeCount>=540)
-                //{
-                //    var AVG = TotalTime / TotalTimeCount;
-                //    Console.WriteLine("\r\nTotal Time : " + TotalTime);
-                //    Console.WriteLine("AVG Total Time : " + AVG);
-                //    Console.WriteLine("Total Count : " + TotalTimeCount);
-                //    Console.WriteLine(Monsajem_Incs.TimeingTester.Timing.GetInfos());
-                //}
+                TotalTime = TotalTime + Time;
+                TotalTimeCount++;
+
+
+                if (TotalTimeCount >= 100)
+                {
+                    Console.WriteLine("*********************************");
+                    Console.WriteLine("*********************************");
+                    Console.WriteLine("*********************************");
+                    var AVG = TotalTime / TotalTimeCount;
+                    Console.WriteLine("\r\nTotal Time : " + TotalTime);
+                    Console.WriteLine("AVG Total Time : " + AVG);
+                    Console.WriteLine("Total Count : " + TotalTimeCount);
+                    Console.WriteLine(Monsajem_Incs.TimeingTester.Timing.GetInfos());
+                    Console.WriteLine("*********************************");
+                    Console.WriteLine("*********************************");
+                    Console.WriteLine("*********************************");
+                }
             }
 
             private static t TryingAction<t>(Func<t> ac,string MethodName)
@@ -122,8 +143,7 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
             {
                 TryingAction(() =>
                 { 
-                    JsInfo_obj.InvokeVoid("SubmitToSelf", Name, obj);
-                    //JsInfo_obj.InvokeVoid("SubmitStringToSelf", System.Text.Encoding.UTF8.GetBytes(Name), System.Text.Encoding.UTF8.GetBytes(obj));
+                    JsInfo_obj.InvokeVoid("SubmitStringToSelf",Name, Encoding.UTF8.GetBytes(obj));
                 }, "SubmitStringToSelf");
             }
             public static void SubmitToSelf(string Name, object obj)
@@ -142,120 +162,91 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
                 }, "InvokeFunc");
             }
 
-            public static t JsGetValue<t>(string Name)
+
+            public static t GetValue_obj<t>(IJSInProcessObjectReference obj, string Name)
             {
                 return TryingAction(() =>
                 {
-                    if (JsInfo_obj.Invoke<bool>("HaveValue_name", Name))
-                    {
-                        var Type = typeof(t);
-                        if(Type == typeof(string))//||
-                           //Type == typeof(Int16) ||
-                           // Type == typeof(Int32) ||
-                           // Type == typeof(Int64) ||
-                           // Type == typeof(UInt16) ||
-                           // Type == typeof(UInt32) ||
-                           // Type == typeof(UInt64) ||
-                           // Type == typeof(Single) ||
-                           // Type == typeof(Double) ||
-                           // Type == typeof(Decimal)||
-                           // Type == typeof(bool))
-                            return JsInfo_obj.InvokeUnmarshalled<string,t>("GetValue_name", Name);
-                        else
-                            return JsInfo_obj.Invoke<t>("GetValue_name", Name);
-                    }
-                    else
-                        return default;
-                }, "JsGetValue(1)<"+typeof(t).FullName);
+                    return JsInfo_obj.Invoke<t>("GetValue_obj", obj, Name);
+                }, "GetValue_obj<" + typeof(t).ToString());
             }
-            public static IJSInProcessObjectReference JsGetValue(string Name)
+            public static t GetValue_name<t>(string Name)
             {
                 return TryingAction(() =>
                 {
-                    return JsGetValue<IJSInProcessObjectReference>(Name);
-                }, "JsGetValue");
+                        return JsInfo_obj.Invoke<t>("GetValue_name", Name);
+                }, "GetValue_name<" + typeof(t).ToString());
             }
-            public static void JsSetValue(string Name, object Value)
+            public static void SetValue_obj(IJSInProcessObjectReference obj,string Name, object Value)
+            {
+                var Type = "null";
+                if (Value != null) 
+                    Type = Value.GetType().ToString();
+                TryingAction(() =>
+                {
+                    JsInfo_obj.InvokeVoid("SetValue_obj",obj , Name, Value);
+                }, "SetValue_obj "+Type);
+            }
+            public static void SetValue_name(string Name, object Value)
+            {
+                var Type = "null";
+                if (Value != null)
+                    TryingAction(() =>
+                {
+                    JsInfo_obj.InvokeVoid("SetValue_name", Name, Value);
+                }, "SetValue_name " +Type);
+            }
+
+            public static string GetStringValue_obj(IJSInProcessObjectReference obj, string Name)
+            {
+                return TryingAction(() =>
+                {
+                    return Encoding.UTF8.GetString(JsInfo_obj.Invoke<byte[]>("GetStringValue_obj", obj, Name));
+                }, "GetStringValue_obj");
+            }
+            public static string GetStringValue_name(string Name)
+            {
+                return TryingAction(() =>
+                {
+                    return Encoding.UTF8.GetString(JsInfo_obj.Invoke<byte[]>("GetStringValue_name", Name));
+                }, "GetStringValue_name");
+            }
+            public static void SetStringValue_obj(IJSInProcessObjectReference obj,string Name, string Value)
             {
                 TryingAction(() =>
                 {
-                    //if (Value.GetType() == typeof(string))
-                    //    JsInfo.InvokeUnmarshalled<string,string,object>("SetValue_name", Name,(string) Value);
-                    //else
-
-                    JsInfo_obj.InvokeVoid("SetValue_name", Name, Value);
-                }, "JsSetValue");
+                    JsInfo_obj.InvokeVoid("SetStringValue_obj",obj,  Name, Encoding.UTF8.GetBytes(Value));
+                }, "SetStringValue_obj");
             }
-            public static bool JsHaveValue(string Name)
+            public static void SetStringValue_name(string Name, string Value)
+            {
+                TryingAction(() =>
+                {
+                    JsInfo_obj.InvokeVoid("SetStringValue_name", Name, Encoding.UTF8.GetBytes(Value));
+                }, "SetStringValue_name");
+            }
+
+            public static bool HaveValue_obj(IJSInProcessObjectReference obj, string Name)
+            {
+                return TryingAction(() =>
+                {
+                    return JsInfo_obj.Invoke<bool>("HaveValue_obj",obj, Name);
+                }, "HaveValue_obj");
+            }
+            public static bool HaveValue_name(string Name)
             {
                 return TryingAction(() =>
                 {
                     return JsInfo_obj.Invoke<bool>("HaveValue_name", Name);
-                }, "JsHaveValue");
+                }, "HaveValue_name");
             }
 
-            public static t JsGetValue<t>(IJSInProcessObjectReference obj, string Name)
-            {
-                return TryingAction(() =>
-                {
-                    if (JsInfo_obj.Invoke<bool>("HaveValue_obj", obj, Name))
-                    {
-                        var Type = typeof(t);
-                        if (Type == typeof(string) )//||
-                           //Type == typeof(Int16) ||
-                           // Type == typeof(Int32) ||
-                           // Type == typeof(Int64) ||
-                           // Type == typeof(UInt16) ||
-                           // Type == typeof(UInt32) ||
-                           // Type == typeof(UInt64) ||
-                           // Type == typeof(Single) ||
-                           // Type == typeof(Double) ||
-                           // Type == typeof(Decimal) ||
-                           // Type == typeof(bool))
-                            return JsInfo_obj.InvokeUnmarshalled<string, t>("GetValue_obj", Name);
-                        else
-                            return JsInfo_obj.Invoke<t>("GetValue_obj", obj, Name);
-                    }
-                    else
-                        return default;
-                }, " JsGetValue<"+typeof(t).FullName);
-            }
-            public static IJSInProcessObjectReference JsGetValue(IJSInProcessObjectReference obj, string Name)
-            {
-                return TryingAction(() =>
-                {
-                    return JsGetValue<IJSInProcessObjectReference>(obj, Name);
-                }, " JsGetValue");
-            }
             public static IJSInProcessObjectReference JsGetStaticValue(string Name)
             {
                 return TryingAction(() =>
                 {
                     return new JsObjectOfType(Name);
                 }, "JsGetStaticValue");
-            }
-            public static void JsSetValue(IJSInProcessObjectReference obj, string Name, object Value)
-            {
-                TryingAction(() =>
-                {
-                    if (Value != null &&
-                        typeof(Delegate).IsAssignableFrom(Value.GetType()))
-                    {
-                        JsSetEvent(obj, Name, (Delegate)Value);
-                    }
-                    else
-                    {
-                        JsInfo_obj.InvokeVoid("SetValue_obj", obj, Name, Value);
-                    }
-                }, "JsSetValue");
-            }
-            public static bool JsHaveValue(IJSInProcessObjectReference obj, string Name)
-            {
-                return TryingAction(() =>
-                {
-                    return JsInfo_obj.Invoke<bool>("HaveValue_obj", obj, Name);
-                },"JsHaveValue");
-
             }
             public static void JsSetEvent(IJSInProcessObjectReference obj, string Name, Delegate Value)
             {

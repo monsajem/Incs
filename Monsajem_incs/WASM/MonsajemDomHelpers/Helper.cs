@@ -1,10 +1,12 @@
 ﻿using Microsoft.JSInterop;
+using Monsajem_Incs.Collection.Array.Base;
 using Monsajem_Incs.Serialization;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Reflection;
 using System.Runtime;
 using System.Runtime.Serialization;
 using System.Text;
@@ -32,8 +34,10 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
             Document = new Document();
         }
 
-        public static T InvokeJs<T>(this IJSInProcessObjectReference obj, string identifier, params object[] args)
+        private static T InvokeJs_Total<T>(this IJSInProcessObjectReference obj,bool IsGlobal, string identifier, params object[] args)
         {
+            if (IsGlobal == false && obj == null)
+                throw new Exception("js object is null");
             var type = typeof(T);
             var UseUnmarshal= true;
             if (args != null && args.Length > 0)
@@ -60,7 +64,7 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
                 {
                     if (args[a] == null)
                     {
-                        JsInfo.SubmitToSelf("p" + a, args[a]);
+                        JsInfo.SubmitToSelf("p" + a, null);
                     }
                     else
                     {
@@ -76,21 +80,7 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
                     }
                 }
                 JsInfo.InvokeFunc(obj, identifier, "p", args.Length, "res");
-                if (JsHaveValue("res") == false)
-                    return default;
-                if (type.IsSubclassOf(typeof(DOMObject)) || type == typeof(DOMObject))
-                {
-                    var Result_JsObj = JsGetValue<IJSInProcessObjectReference>("res");
-                    if (Result_JsObj == null)
-                        return default;
-                    var Result = (DOMObject)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(type);
-                    Result.ManagedJSObject = Result_JsObj;
-                    return (T)(object)Result;
-                }
-                else
-                {
-                    return JsGetValue<T>("res");
-                }
+                return JsGetValue<T>("res");
             }
             else
             {
@@ -109,52 +99,115 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
                 }
             }
         }
+
+        private static t JsGetValue_Total<t>(this IJSInProcessObjectReference obj,bool IsGlobal, string Name)
+        {
+            if(IsGlobal==false&&obj == null)
+                throw new Exception("js object is null");
+            if (obj == null)
+            {
+                if (JsInfo.HaveValue_name(Name) == false)
+                    return default;
+            }
+            else
+            {
+                if(JsInfo.HaveValue_obj(obj,Name)==false)
+                    return default;
+            }
+            var type = typeof(t);
+            if (type.IsSubclassOf(typeof(DOMObject)) || type == typeof(DOMObject))
+            {
+                IJSInProcessObjectReference Result_JsObj;
+                if (obj != null)
+                    Result_JsObj = JsInfo.GetValue_obj<IJSInProcessObjectReference>(obj, Name);
+                else
+                    Result_JsObj = JsInfo.GetValue_name<IJSInProcessObjectReference>(Name);
+                if (Result_JsObj == null)
+                    return default;
+                var Result = (DOMObject)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(type);
+                Result.ManagedJSObject = Result_JsObj;
+                return (t)(object)Result;
+            }
+            else if (type == typeof(string))
+            {
+                if (obj != null)
+                    return (t)(object)JsInfo.GetStringValue_obj(obj, Name);
+                else
+                    return (t)(object)JsInfo.GetStringValue_name(Name);
+            }
+            else
+            {
+                if (obj != null)
+                    return JsInfo.GetValue_obj<t>(obj, Name);
+                else
+                    return JsInfo.GetValue_name<t>(Name);
+            }
+        }
+        private static void JsSetValue_Total(this IJSInProcessObjectReference obj,bool IsGlobal, string Name, object Value)
+        {
+            if (IsGlobal == false && obj == null)
+                throw new Exception("js object is null");
+            if (Value != null)
+            {
+                var ValueType = Value.GetType();
+                if (typeof(Delegate).IsAssignableFrom(ValueType))
+                {
+                    JsInfo.JsSetEvent(obj, Name, (Delegate)Value);
+                }
+                else if (ValueType.IsSubclassOf(typeof(DOMObject)) || ValueType == typeof(DOMObject))
+                {
+                    Value = ((DOMObject)Value).ManagedJSObject;
+                    if (obj != null)
+                        JsInfo.SetValue_obj(obj, Name, Value);
+                    else
+                        JsInfo.SetValue_name(Name, Value);
+                }
+                else if (ValueType == typeof(string))
+                {
+                    if (obj != null)
+                        JsInfo.SetStringValue_obj(obj, Name,(string)Value);
+                    else
+                        JsInfo.SetStringValue_name(Name,(string) Value);
+                }
+                else
+                {
+                    if (obj != null)
+                        JsInfo.SetValue_obj(obj, Name,Value);
+                    else
+                        JsInfo.SetValue_name(Name, Value);
+                }
+            }
+            else
+            {
+                if(obj!=null)
+                    JsInfo.SetValue_obj(obj, Name, null);
+                else
+                    JsInfo.SetValue_name(Name, null);
+            }
+        }
+
+
+        public static T InvokeJs<T>(this IJSInProcessObjectReference obj, string identifier, params object?[]? args)=>
+            InvokeJs_Total<T>(obj,false,identifier,args);
+        
         public static object InvokeJs(this IJSInProcessObjectReference obj, Type type, string identifier, params object?[]? args)
         {
-            return typeof(js).GetMethods().Where((c)=>c.Name== "InvokeJs" && c.IsGenericMethod).First().MakeGenericMethod(type).Invoke(null,new object[] { obj, identifier, args });
+            var bindingFlags = BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy;
+            return typeof(js).GetMethods(bindingFlags).Where((c)=>c.Name== "InvokeJs_Total" && c.IsGenericMethod).First().MakeGenericMethod(type).Invoke(null,new object[] { obj, false,identifier, args });
         }
-        public static t JsGetValue<t>(this string Name)
-        {
-            var type = typeof(t);
-            if (type.IsSubclassOf(typeof(DOMObject)) || type == typeof(DOMObject))
-            {
-                var Result_JsObj = JsInfo.JsGetValue<IJSInProcessObjectReference>(Name);
-                if (Result_JsObj == null)
-                    return default;
-                var Result = (DOMObject)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(type);
-                Result.ManagedJSObject = Result_JsObj;
-                return (t)(object)Result;
-            }
-            else
-            {
-                return JsInfo.JsGetValue<t>(Name);
-            }            
-        }
-        public static IJSInProcessObjectReference JsGetValue(this string Name) => JsInfo.JsGetValue(Name);
-        public static void JsSetValue(this string Name, object Value)=>JsInfo.JsSetValue(Name, Value);
-        public static bool JsHaveValue(this string Name)=>JsInfo.JsHaveValue(Name);
-        public static t JsGetValue<t>(this IJSInProcessObjectReference obj, string Name)
-        {
-            var type = typeof(t);
-            if (type.IsSubclassOf(typeof(DOMObject)) || type == typeof(DOMObject))
-            {
-                var Result_JsObj = JsInfo.JsGetValue<IJSInProcessObjectReference>(obj, Name);
-                if (Result_JsObj == null)
-                    return default;
-                var Result = (DOMObject)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(type);
-                Result.ManagedJSObject = Result_JsObj;
-                return (t)(object)Result;
-            }
-            else
-            {
-                return JsInfo.JsGetValue<t>(obj, Name);
-            }
-        }
-        public static IJSInProcessObjectReference JsGetValue(this IJSInProcessObjectReference obj, string Name) => JsInfo.JsGetValue(obj, Name);
-        public static IJSInProcessObjectReference JsGetStaticValue(this string Name)=>JsInfo.JsGetStaticValue(Name);    
-        public static void JsSetValue(this IJSInProcessObjectReference obj, string Name, object Value)=> JsInfo.JsSetValue(obj, Name, Value);
-        public static bool JsHaveValue(this IJSInProcessObjectReference obj, string Name)=> JsInfo.JsHaveValue(obj, Name);  
-        public static void JsSetEvent(this IJSInProcessObjectReference obj, string Name, Delegate Value)=> JsInfo.JsSetValue(obj, Name, Value);
+
+        public static t JsGetValue<t>(this IJSInProcessObjectReference obj,string Name) => JsGetValue_Total<t>(obj, false, Name);
+        public static t JsGetValue<t>(this string Name)=>JsGetValue_Total<t>(null,true, Name);
+        public static IJSInProcessObjectReference JsGetValue(this string Name) => JsGetValue_Total<IJSInProcessObjectReference>(null,true,Name);
+        public static void JsSetValue(this string Name, object Value) => JsSetValue_Total(null, true, Name, Value);
+        public static bool JsHaveValue(this string Name)=>JsInfo.HaveValue_name(Name);
+
+        public static void JsSetValue(this IJSInProcessObjectReference obj, string Name, object Value) =>
+            JsSetValue_Total(obj, false, Name, Value);
+        public static IJSInProcessObjectReference JsGetValue(this IJSInProcessObjectReference obj, string Name) =>
+            JsGetValue_Total<IJSInProcessObjectReference>(obj, false, Name);
+        public static IJSInProcessObjectReference JsGetStaticValue(this string Name)=>JsInfo.JsGetStaticValue(Name);
+        public static void JsSetEvent(this IJSInProcessObjectReference obj, string Name, Delegate Value)=> JsInfo.JsSetEvent(obj, Name, Value);
 
         public static IJSInProcessObjectReference JsConvert(this object obj)=>JsInfo.JsConvert(obj);
 
