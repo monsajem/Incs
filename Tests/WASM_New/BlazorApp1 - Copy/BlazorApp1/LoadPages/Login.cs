@@ -25,6 +25,7 @@ namespace Monsajem_Client
             protected override async Task Ready()
             {
                 Main = new Login_html();
+                MainElement.ReplaceChilds(Main.Main);
                 Main.btn_Login.OnClick += async (c1, c2) =>
                 {
                     if(IsLocalUrl)
@@ -87,7 +88,6 @@ namespace Monsajem_Client
                     }
                    
                 };
-                MainElement.ReplaceChilds(Main.Main);
             }
         }
     }

@@ -21,13 +21,15 @@ namespace WebAssembly.Browser.DOM
 
         }
 
-        internal Dictionary<string, DOMEventHandler> eventHandlers = [];
+        internal Dictionary<string, DOMEventHandler> eventHandlers = new Dictionary<string, DOMEventHandler>();
 
 
         [Export("addEventListener")]
         public void AddEventListener(string type, DOMEventHandler listener, object options)
         {
             bool addNativeEventListener = false;
+            if(eventHandlers==null)
+                eventHandlers=new Dictionary<string, DOMEventHandler>();
             lock (eventHandlers)
             {
                 if (!eventHandlers.ContainsKey(type))
@@ -40,10 +42,8 @@ namespace WebAssembly.Browser.DOM
 
             if (addNativeEventListener)
             {
-
                 var UID = NextEventId;
                 AddJSEventListener(type, dispather(type), UID);
-
             }
 
 

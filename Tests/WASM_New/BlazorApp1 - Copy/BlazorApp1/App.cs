@@ -119,6 +119,7 @@ namespace Monsajem_Client
             js.Document.Title = "حسابداری";
             js.Document.GetElementById("AppPreload").Remove();
             js.Document.Body.AppendChild(BasePage_html.HtmlText);
+            Console.WriteLine(BasePage_html.HtmlText);
             BasePage_html = new BasePage_html(true);
             var MaxTryLoadDB = 2;
             _CachedUri = "?" + DateTime.UtcNow.ToShortDateString() + DateTime.UtcNow.ToShortTimeString();
@@ -138,7 +139,7 @@ namespace Monsajem_Client
                     var Db_Load_Time = Monsajem_Incs.TimeingTester.Timing.run(() =>
                     {
                         Register.Value = DataLoaded.Deserialize<object>();
-                    });
+                    },"DB Desrilize");
 
                     if (IsUser == false)
                     {

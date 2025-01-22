@@ -449,48 +449,6 @@ namespace WebAssembly.Browser.MonsajemDomHelpers
                 return js.JsRuntime.InvokeAsync<TValue>(TypeAddress + "." + identifier,cancellationToken, args);
             }
         }
-
-        private class InvokableDelegate
-        {
-            public Delegate DG;
-            public JSInProcessRuntime Js;
-
-            [JSInvokable("Invoke")]
-            public void Invoke()
-            {
-                var MethodParams = DG.Method.GetParameters();
-                var Params = new object[MethodParams.Length];
-                for (int i = 0; i < Params.Length; i++)
-                {
-                    var methodParam = MethodParams[i];
-                    Params[i] = Js.GetType().GetMethod("Invoke").MakeGenericMethod(methodParam.ParameterType).Invoke(Js, new object[] { "eval", new object[] { "p" + i } });
-                }
-                _ = DG.DynamicInvoke(Params);
-            }
-
-            public void Bind(IJSInProcessObjectReference obj, string Property)
-            {
-                var MethodParams = DG.Method.GetParameters();
-                var JsFunc = @"({
-  Binder: function (Invoker,obj,property) {
-obj[property] = function ( ";
-
-                for (int i = 0; i < MethodParams.Length; i++)
-                {
-                    JsFunc = JsFunc + "p" + i + ",";
-                }
-                JsFunc = JsFunc.Substring(0, JsFunc.Length - 1);
-                JsFunc += "){";
-                for (int i = 0; i < MethodParams.Length; i++)
-                {
-                    JsFunc = JsFunc + "self.p" + i + " = p" + i + ";";
-                }
-                JsFunc += "Invoker.invokeMethod('Invoke');}; },})";
-                var PropertyInfo = Js.Invoke<IJSInProcessObjectReference>("eval", JsFunc);
-                var Invoker = Js.Invoke<IJSInProcessObjectReference>("eval", DotNetObjectReference.Create(this));
-                PropertyInfo.InvokeVoid("Binder", Invoker, obj, Property);
-            }
-        }
     }
 
     public class WebProcess

@@ -11,9 +11,12 @@ namespace WebAssembly.Browser.DOM
         {
             get
             {
-                return string.IsNullOrEmpty(qualifiedName)
+                var Result = string.IsNullOrEmpty(qualifiedName)
                     ? throw new ArgumentNullException(nameof(qualifiedName))
                     : InvokeMethod<string>("getAttribute", qualifiedName);
+                if (Result == null)
+                    Result = "";
+                return Result;
             }
             set
             {
@@ -30,7 +33,13 @@ namespace WebAssembly.Browser.DOM
         // Special Attribute and Style methods
         #region Attribute and Style methods
 
-        public ElementAttributes Attribute { get => new(ManagedJSObject); }
+        public ElementAttributes Attribute { 
+            get
+            {
+                var Result = new ElementAttributes(ManagedJSObject);
+                return Result;
+            }
+        }
 
         [Export("getAttribute")]
         public string GetAttribute(string qualifiedName) =>

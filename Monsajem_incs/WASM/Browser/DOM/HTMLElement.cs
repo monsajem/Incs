@@ -101,8 +101,8 @@ namespace WebAssembly.Browser.DOM
         }
         public event DOMEventHandler OnClick
         {
-            add => AddEventListener("click", value, false);
-            remove => RemoveEventListener("click", value, false);
+            add => AddEventListener("onclick", value, false);
+            remove => RemoveEventListener("onclick", value, false);
         }
         public event DOMEventHandler OnContextmenu
         {

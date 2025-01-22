@@ -77,10 +77,13 @@ namespace WebAssembly.Browser.DOM
             }
         }
 
-        private object[] Events = new object[0];
+        private static object[] Events = new object[0];
         protected void AddJSEventListener(string eventName, object eventDelegate, int uid)
         {
-            ManagedJSObject.InvokeVoid("addEventListener", eventName, eventDelegate, uid);
+            if(Events==null)
+                Events = new object[0];
+            ManagedJSObject.JsSetEvent(eventName,(Delegate) eventDelegate);
+            //ManagedJSObject.InvokeJs<object>("addEventListener", eventName, eventDelegate, uid);
             Insert(ref Events, eventDelegate);
         }
 
