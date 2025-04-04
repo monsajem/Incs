@@ -26,9 +26,6 @@ This repository is organized into multiple components, each serving a specific p
 
 Here are the main modules included in this framework:
 
-- **[Base Frameworks](./Monsajem_incs/BasicFrameWorks)**  
-  Low-level utilities, unsafe memory helpers, and type management.
-
 - **[Data Handling](./Monsajem_incs/BasicFrameWorks/Datawork)**  
   Custom data structures, type converters, and binary serializers optimized for storage and performance.
 
