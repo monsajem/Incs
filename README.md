@@ -1,6 +1,4 @@
-# <img src="https://github.com/monsajem/Logo_files/blob/master/MonsajemLogo.png" width="50" height="25">Monsajem Soft incs
-
-# Monsajem Incs
+# <img src="https://github.com/monsajem/Logo_files/blob/master/MonsajemLogo.png" width="50" height="25"> Monsajem Soft incs
 
 A complete and modular framework for building all kinds of software applications — featuring a high-performance custom database, a custom communication protocol, and a modern Blazor-based UI layer.
 
@@ -19,12 +17,6 @@ This repository is organized into multiple components, each serving a specific p
 - **Blazor-Based UI Framework**  
   Build reactive, component-based UIs using .NET Blazor.
 
-- **Binary Serializer**  
-  A fast, lightweight serializer tailored for structured binary data.
-
-- **IL-Level Programming Tools**  
-  Analyze, generate, and modify Intermediate Language (IL) code.
-
 - **Advanced Data Structures**  
   Including AVL trees, low-level array interfaces, and unsafe memory operations.
 
@@ -34,28 +26,19 @@ This repository is organized into multiple components, each serving a specific p
 
 Here are the main modules included in this framework:
 
-- **Core**  
+- **[Base Frameworks](./Monsajem_incs/BasicFrameWorks)**  
   Low-level utilities, unsafe memory helpers, and type management.
 
-- **Collections**  
-  Data structures such as custom arrays, AVL trees, and linked storage for disk.
+- **[Data Handling](./Monsajem_incs/BasicFrameWorks/Datawork)**  
+  Custom data structures, type converters, and binary serializers optimized for storage and performance.
 
-- **Serialization**  
-  High-performance binary serializer with customizable behavior.
+- **[Networking](./Monsajem_incs/BasicFrameWorks/Network)**  
+  Lightweight protocol for sending and receiving structured data efficiently, along with services and infrastructure for data exchange and remote command execution.
 
-- **Networking**  
-  Lightweight protocol for sending and receiving structured data efficiently.
-
-- **Database**  
+- **[Database](./Monsajem_incs/BasicFrameWorks/Datawork/Database)**  
   A custom, persistent, and fast NoSQL-style storage engine.
 
-- **IL Tools**  
-  Tools to read, analyze, and emit IL code at runtime.
-
-- **UI Components**  
-  Set of building blocks for UI in Blazor, with performance-oriented design.
-
-- **Benchmarks & Tests**  
+- **[Benchmarks & Tests](./Tests)**  
   Performance evaluations and automated tests to ensure stability.
 
 ---
