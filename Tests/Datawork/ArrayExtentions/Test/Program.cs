@@ -42,7 +42,7 @@ namespace Test
 
             //xar.DeleteByPosition(3);
 
-            //ReadPerformaceTest();
+            ReadPerformaceTest();
             //PerformaceTest();
             //try
             //{
@@ -85,12 +85,21 @@ namespace Test
 
             var Res = 0;
             
-            var t1 = Timing.run(() =>
+            var t1_1 = Timing.run(() =>
             {
                 var _Res = 0;
                 var ar = ar1;
                 foreach (var item in ar)
                     _Res += item;
+                Res = _Res;
+            });
+
+            var t1_2 = Timing.run(() =>
+            {
+                var _Res = 0;
+                var ar = ar1;
+                for(int i=0; i < Count;i++)
+                    _Res += ar[i];
                 Res = _Res;
             });
 
@@ -115,7 +124,8 @@ namespace Test
                 }
                 Res = _Res;
             });
-            Console.WriteLine(t1.ToString());
+            Console.WriteLine(t1_1.ToString());
+            Console.WriteLine(t1_2.ToString());
             Console.WriteLine(t2.ToString());
             Console.WriteLine(t3.ToString());
             Console.ReadKey();

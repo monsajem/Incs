@@ -116,6 +116,8 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
 
         private Node _Root;
         public Node Root { get => _Root; set { _Root = value; } }
+        public List<Node> CacheData=new List<Node>();
+        private UInt64 CacheUpdateCode;
 
         public class Node
         {
@@ -126,7 +128,8 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             }
 
             public Array<ValueType> Collector;
-
+            public UInt64 UpdateCode { get;set; }
+            public int UpdatePosition { get; set; }
             public int Balance { get => NextDeep - BeforeDeep; }
             public int NextDeep { get; set; }
             public int BeforeDeep { get; set; }
@@ -210,21 +213,32 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             out Node Before,
             out Node Next)
         {
+            var CacheData = this.CacheData;
+            var CacheUpdateCode = this.CacheUpdateCode;
             Before = default;
             Next = default;
             if (position < 0)
                 throw new Exception("Position must start at zero.");
             position++;
             var Current = Root;
+            var CurrentPosition = 0;
             while (Current != null)
             {
                 var cmp = position - (Current.BeforeLen + 1);
+                if(cmp >= 0)
+                {
+                    CurrentPosition += Current.BeforeLen;
+                    CacheData[CurrentPosition] = Current;
+                    Current.UpdateCode = CacheUpdateCode;
+                    Current.UpdatePosition = CurrentPosition;
+                }
                 if (cmp == 0)
                     return Current;
                 else if (cmp > 0)
                 {
                     Before = Current;
-                    position -= Current.BeforeLen + 1;
+                    var AddNewLen = Current.BeforeLen + 1;
+                    position -= AddNewLen;
                     Current = Current.Next;
                 }
                 else
@@ -239,7 +253,17 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
 
         public override ValueType this[int Position]
         {
-            get => GetItem(Position, out _, out _).Value;
+            get
+            {
+                if (CacheData.Count > Position)
+                {
+                    var Data = CacheData[Position];
+                    if (Data != null)
+                        if (Data.UpdateCode == CacheUpdateCode && Data.UpdatePosition == Position)
+                            return Data.Value;
+                }
+                return GetItem(Position, out _, out _).Value;
+            }
             set
             {
                 GetItem(Position, out var x, out var y).Value = value;
@@ -255,6 +279,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             Node Before; Node Next;
             var Current = GetItem(Position, out Before, out Next);
             Insert(Value, Current, Before, Next);
+
 #if DEBUG
             ItemsForDebug.Insert(Value, Position);
             CheckBugs();
@@ -287,8 +312,8 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
         public override (int Index, ValueType Value) BinarySearch(ValueType key, int minNum, int maxNum)
         {
             (int Index, ValueType Value) Result = default;
-            Node Before; Node Next; int Pos;
-            var Current = Find(key, out Before, out Next, out Pos);
+            int Pos;
+            var Current = Find(key, out _, out _, out Pos);
             Result = Current != null ? ((int Index, ValueType Value))(Pos, Current.Value) : ((int Index, ValueType Value))(~Pos, default);
 #if DEBUG
             CheckBugs();
@@ -365,13 +390,16 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
         End:
             Length++;
 
+            CacheUpdateCode += 1;
+            CacheData.Add(null);
+
             ChangedNextSequence?.Invoke((Current.FindBeforeSequnce(), Current));
+
         }
 
         public override void DeleteByPosition(int Position)
         {
-            Node Before; Node Next;
-            var Item = GetItem(Position, out Before, out Next);
+            var Item = GetItem(Position, out _, out _);
 
             Node BeforeSequnce = default;
             var ChangedNextSequence = this.ChangedNextSequence;
@@ -380,6 +408,9 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
 
             Drop(Item);
             Length--;
+
+            CacheUpdateCode += 1;
+            CacheData.RemoveAt(this.Length);
 
             ChangedNextSequence?.Invoke((BeforeSequnce, BeforeSequnce?.FindNextSequnce()));
 
@@ -391,13 +422,17 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
 
         public override (int Index, ValueType Value) BinaryDelete(ValueType Value)
         {
-            Node Before; Node Next; int Pos;
-            var Item = Find(Value, out Before, out Next, out Pos);
+            int Pos;
+            var Item = Find(Value, out _, out _, out Pos);
             if (Item == null)
                 throw new Exception($"{Value} not found!");
             var Result = (Pos, Item.Value);
             Drop(Item);
             Length--;
+            
+            CacheUpdateCode += 1;
+            CacheData.RemoveAt(this.Length);
+
 #if DEBUG
             var ItemResult = ItemsForDebug.BinaryDelete(Value);
             CheckBugs();
@@ -676,6 +711,8 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             out Node Next,
             out int Position)
         {
+            var CacheData = this.CacheData;
+            var CacheUpdateCode = this.CacheUpdateCode;
             Before = default;
             Next = default;
             Position = 0;
@@ -686,11 +723,17 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
                 if (cmp == 0)
                 {
                     Position += Current.BeforeLen;
+                    Current.UpdateCode = CacheUpdateCode;
+                    Current.UpdatePosition = Position;
+                    CacheData[Position]=Current;
                     return Current;
                 }
                 else if (cmp < 0)
                 {
                     Position += Current.BeforeLen + 1;
+                    Current.UpdateCode = CacheUpdateCode;
+                    Current.UpdatePosition = Position;
+                    CacheData[Position] = Current;
                     Before = Current;
                     Current = Current.Next;
                 }
