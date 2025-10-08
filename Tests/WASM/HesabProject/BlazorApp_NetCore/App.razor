@@ -2,6 +2,8 @@
 @using WASM_Global;
 @using Microsoft.JSInterop;
 @using WebAssembly.Browser.DOM;
+@using System.Reflection;
+@using WebAssembly.Browser.MonsajemDomHelpers
 
 @inject Microsoft.JSInterop.IJSRuntime jSRuntime
 @inject Microsoft.JSInterop.JSInProcessRuntime jSRuntime_inProcess
@@ -13,9 +15,9 @@
 {
     protected override void OnInitialized()
     {
-        Publisher.jSRuntime = jSRuntime;
-        Publisher.jSInProcessRuntime = jSRuntime as IJSInProcessRuntime;
+        Publisher.jSRuntime = (JSInProcessRuntime)jSRuntime;
         Publisher.NavigationManager = NavigationManager;
+        js.Start((JSInProcessRuntime)WASM_Global.Publisher.jSRuntime);
 
         NavigationManager.LocationChanged += async (s, e) =>
         {

@@ -29,17 +29,6 @@
     <Content Remove="wwwroot\index.html~RF17ed9fba.TMP" />
   </ItemGroup>
 
-	<ItemGroup>
-		<BlazorWebAssemblyLazyLoad Include="System.Security.Cryptography.Primitives.dll" />
-		<BlazorWebAssemblyLazyLoad Include="System.Text.RegularExpressions.dll" />
-		<BlazorWebAssemblyLazyLoad Include="System.Threading.ThreadPool.dll" />
-		<BlazorWebAssemblyLazyLoad Include="System.IO.FileSystem.dll" />
-		<BlazorWebAssemblyLazyLoad Include="System.Net.Sockets.dll" />
-		<BlazorWebAssemblyLazyLoad Include="System.Net.WebSockets.dll" />
-		<BlazorWebAssemblyLazyLoad Include="System.IO.FileSystem.dll" />		
-		<BlazorWebAssemblyLazyLoad Include="System.Text.RegularExpressions.dll" />
-	</ItemGroup>
-
   <ItemGroup>
     <None Remove="DB" />
   </ItemGroup>
