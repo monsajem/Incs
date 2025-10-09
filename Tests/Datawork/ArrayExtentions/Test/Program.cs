@@ -66,14 +66,10 @@ namespace Test
 
         static void ReadPerformaceTest()
         {
-            var Count = 1000000;
+            var Count = 10000000;
             var ar1 = new Monsajem_Incs.Collection.Array.TreeBased.Array<int>();
             for (int i =0; i < Count; i++)
                 ar1.Insert(i, i);
-
-            for (int i = 0; i < Count; i++)
-                if (ar1[i] != i)
-                    throw new Exception();
 
             Console.WriteLine(ar1.AsEnumerable().ToArray().Length);
             var ar2 = new SortedSet<int>();
@@ -103,6 +99,15 @@ namespace Test
                 Res = _Res;
             });
 
+            var t1_3 = Timing.run(() =>
+            {
+                var _Res = 0;
+                var ar = ar1;
+                for (int i = 0; i < Count; i++)
+                    _Res += ar[i];
+                Res = _Res;
+            });
+
             var t2 = Timing.run(() =>
             {
                 var _Res = 0;
@@ -124,8 +129,14 @@ namespace Test
                 }
                 Res = _Res;
             });
+
+            for (int i = 0; i < Count; i++)
+                if (ar1[i] != i)
+                    throw new Exception();
+
             Console.WriteLine(t1_1.ToString());
             Console.WriteLine(t1_2.ToString());
+            Console.WriteLine(t1_3.ToString());
             Console.WriteLine(t2.ToString());
             Console.WriteLine(t3.ToString());
             Console.ReadKey();

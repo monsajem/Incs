@@ -252,15 +252,6 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             return null;
         }
 
-        public ValueType getsharp(int Position)
-        {
-            var Data = CacheData[Position];
-            if (Data != null)
-                if (Data.UpdateCode == CacheUpdateCode && Data.UpdatePosition == Position)
-                    return Data.Value;
-            return default;
-        }
-
         public override ValueType this[int Position]
         {
             get
