@@ -116,7 +116,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
 
         private Node _Root;
         public Node Root { get => _Root; set { _Root = value; } }
-        public List<Node> CacheData=new List<Node>();
+        public List<Node> CacheData = new List<Node>();
         private UInt64 CacheUpdateCode;
 
         public class Node
@@ -128,7 +128,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             }
 
             public Array<ValueType> Collector;
-            public UInt64 UpdateCode { get;set; }
+            public UInt64 UpdateCode { get; set; }
             public int UpdatePosition { get; set; }
             public int Balance { get => NextDeep - BeforeDeep; }
             public int NextDeep { get; set; }
@@ -225,12 +225,12 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             while (Current != null)
             {
                 var cmp = position - (Current.BeforeLen + 1);
-                if(cmp >= 0)
+                if (cmp >= 0)
                 {
-                    CurrentPosition += Current.BeforeLen;
-                    CacheData[CurrentPosition] = Current;
+                    var CP = CurrentPosition + Current.BeforeLen;
+                    CacheData[CP] = Current;
                     Current.UpdateCode = CacheUpdateCode;
-                    Current.UpdatePosition = CurrentPosition;
+                    Current.UpdatePosition = CP;
                 }
                 if (cmp == 0)
                     return Current;
@@ -239,6 +239,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
                     Before = Current;
                     var AddNewLen = Current.BeforeLen + 1;
                     position -= AddNewLen;
+                    CurrentPosition += AddNewLen;
                     Current = Current.Next;
                 }
                 else
@@ -251,17 +252,23 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             return null;
         }
 
+        public ValueType getsharp(int Position)
+        {
+            var Data = CacheData[Position];
+            if (Data != null)
+                if (Data.UpdateCode == CacheUpdateCode && Data.UpdatePosition == Position)
+                    return Data.Value;
+            return default;
+        }
+
         public override ValueType this[int Position]
         {
             get
             {
-                if (CacheData.Count > Position)
-                {
-                    var Data = CacheData[Position];
-                    if (Data != null)
-                        if (Data.UpdateCode == CacheUpdateCode && Data.UpdatePosition == Position)
-                            return Data.Value;
-                }
+                var Data = CacheData[Position];
+                if (Data != null)
+                    if (Data.UpdateCode == CacheUpdateCode && Data.UpdatePosition == Position)
+                        return Data.Value;
                 return GetItem(Position, out _, out _).Value;
             }
             set
@@ -429,7 +436,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
             var Result = (Pos, Item.Value);
             Drop(Item);
             Length--;
-            
+
             CacheUpdateCode += 1;
             CacheData.RemoveAt(this.Length);
 
@@ -725,7 +732,7 @@ namespace Monsajem_Incs.Collection.Array.TreeBased
                     Position += Current.BeforeLen;
                     Current.UpdateCode = CacheUpdateCode;
                     Current.UpdatePosition = Position;
-                    CacheData[Position]=Current;
+                    CacheData[Position] = Current;
                     return Current;
                 }
                 else if (cmp < 0)
